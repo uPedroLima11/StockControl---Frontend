@@ -37,14 +37,14 @@ export default function Sidebar() {
     return (
         <>
             <button
-                className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#00403C] p-2 rounded-full"
+                className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-2 rounded-full"
                 onClick={toggleSidebar}
             >
                 <FaBars />
             </button>
 
             <aside
-                className={`fixed top-0 h-screen w-64 bg-[#00403C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${
+                className={`fixed top-0 h-screen w-64 bg-[#013C3C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
@@ -128,7 +128,7 @@ function NotificacaoPainel({
     return (
         <div
             ref={panelRef}
-            className={`fixed top-0 left-0 w-80 bg-[#00403C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${
+            className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${
                 isVisible ? 'translate-y-0' : '-translate-y-full'
             }`}
         >

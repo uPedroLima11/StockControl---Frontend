@@ -34,9 +34,9 @@ export default function LayoutWrapper({
   }
 
   return (
-    <div className="flex">
+    <div className="flex bg-[#20252B]">
       <Sidebar />
-      <main className="flex-1 p-6 overflow-y-auto max-h-screen">{children}</main>
+      <main className="flex-1 overflow-y-auto max-h-screen">{children}</main>
     </div>
   );
 }
