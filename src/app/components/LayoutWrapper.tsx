@@ -17,7 +17,7 @@ export default function LayoutWrapper({
   const isPublicPage =
     pathname === "/login" ||
     pathname === "/registro" ||
-    pathname === "/esqueci-senha";
+    pathname === "/esqueci";
 
   if (isHome) {
     return (
@@ -36,7 +36,7 @@ export default function LayoutWrapper({
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-6 overflow-y-auto max-h-screen">{children}</main>
     </div>
   );
 }
