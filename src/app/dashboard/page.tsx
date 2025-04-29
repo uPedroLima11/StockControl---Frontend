@@ -33,7 +33,7 @@ export default function Dashboard() {
 
             <div className="flex justify-center px-2 sm:px-4 py-10">
                 <div className="w-full max-w-6xl space-y-8">
-                    <h1 className="text-center text-2xl font-mono text-gray-800">Dashboard</h1>
+                    <h1 className="text-center text-2xl font-mono text-white">Dashboard</h1>
 
                     <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-md">
                         <h2 className="text-lg font-semibold mb-4 border-b pb-2">Resumo do Inventário</h2>

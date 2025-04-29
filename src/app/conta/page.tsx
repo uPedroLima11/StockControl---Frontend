@@ -33,9 +33,8 @@ export default function MinhaConta() {
                         <p>Cidade: Pelotas</p>
                         <p>Cep: 40048922</p>
                         <p>Telefone: <span className="text-gray-500">Adicionar</span></p>
-                        <p>Fax: <span className="text-gray-500">Adicionar</span></p>
                         <p>WebSite: <span className="text-gray-500">Adicionar</span></p>
-                        <p>Email: <span className="text-gray-500">Adicionar</span></p>
+                        <p>Email da Empresa: <span className="text-gray-500">Adicionar</span></p>
                     </div>
                 </div>
 

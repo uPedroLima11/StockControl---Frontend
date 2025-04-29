@@ -65,14 +65,14 @@ export default function Sidebar() {
                         <SidebarLink href="#" icon={<FaChartBar />} label="Resumo" />
                         <SidebarLink href="/produtos" icon={<FaBoxOpen />} label="Produtos" />
                         <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Relatórios" />
-                        <SidebarLink href="/minhaconta" icon={<FaUser />} label="Minha Conta" />
+                        <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
                         <SidebarLink href="#" icon={<FaHeadset />} label="Suporte" />
                     </nav>
                 </div>
 
                 <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
                     <SidebarLink href="#" icon={<FaWrench />} label="Ativação" />
-                    <SidebarLink href="#" icon={<FaSignOutAlt />} label="Sair" />
+                    <SidebarLink href="/" icon={<FaSignOutAlt />} label="Sair" />
                 </div>
             </aside>
 
