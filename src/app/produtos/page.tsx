@@ -18,7 +18,7 @@ export default function Produtos() {
                         <FaSearch className="ml-2 text-green-800" />
                     </div>
 
-                    <button className="px-6 py-2 border-2 border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm">
+                    <button className="px-6 py-2 border-2 bg-white border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm">
                         Novo Produto
                     </button>
                 </div>
