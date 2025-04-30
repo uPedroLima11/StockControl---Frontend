@@ -104,7 +104,7 @@ export default function Sidebar() {
                         <SidebarLink href="/configuracoes" icon={<FaWrench />} label="Configurações" />
                         <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
                         {fotoEmpresa && (
-                            <Link href="/conta" className="flex items-center gap-1">
+                            <Link href="/empresa" className="flex items-center gap-1">
                                 <img
                                     src={fotoEmpresa}
                                     alt="Foto da Empresa"
