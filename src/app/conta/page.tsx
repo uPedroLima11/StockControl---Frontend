@@ -25,6 +25,7 @@ export default function MinhaConta() {
                     <h2 className="text-lg font-semibold">Informações da Conta</h2>
                     <div className="mt-2 space-y-1 text-sm">
                         <p>Nome da Empresa: <strong>StockControl</strong></p>
+                        <p>Cargo na Empresa: <strong>Proprietário</strong></p>
                         <p>Primeiro Nome: Usuario</p>
                         <p>Sobrenome: da Conta</p>
                         <p>Endereço: Rua Quatorze</p>
