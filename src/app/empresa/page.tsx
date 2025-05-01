@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 interface Empresa {
   id: string;
@@ -25,6 +26,7 @@ export default function Empresa() {
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [novaFoto, setNovaFoto] = useState('');
   const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null);
+  const router = useRouter();
 
   const getCookie = (name: string) => {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -36,19 +38,36 @@ export default function Empresa() {
       try {
         const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
         if (!userId) {
-          console.error('Usuário não logado');
+          console.warn('Usuário não logado');
           return;
         }
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${userId}`);
-        if (!res.ok) throw new Error('Erro ao buscar empresa');
+
+        if (res.status === 404) {
+          router.push('/criarempresa');
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Erro inesperado ao buscar empresa: ${res.status}`);
+        }
 
         const data = await res.json();
+
+        if (!data.empresa || !data.empresa.id) {
+          router.push('/criarempresa');
+          return;
+        }
+
         setEmpresa(data.empresa);
         setTipoUsuario(data.tipoUsuario);
         setNovaFoto(data.empresa.foto || '');
-      } catch (error) {
-        console.error('Erro ao buscar dados da empresa:', error);
+      } catch (error: any) {
+        if (error.message && !error.message.includes('404')) {
+          console.error('Erro ao buscar dados da empresa:', error);
+        }
+        router.push('/criarempresa');
       } finally {
         setLoading(false);
       }
@@ -59,16 +78,11 @@ export default function Empresa() {
 
   const atualizarFoto = async () => {
     if (!empresa) return;
-  
+
     try {
-      console.log("Dados enviados para atualizar a foto:", novaFoto);
-  
       const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
-      if (!userId) {
-        console.error("Usuário não encontrado");
-        return;
-      }
-  
+      if (!userId) return;
+
       const empresaAtualizada = {
         nome: empresa.nome,
         email: empresa.email,
@@ -79,19 +93,17 @@ export default function Empresa() {
         estado: empresa.estado || null,
         cidade: empresa.cidade || null,
         cep: empresa.cep || null,
-        idUsuario: userId,  
+        idUsuario: userId,
       };
-  
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresa.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresaAtualizada),
       });
-  
+
       if (!res.ok) throw new Error('Erro ao atualizar foto');
-  
+
       const data = await res.json();
       setEmpresa(data);
       setModalAberto(false);
@@ -100,28 +112,22 @@ export default function Empresa() {
       console.error('Erro ao atualizar a logo da empresa:', err);
     }
   };
-  
 
   const editarDadosEmpresa = async () => {
     if (!empresaEditada) return;
 
     try {
       const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
-      if (!userId) {
-        console.error("Usuário não encontrado");
-        return;
-      }
+      if (!userId) return;
 
       const empresaAtualizada = {
         ...empresaEditada,
-        idUsuario: userId, 
+        idUsuario: userId,
       };
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(empresaAtualizada),
       });
 
@@ -133,6 +139,30 @@ export default function Empresa() {
       window.location.reload();
     } catch (error) {
       console.error('Erro ao editar empresa:', error);
+    }
+  };
+
+  const excluirOuSairDaEmpresa = async () => {
+    const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
+    if (!userId) return;
+
+    const confirmacao = window.confirm(
+      tipoUsuario === 'PROPRIETARIO'
+        ? 'Tem certeza que deseja deletar a empresa? Esta ação é irreversível.'
+        : 'Tem certeza que deseja sair da empresa?'
+    );
+    if (!confirmacao) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Erro ao excluir/sair da empresa');
+
+      router.push('/criarempresa');
+    } catch (error) {
+      console.error('Erro ao processar exclusão/saída da empresa:', error);
     }
   };
 
@@ -188,7 +218,7 @@ export default function Empresa() {
             )}
           </div>
 
-          {tipoUsuario === 'PROPRIETARIO' || tipoUsuario === 'ADMIN' ? (
+          {(tipoUsuario === 'PROPRIETARIO' || tipoUsuario === 'ADMIN') && (
             <button
               onClick={() => {
                 setEmpresaEditada(empresa);
@@ -198,8 +228,15 @@ export default function Empresa() {
             >
               Editar Dados
             </button>
-          ) : (
-            <p className="text-red-600 text-center">Você não tem permissão para editar os dados</p>
+          )}
+
+          {tipoUsuario && (
+            <button
+              onClick={excluirOuSairDaEmpresa}
+              className="w-full px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-mono text-sm"
+            >
+              {tipoUsuario === 'PROPRIETARIO' ? 'Deletar Empresa' : 'Sair da Empresa'}
+            </button>
           )}
         </div>
       </div>
@@ -241,18 +278,26 @@ export default function Empresa() {
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Editar Empresa</h2>
 
-            {[{ label: 'Nome', key: 'nome' }, { label: 'Email', key: 'email' }, { label: 'Telefone', key: 'telefone' }, { label: 'Endereço', key: 'endereco' }, { label: 'País', key: 'pais' }, { label: 'Estado', key: 'estado' }, { label: 'Cidade', key: 'cidade' }, { label: 'CEP', key: 'cep' }]
-              .map(({ label, key }) => (
-                <div key={key} className="mb-3">
-                  <label className="block text-sm font-medium mb-1">{label}</label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded p-2"
-                    value={(empresaEditada as any)[key] || ''}
-                    onChange={(e) => setEmpresaEditada({ ...empresaEditada, [key]: e.target.value })}
-                  />
-                </div>
-              ))}
+            {[
+              { label: 'Nome', key: 'nome' },
+              { label: 'Email', key: 'email' },
+              { label: 'Telefone', key: 'telefone' },
+              { label: 'Endereço', key: 'endereco' },
+              { label: 'País', key: 'pais' },
+              { label: 'Estado', key: 'estado' },
+              { label: 'Cidade', key: 'cidade' },
+              { label: 'CEP', key: 'cep' },
+            ].map(({ label, key }) => (
+              <div key={key} className="mb-3">
+                <label className="block text-sm font-medium mb-1">{label}</label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded p-2"
+                  value={(empresaEditada as any)[key] || ''}
+                  onChange={(e) => setEmpresaEditada({ ...empresaEditada, [key]: e.target.value })}
+                />
+              </div>
+            ))}
 
             <div className="flex justify-end gap-2 mt-4">
               <button

@@ -41,7 +41,7 @@ export default function Usuarios() {
     const fetchDados = async () => {
       try {
         const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-        if (!resEmpresa.ok) throw new Error('Erro ao buscar empresa');
+        if (!resEmpresa.ok) throw new Error('Você não possui uma empresa cadastrada');
 
         const empresaData = await resEmpresa.json();
         const empresaIdRecebido = empresaData.empresa.id;

@@ -33,7 +33,7 @@ export default function Navbar() {
         })
         .catch(err => {
           console.error('Erro ao buscar empresa:', err);
-          setFotoEmpresa('/default-empresa.png'); 
+          setFotoEmpresa('/contadefault.png'); 
         });
     }
   }, []);
