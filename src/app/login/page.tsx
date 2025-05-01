@@ -33,7 +33,7 @@ export default function Login() {
       const res = await response.json();
   
       if (response.ok) {
-        document.cookie = `idUsuario=${res.id}; path=/`;
+        document.cookie = `idUsuario=${encodeURIComponent(res.id)}; path=/; max-age=86400`;
   
         alert('Login realizado com sucesso!');
         router.push('/conta'); 

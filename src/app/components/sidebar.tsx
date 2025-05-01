@@ -39,26 +39,33 @@ export default function Sidebar() {
             const idUsuario = getCookie('idUsuario');
             if (idUsuario) {
                 fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.empresa.foto) {
-                            setFotoEmpresa(data.empresa.foto);
-                        } else {
-                            setFotoEmpresa('/default-empresa.png');
+                    .then(async res => {
+                        if (!res.ok) {
+                            if (res.status === 404) {
+                                setFotoEmpresa('/contadefault.png');
+                                setNomeEmpresa(null);
+                                return;
+                            }
+                            throw new Error('Erro ao buscar empresa');
                         }
-    
-                        if (data.empresa.nome) {
-                            setNomeEmpresa(data.empresa.nome);
+                        const data = await res.json();
+                        if (data?.empresa) {
+                            setFotoEmpresa(data.empresa.foto || '/contadefault.png');
+                            setNomeEmpresa(data.empresa.nome || null);
+                        } else {
+                            setFotoEmpresa('/contadefault.png');
+                            setNomeEmpresa(null);
                         }
                     })
                     .catch(err => {
                         console.error('Erro ao buscar empresa:', err);
-                        setFotoEmpresa('/default-empresa.png');
+                        setFotoEmpresa('/contadefault.png');
+                        setNomeEmpresa(null);
                     });
             }
         }
     }, [isClient]);
-    
+
     if (!isClient) return null;
 
     function getCookie(nome: string): string | null {
@@ -100,16 +107,16 @@ export default function Sidebar() {
                         <SidebarLink href="/suporte" icon={<FaHeadset />} label="Suporte" />
                         <SidebarLink href="/configuracoes" icon={<FaWrench />} label="Configurações" />
                         <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
-                        {fotoEmpresa && (
-                            <Link href="/empresa" className="flex items-center gap-1">
-                                <img
-                                    src={fotoEmpresa}
-                                    alt="Foto da Empresa"
-                                    className="h-10 w-10 rounded-full object-cover border border-gray-300"
-                                />
-                                {nomeEmpresa && <h1 className='text-sm font-medium'>{nomeEmpresa}</h1>}
-                            </Link>
-                        )}
+                        <Link href="/empresa" className="flex items-center gap-2">
+                            <img
+                                src={fotoEmpresa || '/contadefault.png'}
+                                alt="Foto da Empresa"
+                                className="h-10 w-10 rounded-full object-cover border border-gray-300"
+                            />
+                            <h1 className='text-sm font-medium'>
+                                {nomeEmpresa ?? 'Criar Empresa'}
+                            </h1>
+                        </Link>
                     </nav>
                 </div>
 
