@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 import { useEffect, useState } from 'react';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 
@@ -16,6 +15,8 @@ interface Empresa {
   foto?: string;
 }
 
+type TipoUsuario = 'CLIENTE' | 'ADMIN' | 'PROPRIETARIO';
+
 export default function Empresa() {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [empresaEditada, setEmpresaEditada] = useState<Empresa | null>(null);
@@ -23,6 +24,7 @@ export default function Empresa() {
   const [modalAberto, setModalAberto] = useState(false);
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [novaFoto, setNovaFoto] = useState('');
+  const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null);
 
   const getCookie = (name: string) => {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -33,7 +35,6 @@ export default function Empresa() {
     const fetchEmpresa = async () => {
       try {
         const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
-
         if (!userId) {
           console.error('Usuário não logado');
           return;
@@ -43,8 +44,9 @@ export default function Empresa() {
         if (!res.ok) throw new Error('Erro ao buscar empresa');
 
         const data = await res.json();
-        setEmpresa(data);
-        setNovaFoto(data.foto || '');
+        setEmpresa(data.empresa);
+        setTipoUsuario(data.tipoUsuario);
+        setNovaFoto(data.empresa.foto || '');
       } catch (error) {
         console.error('Erro ao buscar dados da empresa:', error);
       } finally {
@@ -57,14 +59,16 @@ export default function Empresa() {
 
   const atualizarFoto = async () => {
     if (!empresa) return;
-
+  
     try {
+      console.log("Dados enviados para atualizar a foto:", novaFoto);
+  
       const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
       if (!userId) {
         console.error("Usuário não encontrado");
         return;
       }
-
+  
       const empresaAtualizada = {
         nome: empresa.nome,
         email: empresa.email,
@@ -75,8 +79,9 @@ export default function Empresa() {
         estado: empresa.estado || null,
         cidade: empresa.cidade || null,
         cep: empresa.cep || null,
+        idUsuario: userId,  
       };
-
+  
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresa.id}`, {
         method: 'PUT',
         headers: {
@@ -84,28 +89,40 @@ export default function Empresa() {
         },
         body: JSON.stringify(empresaAtualizada),
       });
-
+  
       if (!res.ok) throw new Error('Erro ao atualizar foto');
-
+  
       const data = await res.json();
       setEmpresa(data);
       setModalAberto(false);
-      window.location.reload(); 
+      window.location.reload();
     } catch (err) {
       console.error('Erro ao atualizar a logo da empresa:', err);
     }
   };
+  
 
   const editarDadosEmpresa = async () => {
     if (!empresaEditada) return;
 
     try {
+      const userId = localStorage.getItem('idUsuario') || getCookie('idUsuario');
+      if (!userId) {
+        console.error("Usuário não encontrado");
+        return;
+      }
+
+      const empresaAtualizada = {
+        ...empresaEditada,
+        idUsuario: userId, 
+      };
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(empresaEditada),
+        body: JSON.stringify(empresaAtualizada),
       });
 
       if (!res.ok) throw new Error('Erro ao atualizar empresa');
@@ -113,7 +130,7 @@ export default function Empresa() {
       const data = await res.json();
       setEmpresa(data);
       setModalEdicaoAberto(false);
-      window.location.reload(); 
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao editar empresa:', error);
     }
@@ -160,24 +177,30 @@ export default function Empresa() {
             {empresa.foto && (
               <img src={empresa.foto} alt="Logo da empresa" className="w-32 h-32 object-cover rounded mb-4" />
             )}
-            <button
-              onClick={() => setModalAberto(true)}
-              className="flex items-center gap-2 px-6 py-2 border-2 border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm"
-            >
-              <FaCloudUploadAlt />
-              Alterar Logo
-            </button>
+            {tipoUsuario !== 'CLIENTE' && (
+              <button
+                onClick={() => setModalAberto(true)}
+                className="flex items-center gap-2 px-6 py-2 border-2 border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm"
+              >
+                <FaCloudUploadAlt />
+                Alterar Logo
+              </button>
+            )}
           </div>
 
-          <button
-            onClick={() => {
-              setEmpresaEditada(empresa);
-              setModalEdicaoAberto(true);
-            }}
-            className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-mono text-sm"
-          >
-            Editar Dados
-          </button>
+          {tipoUsuario === 'PROPRIETARIO' || tipoUsuario === 'ADMIN' ? (
+            <button
+              onClick={() => {
+                setEmpresaEditada(empresa);
+                setModalEdicaoAberto(true);
+              }}
+              className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-mono text-sm"
+            >
+              Editar Dados
+            </button>
+          ) : (
+            <p className="text-red-600 text-center">Você não tem permissão para editar os dados</p>
+          )}
         </div>
       </div>
 
@@ -218,28 +241,18 @@ export default function Empresa() {
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Editar Empresa</h2>
 
-            {[
-              { label: 'Nome', key: 'nome' },
-              { label: 'Email', key: 'email' },
-              { label: 'Telefone', key: 'telefone' },
-              { label: 'Endereço', key: 'endereco' },
-              { label: 'País', key: 'pais' },
-              { label: 'Estado', key: 'estado' },
-              { label: 'Cidade', key: 'cidade' },
-              { label: 'CEP', key: 'cep' },
-            ].map(({ label, key }) => (
-              <div key={key} className="mb-3">
-                <label className="block text-sm font-medium mb-1">{label}</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded p-2"
-                  value={(empresaEditada as any)[key] || ''}
-                  onChange={(e) =>
-                    setEmpresaEditada({ ...empresaEditada, [key]: e.target.value })
-                  }
-                />
-              </div>
-            ))}
+            {[{ label: 'Nome', key: 'nome' }, { label: 'Email', key: 'email' }, { label: 'Telefone', key: 'telefone' }, { label: 'Endereço', key: 'endereco' }, { label: 'País', key: 'pais' }, { label: 'Estado', key: 'estado' }, { label: 'Cidade', key: 'cidade' }, { label: 'CEP', key: 'cep' }]
+              .map(({ label, key }) => (
+                <div key={key} className="mb-3">
+                  <label className="block text-sm font-medium mb-1">{label}</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded p-2"
+                    value={(empresaEditada as any)[key] || ''}
+                    onChange={(e) => setEmpresaEditada({ ...empresaEditada, [key]: e.target.value })}
+                  />
+                </div>
+              ))}
 
             <div className="flex justify-end gap-2 mt-4">
               <button

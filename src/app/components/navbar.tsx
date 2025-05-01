@@ -25,15 +25,15 @@ export default function Navbar() {
       fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`)
         .then(res => res.json())
         .then(data => {
-          if (data.foto) {
-            setFotoEmpresa(data.foto);
+          if (data.empresa.foto) {
+            setFotoEmpresa(data.empresa.foto);
           } else {
             setFotoEmpresa('/contadefault.png');
           }
         })
         .catch(err => {
           console.error('Erro ao buscar empresa:', err);
-          setFotoEmpresa('/default-empresa.png');
+          setFotoEmpresa('/default-empresa.png'); 
         });
     }
   }, []);
@@ -47,9 +47,7 @@ export default function Navbar() {
     <nav className="font-sans bg-gradient-to-r py-2 bg-[#0f0e17] shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] fixed w-screen z-20 top-0">
       <div className="w-full flex items-center justify-between px-4 lg:px-10">
         <a href="/" className="flex items-center space-x-2">
-
           <img src="/icone.png" className="h-16" />
-
           <span className="text-lg font-semibold text-white">StockControl</span>
         </a>
 
@@ -67,18 +65,20 @@ export default function Navbar() {
             Assinatura
           </Link>
           {fotoEmpresa ? (
-            <Link href={"/conta"}><img
-              src={fotoEmpresa}
-              alt="Empresa"
-              className="h-14 w-14 rounded-full object-cover border border-gray-300"
-            /></Link>
+            <Link href={"/conta"}>
+              <img
+                src={fotoEmpresa}
+                alt="Empresa"
+                className="h-14 w-14 rounded-full object-cover border border-gray-300"
+              />
+            </Link>
           ) : (
-          <Link
-            href="/registro"
-            className="bg-[#D4CCCC] text-black text-xl px-8 py-2 rounded-3xl font-light transition hover:bg-[#c2b9b9]"
-          >
-            Entrar
-          </Link> 
+            <Link
+              href="/registro"
+              className="bg-[#D4CCCC] text-black text-xl px-8 py-2 rounded-3xl font-light transition hover:bg-[#c2b9b9]"
+            >
+              Entrar
+            </Link> 
           )}
         </div>
       </div>

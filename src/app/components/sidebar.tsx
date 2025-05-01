@@ -41,17 +41,14 @@ export default function Sidebar() {
                 fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`)
                     .then(res => res.json())
                     .then(data => {
-                        if (data.foto) {
-                            setFotoEmpresa(data.foto);
-                            if (data.nome === 'Empresa') {
-                                setFotoEmpresa('/contadefault.png');
-                            }
+                        if (data.empresa.foto) {
+                            setFotoEmpresa(data.empresa.foto);
                         } else {
-                            setFotoEmpresa('/contadefault.png');
+                            setFotoEmpresa('/default-empresa.png');
                         }
-
-                        if (data.nome) {
-                            setNomeEmpresa(data.nome);
+    
+                        if (data.empresa.nome) {
+                            setNomeEmpresa(data.empresa.nome);
                         }
                     })
                     .catch(err => {
@@ -61,7 +58,7 @@ export default function Sidebar() {
             }
         }
     }, [isClient]);
-
+    
     if (!isClient) return null;
 
     function getCookie(nome: string): string | null {
