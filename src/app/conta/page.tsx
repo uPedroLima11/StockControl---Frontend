@@ -37,14 +37,6 @@ export default function MinhaConta() {
                         <p>Email da Empresa: <span className="text-gray-500">Adicionar</span></p>
                     </div>
                 </div>
-
-                <div>
-                    <h2 className="text-lg font-semibold">Sua Logo</h2>
-                    <button className="px-6 py-2 border-2 border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm">
-                        <FaCloudUploadAlt />
-                        Adicionar Logo
-                    </button>
-                </div>
             </div>
         </div>
     );
