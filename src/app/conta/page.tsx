@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { FaCloudUploadAlt } from 'react-icons/fa';
-
 export default function MinhaConta() {
     return (
         <div className="min-h-screen flex justify-center items-start pt-10">
