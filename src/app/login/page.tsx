@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { HiEnvelope, HiLockClosed } from 'react-icons/hi2';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useState } from 'react';
+import { useUsuarioStore } from '../context/usuario';
 
 type Inputs = {
   email: string;
@@ -14,8 +15,9 @@ type Inputs = {
 
 export default function Login() {
   const { register, handleSubmit } = useForm<Inputs>();
-  const router = useRouter();
+  const { logar } = useUsuarioStore();
   const [visivel, setVisivel] = useState(false);
+  const router = useRouter();
 
   async function handleLogin(data: Inputs) {
     try {
@@ -30,16 +32,13 @@ export default function Login() {
         }),
       });
   
-      const res = await response.json();
-  
-      if (response.ok) {
-        document.cookie = `idUsuario=${encodeURIComponent(res.id)}; path=/; max-age=86400`;
-  
-        alert('Login realizado com sucesso!');
-        router.push('/conta'); 
-      } else {
-        alert(res.message || 'Erro ao fazer login');
+      if (response.status === 200) {
+        const dados = await response.json();
+        logar(dados);
+        localStorage.setItem("client_key", JSON.stringify(dados.id));
+        router.push('/conta')
       }
+
     } catch (err) {
       console.error('Erro de conexão:', err);
       alert('Erro ao se conectar com o servidor.');

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useUsuarioStore } from '../context/usuario';
 
 type Usuario = {
   id: string;
@@ -23,9 +24,10 @@ type Empresa = {
 };
 
 export default function MinhaConta() {
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const { usuario, logar } = useUsuarioStore();
   const [form, setForm] = useState({
     nome: '',
     email: '',
@@ -41,27 +43,36 @@ export default function MinhaConta() {
     },
   });
 
-  function getCookie(nome: string) {
-    const match = document.cookie.match(new RegExp('(^| )' + nome + '=([^;]+)'));
-    return match ? match[2] : null;
-  }
-
   useEffect(() => {
-    const idUsuario = getCookie('idUsuario');
-    if (!idUsuario) return;
+    async function buscaUsuarios(idUsuario: string) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if (response.status === 200) {
+        const dados = await response.json();
+        logar(dados);
+      }
+    }
 
-    const buscarDados = async () => {
-      const resUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios`);
-      const todosUsuarios = await resUser.json();
-      const user = todosUsuarios.find((u: Usuario) => u.id === idUsuario);
-      setUsuario(user);
+    const buscarDados = async (idUsuario: string) => {
+      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if(responseUser.status === 200){
+        const dados = await responseUser.json();
+        setUsuarioLogado(dados);
+      }
 
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-      const empresaData = await resEmpresa.json();
-      setEmpresa(empresaData.empresa);
+      const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      if(responseEmpresa.status === 200){
+        const dados = await responseEmpresa.json();
+        setEmpresa(dados);
+      }
     };
 
-    buscarDados();
+    if (localStorage.getItem("client_key")) {
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      buscaUsuarios(usuarioValor);
+      buscarDados(usuarioValor);
+    }
+
   }, []);
 
   const abrirModal = () => {
@@ -103,7 +114,7 @@ export default function MinhaConta() {
 
         <div className="border-b border-black mb-4 pb-2">
           <h2 className="text-lg font-semibold underline">Email</h2>
-          <p className="mt-1">Email: {usuario?.email || '...'}</p>
+          <p className="mt-1">Email: {usuarioLogado?.email || '...'}</p>
         </div>
 
         <div className="border-b border-black mb-6 pb-6">
@@ -117,9 +128,9 @@ export default function MinhaConta() {
           <h2 className="text-lg font-semibold">Informações da Conta</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>Nome da Empresa: <strong>{empresa?.nome || 'Adicionar'}</strong></p>
-            <p>Cargo na Empresa: <strong>{usuario?.tipo || 'Adicionar'}</strong></p>
-            <p>Nome: {usuario?.nome?.split(' ')[0] || 'Adicionar'}</p>
-            <p>Sobrenome: {usuario?.nome?.split(' ').slice(1, 3).join(' ') || 'Adicionar'}</p>
+            <p>Cargo na Empresa: <strong>{usuarioLogado?.tipo || 'Adicionar'}</strong></p>
+            <p>Nome: {usuarioLogado?.nome?.split(' ')[0] || 'Adicionar'}</p>
+            <p>Sobrenome: {usuarioLogado?.nome?.split(' ').slice(1, 3).join(' ') || 'Adicionar'}</p>
             <p>Endereço: {empresa?.endereco || 'Adicionar'}</p>
             <p>País: {empresa?.pais || 'Adicionar'}</p>
             <p>Estado: {empresa?.estado || 'Adicionar'}</p>

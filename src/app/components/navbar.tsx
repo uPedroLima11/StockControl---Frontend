@@ -3,10 +3,21 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import { useUsuarioStore } from '../context/usuario';
+
+type Usuario = {
+  id: string;
+  nome: string;
+  email: string;
+  tipo: string;
+  empresaId: string | null;
+};
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const { usuario, logar } = useUsuarioStore();
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -19,22 +30,40 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const idUsuario = getCookie('idUsuario');
+    async function buscaUsuarios(idUsuario: string) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if (response.status === 200) {
+        const dados = await response.json();
+        logar(dados);
+      }
+    }
 
-    if (idUsuario) {
-      fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.empresa.foto) {
-            setFotoEmpresa(data.empresa.foto);
-          } else {
-            setFotoEmpresa('/contadefault.png');
-          }
-        })
-        .catch(err => {
-          console.error('Erro ao buscar empresa:', err);
-          setFotoEmpresa('/contadefault.png'); 
-        });
+    const buscarDados = async (idUsuario: string) => {
+      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if(responseUser.status === 200){
+        const dados = await responseUser.json();
+        setUsuarioLogado(dados);
+      }
+    }
+
+    const buscaEmpresa = async (idUsuario: string) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      if (response.status === 200) {
+        const dados = await response.json();
+        if (dados.foto) {
+          setFotoEmpresa(dados.foto);
+        } else {
+          setFotoEmpresa('/contadefault.png');
+        }
+      }
+    }
+
+    if (localStorage.getItem("client_key")) {
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      buscaUsuarios(usuarioValor);
+      buscarDados(usuarioValor);
+      buscaEmpresa(usuarioValor);
     }
   }, []);
 
@@ -74,7 +103,7 @@ export default function Navbar() {
             </Link>
           ) : (
             <Link
-              href="/registro"
+              href="/login"
               className="bg-[#D4CCCC] text-black text-xl px-8 py-2 rounded-3xl font-light transition hover:bg-[#c2b9b9]"
             >
               Entrar
@@ -92,7 +121,7 @@ export default function Navbar() {
             Assinatura
           </Link>
           <Link
-            href="/registro"
+            href="/login"
             onClick={toggleMenu}
             className="bg-[#D4CCCC] text-black rounded-3xl px-6 py-2 text-center text-base"
           >
