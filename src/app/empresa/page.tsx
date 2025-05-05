@@ -274,7 +274,8 @@ export default function Empresa() {
       </div>
 
       {modalAberto && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
             <h2 className="text-xl font-semibold mb-4">Alterar Logo</h2>
             <div className="mb-4">
@@ -295,7 +296,8 @@ export default function Empresa() {
       )}
 
       {modalEdicaoAberto && empresaEditada && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50"
+         style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Editar Empresa</h2>
 

@@ -3,34 +3,11 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { HiEnvelope } from 'react-icons/hi2';
 
-type Inputs = {
-    email: string;
-};
 
-export default function login() {
-    const { register, handleSubmit } = useForm<Inputs>();
-
-    async function enviaRecuperacao(data: Inputs) {
-        const token = Math.floor(100000 + Math.random() * 900000);
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_URL_API}/usuarios/esqueceu/${data.email}`,
-            {
-                method: 'put',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    recuperacao: token.toString(),
-                }),
-            },
-        );
-        if (response.status === 200) {
-            console.log('Token enviado. Verifique seu email.');
-        } else {
-            console.error('Algo deu errado. Verifique suas credenciais e tente novamente.');
-        }
-    }
-
+export default function esqueci() {
+    
+    const { register } = useForm();
+    
     return (
         <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">
             <div className=''>
@@ -41,7 +18,7 @@ export default function login() {
                     </span>
                 </Link>
             </div>
-            <form className="md:w-2/6" onSubmit={handleSubmit(enviaRecuperacao)}>
+            <form className="md:w-2/6" onSubmit={() => {}}>
                 <label
                     htmlFor="input-group-1"
                     className="block mb-2 text-sm font-medium text-white"
@@ -55,8 +32,9 @@ export default function login() {
                     <input
                         type="email"
                         className=" border text-sm rounded-lg block w-full ps-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Digite seu email"
                         required
-                        {...register('email')}
+                        { ...register('email') }
                     />
                 </div>
                 <button
