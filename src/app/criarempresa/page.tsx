@@ -38,7 +38,7 @@ export default function CriarEmpresa() {
       router.push("/dashboard");
     }
   }, [usuarioLogado, router]);
-  
+
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -80,18 +80,15 @@ export default function CriarEmpresa() {
         if (data.empresa) {
           router.push("/empresa");
         }
-      } else {
-        console.error("Erro ao buscar empresa", response.statusText);
       }
     } catch (err) {
-      console.error("Erro de conexão", err);
+      //Sem Lógica de erro
     }
   };
 
   async function onSubmit(data: Inputs) {
-    const id = localStorage.getItem("client_key");
     const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa`, {
         method: "POST",
@@ -111,7 +108,8 @@ export default function CriarEmpresa() {
           title: "Oops... algo deu errado!",
           text: "Email ja Existente ou erro ao criar empresa.",
           confirmButtonColor: "#013C3C",
-        });      }
+        });
+      }
     } catch (err) {
       console.error(err);
     }
