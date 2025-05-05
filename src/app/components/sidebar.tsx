@@ -8,18 +8,18 @@ import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "../context/usuario";
 
 type Usuario = {
-    id: string;
-    nome: string;
-    email: string;
-    tipo: string;
-    empresaId: string | null;
-  };
+  id: string;
+  nome: string;
+  email: string;
+  tipo: string;
+  empresaId: string | null;
+};
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isClient, setIsClient] = useState(false);
-const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const { usuario, logar } = useUsuarioStore();
@@ -38,48 +38,39 @@ const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-        if (response.status === 200) {
-          const dados = await response.json();
-          logar(dados);
-        }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if (response.status === 200) {
+        const dados = await response.json();
+        logar(dados);
       }
-  
-      const buscarDados = async (idUsuario: string) => {
-        const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-        if(responseUser.status === 200){
-          const dados = await responseUser.json();
-          setUsuarioLogado(dados);
-        }
     }
 
+    const buscarDados = async (idUsuario: string) => {
+      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+      if (responseUser.status === 200) {
+        const dados = await responseUser.json();
+        setUsuarioLogado(dados);
+      }
+    };
+
     const buscaEmpresa = async (idUsuario: string) => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-        if (response.status === 200) {
-          const dados = await response.json();
-          if (dados.foto) {
-            setFotoEmpresa(dados.foto);
-          } else {
-            setFotoEmpresa("/contadefault.png");
-          }
-          if (dados.nome) {
-            setNomeEmpresa(dados.nome);
-          } else {
-            setNomeEmpresa(null);
-          }
-        } else {
-          setFotoEmpresa("/contadefault.png");
-          setNomeEmpresa(null);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      if (response.status === 200) {
+        const dados = await response.json();
+        if (dados) {
+          setFotoEmpresa(dados.foto);
+          setNomeEmpresa(dados.nome);
         }
       }
+    };
 
-        if (localStorage.getItem("client_key")) {
-            const usuarioSalvo = localStorage.getItem("client_key") as string;
-            const usuarioValor = usuarioSalvo.replace(/"/g, "");
-            buscaUsuarios(usuarioValor);
-            buscarDados(usuarioValor);
-            buscaEmpresa(usuarioValor)
-          }
+    if (localStorage.getItem("client_key")) {
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      buscaUsuarios(usuarioValor);
+      buscarDados(usuarioValor);
+      buscaEmpresa(usuarioValor);
+    }
   }, []);
 
   return (
@@ -193,9 +184,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
           ✕
         </button>
       </div>
-      <div className="space-y-4 text-sm">
-        {notificacaoTable}
-      </div>
+      <div className="space-y-4 text-sm">{notificacaoTable}</div>
     </div>
   );
 }
