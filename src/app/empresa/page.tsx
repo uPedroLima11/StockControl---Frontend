@@ -154,18 +154,22 @@ export default function Empresa() {
 
     try {
       const userId = localStorage.getItem("client_key");
-      if (!userId) return;
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      if (!usuarioValor) return;
 
       const empresaAtualizada = {
         ...empresaEditada,
-        idUsuario: userId,
+        idUsuario: usuarioValor,
       };
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}/${usuarioValor}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(empresaAtualizada),
       });
+
+      console.log("Resposta da atualização:", res);
 
       if (!res.ok) throw new Error("Erro ao atualizar empresa");
 
