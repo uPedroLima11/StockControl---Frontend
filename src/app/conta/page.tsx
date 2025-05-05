@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUsuarioStore } from '../context/usuario';
+import Swal from 'sweetalert2';
 
 type Usuario = {
   id: string;
@@ -74,7 +75,7 @@ export default function MinhaConta() {
   const handleSalvar = async () => {
     if (!usuario) return;
 
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`, {
+    const atualizarDados = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -82,9 +83,23 @@ export default function MinhaConta() {
         email: form.email,
       }),
     });
+    if (!(atualizarDados.status === 200)) {
+      Swal.fire({
+        icon: "error",
+        title: "Algo deu errado!",
+        text: 'Email ja Existente !',
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#013C3C",
+      }); 
+    } else {
+      Swal.fire({
+        title: "Alteração realizada com sucesso!",
+        icon: "success",
+        confirmButtonColor: "#013C3C",
 
+      });
+    }
     setModalAberto(false);
-    window.location.reload();
   };
 
   return (
@@ -135,7 +150,7 @@ export default function MinhaConta() {
       {modalAberto && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} 
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
         >
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Editar Informações</h2>

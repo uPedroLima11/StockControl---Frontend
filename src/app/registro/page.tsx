@@ -6,11 +6,13 @@ import { useForm } from 'react-hook-form';
 import { HiEnvelope, HiLockClosed, HiMiniUserCircle } from 'react-icons/hi2';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from 'react';
+import Swal from 'sweetalert2';
 
 type Inputs = {
   nome: string;
   email: string;
   senha: string;
+  verificarSenha: string;
 };
 
 export default function Registro() {
@@ -20,6 +22,15 @@ export default function Registro() {
 
   async function verificaCadastro(data: Inputs) {
     try {
+      if (data.senha !== data.verificarSenha) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "As senhas não coincidem.",
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios`, {
         method: 'POST',
         headers: {
@@ -36,8 +47,12 @@ export default function Registro() {
       if (response.status === 201) {
         router.push('/login');
       } else {
-        const erroTexto = await response.text();
-        console.error("Erro ao registrar:", erroTexto);
+        Swal.fire({
+          icon: "error",
+          title: "Algo deu errado.",
+          text: "Verifique se o email já está cadastrado ou se a senha possui letra maiuscula e (?!# etc).",
+          confirmButtonColor: "#013C3C",
+        });
       }
     } catch (err) {
       console.error('Erro na requisição:', err);
@@ -91,6 +106,25 @@ export default function Registro() {
           <input
             type={visivel ? 'text' : 'password'}
             {...register('senha')}
+            required
+            className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+          />
+          <div
+            className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5"
+            onClick={() => setVisivel(!visivel)}
+          >
+            {visivel ? <FaEyeSlash className="text-gray-400" /> : <FaEye className="text-gray-400" />}
+          </div>
+        </div>
+
+        <label className="block mb-2 text-sm font-medium text-white">Confirmar Senha:</label>
+        <div className="relative mb-6">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+            <HiLockClosed className="text-gray-400" />
+          </div>
+          <input
+            type={visivel ? 'text' : 'password'}
+            {...register('verificarSenha')}
             required
             className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
           />

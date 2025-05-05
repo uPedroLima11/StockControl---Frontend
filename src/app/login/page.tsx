@@ -7,6 +7,7 @@ import { HiEnvelope, HiLockClosed } from 'react-icons/hi2';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useState } from 'react';
 import { useUsuarioStore } from '../context/usuario';
+import Swal from 'sweetalert2';
 
 type Inputs = {
   email: string;
@@ -31,19 +32,31 @@ export default function Login() {
           senha: data.senha,
         }),
       });
-  
+
       if (response.status === 200) {
+        Swal.fire({
+          text: "Login Realizado Com Sucesso!",
+          icon: "success",
+          confirmButtonColor: "#013C3C",
+        });
         const dados = await response.json();
         logar(dados);
         localStorage.setItem("client_key", JSON.stringify(dados.id));
-        router.push('/conta')
+        router.push('/dashboard')
+      } else{
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Algo deu errado, Verifque as credenciais",
+          confirmButtonColor: "#013C3C",
+        });
       }
 
     } catch (err) {
       console.error('Erro de conexão:', err);
     }
   }
-  
+
 
   return (
     <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">

@@ -95,9 +95,9 @@ export default function Sidebar() {
               </span>
               <span className="text-sm md:inline">Notificações</span>
             </button>
+            <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Dashboard" />
             <SidebarLink href="#" icon={<FaChartBar />} label="Resumo" />
             <SidebarLink href="/produtos" icon={<FaBoxOpen />} label="Produtos" />
-            <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Relatórios" />
             <SidebarLink href="/usuarios" icon={<FaUser />} label="Usuários" />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label="Suporte" />
             <SidebarLink href="/Fornecedores" icon={<FaTruck />} label="Fornecedores" />

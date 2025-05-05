@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUsuarioStore } from "../context/usuario";
+import Swal from "sweetalert2";
 
 type Usuario = {
   id: string;
@@ -105,8 +106,12 @@ export default function CriarEmpresa() {
         window.location.reload();
         router.push("/dashboard");
       } else {
-        const res = await response.json();
-      }
+        Swal.fire({
+          icon: "error",
+          title: "Oops... algo deu errado!",
+          text: "Email ja Existente ou erro ao criar empresa.",
+          confirmButtonColor: "#013C3C",
+        });      }
     } catch (err) {
       console.error(err);
     }

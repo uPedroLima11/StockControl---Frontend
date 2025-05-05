@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "../context/usuario";
+import Swal from "sweetalert2";
 
 type Usuario = {
   id: string;
@@ -183,22 +184,64 @@ export default function Empresa() {
   };
 
   const excluirOuSairDaEmpresa = async () => {
-    const userId = localStorage.getItem("client_key");
-      const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      if (!usuarioValor) return;
+    const usuarioSalvo = localStorage.getItem("client_key") as string;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    if (!usuarioValor) return;
 
-    const confirmacao = window.confirm(tipoUsuario === "PROPRIETARIO" ? "Tem certeza que deseja deletar a empresa? Esta ação é irreversível." : "Tem certeza que deseja sair da empresa?");
-    if (!confirmacao) return;
-
+    if (tipoUsuario === "PROPRIETARIO") {
+      Swal.fire({
+        text: "Você tem certeza que deseja deletar a empresa?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, deletar!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Empresa deletada com sucesso.",
+            icon: "success"
+          });
+        } else {
+          Swal.fire({
+            text: "Você tem certeza que deseja sair da empresa?",	
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, sair!",
+          }).then((result) => {
+            if (result.isConfirmed) { 
+              try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`, {
+                  method: "DELETE",
+                });
+              Swal.fire({
+                title: "Concluido",
+                text: "Você saiu da empresa com sucesso.",
+                icon: "success"
+                });
+            }
+          });
+        }
+      })
+    };
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${userId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Erro ao excluir/sair da empresa");
+      if (!res.ok) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Algo deu errado ao processar sua solicitação.",
+        });
+      }
 
       router.push("/criarempresa");
+      window.location.reload();
     } catch (error) {
       console.error("Erro ao processar exclusão/saída da empresa:", error);
     }
@@ -275,7 +318,7 @@ export default function Empresa() {
 
       {modalAberto && (
         <div className="fixed inset-0 flex items-center justify-center z-50"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
             <h2 className="text-xl font-semibold mb-4">Alterar Logo</h2>
             <div className="mb-4">
@@ -297,7 +340,7 @@ export default function Empresa() {
 
       {modalEdicaoAberto && empresaEditada && (
         <div className="fixed inset-0 flex items-center justify-center z-50"
-         style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} >
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Editar Empresa</h2>
 
