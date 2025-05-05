@@ -4,14 +4,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "../context/usuario";
 import Swal from "sweetalert2";
-
-type Usuario = {
-  id: string;
-  nome: string;
-  email: string;
-  tipo: string;
-  empresaId: string | null;
-};
+import { UsuarioI } from "@/utils/types/usuario";
 
 interface Empresa {
   id: string;
@@ -37,7 +30,7 @@ export default function Empresa() {
   const [novaFoto, setNovaFoto] = useState("");
   const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null);
   const router = useRouter();
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const { usuario, logar } = useUsuarioStore();
 
   useEffect(() => {

@@ -5,14 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUsuarioStore } from "../context/usuario";
 import Swal from "sweetalert2";
-
-type Usuario = {
-  id: string;
-  nome: string;
-  email: string;
-  tipo: string;
-  empresaId: string | null;
-};
+import { UsuarioI } from "@/utils/types/usuario";
 
 type Inputs = {
   nome: string;
@@ -30,7 +23,7 @@ export default function CriarEmpresa() {
   const { register, handleSubmit } = useForm<Inputs>();
   const router = useRouter();
   const [idUsuario, setIdUsuario] = useState<string | null>(null);
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const { usuario, logar } = useUsuarioStore();
 
   useEffect(() => {
