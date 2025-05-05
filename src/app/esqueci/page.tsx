@@ -32,7 +32,7 @@ export default function esqueci() {
                     <input
                         type="email"
                         className=" border text-sm rounded-lg block w-full ps-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Digite seu email"
+                        placeholder="Digite seu email aqui"
                         required
                         { ...register('email') }
                     />
