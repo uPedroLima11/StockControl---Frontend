@@ -32,7 +32,6 @@ export default function MinhaConta() {
     nome: '',
     email: '',
   });
-
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -84,7 +83,6 @@ export default function MinhaConta() {
       }),
     });
 
-    alert('Dados atualizados!');
     setModalAberto(false);
     window.location.reload();
   };

@@ -38,11 +38,9 @@ export default function Registro() {
       } else {
         const erroTexto = await response.text();
         console.error("Erro ao registrar:", erroTexto);
-        alert("Erro ao registrar: " + erroTexto);
       }
     } catch (err) {
       console.error('Erro na requisição:', err);
-      alert('Erro ao se comunicar com o servidor.');
     }
   }
 

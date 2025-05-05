@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt } from "react-icons/fa";
+import { FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "../context/usuario";
 
@@ -100,6 +100,7 @@ export default function Sidebar() {
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Relatórios" />
             <SidebarLink href="/usuarios" icon={<FaUser />} label="Usuários" />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label="Suporte" />
+            <SidebarLink href="/Fornecedores" icon={<FaTruck />} label="Fornecedores" />
             <SidebarLink href="/configuracoes" icon={<FaWrench />} label="Configurações" />
             <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
             <Link href="/empresa" className="flex items-center gap-2">

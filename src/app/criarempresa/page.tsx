@@ -67,7 +67,6 @@ export default function CriarEmpresa() {
     const id = localStorage.getItem("client_key");
 
     if (!id) {
-      alert("Usuário não autenticado. Faça login novamente.");
       router.push("/login");
     }
   }, [router]);
@@ -107,11 +106,9 @@ export default function CriarEmpresa() {
         router.push("/dashboard");
       } else {
         const res = await response.json();
-        alert(res.mensagem || "Erro ao criar empresa");
       }
     } catch (err) {
       console.error(err);
-      alert("Erro de conexão com o servidor.");
     }
   }
 

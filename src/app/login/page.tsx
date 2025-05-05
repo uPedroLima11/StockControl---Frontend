@@ -41,7 +41,6 @@ export default function Login() {
 
     } catch (err) {
       console.error('Erro de conexão:', err);
-      alert('Erro ao se conectar com o servidor.');
     }
   }
   
