@@ -67,10 +67,6 @@ export default function Navbar() {
     }
   }, []);
 
-  function getCookie(nome: string): string | null {
-    const match = document.cookie.match(new RegExp('(^| )' + nome + '=([^;]+)'));
-    return match ? match[2] : null;
-  }
 
   return (
     <nav className="font-sans bg-gradient-to-r py-2 bg-[#0f0e17] shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] fixed w-screen z-20 top-0">
@@ -120,13 +116,23 @@ export default function Navbar() {
           <Link href="#assinatura" onClick={toggleMenu} className="hover:text-[#b37400]">
             Assinatura
           </Link>
-          <Link
-            href="/login"
-            onClick={toggleMenu}
-            className="bg-[#D4CCCC] text-black rounded-3xl px-6 py-2 text-center text-base"
-          >
-            Entrar
-          </Link>
+            {fotoEmpresa ? (
+            <Link href={"/conta"} onClick={toggleMenu}>
+              <img
+              src={fotoEmpresa}
+              alt="Empresa"
+              className="h-14 w-14 rounded-full object-cover border border-gray-300"
+              />
+            </Link>
+            ) : (
+            <Link
+              href="/login"
+              onClick={toggleMenu}
+              className="bg-[#D4CCCC] text-black rounded-3xl px-6 py-2 text-center text-base"
+            >
+              Entrar
+            </Link>
+            )}
         </div>
       )}
     </nav>

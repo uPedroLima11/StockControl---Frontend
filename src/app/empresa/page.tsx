@@ -184,7 +184,9 @@ export default function Empresa() {
 
   const excluirOuSairDaEmpresa = async () => {
     const userId = localStorage.getItem("client_key");
-    if (!userId) return;
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      if (!usuarioValor) return;
 
     const confirmacao = window.confirm(tipoUsuario === "PROPRIETARIO" ? "Tem certeza que deseja deletar a empresa? Esta ação é irreversível." : "Tem certeza que deseja sair da empresa?");
     if (!confirmacao) return;

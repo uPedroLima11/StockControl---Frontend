@@ -33,6 +33,12 @@ export default function CriarEmpresa() {
   const { usuario, logar } = useUsuarioStore();
 
   useEffect(() => {
+    if (usuarioLogado?.empresaId) {
+      router.push("/dashboard");
+    }
+  }, [usuarioLogado, router]);
+  
+  useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (response.status === 200) {

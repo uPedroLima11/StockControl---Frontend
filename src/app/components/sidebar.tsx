@@ -19,10 +19,10 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado,] = useState<Usuario | null>(null);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
-  const { usuario, logar } = useUsuarioStore();
+  const { usuario, logar, } = useUsuarioStore();
 
   useEffect(() => {
     setIsClient(true);
@@ -71,7 +71,9 @@ export default function Sidebar() {
       buscarDados(usuarioValor);
       buscaEmpresa(usuarioValor);
     }
+
   }, []);
+
 
   return (
     <>
@@ -111,7 +113,8 @@ export default function Sidebar() {
           <SidebarLink href="/ativacao" icon={<FaWrench />} label="Ativação" />
           <button
             onClick={() => {
-              document.cookie = "idUsuario=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+              localStorage.removeItem("client_key");
+
               window.location.href = "/";
             }}
             className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm"
@@ -121,6 +124,7 @@ export default function Sidebar() {
             </span>
             <span className="text-sm md:inline">Sair</span>
           </button>
+
         </div>
       </aside>
 
