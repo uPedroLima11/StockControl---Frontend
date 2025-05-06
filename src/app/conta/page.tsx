@@ -5,21 +5,11 @@ import Link from "next/link";
 import { useUsuarioStore } from "../context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
-
-type Empresa = {
-  nome?: string;
-  telefone?: string;
-  endereco?: string;
-  pais?: string;
-  estado?: string;
-  cidade?: string;
-  cep?: string;
-  email?: string;
-};
+import { EmpresaI } from "@/utils/types/empresa";
 
 export default function MinhaConta() {
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
-  const [empresa, setEmpresa] = useState<Empresa | null>(null);
+  const [empresa, setEmpresa] = useState<EmpresaI | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const { usuario, logar } = useUsuarioStore();
   const [form, setForm] = useState({
