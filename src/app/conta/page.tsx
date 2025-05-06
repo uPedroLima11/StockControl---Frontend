@@ -94,6 +94,43 @@ export default function MinhaConta() {
     setModalAberto(false);
   };
 
+  const handleExcluir = async () => {
+    if (!usuario) return;
+
+    await Swal.fire({
+      title: "Tem certeza?",
+      text: "Essa ação não pode ser desfeita!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sim, deletar!",
+      cancelButtonText: "Cancelar",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const excluirDados = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuario.id}`, {
+          method: "DELETE",
+        });
+        console.log(excluirDados.status);
+        if (excluirDados.status === 204) {
+          Swal.fire({
+            title: "Conta excluída com sucesso!",
+            icon: "success",
+            confirmButtonColor: "#013C3C",
+          });
+          localStorage.removeItem("client_key");
+          window.location.href = "/";
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Algo deu errado!",
+            text: "Não foi possível excluir a conta.",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#013C3C",
+          });
+        }
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-start pt-10 bg-[#20252B]">
       <div className="bg-white w-full max-w-md rounded p-6 shadow-md">
@@ -132,9 +169,14 @@ export default function MinhaConta() {
           </div>
         </div>
 
-        <button onClick={abrirModal} className="mt-4 bg-[#00332C] text-white px-6 py-2 rounded hover:bg-[#00443f] transition w-full">
-          Editar Perfil
-        </button>
+        <div className="flex items-center mt-6 gap-1">
+          <button onClick={abrirModal} className="mt-4 bg-[#00332C] text-white px-5 py-2 rounded hover:bg-[#00443f] transition w-full cursor-pointer">
+            Editar Perfil
+          </button>
+          <button onClick={handleExcluir} className="mt-4 bg-red-600 text-white px-6 py-2 rounded hover:bg-red-900 transition w-full cursor-pointer">
+            Excluir Conta
+          </button>
+        </div>
       </div>
 
       {modalAberto && (

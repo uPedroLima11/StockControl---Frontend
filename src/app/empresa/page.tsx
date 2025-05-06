@@ -144,7 +144,6 @@ export default function Empresa() {
     if (!empresaEditada) return;
 
     try {
-      const userId = localStorage.getItem("client_key");
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!usuarioValor) return;
