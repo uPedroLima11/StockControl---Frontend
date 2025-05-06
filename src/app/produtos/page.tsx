@@ -1,11 +1,38 @@
+"use client";
+
+import { ProdutoI } from "@/utils/types/produtos";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { FaSearch, FaCog } from "react-icons/fa";
 
 export default function Produtos() {
+  const [produtos, setProdutos] = useState<ProdutoI[]>([]);
+  useEffect(() => {
+    async function buscaDados() {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+      const dados = await response.json();
+      setProdutos(dados);
+    }
+    buscaDados();
+  });
+
+  const produtoTable = produtos.map((produto) => (
+    <tr key={produto.id} className="border-b hover:bg-gray-100 transition">
+      <td className="py-3 px-4 flex items-center gap-2 max-w-[260px]">
+        <Image src={produto.foto || "/out.jpg"} width={30} height={30} className="rounded" priority loading="eager" alt={""} />
+        <span className="truncate">{produto.nome}</span>
+      </td>
+      <td className="py-3 px-3">{produto.id}</td>
+      <td className="py-3 px-3">{produto.fornecedorId}</td>
+      <td className="py-3 px-3">{produto.categoriaId}</td>
+      <td className="py-3 px-3">{produto.quantidade}</td>
+      <td className="py-3 px-3">R${produto.preco.toFixed(2).replace(".", ",")}</td>
+    </tr>
+  ));
   return (
     <div className="flex justify-center px-4 py-10">
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono text-gray-800 mb-6">Produtos</h1>
+        <h1 className="text-center text-2xl font-mono text-white mb-6">Produtos</h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <div className="flex items-center border rounded-full px-4 py-2 bg-white shadow-sm">
@@ -34,7 +61,16 @@ export default function Produtos() {
               </tr>
             </thead>
             <tbody>
-              {Array(4)
+              {produtoTable.length > 0 ? (
+                produtoTable
+              ) : (
+                <tr className="border-b hover:bg-gray-100 transition">
+                  <td colSpan={6} className="py-3 px-4 text-center text-gray-500">
+                    Nenhum produto encontrado.
+                  </td>
+                </tr>
+              )}	
+              {/* {Array(4)
                 .fill(0)
                 .map((_, i) => (
                   <tr key={i} className="border-b hover:bg-gray-100 transition">
@@ -48,7 +84,7 @@ export default function Produtos() {
                     <td className="py-3 px-4">3</td>
                     <td className="py-3 px-4">R$ 1800,00</td>
                   </tr>
-                ))}
+                ))} */}
             </tbody>
           </table>
         </div>

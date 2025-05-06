@@ -3,22 +3,14 @@
 import { useEffect, useState } from "react";
 import { FaCog } from "react-icons/fa";
 import { useUsuarioStore } from "../context/usuario";
-
-interface Usuario {
-  id: string;
-  nome: string;
-  tipo: string;
-  createdAt: string;
-  updatedAt: string;
-  empresaId: string | null;
-}
+import { UsuarioI } from "@/utils/types/usuario";
 
 export default function Usuarios() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const { logar } = useUsuarioStore();
 
   useEffect(() => {
@@ -50,7 +42,7 @@ export default function Usuarios() {
         const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
         if (!resUsuarios.ok) throw new Error("Erro ao buscar usuários");
 
-        const todosUsuarios: Usuario[] = await resUsuarios.json();
+        const todosUsuarios: UsuarioI[] = await resUsuarios.json();
 
         const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
