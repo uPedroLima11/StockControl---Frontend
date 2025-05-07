@@ -1,3 +1,6 @@
+import { CategoriaI } from "./categoria";
+import { FornecedorI } from "./fornecedor";
+
 export interface ProdutoI {
     id: string;
     nome: string;
@@ -7,6 +10,8 @@ export interface ProdutoI {
     foto?: string;
     fornecedorId?: string;
     categoriaId?: string;
+    fornecedor?: FornecedorI;
+    categoria?: CategoriaI;
     createdAt: Date;
     updatedAt: Date;
 }

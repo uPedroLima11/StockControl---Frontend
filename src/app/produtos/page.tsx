@@ -23,8 +23,8 @@ export default function Produtos() {
         <span className="truncate">{produto.nome}</span>
       </td>
       <td className="py-3 px-3">{produto.id}</td>
-      <td className="py-3 px-3">{produto.fornecedorId}</td>
-      <td className="py-3 px-3">{produto.categoriaId}</td>
+      <td className="py-3 px-3">{produto.fornecedor?.nome || ""}</td>
+      <td className="py-3 px-3">{produto.categoria?.nome || ""}</td>
       <td className="py-3 px-3">{produto.quantidade}</td>
       <td className="py-3 px-3">R${produto.preco.toFixed(2).replace(".", ",")}</td>
     </tr>
