@@ -300,7 +300,7 @@ export default function Produtos() {
                 <img
                   src={form.foto}
                   alt="Preview"
-                  className="w-24 h-24 object-cover rounded mb-4"
+                  className="w-44 h-44 object-cover rounded mb-4"
                 />
               )}
 
