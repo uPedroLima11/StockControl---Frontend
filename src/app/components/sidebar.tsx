@@ -13,8 +13,8 @@ export default function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
-  const { usuario, logar } = useUsuarioStore();
-
+  const { logar } = useUsuarioStore();
+ 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
