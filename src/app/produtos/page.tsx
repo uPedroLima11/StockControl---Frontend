@@ -67,10 +67,13 @@ export default function Produtos() {
   const handleSubmit = async () => {
     if (!empresaId) return alert("Empresa não identificada.");
     try {
+      const precoFormatado = parseFloat(form.preco.replace(/\./g, "").replace(",", "."));
+      const quantidadeFormatada = parseFloat(form.quantidade);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, preco: +form.preco, quantidade: +form.quantidade, empresaId }),
+        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada, empresaId }),
       });
 
       if (response.ok) {
@@ -88,17 +91,21 @@ export default function Produtos() {
 
   const handleUpdate = async () => {
     if (!modalVisualizar) return;
-  
+
     try {
+      const precoFormatado = parseFloat(form.preco.replace(/\./g, "").replace(",", "."));
+      const quantidadeFormatada = parseFloat(form.quantidade);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, preco: +form.preco, quantidade: +form.quantidade }),
+        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada }),
       });
-  
+
+
       if (response.ok) {
         setModalVisualizar(null);
-        
+
         Swal.fire({
           position: "center",
           icon: "success",
@@ -106,10 +113,10 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500
         });
-  
+
         setTimeout(() => {
           window.location.reload();
-        }, 1600); 
+        }, 1600);
       } else {
         Swal.fire({
           icon: "error",
@@ -126,7 +133,7 @@ export default function Produtos() {
       });
     }
   };
-  
+
 
   const handleDelete = async () => {
     if (!modalVisualizar) return;
@@ -197,21 +204,21 @@ export default function Produtos() {
                 <th className="py-3 px-4"><div className="flex items-center gap-1"><FaCog /> Nome</div></th>
                 <th className="py-3 px-4">Fornecedor</th>
                 <th className="py-3 px-4">Categoria</th>
-                <th className="py-3 px-4">Estoque</th>
+                <th className="py-3 px-4 text-center">Estoque</th>
                 <th className="py-3 px-4">Preço</th>
               </tr>
             </thead>
             <tbody>
               {produtosFiltrados.map(produto => (
                 <tr key={produto.id} onClick={() => { setModalVisualizar(produto); setForm(produto); }} className="border-b hover:bg-gray-100 transition cursor-pointer">
-                  <td className="py-3 px-4 flex items-center gap-2 max-w-[260px]">
+                  <td className="py-3 px-4 flex items-center gap-2">
                     <Image src={produto.foto || "/out.jpg"} width={30} height={30} className="rounded" alt={produto.nome} />
-                    <span className="truncate">{produto.nome}</span>
+                    <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
                   </td>
                   <td className="py-3 px-3">{produto.fornecedor?.nome || "-"}</td>
                   <td className="py-3 px-3">{produto.categoria?.nome || "-"}</td>
-                  <td className="py-3 px-3">{produto.quantidade}</td>
-                  <td className="py-3 px-3">R${produto.preco.toFixed(2).replace(".", ",")}</td>
+                  <td className="py-3 px-4 text-center">{produto.quantidade || "-"}</td>
+                  <td className="py-3 px-3">R${produto.preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
                 </tr>
               ))}
             </tbody>
@@ -241,12 +248,13 @@ export default function Produtos() {
 
               <input
                 placeholder="Preço"
-                type="number"
+                type="text"
                 value={form.preco || ""}
                 onChange={(e) => setForm({ ...form, preco: e.target.value })}
                 className={inputClass}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
               />
+
 
               <input
                 placeholder="Quantidade"
@@ -258,7 +266,7 @@ export default function Produtos() {
               />
 
               <input
-                placeholder="Foto (URL)"
+                placeholder="Foto (URL) (Não obrigatório)"
                 value={form.foto || ""}
                 onChange={(e) => setForm({ ...form, foto: e.target.value })}
                 className={inputClass}
