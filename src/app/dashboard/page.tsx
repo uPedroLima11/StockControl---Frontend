@@ -3,10 +3,6 @@
 import { Poppins } from "next/font/google";
 import Image from "next/image";
 
-const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
 
 export default function Dashboard() {
   return (

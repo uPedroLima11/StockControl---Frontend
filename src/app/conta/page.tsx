@@ -82,6 +82,7 @@ export default function MinhaConta() {
       });
     }
     setModalAberto(false);
+    window.location.reload();
   };
 
   const handleExcluir = async () => {

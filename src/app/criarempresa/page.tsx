@@ -22,9 +22,8 @@ type Inputs = {
 export default function CriarEmpresa() {
   const { register, handleSubmit } = useForm<Inputs>();
   const router = useRouter();
-  const [idUsuario, setIdUsuario] = useState<string | null>(null);
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
-  const { usuario, logar } = useUsuarioStore();
+  const { logar } = useUsuarioStore();
 
   useEffect(() => {
     if (usuarioLogado?.empresaId) {
@@ -54,7 +53,6 @@ export default function CriarEmpresa() {
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       buscaUsuarios(usuarioValor);
       buscarDados(usuarioValor);
-      setIdUsuario(usuarioValor);
       fetchEmpresa(usuarioValor);
     }
 
@@ -63,7 +61,7 @@ export default function CriarEmpresa() {
     if (!id) {
       router.push("/login");
     }
-  }, [router]);
+  }, [router, logar]);
 
   const fetchEmpresa = async (idUsuario: string) => {
     try {
@@ -74,8 +72,8 @@ export default function CriarEmpresa() {
           router.push("/empresa");
         }
       }
-    } catch (err) {
-      //Sem Lógica de erro
+    } catch {
+      // Sem lógica de erro
     }
   };
 
@@ -99,7 +97,7 @@ export default function CriarEmpresa() {
         Swal.fire({
           icon: "error",
           title: "Oops... algo deu errado!",
-          text: "Email ja Existente ou erro ao criar empresa.",
+          text: "Email já existente ou erro ao criar empresa.",
           confirmButtonColor: "#013C3C",
         });
       }

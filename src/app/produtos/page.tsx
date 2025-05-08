@@ -64,6 +64,16 @@ export default function Produtos() {
     buscarCategorias();
   }, []);
 
+  useEffect(() => {
+    if (modalVisualizar) {
+      setForm({
+        ...modalVisualizar,
+        preco: modalVisualizar.preco.toFixed(2).replace(".", ","),
+        quantidade: String(modalVisualizar.quantidade)
+      });
+    }
+  }, [modalVisualizar]);
+
   const handleSubmit = async () => {
     if (!empresaId) return alert("Empresa não identificada.");
     try {
@@ -102,10 +112,8 @@ export default function Produtos() {
         body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada }),
       });
 
-
       if (response.ok) {
         setModalVisualizar(null);
-
         Swal.fire({
           position: "center",
           icon: "success",
@@ -113,27 +121,15 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500
         });
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1600);
+        setTimeout(() => window.location.reload(), 1600);
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Erro!",
-          text: "Erro ao atualizar produto."
-        });
+        Swal.fire({ icon: "error", title: "Erro!", text: "Erro ao atualizar produto." });
       }
     } catch (err) {
       console.error("Erro ao atualizar produto:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: "Erro inesperado ao tentar atualizar."
-      });
+      Swal.fire({ icon: "error", title: "Erro!", text: "Erro inesperado ao tentar atualizar." });
     }
   };
-
 
   const handleDelete = async () => {
     if (!modalVisualizar) return;
@@ -154,9 +150,7 @@ export default function Produtos() {
         await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
           method: "DELETE"
         });
-
         Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
-
         setModalVisualizar(null);
         window.location.reload();
       } catch (err) {
@@ -165,7 +159,6 @@ export default function Produtos() {
       }
     }
   };
-
 
   const produtosFiltrados = produtos.filter(produto =>
     produto.nome.toLowerCase().includes(busca.toLowerCase())

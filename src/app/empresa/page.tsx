@@ -1,10 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "../context/usuario";
 import Swal from "sweetalert2";
-import { UsuarioI } from "@/utils/types/usuario";
 
 interface Empresa {
   id: string;
@@ -30,8 +30,7 @@ export default function Empresa() {
   const [novaFoto, setNovaFoto] = useState("");
   const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null);
   const router = useRouter();
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
-  const { usuario, logar } = useUsuarioStore();
+  const { logar } = useUsuarioStore();
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -47,7 +46,6 @@ export default function Empresa() {
       const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (responseUser.status === 200) {
         const dados = await responseUser.json();
-        setUsuarioLogado(dados);
       }
     };
 
@@ -89,7 +87,7 @@ export default function Empresa() {
 
         setEmpresa(data);
         setNovaFoto(data.foto || "");
-      } catch (error: any) {
+      } catch (error: unknown) {
         router.push("/criarempresa");
       } finally {
         setLoading(false);

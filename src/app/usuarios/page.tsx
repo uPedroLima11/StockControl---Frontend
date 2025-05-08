@@ -7,10 +7,8 @@ import { UsuarioI } from "@/utils/types/usuario";
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
-  const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const { logar } = useUsuarioStore();
 
   useEffect(() => {
@@ -26,7 +24,6 @@ export default function Usuarios() {
       const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (responseUser.status === 200) {
         const dados = await responseUser.json();
-        setUsuarioLogado(dados);
       }
     };
 
@@ -37,7 +34,6 @@ export default function Usuarios() {
 
         const empresaData = await resEmpresa.json();
         const empresaIdRecebido = empresaData.id;
-        setEmpresaId(empresaIdRecebido);
 
         const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
         if (!resUsuarios.ok) throw new Error("Erro ao buscar usuários");
@@ -47,9 +43,13 @@ export default function Usuarios() {
         const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
         setUsuarios(usuariosDaEmpresa);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Erro ao carregar dados:", err);
-        setError(err.message || "Erro ao carregar dados");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Erro desconhecido");
+        }
       } finally {
         setLoading(false);
       }
