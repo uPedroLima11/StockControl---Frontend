@@ -5,19 +5,10 @@ import Link from 'next/link';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { useUsuarioStore } from '../context/usuario';
 
-type Usuario = {
-  id: string;
-  nome: string;
-  email: string;
-  tipo: string;
-  empresaId: string | null;
-};
-
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
-  const { usuario, logar } = useUsuarioStore();
+  const { logar } = useUsuarioStore();
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -38,14 +29,6 @@ export default function Navbar() {
       }
     }
 
-    const buscarDados = async (idUsuario: string) => {
-      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if(responseUser.status === 200){
-        const dados = await responseUser.json();
-        setUsuarioLogado(dados);
-      }
-    }
-
     const buscaEmpresa = async (idUsuario: string) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
       if (response.status === 200) {
@@ -62,19 +45,17 @@ export default function Navbar() {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       buscaUsuarios(usuarioValor);
-      buscarDados(usuarioValor);
       buscaEmpresa(usuarioValor);
     }
-  }, []);
-
+  }, [logar]);
 
   return (
     <nav className="font-sans bg-gradient-to-r py-2 bg-[#0f0e17] shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] fixed w-screen z-20 top-0">
       <div className="w-full flex items-center justify-between px-4 lg:px-10">
-        <a href="/" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
           <img src="/icone.png" className="h-16" />
           <span className="text-lg font-semibold text-white">StockControl</span>
-        </a>
+        </Link>
 
         <div className="lg:hidden">
           <button onClick={toggleMenu} className="text-white text-2xl focus:outline-none">
@@ -90,7 +71,7 @@ export default function Navbar() {
             Assinatura
           </Link>
           {fotoEmpresa ? (
-            <Link href={"/conta"}>
+            <Link href="/conta">
               <img
                 src={fotoEmpresa}
                 alt="Empresa"
@@ -103,7 +84,7 @@ export default function Navbar() {
               className="bg-[#D4CCCC] text-black text-xl px-8 py-2 rounded-3xl font-light transition hover:bg-[#c2b9b9]"
             >
               Entrar
-            </Link> 
+            </Link>
           )}
         </div>
       </div>
@@ -116,15 +97,15 @@ export default function Navbar() {
           <Link href="#assinatura" onClick={toggleMenu} className="hover:text-[#b37400]">
             Assinatura
           </Link>
-            {fotoEmpresa ? (
-            <Link href={"/conta"} onClick={toggleMenu}>
+          {fotoEmpresa ? (
+            <Link href="/conta" onClick={toggleMenu}>
               <img
-              src={fotoEmpresa}
-              alt="Empresa"
-              className="h-14 w-14 rounded-full object-cover border border-gray-300"
+                src={fotoEmpresa}
+                alt="Empresa"
+                className="h-14 w-14 rounded-full object-cover border border-gray-300"
               />
             </Link>
-            ) : (
+          ) : (
             <Link
               href="/login"
               onClick={toggleMenu}
@@ -132,7 +113,7 @@ export default function Navbar() {
             >
               Entrar
             </Link>
-            )}
+          )}
         </div>
       )}
     </nav>
