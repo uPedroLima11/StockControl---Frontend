@@ -4,15 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck } from "react-icons/fa";
-import { NotificacaoI } from "@/utils/types/notificacao"; 
+import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "../context/usuario";
+import { ConviteI } from "@/utils/types/convite";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
-  const { logar } = useUsuarioStore();
+  const { usuario, logar } = useUsuarioStore();
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -118,7 +119,7 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
 
 function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]); 
+  const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const { usuario } = useUsuarioStore();
 
   useEffect(() => {
@@ -148,11 +149,36 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     };
   }, [isVisible, onClose, usuario]);
 
+  async function handleInviteResponse(id: string, convite: ConviteI) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ empresaId: convite.empresaId }),
+    });
+
+    if (response.ok) {
+      window.location.href = "/empresa";
+    }
+  }
+
   const notificacaoTable = notificacoes.map((notificacao) => (
     <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
       <h3 className="font-bold">{notificacao.titulo}</h3>
       <p>{notificacao.descricao}</p>
-      <p>{notificacao.lida ? "Lida" : "Não lida"}</p>
+      {notificacao.convite != null ? (
+        <button
+          onClick={() => {
+            handleInviteResponse(usuario.id, notificacao.convite);
+          }}
+          className="px- py-2 bg-[#013C3C] text-white rounded-lg"
+        >
+          Aceitar
+        </button>
+      ) : (
+        <p>{notificacao.lida ? "Lida" : "Não lida"}</p>
+      )}
     </div>
   ));
 
