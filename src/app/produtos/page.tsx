@@ -16,7 +16,22 @@ export default function Produtos() {
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
   const [categorias, setCategorias] = useState<CategoriaI[]>([]);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<ProdutoI>({
+    id: "",
+    nome: "",
+    descricao: "",
+    preco: 0,
+    quantidade: 0,
+    foto: "",
+    fornecedorId: "",
+    categoriaId: "",
+    empresaId: "",
+    fornecedor: undefined,
+    categoria: undefined,
+    empresa: "",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
@@ -68,8 +83,8 @@ export default function Produtos() {
     if (modalVisualizar) {
       setForm({
         ...modalVisualizar,
-        preco: modalVisualizar.preco.toFixed(2).replace(".", ","),
-        quantidade: String(modalVisualizar.quantidade)
+        preco: parseFloat(modalVisualizar.preco.toFixed(2)),
+        quantidade: modalVisualizar.quantidade,
       });
     }
   }, [modalVisualizar]);
@@ -77,8 +92,8 @@ export default function Produtos() {
   const handleSubmit = async () => {
     if (!empresaId) return alert("Empresa não identificada.");
     try {
-      const precoFormatado = parseFloat(form.preco.replace(/\./g, "").replace(",", "."));
-      const quantidadeFormatada = parseFloat(form.quantidade);
+      const precoFormatado = parseFloat(form.preco.toString().replace(/\./g, "").replace(",", "."));
+      const quantidadeFormatada = parseFloat(form.quantidade.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
@@ -88,7 +103,22 @@ export default function Produtos() {
 
       if (response.ok) {
         setModalAberto(false);
-        setForm({});
+        setForm({
+          id: "",
+          nome: "",
+          descricao: "",
+          preco: 0,
+          quantidade: 0,
+          foto: "",
+          fornecedorId: "",
+          categoriaId: "",
+          empresaId: "",
+          fornecedor: undefined,
+          categoria: undefined,
+          empresa: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
         window.location.reload();
       } else {
         const err = await response.json();
@@ -103,8 +133,8 @@ export default function Produtos() {
     if (!modalVisualizar) return;
 
     try {
-      const precoFormatado = parseFloat(form.preco.replace(/\./g, "").replace(",", "."));
-      const quantidadeFormatada = parseFloat(form.quantidade);
+      const precoFormatado = parseFloat(form.preco.toString().replace(/\./g, "").replace(",", "."));
+      const quantidadeFormatada = parseFloat(form.quantidade.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
@@ -119,7 +149,7 @@ export default function Produtos() {
           icon: "success",
           title: "Produto atualizado com sucesso!",
           showConfirmButton: false,
-          timer: 1500
+          timer: 1500,
         });
         setTimeout(() => window.location.reload(), 1600);
       } else {
@@ -142,13 +172,13 @@ export default function Produtos() {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Sim, deletar!",
-      cancelButtonText: "Cancelar"
+      cancelButtonText: "Cancelar",
     });
 
     if (result.isConfirmed) {
       try {
         await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
-          method: "DELETE"
+          method: "DELETE",
         });
         Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
         setModalVisualizar(null);
@@ -243,7 +273,7 @@ export default function Produtos() {
                 placeholder="Preço"
                 type="text"
                 value={form.preco || ""}
-                onChange={(e) => setForm({ ...form, preco: e.target.value })}
+                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
                 className={inputClass}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
               />
@@ -253,7 +283,7 @@ export default function Produtos() {
                 placeholder="Quantidade"
                 type="number"
                 value={form.quantidade || ""}
-                onChange={(e) => setForm({ ...form, quantidade: e.target.value })}
+                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
                 className={inputClass}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
               />

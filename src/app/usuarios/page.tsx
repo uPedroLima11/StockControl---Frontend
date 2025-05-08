@@ -20,13 +20,6 @@ export default function Usuarios() {
       }
     }
 
-    const buscarDados = async (idUsuario: string) => {
-      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if (responseUser.status === 200) {
-        const dados = await responseUser.json();
-      }
-    };
-
     const fetchDados = async (idUsuario: string) => {
       try {
         const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
@@ -59,7 +52,6 @@ export default function Usuarios() {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       buscaUsuarios(usuarioValor);
-      buscarDados(usuarioValor);
       fetchDados(usuarioValor);
     }
   }, []);
