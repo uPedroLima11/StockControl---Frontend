@@ -14,7 +14,7 @@ export default function Sidebar() {
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const { logar } = useUsuarioStore();
- 
+  
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
