@@ -10,8 +10,10 @@ export interface ProdutoI {
     foto?: string;
     fornecedorId?: string;
     categoriaId?: string;
+    empresaId?: string;
     fornecedor?: FornecedorI;
     categoria?: CategoriaI;
+    empresa?: string;
     createdAt: Date;
     updatedAt: Date;
 }
