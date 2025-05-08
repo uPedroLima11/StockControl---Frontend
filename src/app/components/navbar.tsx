@@ -33,11 +33,7 @@ export default function Navbar() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
       if (response.status === 200) {
         const dados = await response.json();
-        if (dados.foto) {
-          setFotoEmpresa(dados.foto);
-        } else {
-          setFotoEmpresa('/contadefault.png');
-        }
+        setFotoEmpresa(dados?.foto || '/contadefault.png');
       }
     }
 
@@ -73,9 +69,9 @@ export default function Navbar() {
           {fotoEmpresa ? (
             <Link href="/conta">
               <img
-                src={fotoEmpresa}
-                alt="Empresa"
-                className="h-14 w-14 rounded-full object-cover border border-gray-300"
+              src={fotoEmpresa || '/contadefault.png'}
+              alt="Empresa"
+              className="h-14 w-14 rounded-full object-cover border border-gray-300"
               />
             </Link>
           ) : (
@@ -100,7 +96,7 @@ export default function Navbar() {
           {fotoEmpresa ? (
             <Link href="/conta" onClick={toggleMenu}>
               <img
-                src={fotoEmpresa}
+              src={fotoEmpresa || '/contadefault.png'}
                 alt="Empresa"
                 className="h-14 w-14 rounded-full object-cover border border-gray-300"
               />

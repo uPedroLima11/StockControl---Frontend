@@ -4,37 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck } from "react-icons/fa";
-import { NotificacaoI } from "@/utils/types/notificacao";
+import { NotificacaoI } from "@/utils/types/notificacao"; 
 import { useUsuarioStore } from "../context/usuario";
-
-type Usuario = {
-  id: string;
-  nome: string;
-  email: string;
-  tipo: string;
-  empresaId: string | null;
-};
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [usuarioLogado, setUsuarioLogado,] = useState<Usuario | null>(null);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
-  const { usuario, logar, } = useUsuarioStore();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
+  const { usuario, logar } = useUsuarioStore();
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -44,14 +22,6 @@ export default function Sidebar() {
         logar(dados);
       }
     }
-
-    const buscarDados = async (idUsuario: string) => {
-      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if (responseUser.status === 200) {
-        const dados = await responseUser.json();
-        setUsuarioLogado(dados);
-      }
-    };
 
     const buscaEmpresa = async (idUsuario: string) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
@@ -68,12 +38,17 @@ export default function Sidebar() {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       buscaUsuarios(usuarioValor);
-      buscarDados(usuarioValor);
       buscaEmpresa(usuarioValor);
     }
+  }, [logar]);
 
-  }, []);
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
 
   return (
     <>
@@ -115,7 +90,6 @@ export default function Sidebar() {
           <button
             onClick={() => {
               localStorage.removeItem("client_key");
-
               window.location.href = "/";
             }}
             className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm"
@@ -125,7 +99,6 @@ export default function Sidebar() {
             </span>
             <span className="text-sm md:inline">Sair</span>
           </button>
-
         </div>
       </aside>
 
@@ -145,7 +118,7 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
 
 function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
+  const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]); 
   const { usuario } = useUsuarioStore();
 
   useEffect(() => {
@@ -154,7 +127,9 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       const dados = await response.json();
       setNotificacoes(dados);
     }
-    buscaDados();
+    if (usuario?.id) {
+      buscaDados();
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
@@ -171,7 +146,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isVisible, onClose]);
+  }, [isVisible, onClose, usuario]);
 
   const notificacaoTable = notificacoes.map((notificacao) => (
     <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
