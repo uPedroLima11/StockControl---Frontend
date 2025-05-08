@@ -40,7 +40,7 @@ export default function Registro() {
           nome: data.nome,
           email: data.email,
           senha: data.senha,
-          tipo: "CLIENTE",
+          tipo: "FUNCIONARIO",
         }),
       });
 

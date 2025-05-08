@@ -20,7 +20,7 @@ interface Empresa {
   foto?: string;
 }
 
-type TipoUsuario = "CLIENTE" | "ADMIN" | "PROPRIETARIO";
+type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
 type EmpresaChave = keyof Pick<Empresa, "nome" | "email" | "telefone" | "endereco" | "pais" | "estado" | "cidade" | "cep">;
 
 export default function Empresa() {
@@ -256,7 +256,7 @@ export default function Empresa() {
           <div>
             <h2 className="text-lg font-semibold mb-2">Logo da Empresa</h2>
             {empresa.foto && <Image src={empresa.foto} alt="Logo da empresa" width={128} height={128} className="rounded mb-4" />}
-            {tipoUsuario !== "CLIENTE" && (
+            {tipoUsuario !== "FUNCIONARIO" && (
               <button onClick={() => setModalAberto(true)} className="flex items-center gap-2 px-6 py-2 border-2 border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm">
                 <FaCloudUploadAlt />
                 Alterar Logo
