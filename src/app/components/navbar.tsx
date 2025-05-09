@@ -69,9 +69,9 @@ export default function Navbar() {
           {fotoEmpresa ? (
             <Link href="/conta">
               <img
-              src={fotoEmpresa || '/contadefault.png'}
-              alt="Empresa"
-              className="h-14 w-14 rounded-full object-cover border border-gray-300"
+                src={fotoEmpresa || '/contadefault.png'}
+                alt="Empresa"
+                className="h-14 w-14 rounded-full object-cover border border-gray-300"
               />
             </Link>
           ) : (
@@ -96,7 +96,7 @@ export default function Navbar() {
           {fotoEmpresa ? (
             <Link href="/conta" onClick={toggleMenu}>
               <img
-              src={fotoEmpresa || '/contadefault.png'}
+                src={fotoEmpresa || '/contadefault.png'}
                 alt="Empresa"
                 className="h-14 w-14 rounded-full object-cover border border-gray-300"
               />

@@ -1,3 +1,3 @@
 export default function Fornecedores() {
-    return <h1>iniciar tela fornecedor</h1>;
+    return <h1>Em Desenvolvimento a tela</h1>;
 }

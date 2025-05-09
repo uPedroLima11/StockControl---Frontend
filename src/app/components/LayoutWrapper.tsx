@@ -30,7 +30,7 @@ export default function LayoutWrapper({
   }
 
   if (isPublicPage) {
-    return <main>{children}</main>; 
+    return <main>{children}</main>;
   }
 
   return (
