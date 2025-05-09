@@ -14,7 +14,7 @@ export default function Sidebar() {
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const { logar } = useUsuarioStore();
-  
+
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -163,9 +163,24 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     }
   }
 
+  async function handleDeleteNotification(id: string) {
+    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}`, {
+      method: "DELETE",
+    });
+
+    window.location.reload();
+  }
+
+
+
   const notificacaoTable = notificacoes.map((notificacao) => (
     <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
-      <h3 className="font-bold">{notificacao.titulo}</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold">{notificacao.titulo}</h3>
+        <button onClick={() => {handleDeleteNotification(notificacao.id)}} className="text-white">
+          ✕
+        </button>
+      </div>
       <p>{notificacao.descricao}</p>
       {notificacao.convite != null ? (
         <button

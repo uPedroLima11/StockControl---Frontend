@@ -1,7 +1,7 @@
 import { ConviteI } from "./convite";
 
 export interface NotificacaoI {
-  id: number;
+  id: string;
   titulo: string;
   descricao: string;
   lida: boolean;
