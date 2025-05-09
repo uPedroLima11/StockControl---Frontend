@@ -10,7 +10,6 @@ export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState("");
   const [isEnviando, setIsEnviando] = useState(false);
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -99,7 +98,7 @@ export default function Usuarios() {
         setTitulo("");
         setDescricao("");
         setUsuarioSelecionado(null);
-        setShowModal(false);
+        setShowModalMensagem(false);
       } else {
         Swal.fire({
           title: "Erro",
@@ -159,7 +158,7 @@ export default function Usuarios() {
           confirmButtonColor: "#013C3C",
         });
         setEmail("");
-        setShowModal(false);
+        setShowModalConvite(false);
       } else {
         alert("Erro ao enviar convite.");
       }

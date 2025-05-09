@@ -119,7 +119,7 @@ export default function Sidebar() {
             <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
 
             <Link href="/empresa" className="flex items-center gap-2">
-              <img src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" className="h-10 w-10 rounded-full object-cover border border-gray-300" />
+              <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
               <h1 className="text-sm font-medium">{nomeEmpresa ?? "Criar Empresa"}</h1>
             </Link>
           </nav>
@@ -156,7 +156,7 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
 function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
-  const [usuarios, setUsuarios] = useState<Map<string, string>>(new Map()); 
+  const [usuarios, setUsuarios] = useState<Map<string, string>>(new Map());
   const { usuario } = useUsuarioStore();
 
   useEffect(() => {
@@ -220,7 +220,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   }
 
   const notificacaoTable = notificacoes.map((notificacao) => {
-    const nomeEnviadoPor = notificacao.usuario?.nome || "Desconhecido"; 
+    const nomeEnviadoPor = usuarios.get(notificacao.enviadoPorId?.toString()) || "Desconhecido";
     return (
       <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
         <div className="flex justify-between items-center mb-4">
@@ -229,7 +229,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
 
         <p>{notificacao.descricao}</p>
-        <p className="text-sm text-gray-400">Enviado por: {nomeEnviadoPor}</p> 
+        <p className="text-sm text-gray-400">Enviado por: {nomeEnviadoPor}</p>
 
         {notificacao.convite != null ? (
           <button

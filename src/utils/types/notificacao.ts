@@ -15,6 +15,7 @@ export interface NotificacaoI {
   usuarioId: string;  
   usuario?: UsuarioI;
   convite: ConviteI | null;
+  enviadoPorId: UsuarioI;
   createdAt: Date;
   updatedAt: Date;
 }
