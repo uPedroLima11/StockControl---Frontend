@@ -134,7 +134,7 @@ export default function Usuarios() {
 
       if (usuarioConvidado && usuarioConvidado.empresaId) {
         Swal.fire({
-          title: "Usuário já possui uma empresa",
+          title: "Usuário já possui uma empresa vinculada",
           text: "Esse usuário já está vinculado a uma empresa.",
           icon: "warning",
           confirmButtonText: "Ok",
@@ -160,7 +160,7 @@ export default function Usuarios() {
         setEmail("");
         setShowModalConvite(false);
       } else {
-        alert("Erro ao enviar convite.");
+        alert("Erro ao enviar convite. Verifique se o e-mail é válido.");
       }
     } catch (err) {
       console.error(err);
@@ -192,7 +192,7 @@ export default function Usuarios() {
           });
 
           if (res.ok) {
-            Swal.fire("Removido!", "Usuário foi removido da empresa e o cargo foi alterado para FUNCIONARIO.", "success");
+            Swal.fire(`Removido!", "Usuário ${usuario.nome} foi removido da empresa`, "success");
             setModalEditarUsuario(null);
             window.location.reload();
             setUsuarios((prev) =>
