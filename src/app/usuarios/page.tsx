@@ -1,7 +1,6 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaMoon, FaSun } from "react-icons/fa";
 import { useUsuarioStore } from "../context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
@@ -21,7 +20,38 @@ export default function Usuarios() {
   const [descricao, setDescricao] = useState("");
   const [showModalConvite, setShowModalConvite] = useState(false);
   const [showModalMensagem, setShowModalMensagem] = useState(false);
+  const [modoDark, setModoDark] = useState(false);
 
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativo = temaSalvo === "true";
+    setModoDark(ativo);
+    aplicarTema(ativo);
+  }, []);
+
+  const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement;
+    if (ativado) {
+      root.classList.add("dark");
+      root.style.setProperty("--cor-fundo", "#20252B");
+      root.style.setProperty("--cor-texto", "#FFFFFF");
+      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
+      root.style.setProperty("--cor-borda", "#374151");
+      root.style.setProperty("--cor-cinza", "#A3A3A3");
+      document.body.style.backgroundColor = "#20252B";
+      document.body.style.color = "#FFFFFF";
+    } else {
+      root.classList.remove("dark");
+      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-texto", "#000000");
+      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+      root.style.setProperty("--cor-borda", "#E5E7EB");
+      root.style.setProperty("--cor-cinza", "#4B5563");
+      document.body.style.backgroundColor = "#FFFFFF";
+      document.body.style.color = "#000000";
+    }
+  };
+  
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -230,33 +260,43 @@ async function enviarConvite() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
-        <h1 className="text-3xl font-mono text-white">Carregando usuários...</h1>
+      <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>Carregando usuários...</h1>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
+      <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
         <h1 className="text-3xl font-mono text-red-400">Erro: {error}</h1>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1B1F24] text-white py-10 px-4 md:px-16">
+    <div className="min-h-screen py-10 px-4 md:px-16" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-mono text-white">Usuários</h1>
+        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>Usuários</h1>
         <div className="flex space-x-4">
           <button
-            className="px-4 py-2 rounded-sm font-bold bg-[#00332C] text-sm hover:bg-[#55d6be1a] transition"
+            className="px-4 py-2 rounded-sm font-bold text-sm transition"
+            style={{
+              backgroundColor: modoDark ? "#00332C" : "#55D6BE",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+            }}
             onClick={() => setShowModalConvite(true)}
           >
             Convidar Usuário
           </button>
           <button
-            className="px-4 py-2 rounded-sm font-bold bg-[#ee1010] text-sm hover:bg-[#dd7878d8] transition"
+            className="px-4 py-2 rounded-sm font-bold text-sm transition"
+            style={{
+              backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
+              color: "#FFFFFF",
+              border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+            }}
             onClick={() => setShowModalMensagem(true)}
           >
             Enviar Mensagem
@@ -266,7 +306,7 @@ async function enviarConvite() {
 
       <div className="overflow-x-auto rounded-lg">
         <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
-          <thead className="border-b border-gray-600 text-gray-300">
+          <thead className="border-b" style={{ borderColor: "var(--cor-borda)", color: "var(--cor-cinza)" }}>
             <tr>
               <th className="px-6 py-4">Nome de Usuário</th>
               <th className="px-6 py-4">Função</th>
@@ -275,7 +315,7 @@ async function enviarConvite() {
               <th className="px-6 py-4">Ação</th>
             </tr>
           </thead>
-          <tbody className="text-white">
+          <tbody style={{ color: "var(--cor-texto)" }}>
             {usuarios.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center">
@@ -284,7 +324,14 @@ async function enviarConvite() {
               </tr>
             ) : (
               usuarios.map((usuario) => (
-                <tr key={usuario.id} className="bg-[#2A2F36] rounded-md shadow-sm">
+                <tr 
+                  key={usuario.id} 
+                  className="rounded-md shadow-sm"
+                  style={{ 
+                    backgroundColor: modoDark ? "#2A2F36" : "#F3F4F6",
+                    border: modoDark ? "1px solid #374151" : "1px solid #E5E7EB"
+                  }}
+                >
                   <td className="px-6 py-4">{usuario.nome}</td>
                   <td className="px-6 py-4">{usuario.tipo}</td>
                   <td className="px-6 py-4">{new Date(usuario.createdAt).toLocaleDateString()}</td>
@@ -309,11 +356,17 @@ async function enviarConvite() {
 
       {showModalConvite && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+          <div 
+            className="p-6 rounded-lg w-full max-w-md"
+            style={{ 
+              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
+              color: modoDark ? "#FFFFFF" : "#000000"
+            }}
+          >
             <h2 className="text-xl mb-4">Convidar Usuário</h2>
             <div>
               <div className="mb-2">
-                <label htmlFor="email" className="text-white text-sm font-semibold">
+                <label htmlFor="email" className="text-sm font-semibold">
                   E-mail do Usuário:
                 </label>
                 <input
@@ -321,19 +374,31 @@ async function enviarConvite() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#444b52] text-white p-3 rounded-md mt-2"
+                  className="w-full border p-3 rounded-md mt-2"
+                  style={{ 
+                    backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
+                className="px-4 py-2 rounded"
+                style={{
+                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
                 onClick={() => setShowModalConvite(false)}
               >
                 Cancelar
               </button>
               <button
-                className={`px-4 py-2 bg-[#55D6BE] text-black rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : "hover:bg-[#44bca5]"}`}
+                className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                style={{
+                  backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
+                  color: modoDark ? "#000000" : "#FFFFFF"
+                }}
                 onClick={enviarConvite}
                 disabled={isEnviando}
               >
@@ -346,11 +411,17 @@ async function enviarConvite() {
 
       {showModalMensagem && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+          <div 
+            className="p-6 rounded-lg w-full max-w-md"
+            style={{ 
+              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
+              color: modoDark ? "#FFFFFF" : "#000000"
+            }}
+          >
             <h2 className="text-xl mb-4">Enviar Mensagem</h2>
             <div>
               <div className="mb-2">
-                <label htmlFor="nome" className="text-white text-sm font-semibold">
+                <label htmlFor="nome" className="text-sm font-semibold">
                   De:
                 </label>
                 <input
@@ -358,14 +429,23 @@ async function enviarConvite() {
                   type="text"
                   value={usuarioLogado?.nome || ""}
                   readOnly
-                  className="w-full bg-[#444b52] text-white p-3 rounded-md mt-2"
+                  className="w-full p-3 rounded-md mt-2"
+                  style={{ 
+                    backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
                 />
               </div>
-              <label htmlFor="nome" className="text-white text-sm font-semibold">
+              <label htmlFor="nome" className="text-sm font-semibold">
                 Para:
               </label>
               <select
-                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+                className="w-full p-2 mb-4 rounded border"
+                style={{ 
+                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
+                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
               >
                 <option value="">Selecione o usuário</option>
@@ -381,25 +461,43 @@ async function enviarConvite() {
                 placeholder="Título da mensagem"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
-                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+                className="w-full p-2 mb-4 rounded border"
+                style={{ 
+                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
+                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
               />
 
               <textarea
                 placeholder="Descrição da mensagem"
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+                className="w-full p-2 mb-4 rounded border"
+                style={{ 
+                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
+                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
               ></textarea>
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
+                className="px-4 py-2 rounded"
+                style={{
+                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
                 onClick={() => setShowModalMensagem(false)}
               >
                 Cancelar
               </button>
               <button
-                className={`px-4 py-2 bg-[#55D6BE] text-black rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : "hover:bg-[#44bca5]"}`}
+                className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                style={{
+                  backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
+                  color: modoDark ? "#000000" : "#FFFFFF"
+                }}
                 onClick={enviarNotificacao}
                 disabled={isEnviando}
               >
@@ -409,9 +507,16 @@ async function enviarConvite() {
           </div>
         </div>
       )}
+
       {modalEditarUsuario && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+          <div 
+            className="p-6 rounded-lg w-full max-w-md"
+            style={{ 
+              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
+              color: modoDark ? "#FFFFFF" : "#000000"
+            }}
+          >
             <h2 className="text-xl mb-4">Editar Usuário</h2>
             <p className="mb-4">Usuário: <strong>{modalEditarUsuario.nome}</strong></p>
 
@@ -419,7 +524,12 @@ async function enviarConvite() {
             <select
               value={novoTipo}
               onChange={(e) => setNovoTipo(e.target.value)}
-              className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+              className="w-full p-2 mb-4 rounded border"
+              style={{ 
+                backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
+                borderColor: modoDark ? "#374151" : "#D1D5DB",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             >
               <option value="FUNCIONARIO">FUNCIONARIO</option>
               <option value="ADMIN">ADMIN</option>
@@ -428,13 +538,20 @@ async function enviarConvite() {
 
             <div className="flex justify-between">
               <button
-                className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded text-sm"
+                className="px-3 py-1.5 rounded text-sm"
+                style={{
+                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
                 onClick={() => setModalEditarUsuario(null)}
               >
                 Cancelar
               </button>
               <button
-                className="bg-[#013C3C] hover:bg-[#013c3c8e] px-3 py-1.5 rounded text-sm text-white"
+                className="px-3 py-1.5 rounded text-sm text-white"
+                style={{
+                  backgroundColor: modoDark ? "#013C3C" : "#55D6BE",
+                }}
                 onClick={async () => {
                   if (!usuarioLogado || !modalEditarUsuario) return;
                   if (!podeEditarCargo(usuarioLogado.tipo, modalEditarUsuario.tipo, novoTipo)) {
@@ -460,7 +577,10 @@ async function enviarConvite() {
                 Salvar Cargo
               </button>
               <button
-                className="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded text-sm"
+                className="px-3 py-1.5 rounded text-sm text-white"
+                style={{
+                  backgroundColor: "#ee1010",
+                }}
                 onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
               >
                 Remover
@@ -469,7 +589,6 @@ async function enviarConvite() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
