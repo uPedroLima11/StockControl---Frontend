@@ -339,7 +339,7 @@ export default function Produtos() {
                     <button onClick={handleDelete} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Excluir</button>
                   </>
                 ) : (
-                  <button onClick={handleSubmit} className="bg-[#00332C] text-white px-4 py-2 rounded hover:bg-[#00443f]">Salvar</button>
+                  <button onClick={handleSubmit} className="bg-[#00332C] text-white px-4 py-2 rounded hover:bg-[#00443f]">Criar Produto</button>
                 )}
               </div>
             </div>
