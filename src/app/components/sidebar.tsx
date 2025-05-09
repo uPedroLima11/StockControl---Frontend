@@ -166,7 +166,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       setNotificacoes(dados);
 
       const usuariosMap = new Map();
-      for (let notificacao of dados) {
+      for (const notificacao of dados) {
         const usuarioId = notificacao.enviadoPorId;
         if (usuarioId && !usuariosMap.has(usuarioId)) {
           const usuarioResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
