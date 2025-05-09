@@ -156,6 +156,7 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
 function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
+  const [usuarios, setUsuarios] = useState<Map<string, string>>(new Map()); 
   const { usuario } = useUsuarioStore();
 
   useEffect(() => {
@@ -163,6 +164,17 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
       const dados = await response.json();
       setNotificacoes(dados);
+
+      const usuariosMap = new Map();
+      for (let notificacao of dados) {
+        const usuarioId = notificacao.enviadoPorId;
+        if (usuarioId && !usuariosMap.has(usuarioId)) {
+          const usuarioResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+          const usuarioData = await usuarioResponse.json();
+          usuariosMap.set(usuarioId, usuarioData.nome);
+        }
+      }
+      setUsuarios(usuariosMap);
     }
 
     if (usuario?.id) {
@@ -207,25 +219,32 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     setNotificacoes((prev) => prev.filter((n) => n.id !== id));
   }
 
-  const notificacaoTable = notificacoes.map((notificacao) => (
-    <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold">{notificacao.titulo}</h3>
-        <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
+  const notificacaoTable = notificacoes.map((notificacao) => {
+    const nomeEnviadoPor = notificacao.usuario?.nome || "Desconhecido"; 
+    return (
+      <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold">{notificacao.titulo}</h3>
+          <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
+        </div>
+
+        <p>{notificacao.descricao}</p>
+        <p className="text-sm text-gray-400">Enviado por: {nomeEnviadoPor}</p> 
+
+        {notificacao.convite != null ? (
+          <button
+            onClick={() => notificacao.convite && handleInviteResponse(usuario.id, notificacao.convite)}
+            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
+          >
+            Aceitar
+          </button>
+        ) : (
+          <p>{notificacao.lida ? "Lida" : "Não lida"}</p>
+        )}
       </div>
-      <p>{notificacao.descricao}</p>
-      {notificacao.convite != null ? (
-        <button
-          onClick={() => handleInviteResponse(usuario.id, notificacao.convite)}
-          className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
-        >
-          Aceitar
-        </button>
-      ) : (
-        <p>{notificacao.lida ? "Lida" : "Não lida"}</p>
-      )}
-    </div>
-  ));
+    );
+  });
+
 
   return (
     <div ref={panelRef} className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>

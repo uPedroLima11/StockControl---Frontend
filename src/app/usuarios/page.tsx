@@ -313,6 +313,21 @@ export default function Usuarios() {
           <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
             <h2 className="text-xl mb-4">Enviar Mensagem</h2>
             <div>
+              <div className="mb-1">
+                <label htmlFor="nome" className="text-white text-sm font-semibold">
+                  De:
+                </label>
+                <input
+                  id="nome"
+                  type="text"
+                  value={usuarioLogado?.nome || ""}
+                  readOnly
+                  className="w-full bg-[#444b52] text-white p-3 rounded-md mt-2"
+                />
+              </div>
+              <label htmlFor="nome" className="text-white text-sm font-semibold">
+                  Para:
+                </label>
               <select
                 className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
