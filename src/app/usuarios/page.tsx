@@ -139,6 +139,7 @@ export default function Usuarios() {
           if (res.ok) {
             Swal.fire("Removido!", "Usuário foi removido da empresa e o cargo foi alterado para FUNCIONARIO.", "success");
             setModalEditarUsuario(null);
+            window.location.reload();
             setUsuarios((prev) =>
               prev.map((u) =>
                 u.id === usuario.id ? { ...u, empresaId: null, tipo: "FUNCIONARIO" } : u
@@ -154,7 +155,7 @@ export default function Usuarios() {
       }
     });
   }
-  
+
   async function atualizarTipoUsuario(usuarioId: string, tipoSelecionado: string) {
     const usuarioSelecionado = usuarios.find((u) => u.id === usuarioId);
     if (!usuarioLogado || !usuarioSelecionado) return;
@@ -175,6 +176,7 @@ export default function Usuarios() {
       if (res.ok) {
         Swal.fire("Sucesso", "Tipo de usuário atualizado com sucesso!", "success");
         setModalEditarUsuario(null);
+        window.location.reload();
         setUsuarios((prev) =>
           prev.map((u) => (u.id === usuarioId ? { ...u, tipo: tipoSelecionado } : u))
         );

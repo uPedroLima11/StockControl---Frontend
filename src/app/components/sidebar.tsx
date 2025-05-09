@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck } from "react-icons/fa";
+import {
+  FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt,
+  FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck
+} from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "../context/usuario";
 import { ConviteI } from "@/utils/types/convite";
@@ -13,9 +16,13 @@ export default function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
-  const { logar } = useUsuarioStore();
+  const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
+  const { logar, usuario } = useUsuarioStore();
 
   useEffect(() => {
+    const usuarioSalvo = typeof window !== "undefined" ? localStorage.getItem("client_key") : null;
+    const usuarioId = usuarioSalvo?.replace(/"/g, "");
+
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (response.status === 200) {
@@ -24,7 +31,7 @@ export default function Sidebar() {
       }
     }
 
-    const buscaEmpresa = async (idUsuario: string) => {
+    async function buscaEmpresa(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
       if (response.status === 200) {
         const dados = await response.json();
@@ -33,22 +40,46 @@ export default function Sidebar() {
           setNomeEmpresa(dados.nome);
         }
       }
-    };
+    }
 
-    if (localStorage.getItem("client_key")) {
-      const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      buscaUsuarios(usuarioValor);
-      buscaEmpresa(usuarioValor);
+    async function verificarNotificacoes(idUsuario: string) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+      const notificacoes = await response.json();
+      const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => !n.lida);
+      setTemNotificacaoNaoLida(possuiNaoLidas);
+    }
+
+    if (usuarioId) {
+      buscaUsuarios(usuarioId);
+      buscaEmpresa(usuarioId);
+      verificarNotificacoes(usuarioId);
+
+      const intervalId = setInterval(() => {
+        if (usuarioId) {
+          verificarNotificacoes(usuarioId);
+        }
+      }, 60000);
+
+      return () => clearInterval(intervalId);
     }
   }, [logar]);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
 
-  const toggleNotifications = () => {
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const toggleNotifications = async () => {
     setShowNotifications(!showNotifications);
+
+    if (!showNotifications && usuario?.id) {
+      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuarioId: usuario.id }),
+      });
+      setTemNotificacaoNaoLida(false);
+    }
   };
 
   return (
@@ -65,12 +96,19 @@ export default function Sidebar() {
           </Link>
 
           <nav className="flex flex-col items-start px-4 py-6 gap-4 text-white text-sm">
-            <button onClick={toggleNotifications} className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
-              <span className="text-lg">
+            <button onClick={toggleNotifications} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
+              <span className="text-lg relative">
                 <FaBell />
+                {temNotificacaoNaoLida && (
+                  <>
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
+                  </>
+                )}
               </span>
               <span className="text-sm md:inline">Notificações</span>
             </button>
+
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Dashboard" />
             <SidebarLink href="#" icon={<FaChartBar />} label="Resumo" />
             <SidebarLink href="/produtos" icon={<FaBoxOpen />} label="Produtos" />
@@ -79,6 +117,7 @@ export default function Sidebar() {
             <SidebarLink href="/Fornecedores" icon={<FaTruck />} label="Fornecedores" />
             <SidebarLink href="/configuracoes" icon={<FaWrench />} label="Configurações" />
             <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
+
             <Link href="/empresa" className="flex items-center gap-2">
               <img src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" className="h-10 w-10 rounded-full object-cover border border-gray-300" />
               <h1 className="text-sm font-medium">{nomeEmpresa ?? "Criar Empresa"}</h1>
@@ -88,13 +127,10 @@ export default function Sidebar() {
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
           <SidebarLink href="/ativacao" icon={<FaWrench />} label="Ativação" />
-          <button
-            onClick={() => {
-              localStorage.removeItem("client_key");
-              window.location.href = "/";
-            }}
-            className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm"
-          >
+          <button onClick={() => {
+            localStorage.removeItem("client_key");
+            window.location.href = "/";
+          }} className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
             <span className="text-lg">
               <FaSignOutAlt />
             </span>
@@ -128,6 +164,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       const dados = await response.json();
       setNotificacoes(dados);
     }
+
     if (usuario?.id) {
       buscaDados();
     }
@@ -167,27 +204,20 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}`, {
       method: "DELETE",
     });
-
-    window.location.reload();
+    setNotificacoes((prev) => prev.filter((n) => n.id !== id));
   }
-
-
 
   const notificacaoTable = notificacoes.map((notificacao) => (
     <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold">{notificacao.titulo}</h3>
-        <button onClick={() => {handleDeleteNotification(notificacao.id)}} className="text-white">
-          ✕
-        </button>
+        <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
       </div>
       <p>{notificacao.descricao}</p>
       {notificacao.convite != null ? (
         <button
-          onClick={() => {
-            handleInviteResponse(usuario.id, notificacao.convite);
-          }}
-          className="px- py-2 bg-[#013C3C] text-white rounded-lg"
+          onClick={() => handleInviteResponse(usuario.id, notificacao.convite)}
+          className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
         >
           Aceitar
         </button>
@@ -201,9 +231,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     <div ref={panelRef} className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">Notificações</h2>
-        <button onClick={onClose} className="text-white">
-          ✕
-        </button>
+        <button onClick={onClose} className="text-white">✕</button>
       </div>
       <div className="space-y-4 text-sm">{notificacaoTable}</div>
     </div>
