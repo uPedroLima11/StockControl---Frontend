@@ -68,108 +68,108 @@ export default function Usuarios() {
   }, []);
 
   async function enviarNotificacao() {
-    setIsEnviando(true);
-    try {
-      if (!usuarioSelecionado || !titulo || !descricao) {
-        Swal.fire({
-          title: "Campos obrigatórios",
-          text: "Por favor, preencha todos os campos antes de enviar.",
-          icon: "warning",
-        });
-        return;
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          titulo,
-          descricao,
-          usuarioId: usuarioSelecionado.id,
-        }),
+  setIsEnviando(true);
+  try {
+    if (!usuarioSelecionado || !titulo || !descricao) {
+      Swal.fire({
+        title: "Campos obrigatórios",
+        text: "Por favor, preencha todos os campos antes de enviar.",
+        icon: "warning",
       });
+      return;
+    }
 
-      if (response.ok) {
-        Swal.fire({
-          title: "Mensagem enviada!",
-          text: `A mensagem foi enviada para ${usuarioSelecionado.email}.`,
-          icon: "success",
-        });
-        setTitulo("");
-        setDescricao("");
-        setUsuarioSelecionado(null);
-        setShowModalMensagem(false);
-      } else {
-        Swal.fire({
-          title: "Erro",
-          text: "Erro ao enviar a notificação. Tente novamente.",
-          icon: "error",
-        });
-      }
-    } catch (err) {
-      console.error("Erro ao enviar notificação:", err);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        titulo,
+        descricao,
+        usuarioId: usuarioSelecionado.id,
+        nomeRemetente: usuarioLogado?.nome,
+      }),
+    });
+
+    if (response.ok) {
+      Swal.fire({
+        title: "Mensagem enviada!",
+        text: `A mensagem foi enviada para ${usuarioSelecionado.email}.`,
+        icon: "success",
+      });
+      setTitulo("");
+      setDescricao("");
+      setUsuarioSelecionado(null);
+      setShowModalMensagem(false);
+    } else {
       Swal.fire({
         title: "Erro",
-        text: "Erro interno ao enviar a notificação.",
+        text: "Erro ao enviar a notificação. Tente novamente.",
         icon: "error",
       });
-    } finally {
-      setIsEnviando(false);
     }
+  } catch (err) {
+    console.error("Erro ao enviar notificação:", err);
+    Swal.fire({
+      title: "Erro",
+      text: "Erro interno ao enviar a notificação.",
+      icon: "error",
+    });
+  } finally {
+    setIsEnviando(false);
   }
+}
 
-  async function enviarConvite() {
-    setIsEnviando(true);
-    try {
-      const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const idUsuario = usuarioSalvo.replace(/"/g, "");
+async function enviarConvite() {
+  setIsEnviando(true);
+  try {
+    const usuarioSalvo = localStorage.getItem("client_key") as string;
+    const idUsuario = usuarioSalvo.replace(/"/g, "");
 
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-      const empresa = await resEmpresa.json();
+    const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+    const empresa = await resEmpresa.json();
 
-      const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
-      const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
+    const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+    const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
 
-      const usuarioConvidado = todosUsuarios.find((u) => u.email === email);
+    const usuarioConvidado = todosUsuarios.find((u) => u.email === email);
 
-      if (usuarioConvidado && usuarioConvidado.empresaId) {
-        Swal.fire({
-          title: "Usuário já possui uma empresa vinculada",
-          text: "Esse usuário já está vinculado a uma empresa.",
-          icon: "warning",
-          confirmButtonText: "Ok",
-          confirmButtonColor: "#013C3C",
-        });
-        return;
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/convites`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, empresaId: empresa.id }),
+    if (usuarioConvidado && usuarioConvidado.empresaId) {
+      Swal.fire({
+        title: "Usuário já possui uma empresa vinculada",
+        text: "Esse usuário já está vinculado a uma empresa.",
+        icon: "warning",
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#013C3C",
       });
-
-      if (response.ok) {
-        Swal.fire({
-          title: "Convite enviado com sucesso!",
-          text: `Um convite foi enviado para ${email}.`,
-          icon: "success",
-          confirmButtonText: "Ok",
-          confirmButtonColor: "#013C3C",
-        });
-        setEmail("");
-        setShowModalConvite(false);
-      } else {
-        alert("Erro ao enviar convite. Verifique se o e-mail é válido.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao enviar convite.");
-    } finally {
-      setIsEnviando(false);
+      return;
     }
-  }
 
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/convites`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, empresaId: empresa.id }),
+    });
+
+    if (response.ok) {
+      Swal.fire({
+        title: "Convite enviado com sucesso!",
+        text: `${usuarioLogado?.nome} Você enviou o convite para o email: ${email}.`,
+        icon: "success",
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#013C3C",
+      });
+      setEmail("");
+      setShowModalConvite(false);
+    } else {
+      alert("Erro ao enviar convite. Verifique se o e-mail é válido.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao enviar convite.");
+  } finally {
+    setIsEnviando(false);
+  }
+}
   async function confirmarRemocaoUsuario(usuario: UsuarioI) {
     if (!podeEditar(usuario)) return;
 

@@ -173,41 +173,55 @@ export default function Empresa() {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!usuarioValor) return;
+  
       if (tipoUsuario === "PROPRIETARIO") {
-        await Swal.fire({
+        const confirm = await Swal.fire({
           title: "Tem certeza?",
           text: "Essa ação não pode ser desfeita!",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Sim, deletar!",
           cancelButtonText: "Cancelar",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`, {
-              method: "DELETE",
-            });
-
-            if (!res.ok) throw new Error("Erro ao excluir/sair da empresa");
-          }
         });
+  
+        if (confirm.isConfirmed) {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`, {
+            method: "DELETE",
+          });
+  
+          if (!res.ok) throw new Error("Erro ao excluir a empresa");
+  
+          router.push("/criarempresa");
+          window.location.reload();
+        }
       } else {
-        await Swal.fire({
-          title: "Tem certeza?",
-          text: "Você realmente deseja sair da empresa?",
+        const confirm = await Swal.fire({
+          title: "Sair da empresa?",
+          text: "Você perderá o acesso aos dados da empresa.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Sim, sair!",
           cancelButtonText: "Cancelar",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-              method: "DELETE",
-            });
-            if (!res.ok) throw new Error("Erro ao sair da empresa");
-          }
         });
+  
+        if (confirm.isConfirmed) {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              empresaId: null,
+              tipo: "FUNCIONARIO",
+            }),
+          });
+  
+          if (!res.ok) throw new Error("Erro ao sair da empresa");
+  
+          router.push("/criarempresa");
+          window.location.reload();
+        }
       }
-
       router.push("/criarempresa");
       window.location.reload();
     } catch (error) {
