@@ -20,6 +20,8 @@ export default function Usuarios() {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<UsuarioI | null>(null);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [showModalConvite, setShowModalConvite] = useState(false);
+  const [showModalMensagem, setShowModalMensagem] = useState(false);
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -247,22 +249,20 @@ export default function Usuarios() {
     <div className="min-h-screen bg-[#1B1F24] text-white py-10 px-4 md:px-16">
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl font-mono text-white">Usuários</h1>
-        {usuarioLogado?.tipo !== "CLIENTE" && (
-          <div className="flex space-x-4">
-            <button
-              className="px-4 py-2 rounded-sm font-bold bg-[#00332C] text-sm hover:bg-[#55d6be1a] transition"
-              onClick={() => setShowModal(true)}
-            >
-              Convidar Usuário
-            </button>
-            <button
-              className="px-4 py-2 rounded-sm font-bold bg-[#ee1010] text-sm hover:bg-[#dd7878d8] transition"
-              onClick={() => setShowModal(true)}
-            >
-              Enviar Mensagem
-            </button>
-          </div>
-        )}
+        <div className="flex space-x-4">
+          <button
+            className="px-4 py-2 rounded-sm font-bold bg-[#00332C] text-sm hover:bg-[#55d6be1a] transition"
+            onClick={() => setShowModalConvite(true)}
+          >
+            Convidar Usuário
+          </button>
+          <button
+            className="px-4 py-2 rounded-sm font-bold bg-[#ee1010] text-sm hover:bg-[#dd7878d8] transition"
+            onClick={() => setShowModalMensagem(true)}
+          >
+            Enviar Mensagem
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-lg">
@@ -308,12 +308,49 @@ export default function Usuarios() {
         </table>
       </div>
 
-      {showModal && (
+      {showModalConvite && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+            <h2 className="text-xl mb-4">Convidar Usuário</h2>
+            <div>
+              <div className="mb-2">
+                <label htmlFor="email" className="text-white text-sm font-semibold">
+                  E-mail do Usuário:
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#444b52] text-white p-3 rounded-md mt-2"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
+                onClick={() => setShowModalConvite(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`px-4 py-2 bg-[#55D6BE] text-black rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : "hover:bg-[#44bca5]"}`}
+                onClick={enviarConvite}
+                disabled={isEnviando}
+              >
+                {isEnviando ? "Enviando..." : "Enviar Convite"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModalMensagem && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
             <h2 className="text-xl mb-4">Enviar Mensagem</h2>
             <div>
-              <div className="mb-1">
+              <div className="mb-2">
                 <label htmlFor="nome" className="text-white text-sm font-semibold">
                   De:
                 </label>
@@ -326,8 +363,8 @@ export default function Usuarios() {
                 />
               </div>
               <label htmlFor="nome" className="text-white text-sm font-semibold">
-                  Para:
-                </label>
+                Para:
+              </label>
               <select
                 className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
@@ -358,7 +395,7 @@ export default function Usuarios() {
             <div className="flex justify-end gap-2">
               <button
                 className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowModalMensagem(false)}
               >
                 Cancelar
               </button>
@@ -373,6 +410,67 @@ export default function Usuarios() {
           </div>
         </div>
       )}
+      {modalEditarUsuario && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+            <h2 className="text-xl mb-4">Editar Usuário</h2>
+            <p className="mb-4">Usuário: <strong>{modalEditarUsuario.nome}</strong></p>
+
+            <label className="block mb-2 font-semibold">Alterar Cargo:</label>
+            <select
+              value={novoTipo}
+              onChange={(e) => setNovoTipo(e.target.value)}
+              className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+            >
+              <option value="FUNCIONARIO">FUNCIONARIO</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="PROPRIETARIO">PROPRIETARIO</option>
+            </select>
+
+            <div className="flex justify-between">
+              <button
+                className="bg-gray-500 hover:bg-gray-600 px-3 py-1.5 rounded text-sm"
+                onClick={() => setModalEditarUsuario(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-[#013C3C] hover:bg-[#013c3c8e] px-3 py-1.5 rounded text-sm text-white"
+                onClick={async () => {
+                  if (!usuarioLogado || !modalEditarUsuario) return;
+                  if (!podeEditarCargo(usuarioLogado.tipo, modalEditarUsuario.tipo, novoTipo)) {
+                    Swal.fire("Ação não permitida", "Você não tem permissão para alterar este cargo.", "warning");
+                    return;
+                  }
+
+                  const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${modalEditarUsuario.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tipo: novoTipo }),
+                  });
+
+                  if (res.ok) {
+                    Swal.fire("Cargo atualizado!", "O cargo do usuário foi alterado com sucesso.", "success");
+                    setModalEditarUsuario(null);
+                    window.location.reload();
+                  } else {
+                    Swal.fire("Erro", "Não foi possível alterar o cargo.", "error");
+                  }
+                }}
+              >
+                Salvar Cargo
+              </button>
+              <button
+                className="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded text-sm"
+                onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
