@@ -33,6 +33,27 @@ export default function Produtos() {
     updatedAt: new Date(),
   });
   const [busca, setBusca] = useState("");
+  const [modoDark, setModoDark] = useState(false);
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
+
+    const root = document.documentElement;
+
+    if (ativado) {
+      root.style.setProperty("--cor-fundo", "#20252B");
+      root.style.setProperty("--cor-fonte", "#FFFFFF");
+      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
+      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
+    } else {
+      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-fonte", "#000000");
+      root.style.setProperty("--cor-subtitulo", "#4B5563");
+      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+    }
+  }, []);
 
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -197,33 +218,56 @@ export default function Produtos() {
   const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
 
   return (
-    <div className="flex justify-center px-4 py-10">
+    <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono text-white mb-6">Produtos</h1>
+        <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+          Produtos
+        </h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <div className="flex items-center border rounded-full px-4 py-2 bg-white shadow-sm">
+          <div
+            className="flex items-center border rounded-full px-4 py-2 shadow-sm"
+            style={{
+              backgroundColor: "var(--cor-fundo-bloco)",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
+            }}
+          >
             <input
               type="text"
               placeholder="Buscar Produto"
-              className="outline-none font-mono text-sm"
+              className="outline-none font-mono text-sm bg-transparent"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
+              style={{ color: "var(--cor-fonte)" }}
             />
-            <FaSearch className="ml-2 text-green-800" />
+            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
 
           {podeEditar && (
-            <button onClick={() => setModalAberto(true)} className="px-6 py-2 border-2 bg-white border-[#00332C] rounded-lg text-[#00332C] hover:bg-[#00332C] hover:text-white transition font-mono text-sm">
+            <button
+              onClick={() => setModalAberto(true)}
+              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                borderColor: modoDark ? "#FFFFFF" : "#00332C",
+                color: modoDark ? "#FFFFFF" : "#00332C",
+              }}
+            >
               Novo Produto
             </button>
           )}
         </div>
 
-        <div className="bg-white border border-gray-300 rounded-xl overflow-x-auto shadow">
+        <div
+          className="border rounded-xl overflow-x-auto shadow"
+          style={{
+            backgroundColor: "var(--cor-fundo-bloco)",
+            borderColor: modoDark ? "#FFFFFF" : "#000000"
+          }}
+        >
           <table className="w-full text-sm font-mono">
             <thead className="border-b">
-              <tr className="text-left text-gray-700">
+              <tr style={{ color: "var(--cor-fonte)" }}>
                 <th className="py-3 px-4"><div className="flex items-center gap-1"><FaCog /> Nome</div></th>
                 <th className="py-3 px-4">Fornecedor</th>
                 <th className="py-3 px-4">Categoria</th>
@@ -233,7 +277,15 @@ export default function Produtos() {
             </thead>
             <tbody>
               {produtosFiltrados.map(produto => (
-                <tr key={produto.id} onClick={() => { setModalVisualizar(produto); setForm(produto); }} className="border-b hover:bg-gray-100 transition cursor-pointer">
+                <tr
+                  key={produto.id}
+                  onClick={() => { setModalVisualizar(produto); setForm(produto); }}
+                  className="border-b hover:bg-opacity-50 transition cursor-pointer"
+                  style={{
+                    color: "var(--cor-fonte)",
+                    borderColor: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                >
                   <td className="py-3 px-4 flex items-center gap-2">
                     <Image src={produto.foto || "/out.jpg"} width={30} height={30} className="rounded" alt={produto.nome} />
                     <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
@@ -250,23 +302,31 @@ export default function Produtos() {
 
         {(modalAberto || modalVisualizar) && (
           <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-            <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <div
+              className="p-6 rounded-lg shadow-xl w-full max-w-lg"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                color: "var(--cor-fonte)"
+              }}
+            >
               <h2 className="text-xl font-bold mb-4">{modalVisualizar ? "Visualizar Produto" : "Novo Produto"}</h2>
 
               <input
                 placeholder="Nome"
                 value={form.nome || ""}
                 onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               />
 
               <input
                 placeholder="Descrição"
                 value={form.descricao || ""}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               />
 
               <input
@@ -274,26 +334,28 @@ export default function Produtos() {
                 type="text"
                 value={form.preco || ""}
                 onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               />
-
 
               <input
                 placeholder="Quantidade"
                 type="number"
                 value={form.quantidade || ""}
                 onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               />
 
               <input
                 placeholder="Foto (URL) (Não obrigatório)"
                 value={form.foto || ""}
                 onChange={(e) => setForm({ ...form, foto: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               />
 
               {form.foto && (
@@ -307,8 +369,9 @@ export default function Produtos() {
               <select
                 value={form.fornecedorId || ""}
                 onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               >
                 <option value="">Selecione o Fornecedor</option>
                 {fornecedores.map((f) => (
@@ -321,8 +384,9 @@ export default function Produtos() {
               <select
                 value={form.categoriaId || ""}
                 onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ color: "var(--cor-fonte)" }}
               >
                 <option value="">Selecione a Categoria</option>
                 {categorias.map((c) => (
@@ -331,15 +395,40 @@ export default function Produtos() {
                   </option>
                 ))}
               </select>
+
               <div className="flex justify-between mt-4">
-                <button onClick={() => { setModalAberto(false); setModalVisualizar(null); }} className="text-gray-600 hover:underline">Fechar</button>
+                <button
+                  onClick={() => { setModalAberto(false); setModalVisualizar(null); }}
+                  className="hover:underline"
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  Fechar
+                </button>
                 {modalVisualizar ? (
                   podeEditar && <>
-                    <button onClick={handleUpdate} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
-                    <button onClick={handleDelete} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Excluir</button>
+                    <button
+                      onClick={handleUpdate}
+                      className="px-4 py-2 rounded hover:bg-blue-700"
+                      style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-2 rounded hover:bg-red-700"
+                      style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
+                    >
+                      Excluir
+                    </button>
                   </>
                 ) : (
-                  <button onClick={handleSubmit} className="bg-[#00332C] text-white px-4 py-2 rounded hover:bg-[#00443f]">Criar Produto</button>
+                  <button
+                    onClick={handleSubmit}
+                    className="px-4 py-2 rounded hover:bg-[#00443f]"
+                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
+                  >
+                    Criar Produto
+                  </button>
                 )}
               </div>
             </div>
@@ -350,4 +439,4 @@ export default function Produtos() {
   );
 }
 
-const inputClass = "w-full border border-gray-300 rounded p-2 mb-3";
+const inputClass = "w-full rounded p-2 mb-3";
