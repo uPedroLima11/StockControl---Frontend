@@ -17,6 +17,9 @@ export default function Usuarios() {
   const [modalEditarUsuario, setModalEditarUsuario] = useState<null | UsuarioI>(null);
   const [novoTipo, setNovoTipo] = useState("FUNCIONARIO");
   const { logar } = useUsuarioStore();
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState<UsuarioI | null>(null);
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -62,6 +65,57 @@ export default function Usuarios() {
       fetchDados(usuarioValor);
     }
   }, []);
+
+  async function enviarNotificacao() {
+    setIsEnviando(true);
+    try {
+      if (!usuarioSelecionado || !titulo || !descricao) {
+        Swal.fire({
+          title: "Campos obrigatórios",
+          text: "Por favor, preencha todos os campos antes de enviar.",
+          icon: "warning",
+        });
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titulo,
+          descricao,
+          usuarioId: usuarioSelecionado.id,
+        }),
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          title: "Mensagem enviada!",
+          text: `A mensagem foi enviada para ${usuarioSelecionado.email}.`,
+          icon: "success",
+        });
+        setTitulo("");
+        setDescricao("");
+        setUsuarioSelecionado(null);
+        setShowModal(false);
+      } else {
+        Swal.fire({
+          title: "Erro",
+          text: "Erro ao enviar a notificação. Tente novamente.",
+          icon: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao enviar notificação:", err);
+      Swal.fire({
+        title: "Erro",
+        text: "Erro interno ao enviar a notificação.",
+        icon: "error",
+      });
+    } finally {
+      setIsEnviando(false);
+    }
+  }
 
   async function enviarConvite() {
     setIsEnviando(true);
@@ -156,38 +210,6 @@ export default function Usuarios() {
     });
   }
 
-  async function atualizarTipoUsuario(usuarioId: string, tipoSelecionado: string) {
-    const usuarioSelecionado = usuarios.find((u) => u.id === usuarioId);
-    if (!usuarioLogado || !usuarioSelecionado) return;
-
-    const permitido = podeEditarCargo(usuarioLogado.tipo, usuarioSelecionado.tipo, tipoSelecionado);
-    if (!permitido) {
-      Swal.fire("Ação não permitida", "Você não pode atribuir esse cargo.", "warning");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo: tipoSelecionado }),
-      });
-
-      if (res.ok) {
-        Swal.fire("Sucesso", "Tipo de usuário atualizado com sucesso!", "success");
-        setModalEditarUsuario(null);
-        window.location.reload();
-        setUsuarios((prev) =>
-          prev.map((u) => (u.id === usuarioId ? { ...u, tipo: tipoSelecionado } : u))
-        );
-      } else {
-        Swal.fire("Erro", "Erro ao atualizar usuário", "error");
-      }
-    } catch (err) {
-      console.error("Erro ao atualizar tipo do usuário:", err);
-    }
-  }
-
   const podeEditar = (targetUser: UsuarioI) => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
     if (usuarioLogado.tipo === "PROPRIETARIO") return true;
@@ -206,130 +228,136 @@ export default function Usuarios() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
-      <h1 className="text-3xl font-mono text-white">Carregando usuários...</h1>
-    </div>;
+    return (
+      <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
+        <h1 className="text-3xl font-mono text-white">Carregando usuários...</h1>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
-      <h1 className="text-3xl font-mono text-red-400">Erro: {error}</h1>
-    </div>;
+    return (
+      <div className="min-h-screen bg-[#20252B] text-white py-10 px-4 md:px-16">
+        <h1 className="text-3xl font-mono text-red-400">Erro: {error}</h1>
+      </div>
+    );
   }
 
-  return <div className="min-h-screen bg-[#1B1F24] text-white py-10 px-4 md:px-16">
-    <div className="flex justify-between items-center mb-10">
-      <h1 className="text-3xl font-mono text-white">Usuários</h1>
-      {usuarioLogado?.tipo !== "CLIENTE" && <button
-        className="px-4 py-2 rounded-sm font-bold bg-[#00332C] text-sm hover:bg-[#55d6be1a] transition"
-        onClick={() => setShowModal(true)}>
-        Convidar Usuário
-      </button>}
-    </div>
-
-    <div className="overflow-x-auto rounded-lg">
-      <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
-        <thead className="border-b border-gray-600 text-gray-300">
-          <tr>
-            <th className="px-6 py-4">Nome de Usuário</th>
-            <th className="px-6 py-4">Função</th>
-            <th className="px-6 py-4">Criado em</th>
-            <th className="px-6 py-4 font-bold">Última Atualização</th>
-            <th className="px-6 py-4">Ação</th>
-          </tr>
-        </thead>
-        <tbody className="text-white">
-          {usuarios.length === 0 ? <tr>
-            <td colSpan={5} className="px-6 py-4 text-center">
-              Nenhum usuário encontrado
-            </td>
-          </tr> : usuarios.map((usuario) => (
-            <tr key={usuario.id} className="bg-[#2A2F36] rounded-md shadow-sm">
-              <td className="px-6 py-4">{usuario.nome}</td>
-              <td className="px-6 py-4">{usuario.tipo}</td>
-              <td className="px-6 py-4">{new Date(usuario.createdAt).toLocaleDateString()}</td>
-              <td className="px-6 py-4 font-semibold">{new Date(usuario.updatedAt).toLocaleDateString()}</td>
-              <td className="px-6 py-4">
-                {podeEditar(usuario) && <FaCog
-                  className="cursor-pointer hover:text-gray-400"
-                  onClick={() => {
-                    setModalEditarUsuario(usuario);
-                    setNovoTipo(usuario.tipo);
-                  }}
-                />}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-    {showModal && (
-      <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-        <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
-          <h2 className="text-xl mb-4">Convidar Usuário</h2>
-          <input
-            type="email"
-            placeholder="E-mail do usuário"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
-          />
-          <div className="flex justify-end gap-2">
+  return (
+    <div className="min-h-screen bg-[#1B1F24] text-white py-10 px-4 md:px-16">
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-3xl font-mono text-white">Usuários</h1>
+        {usuarioLogado?.tipo !== "CLIENTE" && (
+          <div className="flex space-x-4">
             <button
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
-              onClick={() => setShowModal(false)}>
-              Cancelar
+              className="px-4 py-2 rounded-sm font-bold bg-[#00332C] text-sm hover:bg-[#55d6be1a] transition"
+              onClick={() => setShowModal(true)}
+            >
+              Convidar Usuário
             </button>
             <button
-              className={`px-4 py-2 bg-[#55D6BE] text-black rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : "hover:bg-[#44bca5]"}`}
-              onClick={enviarConvite}
-              disabled={isEnviando}>
-              {isEnviando ? "Convidando..." : "Enviar Convite"}
+              className="px-4 py-2 rounded-sm font-bold bg-[#ee1010] text-sm hover:bg-[#dd7878d8] transition"
+              onClick={() => setShowModal(true)}
+            >
+              Enviar Mensagem
             </button>
           </div>
-        </div>
+        )}
       </div>
-    )}
 
-    {modalEditarUsuario && (
-      <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-        <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
-          <h2 className="text-xl mb-4">Editar Usuário</h2>
+      <div className="overflow-x-auto rounded-lg">
+        <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
+          <thead className="border-b border-gray-600 text-gray-300">
+            <tr>
+              <th className="px-6 py-4">Nome de Usuário</th>
+              <th className="px-6 py-4">Função</th>
+              <th className="px-6 py-4">Criado em</th>
+              <th className="px-6 py-4 font-bold">Última Atualização</th>
+              <th className="px-6 py-4">Ação</th>
+            </tr>
+          </thead>
+          <tbody className="text-white">
+            {usuarios.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-4 text-center">
+                  Nenhum usuário encontrado
+                </td>
+              </tr>
+            ) : (
+              usuarios.map((usuario) => (
+                <tr key={usuario.id} className="bg-[#2A2F36] rounded-md shadow-sm">
+                  <td className="px-6 py-4">{usuario.nome}</td>
+                  <td className="px-6 py-4">{usuario.tipo}</td>
+                  <td className="px-6 py-4">{new Date(usuario.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 font-semibold">{new Date(usuario.updatedAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4">
+                    {podeEditar(usuario) && (
+                      <FaCog
+                        className="cursor-pointer hover:text-gray-400"
+                        onClick={() => {
+                          setModalEditarUsuario(usuario);
+                          setNovoTipo(usuario.tipo);
+                        }}
+                      />
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-          <label className="block mb-2">Tipo de usuário</label>
-          <select
-            className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
-            value={novoTipo}
-            onChange={(e) => setNovoTipo(e.target.value)}>
-            <option value="FUNCIONARIO">FUNCIONÁRIO</option>
-            <option value="ADMIN">ADMIN</option>
-            <option value="PROPRIETARIO">PROPRIETÁRIO</option>
-          </select>
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div className="bg-[#2A2F36] p-6 rounded-lg w-full max-w-md text-white">
+            <h2 className="text-xl mb-4">Enviar Mensagem</h2>
+            <div>
+              <select
+                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+                onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
+              >
+                <option value="">Selecione o usuário</option>
+                {usuarios.map((usuario) => (
+                  <option key={usuario.id} value={usuario.id}>
+                    {usuario.nome}
+                  </option>
+                ))}
+              </select>
 
-          <div className="flex justify-between items-center">
-            <button
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
-              onClick={() => setModalEditarUsuario(null)}>
-              Cancelar
-            </button>
+              <input
+                type="text"
+                placeholder="Título da mensagem"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+              />
 
-            <div className="flex gap-2">
+              <textarea
+                placeholder="Descrição da mensagem"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                className="w-full p-2 mb-4 rounded bg-[#1B1F24] border border-gray-600 text-white"
+              ></textarea>
+            </div>
+            <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
-                onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}>
-                Remover da Empresa
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 rounded"
+                onClick={() => setShowModal(false)}
+              >
+                Cancelar
               </button>
-
               <button
-                className="px-4 py-2 bg-[#55D6BE] text-black hover:bg-[#44bca5] rounded"
-                onClick={() => atualizarTipoUsuario(modalEditarUsuario.id, novoTipo)}>
-                Salvar
+                className={`px-4 py-2 bg-[#55D6BE] text-black rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : "hover:bg-[#44bca5]"}`}
+                onClick={enviarNotificacao}
+                disabled={isEnviando}
+              >
+                {isEnviando ? "Enviando..." : "Enviar Mensagem"}
               </button>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>;
+      )}
+    </div>
+  );
 }

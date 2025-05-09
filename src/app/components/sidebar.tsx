@@ -58,7 +58,7 @@ export default function Sidebar() {
         if (usuarioId) {
           verificarNotificacoes(usuarioId);
         }
-      }, 60000);
+      }, 30000);
 
       return () => clearInterval(intervalId);
     }
