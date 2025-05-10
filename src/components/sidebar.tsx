@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt,
-  FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck
+  FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck,
+  FaCheck,
+  FaCheckDouble
 } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
@@ -285,7 +287,10 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="text-xs">{notificacao.lida ? t("read") : t("unread")}</span>
+          <span className="text-xs flex items-center gap-1">
+            {notificacao.lida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
+            {notificacao.lida ? t("read") : t("unread")}
+          </span>
         </div>
       </div>
     );

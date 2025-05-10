@@ -9,7 +9,7 @@
       "titulo": "Inventory Summary",
       "lucroMensal": "Monthly Sales Profit",
       "custoItens": "Item Cost",
-      "itensDisponiveis": "Available Items"
+      "itensDisponiveis": "stock quantity"
     },
     "atividades": {
       "titulo": "Recent Activities",

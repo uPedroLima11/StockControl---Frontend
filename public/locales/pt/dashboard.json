@@ -9,7 +9,7 @@
         "titulo": "Resumo do Inventário",
         "lucroMensal": "Lucro de Venda Mensal",
         "custoItens": "Custo Itens",
-        "itensDisponiveis": "Itens Disponíveis"
+        "itensDisponiveis": "Quantidade em estoque"
       },
       "atividades": {
         "titulo": "Atividades Recentes",

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
+  const [contagemProdutos, setContagemProdutos] = useState(0);
+  const [contagemValor, setContagemValor] = useState(0);
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("dashboard");
 
@@ -12,6 +14,7 @@ export default function Dashboard() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
+    fetchContagem();
 
     const root = document.documentElement;
 
@@ -26,7 +29,25 @@ export default function Dashboard() {
       root.style.setProperty("--cor-subtitulo", "#4B5563");
       root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
     }
+
+    
   }, []);
+
+  async function fetchContagem() {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem`);
+        if (response.status === 200) {
+          const data = await response.json();
+          setContagemProdutos(data.contagemQuantidade);
+          setContagemValor(data.contagemPreco);
+        }else {
+          setContagemProdutos(0);
+          setContagemValor(0);
+        }
+      } catch (error) {
+        console.error("Erro de conexão:", error);
+      }
+    }
 
   return (
     <div className="px-2 sm:px-4 pt-8">
@@ -74,11 +95,11 @@ export default function Dashboard() {
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>{t("resumo.lucroMensal")}</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>R$ 109.00</p>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>{contagemValor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>{t("resumo.custoItens")}</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>36</p>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>{contagemProdutos}</p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>{t("resumo.itensDisponiveis")}</p>
               </div>
             </div>
