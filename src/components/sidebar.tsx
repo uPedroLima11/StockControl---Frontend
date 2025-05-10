@@ -60,7 +60,7 @@ export default function Sidebar() {
       if (possuiNaoLidas && !temNotificacaoNaoLida) {
         const somAtivado = localStorage.getItem("somNotificacao") !== "false";
         if (somAtivado && audioRef.current) {
-          audioRef.current.play().catch(e => console.log("Erro ao tocar som:", e));
+          audioRef.current.play();
         }
       }
       setTemNotificacaoNaoLida(possuiNaoLidas);

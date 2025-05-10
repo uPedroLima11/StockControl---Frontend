@@ -134,7 +134,6 @@ export default function MinhaConta() {
         const excluirDados = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuario.id}`, {
           method: "DELETE",
         });
-        console.log(excluirDados.status);
         if (excluirDados.status === 204) {
           Swal.fire({
             title: "Conta excluída com sucesso!",
