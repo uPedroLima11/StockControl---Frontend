@@ -232,18 +232,21 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   const notificacaoTable = notificacoes.map((notificacao) => {
     if (notificacao.convite) {
       return (
-        <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold">{t("invite_title")}</h3>
-            <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
-          </div>
-
-          <p>{t("invite_description")} {notificacao.convite.empresa.nome}.</p>
-
-          <button className="py-2 px-4 bg-[#013C3C] text-white rounded-lg">
-            {t("accept")}
-          </button>
+      <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
+        <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold">{t("invite_title")}</h3>
+        <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
         </div>
+
+        <p>{t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.</p>
+
+        <button
+        className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
+        onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}
+        >
+        {t("accept")}
+        </button>
+      </div>
       );
     }
 
