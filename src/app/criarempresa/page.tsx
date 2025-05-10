@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
+import { useTranslation } from "react-i18next";
 
 type Inputs = {
   nome: string;
@@ -23,7 +24,43 @@ export default function CriarEmpresa() {
   const { register, handleSubmit } = useForm<Inputs>();
   const router = useRouter();
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
+  const [modoDark, setModoDark] = useState(false);
   const { logar } = useUsuarioStore();
+  const { t } = useTranslation("criarempresa");
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativo = temaSalvo === "true";
+    setModoDark(ativo);
+    aplicarTema(ativo);
+  }, []);
+
+  const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement;
+    if (ativado) {
+      root.classList.add("dark");
+      root.style.setProperty("--cor-fundo", "#20252B");
+      root.style.setProperty("--cor-texto", "#FFFFFF");
+      root.style.setProperty("--cor-input", "#374151");
+      root.style.setProperty("--cor-borda", "#4B5563");
+      root.style.setProperty("--cor-placeholder", "#9CA3AF");
+      root.style.setProperty("--cor-botao", "#00332C");
+      root.style.setProperty("--cor-botao-hover", "#004d41");
+      document.body.style.backgroundColor = "#20252B";
+      document.body.style.color = "#FFFFFF";
+    } else {
+      root.classList.remove("dark");
+      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-texto", "#000000");
+      root.style.setProperty("--cor-input", "#F3F4F6");
+      root.style.setProperty("--cor-borda", "#D1D5DB");
+      root.style.setProperty("--cor-placeholder", "#9CA3AF");
+      root.style.setProperty("--cor-botao", "#00332C");
+      root.style.setProperty("--cor-botao-hover", "#004d41");
+      document.body.style.backgroundColor = "#FFFFFF";
+      document.body.style.color = "#000000";
+    }
+  };
 
   useEffect(() => {
     if (usuarioLogado?.empresaId) {
@@ -96,8 +133,8 @@ export default function CriarEmpresa() {
       } else {
         Swal.fire({
           icon: "error",
-          title: "Oops... algo deu errado! tente novamente",
-          text: "Email já existente ou erro ao criar empresa.",
+          title: t("erro.titulo"),
+          text: t("erro.mensagem"),
           confirmButtonColor: "#013C3C",
         });
       }
@@ -106,26 +143,43 @@ export default function CriarEmpresa() {
     }
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center p-6 bg-[#20252C] min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-6">Criar Empresa</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xl space-y-4">
-        <input {...register("nome")} placeholder="Nome da empresa" required className={inputClass} />
-        <input {...register("email")} placeholder="Email da empresa" type="email" required className={inputClass} />
-        <input {...register("telefone")} placeholder="Telefone" className={inputClass} />
-        <input {...register("endereco")} placeholder="Endereço" className={inputClass} />
-        <input {...register("pais")} placeholder="País" className={inputClass} />
-        <input {...register("estado")} placeholder="Estado" className={inputClass} />
-        <input {...register("cidade")} placeholder="Cidade" className={inputClass} />
-        <input {...register("cep")} placeholder="CEP" className={inputClass} />
-        <input {...register("foto")} placeholder="URL da Foto (opcional)" className={inputClass} />
+  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+    modoDark
+      ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+      : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+  }`;
 
-        <button type="submit" className="w-full bg-[#00332C] hover:bg-[#004d41] text-white font-bold py-2 px-4 rounded">
-          Criar Empresa
+  return (
+    <div 
+      className="flex flex-col items-center justify-center p-6 min-h-screen"
+      style={{
+        backgroundColor: "var(--cor-fundo)",
+        color: "var(--cor-texto)"
+      }}
+    >
+      <h1 className="text-3xl font-bold mb-6">{t("titulo")}</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xl space-y-4">
+        <input {...register("nome")} placeholder={t("campos.nome")} required className={inputClass} />
+        <input {...register("email")} placeholder={t("campos.email")} type="email" required className={inputClass} />
+        <input {...register("telefone")} placeholder={t("campos.telefone")} className={inputClass} />
+        <input {...register("endereco")} placeholder={t("campos.endereco")} className={inputClass} />
+        <input {...register("pais")} placeholder={t("campos.pais")} className={inputClass} />
+        <input {...register("estado")} placeholder={t("campos.estado")} className={inputClass} />
+        <input {...register("cidade")} placeholder={t("campos.cidade")} className={inputClass} />
+        <input {...register("cep")} placeholder={t("campos.cep")} className={inputClass} />
+        <input {...register("foto")} placeholder={t("campos.foto")} className={inputClass} />
+
+        <button 
+          type="submit" 
+          className="w-full text-white font-bold py-2 px-4 rounded transition"
+          style={{
+            backgroundColor: "var(--cor-botao)",
+            color: "#FFFFFF",
+          }}
+        >
+          {t("botaoCriar")}
         </button>
       </form>
     </div>
   );
 }
-
-const inputClass = "w-full p-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";

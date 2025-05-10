@@ -16,6 +16,8 @@ import contaPt from '../public/locales/pt/conta.json';
 import contaEn from '../public/locales/en/conta.json';
 import empresaPt from '../public/locales/pt/empresa.json';
 import empresaEn from '../public/locales/en/empresa.json';
+import criarempresaPt from '../public/locales/pt/criarempresa.json';
+import criarempresaEn from '../public/locales/en/criarempresa.json';
 
 
 if (!i18n.isInitialized) {
@@ -25,7 +27,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -36,6 +38,7 @@ if (!i18n.isInitialized) {
           usuarios: usuariosEn,
           conta: contaEn,
           empresa: empresaEn,
+          criarempresa: criarempresaEn,
         },
         pt: {
           settings: settingsPt,
@@ -45,6 +48,7 @@ if (!i18n.isInitialized) {
           usuarios: usuariosPt,
           conta: contaPt,
           empresa: empresaPt,
+          criarempresa: criarempresaPt,
         },
       },
       detection: {

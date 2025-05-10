@@ -1,0 +1,19 @@
+{
+    "titulo": "Criar Empresa",
+    "botaoCriar": "Criar Empresa",
+    "erro": {
+        "titulo": "Oops... algo deu errado! tente novamente",
+        "mensagem": "Email já existente ou erro ao criar empresa."
+    },
+    "campos": {
+        "nome": "Nome da empresa",
+        "email": "Email da empresa",
+        "telefone": "Telefone",
+        "endereco": "Endereço",
+        "pais": "País",
+        "estado": "Estado",
+        "cidade": "Cidade",
+        "cep": "CEP",
+        "foto": "URL da Foto (opcional)"
+    }
+}

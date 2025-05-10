@@ -1,0 +1,19 @@
+{
+    "titulo": "Create Company",
+    "botaoCriar": "Create Company",
+    "erro": {
+        "titulo": "Oops... something went wrong! Try again",
+        "mensagem": "Email already exists or error creating company."
+    },
+    "campos": {
+        "nome": "Company name",
+        "email": "Company email",
+        "telefone": "Phone",
+        "endereco": "Address",
+        "pais": "Country",
+        "estado": "State",
+        "cidade": "City",
+        "cep": "ZIP Code",
+        "foto": "Photo URL (optional)"
+    }
+}
