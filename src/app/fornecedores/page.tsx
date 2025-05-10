@@ -98,7 +98,7 @@ export default function Fornecedores() {
     }
   }
 
-  const handleDelete = async () => {
+  async function handleDelete() {
     if (!modalVisualizar) return;
 
     const result = await Swal.fire({
@@ -125,9 +125,14 @@ export default function Fornecedores() {
         Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
       }
     }
-  };
+  }
 
-  const fornecedorFiltrados = fornecedores.filter((fornecedor) => fornecedor.nome.toLowerCase().includes(busca.toLowerCase()));
+  function handleEntrarContato(fornecedor: FornecedorI) {
+    const telefoneFormatado = fornecedor.telefone.replace(/\D/g, "");
+    const numeroComDdd = `55${telefoneFormatado}`;
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComDdd}`;
+    window.open(urlWhatsApp, "_blank");
+  }
 
   const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
   return (
@@ -256,7 +261,7 @@ export default function Fornecedores() {
                       {new Date(fornecedor.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <FaPhoneAlt color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl" />
+                      <FaPhoneAlt onClick={() => handleEntrarContato(fornecedor)} color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl" />
                     </td>
                   </tr>
                 ))}
@@ -304,7 +309,7 @@ export default function Fornecedores() {
                     <button onClick={handleAdicionarFornecedor} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
                       Salvar
                     </button>
-                    <button className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
                       Excluir
                     </button>
                   </>
