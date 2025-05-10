@@ -4,6 +4,7 @@ import { FaCog,} from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
@@ -21,6 +22,7 @@ export default function Usuarios() {
   const [showModalConvite, setShowModalConvite] = useState(false);
   const [showModalMensagem, setShowModalMensagem] = useState(false);
   const [modoDark, setModoDark] = useState(false);
+  const { t } = useTranslation("usuarios");
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -65,13 +67,13 @@ export default function Usuarios() {
     const fetchDados = async (idUsuario: string) => {
       try {
         const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-        if (!resEmpresa.ok) throw new Error("Você não possui uma empresa cadastrada");
+        if (!resEmpresa.ok) throw new Error(t("erroEmpresaNaoCadastrada"));
 
         const empresaData = await resEmpresa.json();
         const empresaIdRecebido = empresaData.id;
 
         const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
-        if (!resUsuarios.ok) throw new Error("Erro ao buscar usuários");
+        if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
         const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
@@ -82,7 +84,7 @@ export default function Usuarios() {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError("Erro desconhecido");
+          setError(t("erroDesconhecido"));
         }
       } finally {
         setLoading(false);
@@ -98,120 +100,121 @@ export default function Usuarios() {
   }, []);
 
   async function enviarNotificacao() {
-  setIsEnviando(true);
-  try {
-    if (!usuarioSelecionado || !titulo || !descricao) {
-      Swal.fire({
-        title: "Campos obrigatórios",
-        text: "Por favor, preencha todos os campos antes de enviar.",
-        icon: "warning",
-      });
-      return;
-    }
+    setIsEnviando(true);
+    try {
+      if (!usuarioSelecionado || !titulo || !descricao) {
+        Swal.fire({
+          title: t("modal.camposObrigatorios.titulo"),
+          text: t("modal.camposObrigatorios.texto"),
+          icon: "warning",
+        });
+        return;
+      }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        titulo,
-        descricao,
-        usuarioId: usuarioSelecionado.id,
-        nomeRemetente: usuarioLogado?.nome,
-      }),
-    });
-
-    if (response.ok) {
-      Swal.fire({
-        title: "Mensagem enviada!",
-        text: `A mensagem foi enviada para ${usuarioSelecionado.email}.`,
-        icon: "success",
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titulo,
+          descricao,
+          usuarioId: usuarioSelecionado.id,
+          nomeRemetente: usuarioLogado?.nome,
+        }),
       });
-      setTitulo("");
-      setDescricao("");
-      setUsuarioSelecionado(null);
-      setShowModalMensagem(false);
-    } else {
+
+      if (response.ok) {
+        Swal.fire({
+          title: t("modal.mensagemEnviada.titulo"),
+          text: t("modal.mensagemEnviada.texto", { email: usuarioSelecionado.email }),
+          icon: "success",
+        });
+        setTitulo("");
+        setDescricao("");
+        setUsuarioSelecionado(null);
+        setShowModalMensagem(false);
+      } else {
+        Swal.fire({
+          title: t("modal.erro.titulo"),
+          text: t("modal.erro.textoEnviarNotificacao"),
+          icon: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao enviar notificação:", err);
       Swal.fire({
-        title: "Erro",
-        text: "Erro ao enviar a notificação. Tente novamente.",
+        title: t("modal.erro.titulo"),
+        text: t("modal.erro.textoInterno"),
         icon: "error",
       });
+    } finally {
+      setIsEnviando(false);
     }
-  } catch (err) {
-    console.error("Erro ao enviar notificação:", err);
-    Swal.fire({
-      title: "Erro",
-      text: "Erro interno ao enviar a notificação.",
-      icon: "error",
-    });
-  } finally {
-    setIsEnviando(false);
   }
-}
 
-async function enviarConvite() {
-  setIsEnviando(true);
-  try {
-    const usuarioSalvo = localStorage.getItem("client_key") as string;
-    const idUsuario = usuarioSalvo.replace(/"/g, "");
+  async function enviarConvite() {
+    setIsEnviando(true);
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const idUsuario = usuarioSalvo.replace(/"/g, "");
 
-    const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-    const empresa = await resEmpresa.json();
+      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const empresa = await resEmpresa.json();
 
-    const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
-    const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
+      const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+      const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
 
-    const usuarioConvidado = todosUsuarios.find((u) => u.email === email);
+      const usuarioConvidado = todosUsuarios.find((u) => u.email === email);
 
-    if (usuarioConvidado && usuarioConvidado.empresaId) {
-      Swal.fire({
-        title: "Usuário já possui uma empresa vinculada",
-        text: "Esse usuário já está vinculado a uma empresa.",
-        icon: "warning",
-        confirmButtonText: "Ok",
-        confirmButtonColor: "#013C3C",
+      if (usuarioConvidado && usuarioConvidado.empresaId) {
+        Swal.fire({
+          title: t("modal.usuarioVinculado.titulo"),
+          text: t("modal.usuarioVinculado.texto"),
+          icon: "warning",
+          confirmButtonText: t("modal.botaoOk"),
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/convites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, empresaId: empresa.id }),
       });
-      return;
-    }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/convites`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, empresaId: empresa.id }),
-    });
-
-    if (response.ok) {
-      Swal.fire({
-        title: "Convite enviado com sucesso!",
-        text: `${usuarioLogado?.nome} Você enviou o convite para o email: ${email}.`,
-        icon: "success",
-        confirmButtonText: "Ok",
-        confirmButtonColor: "#013C3C",
-      });
-      setEmail("");
-      setShowModalConvite(false);
-    } else {
-      alert("Erro ao enviar convite. Verifique se o e-mail é válido.");
+      if (response.ok) {
+        Swal.fire({
+          title: t("modal.conviteEnviado.titulo"),
+          text: t("modal.conviteEnviado.texto", { nome: usuarioLogado?.nome, email }),
+          icon: "success",
+          confirmButtonText: t("modal.botaoOk"),
+          confirmButtonColor: "#013C3C",
+        });
+        setEmail("");
+        setShowModalConvite(false);
+      } else {
+        alert(t("modal.erro.enviarConvite"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(t("modal.erro.enviarConvite"));
+    } finally {
+      setIsEnviando(false);
     }
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao enviar convite.");
-  } finally {
-    setIsEnviando(false);
   }
-}
+
   async function confirmarRemocaoUsuario(usuario: UsuarioI) {
     if (!podeEditar(usuario)) return;
 
     Swal.fire({
-      title: "Tem certeza?",
-      text: `Deseja realmente remover ${usuario.nome} da empresa?`,
+      title: t("modal.confirmacaoRemocao.titulo"),
+      text: t("modal.confirmacaoRemocao.texto", { nome: usuario.nome }),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sim, remover",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: t("modal.confirmacaoRemocao.confirmar"),
+      cancelButtonText: t("modal.confirmacaoRemocao.cancelar"),
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -222,7 +225,11 @@ async function enviarConvite() {
           });
 
           if (res.ok) {
-            Swal.fire(`Removido!", "Usuário ${usuario.nome} foi removido da empresa`, "success");
+            Swal.fire(
+              t("modal.removido"),
+              t("modal.confirmacaoRemocao.sucesso", { nome: usuario.nome }),
+              "success"
+            );
             setModalEditarUsuario(null);
             window.location.reload();
             setUsuarios((prev) =>
@@ -231,11 +238,19 @@ async function enviarConvite() {
               )
             );
           } else {
-            Swal.fire("Erro", "Não foi possível remover o usuário.", "error");
+            Swal.fire(
+              t("modal.erro.titulo"),
+              t("modal.confirmacaoRemocao.erro"),
+              "error"
+            );
           }
         } catch (err) {
           console.error("Erro ao remover usuário:", err);
-          Swal.fire("Erro", "Erro interno ao tentar remover usuário.", "error");
+          Swal.fire(
+            t("modal.erro.titulo"),
+            t("modal.erro.removerUsuario"),
+            "error"
+          );
         }
       }
     });
@@ -261,7 +276,7 @@ async function enviarConvite() {
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>Carregando usuários...</h1>
+        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>{t("carregando")}</h1>
       </div>
     );
   }
@@ -269,7 +284,7 @@ async function enviarConvite() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <h1 className="text-3xl font-mono text-red-400">Erro: {error}</h1>
+        <h1 className="text-3xl font-mono text-red-400">{t("erro")}: {error}</h1>
       </div>
     );
   }
@@ -277,7 +292,7 @@ async function enviarConvite() {
   return (
     <div className="min-h-screen py-10 px-4 md:px-16" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>Usuários</h1>
+        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
         <div className="flex space-x-4">
           <button
             className="px-4 py-2 rounded-sm font-bold text-sm transition"
@@ -288,7 +303,7 @@ async function enviarConvite() {
             }}
             onClick={() => setShowModalConvite(true)}
           >
-            Convidar Usuário
+            {t("convidarUsuario")}
           </button>
           <button
             className="px-4 py-2 rounded-sm font-bold text-sm transition"
@@ -299,7 +314,7 @@ async function enviarConvite() {
             }}
             onClick={() => setShowModalMensagem(true)}
           >
-            Enviar Mensagem
+            {t("enviarMensagem")}
           </button>
         </div>
       </div>
@@ -308,18 +323,18 @@ async function enviarConvite() {
         <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
           <thead className="border-b" style={{ borderColor: "var(--cor-borda)", color: "var(--cor-cinza)" }}>
             <tr>
-              <th className="px-6 py-4">Nome de Usuário</th>
-              <th className="px-6 py-4">Função</th>
-              <th className="px-6 py-4">Criado em</th>
-              <th className="px-6 py-4 font-bold">Última Atualização</th>
-              <th className="px-6 py-4">Ação</th>
+              <th className="px-6 py-4">{t("nomeUsuario")}</th>
+              <th className="px-6 py-4">{t("funcao")}</th>
+              <th className="px-6 py-4">{t("criadoEm")}</th>
+              <th className="px-6 py-4 font-bold">{t("ultimaAtualizacao")}</th>
+              <th className="px-6 py-4">{t("acao")}</th>
             </tr>
           </thead>
           <tbody style={{ color: "var(--cor-texto)" }}>
             {usuarios.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center">
-                  Nenhum usuário encontrado
+                  {t("nenhumUsuario")}
                 </td>
               </tr>
             ) : (
@@ -363,11 +378,11 @@ async function enviarConvite() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl mb-4">Convidar Usuário</h2>
+            <h2 className="text-xl mb-4">{t("modal.convidarUsuario")}</h2>
             <div>
               <div className="mb-2">
                 <label htmlFor="email" className="text-sm font-semibold">
-                  E-mail do Usuário:
+                  {t("modal.emailUsuario")}
                 </label>
                 <input
                   id="email"
@@ -391,7 +406,7 @@ async function enviarConvite() {
                 }}
                 onClick={() => setShowModalConvite(false)}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -402,7 +417,7 @@ async function enviarConvite() {
                 onClick={enviarConvite}
                 disabled={isEnviando}
               >
-                {isEnviando ? "Enviando..." : "Enviar Convite"}
+                {isEnviando ? t("modal.enviando") : t("modal.enviarConvite")}
               </button>
             </div>
           </div>
@@ -418,11 +433,11 @@ async function enviarConvite() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl mb-4">Enviar Mensagem</h2>
+            <h2 className="text-xl mb-4">{t("modal.enviarMensagem")}</h2>
             <div>
               <div className="mb-2">
                 <label htmlFor="nome" className="text-sm font-semibold">
-                  De:
+                  {t("modal.de")}
                 </label>
                 <input
                   id="nome"
@@ -437,7 +452,7 @@ async function enviarConvite() {
                 />
               </div>
               <label htmlFor="nome" className="text-sm font-semibold">
-                Para:
+                {t("modal.para")}
               </label>
               <select
                 className="w-full p-2 mb-4 rounded border"
@@ -448,7 +463,7 @@ async function enviarConvite() {
                 }}
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
               >
-                <option value="">Selecione o usuário</option>
+                <option value="">{t("modal.selecioneUsuario")}</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
                     {usuario.nome}
@@ -458,7 +473,7 @@ async function enviarConvite() {
 
               <input
                 type="text"
-                placeholder="Título da mensagem"
+                placeholder={t("modal.tituloMensagem")}
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 className="w-full p-2 mb-4 rounded border"
@@ -470,7 +485,7 @@ async function enviarConvite() {
               />
 
               <textarea
-                placeholder="Descrição da mensagem"
+                placeholder={t("modal.descricaoMensagem")}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 className="w-full p-2 mb-4 rounded border"
@@ -490,7 +505,7 @@ async function enviarConvite() {
                 }}
                 onClick={() => setShowModalMensagem(false)}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -501,7 +516,7 @@ async function enviarConvite() {
                 onClick={enviarNotificacao}
                 disabled={isEnviando}
               >
-                {isEnviando ? "Enviando..." : "Enviar Mensagem"}
+                {isEnviando ? t("modal.enviando") : t("modal.enviarMensagem")}
               </button>
             </div>
           </div>
@@ -517,10 +532,10 @@ async function enviarConvite() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl mb-4">Editar Usuário</h2>
-            <p className="mb-4">Usuário: <strong>{modalEditarUsuario.nome}</strong></p>
+            <h2 className="text-xl mb-4">{t("modal.editarUsuario")}</h2>
+            <p className="mb-4">{t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong></p>
 
-            <label className="block mb-2 font-semibold">Alterar Cargo:</label>
+            <label className="block mb-2 font-semibold">{t("modal.alterarCargo")}:</label>
             <select
               value={novoTipo}
               onChange={(e) => setNovoTipo(e.target.value)}
@@ -531,9 +546,9 @@ async function enviarConvite() {
                 color: modoDark ? "#FFFFFF" : "#000000"
               }}
             >
-              <option value="FUNCIONARIO">FUNCIONARIO</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="PROPRIETARIO">PROPRIETARIO</option>
+              <option value="FUNCIONARIO">{t("modal.funcionario")}</option>
+              <option value="ADMIN">{t("modal.admin")}</option>
+              <option value="PROPRIETARIO">{t("modal.proprietario")}</option>
             </select>
 
             <div className="flex justify-between">
@@ -545,7 +560,7 @@ async function enviarConvite() {
                 }}
                 onClick={() => setModalEditarUsuario(null)}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 className="px-3 py-1.5 rounded text-sm text-white"
@@ -555,7 +570,11 @@ async function enviarConvite() {
                 onClick={async () => {
                   if (!usuarioLogado || !modalEditarUsuario) return;
                   if (!podeEditarCargo(usuarioLogado.tipo, modalEditarUsuario.tipo, novoTipo)) {
-                    Swal.fire("Ação não permitida", "Você não tem permissão para alterar este cargo.", "warning");
+                    Swal.fire(
+                      t("modal.erroPermissao.titulo"),
+                      t("modal.erroPermissao.texto"),
+                      "warning"
+                    );
                     return;
                   }
 
@@ -566,15 +585,23 @@ async function enviarConvite() {
                   });
 
                   if (res.ok) {
-                    Swal.fire("Cargo atualizado!", "O cargo do usuário foi alterado com sucesso.", "success");
+                    Swal.fire(
+                      t("modal.cargoAtualizado"),
+                      t("modal.cargoAtualizadoSucesso"),
+                      "success"
+                    );
                     setModalEditarUsuario(null);
                     window.location.reload();
                   } else {
-                    Swal.fire("Erro", "Não foi possível alterar o cargo.", "error");
+                    Swal.fire(
+                      t("modal.erro.titulo"),
+                      t("modal.erro.alterarCargo"),
+                      "error"
+                    );
                   }
                 }}
               >
-                Salvar Cargo
+                {t("modal.salvarCargo")}
               </button>
               <button
                 className="px-3 py-1.5 rounded text-sm text-white"
@@ -583,7 +610,7 @@ async function enviarConvite() {
                 }}
                 onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
               >
-                Remover
+                {t("modal.remover")}
               </button>
             </div>
           </div>
