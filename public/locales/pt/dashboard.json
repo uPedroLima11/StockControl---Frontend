@@ -24,7 +24,7 @@
         "colunas": {
           "produto": "Produto",
           "estoqueAtual": "Estoque Atual",
-          "estoqueIdeal": "Estoque Ideal",
+          "estoqueIdeal": "Estoque Mínimo",
           "valorAtual": "Valor Atual",
           "valorIdeal": "Valor Ideal"
         }

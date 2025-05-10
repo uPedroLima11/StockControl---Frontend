@@ -24,7 +24,7 @@
       "colunas": {
         "produto": "Product",
         "estoqueAtual": "Current Stock",
-        "estoqueIdeal": "Ideal Stock",
+        "estoqueIdeal": "Minimal Stock",
         "valorAtual": "Current Value",
         "valorIdeal": "Ideal Value"
       }
