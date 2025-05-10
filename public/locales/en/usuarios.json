@@ -1,4 +1,9 @@
 {
+    "roles": {
+        "FUNCIONARIO": "Employee",
+        "ADMIN": "Admin",
+        "PROPRIETARIO": "Owner"
+    },
     "titulo": "Users",
     "carregando": "Loading Users...",
     "convidarUsuario": "Invite User",

@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  FaBars, FaBell, FaChartBar, FaBoxOpen, FaFileAlt,
+  FaBars, FaBell, FaBoxOpen, FaFileAlt,
   FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck,
   FaCheck,
   FaCheckDouble
 } from "react-icons/fa";
+import { FaClipboardUser } from "react-icons/fa6";
+
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
@@ -121,7 +123,7 @@ export default function Sidebar() {
             </button>
 
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
-            <SidebarLink href="#" icon={<FaChartBar />} label={t("summary")} />
+            <SidebarLink href="#" icon={<FaClipboardUser />} label={t("summary")} />
             <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
             <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />

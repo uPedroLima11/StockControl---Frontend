@@ -23,6 +23,9 @@ export default function Usuarios() {
   const [showModalMensagem, setShowModalMensagem] = useState(false);
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("usuarios");
+  const translateRole = (role: string) => {
+    return t(`roles.${role}`, { defaultValue: role });
+  };
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -348,7 +351,7 @@ export default function Usuarios() {
                   }}
                 >
                   <td className="px-6 py-4">{usuario.nome}</td>
-                  <td className="px-6 py-4">{usuario.tipo}</td>
+                  <td className="px-6 py-4">{translateRole(usuario.tipo)}</td>
                   <td className="px-6 py-4">{new Date(usuario.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 font-semibold">{new Date(usuario.updatedAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4">

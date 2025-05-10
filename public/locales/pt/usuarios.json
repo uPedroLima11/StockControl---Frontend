@@ -1,4 +1,10 @@
 {
+    
+    "roles": {
+    "FUNCIONARIO": "Funcionário",
+    "ADMIN": "Administrador",
+    "PROPRIETARIO": "Proprietário"
+  }, 
     "titulo": "Usuários",
     "carregando": "Carregando Usuarios...",
     "convidarUsuario": "Convidar Usuário",

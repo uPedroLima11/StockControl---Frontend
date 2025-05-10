@@ -36,7 +36,7 @@ export default function Empresa() {
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("empresa");
-
+  
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";

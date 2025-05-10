@@ -19,7 +19,9 @@ export default function MinhaConta() {
   });
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("conta");
-
+  const translateRole = (role: string) => {
+    return t(`roles.${role}`, { defaultValue: role });
+  };
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
@@ -205,7 +207,7 @@ export default function MinhaConta() {
               {t("empresa.nome")}: <strong>{empresa?.nome || t("adicionar")}</strong>
             </p>
             <p>
-              {t("empresa.cargo")}: <strong>{usuarioLogado?.tipo || t("adicionar")}</strong>
+              {t("empresa.cargo")}: <strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong>
             </p>
             <p>{t("nome")}: {usuarioLogado?.nome?.split(" ")[0] || t("adicionar")}</p>
             <p>{t("sobrenome")}: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || t("adicionar")}</p>

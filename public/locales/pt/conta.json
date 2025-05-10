@@ -1,5 +1,9 @@
 {
- 
+ "roles": {
+    "FUNCIONARIO": "Funcionário",
+    "ADMIN": "Admin",
+    "PROPRIETARIO": "Proprietário"
+  },
       "titulo": "Minha conta",
       "email": "Email",
       "senha": "Senha",
