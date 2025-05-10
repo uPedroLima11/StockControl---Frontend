@@ -48,11 +48,14 @@ export default function Produtos() {
         root.style.setProperty("--cor-fonte", "#FFFFFF");
         root.style.setProperty("--cor-subtitulo", "#A3A3A3");
         root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
+        root.style.setProperty("--cor-teste", "#000000");
       } else {
         root.style.setProperty("--cor-fundo", "#FFFFFF");
         root.style.setProperty("--cor-fonte", "#000000");
         root.style.setProperty("--cor-subtitulo", "#4B5563");
         root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+        root.style.setProperty("--cor-teste", "#000000");
+
       }
 
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -298,19 +301,19 @@ export default function Produtos() {
             >
               <h2 className="text-xl font-bold mb-4">{modalVisualizar ? "Visualizar Produto" : "Novo Produto"}</h2>
 
-              <input placeholder="Nome" value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
+              <input placeholder="Nome" value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
 
-              <input placeholder="Descrição" value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
+              <input placeholder="Descrição" value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
 
-              <input placeholder="Preço" type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
+              <input placeholder="Preço" type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
 
-              <input placeholder="Quantidade" type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
+              <input placeholder="Quantidade" type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
 
-              <input placeholder="Foto (URL) (Não obrigatório)" value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
+              <input placeholder="Foto (URL) (Não obrigatório)" value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
 
               {form.foto && <img src={form.foto} alt="Preview" className="w-44 h-44 object-cover rounded mb-4" />}
 
-              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }}>
+              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}>
                 <option value="">Selecione o Fornecedor</option>
                 {fornecedores.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -319,8 +322,8 @@ export default function Produtos() {
                 ))}
               </select>
 
-              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }}>
-                <option value="">Selecione a Categoria</option>
+              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}>
+                <option value="text-white">Selecione a Categoria</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.nome}
