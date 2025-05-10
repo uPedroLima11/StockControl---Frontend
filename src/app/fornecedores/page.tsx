@@ -1,14 +1,12 @@
 "use client";
-import { CategoriaI } from "@/utils/types/categoria";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch } from "react-icons/fa";
+import { FaCog, FaSearch, FaPhoneAlt  } from "react-icons/fa";
 
 export default function Fornecedores() {
   const [modoDark, setModoDark] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
-  // const [_modalAberto, setModalAberto] = useState(false);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
@@ -103,6 +101,7 @@ export default function Fornecedores() {
                 <th className="py-3 px-4 text-center">Telefone</th>
                 <th className="py-3 px-4 text-center">Categoria</th>
                 <th className="py-3 px-4 text-center">Adicionado em</th>
+                <th className="py-3 px-4 text-center">Contato</th>
               </tr>
             </thead>
             <tbody>
@@ -117,6 +116,7 @@ export default function Fornecedores() {
                     <td className="py-3 px-4 text-center">{fornecedor.telefone}</td>
                     <td className="py-3 px-4 text-center">{fornecedor.categoria}</td>
                     <td className="py-3 px-4 text-center">{new Date(fornecedor.createdAt).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 text-center">{<FaPhoneAlt color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl"/>}</td>
                   </tr>
                 ))}
             </tbody>
