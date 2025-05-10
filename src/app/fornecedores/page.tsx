@@ -7,10 +7,8 @@ import { FaCog, FaSearch } from "react-icons/fa";
 export default function Fornecedores() {
   const [modoDark, setModoDark] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-  const [_empresaId, setEmpresaId] = useState<string | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
-  const [_categorias, setCategorias] = useState<CategoriaI[]>([]);
-  const [_modalAberto, setModalAberto] = useState(false);
+  // const [_modalAberto, setModalAberto] = useState(false);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
@@ -39,17 +37,12 @@ export default function Fornecedores() {
 
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
       const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
       const fornecedoresData = await responseFornecedores.json();
       console.log(fornecedoresData);
       setFornecedores(fornecedoresData);
-
-      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
-      const categoriasData = await responseCategorias.json();
-      setCategorias(categoriasData);
     };
 
     initialize();
@@ -76,7 +69,7 @@ export default function Fornecedores() {
 
           {podeEditar && (
             <button
-              onClick={() => setModalAberto(true)}
+              // onClick={() => setModalAberto(true)}
               className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
