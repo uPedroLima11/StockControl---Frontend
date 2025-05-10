@@ -129,7 +129,7 @@ export default function Fornecedores() {
 
   function handleEntrarContato(fornecedor: FornecedorI) {
     const telefoneFormatado = fornecedor.telefone.replace(/\D/g, "");
-    const numeroComDdd = `55${telefoneFormatado}`;
+    const numeroComDdd = `${telefoneFormatado}`;
     const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComDdd}`;
     window.open(urlWhatsApp, "_blank");
   }
@@ -240,7 +240,7 @@ export default function Fornecedores() {
                       }}
                       className="py-3 px-4 text-center"
                     >
-                      {fornecedor.telefone}
+                        {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
                     </td>
                     <td
                       onClick={() => {
