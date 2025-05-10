@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { HiEnvelope, HiLockClosed } from "react-icons/hi2";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 
 type Inputs = {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaBars, FaTimes } from 'react-icons/fa';
-import { useUsuarioStore } from '../context/usuario';
+import { useUsuarioStore } from '@/context/usuario';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);

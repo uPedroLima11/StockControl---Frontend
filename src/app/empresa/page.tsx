@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import Image from "next/image";
 

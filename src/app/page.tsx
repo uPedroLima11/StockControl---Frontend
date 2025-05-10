@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Banner from "./components/banner";
+import Banner from "../components/banner";
 import { FaCloud, FaLock, FaUserShield, FaWhatsapp } from "react-icons/fa";
 import { MdOutlineLibraryBooks } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";

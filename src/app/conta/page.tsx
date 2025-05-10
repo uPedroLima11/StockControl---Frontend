@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { EmpresaI } from "@/utils/types/empresa";

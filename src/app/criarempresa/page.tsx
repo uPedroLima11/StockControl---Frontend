@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 

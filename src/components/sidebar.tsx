@@ -8,7 +8,7 @@ import {
   FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck
 } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
 import { useTranslation } from "react-i18next";
 

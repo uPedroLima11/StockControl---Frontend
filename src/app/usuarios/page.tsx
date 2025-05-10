@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FaCog,} from "react-icons/fa";
-import { useUsuarioStore } from "../context/usuario";
+import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
 
