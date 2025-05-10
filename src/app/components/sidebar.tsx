@@ -18,6 +18,13 @@ export default function Sidebar() {
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const { logar, usuario } = useUsuarioStore();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+
+  useEffect(() => {
+    audioRef.current = new Audio('/notification-sound.mp3');
+    audioRef.current.volume = 0.3;
+  }, []);
 
   useEffect(() => {
     const usuarioSalvo = typeof window !== "undefined" ? localStorage.getItem("client_key") : null;
@@ -41,14 +48,20 @@ export default function Sidebar() {
         }
       }
     }
-
     async function verificarNotificacoes(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
       const notificacoes = await response.json();
       const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => !n.lida);
+      
+      if (possuiNaoLidas && !temNotificacaoNaoLida) {
+        const somAtivado = localStorage.getItem("somNotificacao") !== "false";
+        if (somAtivado && audioRef.current) {
+          audioRef.current.play().catch(e => console.log("Erro ao tocar som:", e));
+        }
+      }
+      
       setTemNotificacaoNaoLida(possuiNaoLidas);
     }
-
     if (usuarioId) {
       buscaUsuarios(usuarioId);
       buscaEmpresa(usuarioId);
@@ -83,6 +96,7 @@ export default function Sidebar() {
 
   return (
     <>
+          <audio ref={audioRef} src="/notification-sound.mp3" preload="auto" />
       <button className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-2 rounded-full" onClick={toggleSidebar}>
         <FaBars />
       </button>

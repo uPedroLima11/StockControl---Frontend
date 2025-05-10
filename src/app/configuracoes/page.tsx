@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaSun, FaMoon } from "react-icons/fa";
+import { FaSun, FaMoon, FaBell, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 
 export default function Configuracoes() {
   const [modoDark, setModoDark] = useState(false);
+  const [somNotificacao, setSomNotificacao] = useState(true);
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
     aplicarTema(ativo);
+
+    const somSalvo = localStorage.getItem("somNotificacao");
+    setSomNotificacao(somSalvo === null || somSalvo === "true");
   }, []);
 
   const aplicarTema = (ativado: boolean) => {
@@ -37,8 +41,14 @@ export default function Configuracoes() {
     aplicarTema(novoTema);
   };
 
+  const alternarSomNotificacao = () => {
+    const novoSom = !somNotificacao;
+    setSomNotificacao(novoSom);
+    localStorage.setItem("somNotificacao", String(novoSom));
+  };
+
   return (
-    <div className="flex min-h-screen  px-4 py-10 bg-[var(--cor-fundo)]">
+    <div className="flex min-h-screen px-4 py-10 bg-[var(--cor-fundo)]">
       <aside
         className="w-64 rounded-xl shadow-md p-6 h-fit"
         style={{
@@ -65,10 +75,10 @@ export default function Configuracoes() {
           ))}
         </ul>
 
-        <div className="mt-6 ">
+        <div className="mt-6 space-y-4">
           <button
             onClick={alternarTema}
-            className="flex items-center  gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium"
             style={{
               backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
               color: modoDark ? "#FBBF24" : "#374151",
@@ -77,6 +87,19 @@ export default function Configuracoes() {
           >
             {modoDark ? <FaSun size={16} /> : <FaMoon size={16} />}
             {modoDark ? "Modo Claro" : "Modo Escuro"}
+          </button>
+
+          <button
+            onClick={alternarSomNotificacao}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium"
+            style={{
+              backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#374151",
+              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+            }}
+          >
+            {somNotificacao ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
+            {somNotificacao ? "Som: Ativado" : "Som: Desativado"}
           </button>
         </div>
       </aside>
