@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaSearch, FaCog } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
@@ -18,6 +19,7 @@ export default function Produtos() {
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
+  const { t } = useTranslation("produtos");
   const [form, setForm] = useState<ProdutoI>({
     id: "",
     nome: "",
@@ -205,7 +207,7 @@ export default function Produtos() {
     <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-          Produtos
+          {t("titulo")}
         </h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
@@ -216,7 +218,7 @@ export default function Produtos() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input type="text" placeholder="Buscar Produto" className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
+            <input type="text" placeholder={t("buscar")} className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
 
@@ -230,7 +232,7 @@ export default function Produtos() {
                 color: modoDark ? "#FFFFFF" : "#00332C",
               }}
             >
-              Novo Produto
+              {t("novo")}
             </button>
           )}
         </div>
@@ -247,13 +249,13 @@ export default function Produtos() {
               <tr style={{ color: "var(--cor-fonte)" }}>
                 <th className="py-3 px-4">
                   <div className="flex items-center gap-1">
-                    <FaCog /> Nome
+                   <FaCog /> {t("nome")}
                   </div>
                 </th>
-                <th className="py-3 px-4">Fornecedor</th>
-                <th className="py-3 px-4">Categoria</th>
-                <th className="py-3 px-4 text-center">Estoque</th>
-                <th className="py-3 px-4">Preço</th>
+                <th>{t("fornecedor")}</th>
+                <th>{t("categoria")}</th>
+                <th className="text-center">{t("estoque")}</th>
+                <th>{t("preco")}</th>
               </tr>
             </thead>
             <tbody>
@@ -299,22 +301,20 @@ export default function Produtos() {
                 color: "var(--cor-fonte)",
               }}
             >
-              <h2 className="text-xl font-bold mb-4">{modalVisualizar ? "Visualizar Produto" : "Novo Produto"}</h2>
+              <input placeholder={t("nome")} value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
-              <input placeholder="Nome" value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
+              <input placeholder={t("descricao")} value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
-              <input placeholder="Descrição" value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
+              <input placeholder={t("preco")} type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
-              <input placeholder="Preço" type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
+              <input placeholder={t("quantidade")} type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
-              <input placeholder="Quantidade" type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
-
-              <input placeholder="Foto (URL) (Não obrigatório)" value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}/>
+              <input placeholder={t("foto")} value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
               {form.foto && <img src={form.foto} alt="Preview" className="w-44 h-44 object-cover rounded mb-4" />}
 
-              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}>
-                <option value="">Selecione o Fornecedor</option>
+              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}>
+                <option value="">{t("selecionarFornecedor")}</option>
                 {fornecedores.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.nome}
@@ -322,8 +322,8 @@ export default function Produtos() {
                 ))}
               </select>
 
-              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)"}}>
-                <option value="text-white">Selecione a Categoria</option>
+              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}>
+                <option value="">{t("selecionarCategoria")}</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.nome}
@@ -334,28 +334,28 @@ export default function Produtos() {
               <div className="flex justify-between mt-4">
                 <button
                   onClick={() => {
-                    setModalAberto(false);
-                    setModalVisualizar(null);
+                  setModalAberto(false);
+                  setModalVisualizar(null);
                   }}
                   className="hover:underline"
                   style={{ color: "var(--cor-fonte)" }}
                 >
-                  Fechar
+                  {t("fechar")}
                 </button>
                 {modalVisualizar ? (
                   podeEditar && (
-                    <>
-                      <button onClick={handleUpdate} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                        Salvar
-                      </button>
-                      <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                        Excluir
-                      </button>
-                    </>
+                  <>
+                    <button onClick={handleUpdate} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    {t("salvar")}
+                    </button>
+                    <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    {t("excluir")}
+                    </button>
+                  </>
                   )
                 ) : (
                   <button onClick={handleSubmit} className="px-4 py-2 rounded hover:bg-[#00443f]" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                    Criar Produto
+                  {t("criar")}
                   </button>
                 )}
               </div>

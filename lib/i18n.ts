@@ -8,6 +8,8 @@ import settingsPt from '../public/locales/pt/settings.json';
 import sidebarPt from '../public/locales/pt/sidebar.json';
 import dashboardPt from '../public/locales/pt/dashboard.json';
 import dashboardEn from '../public/locales/en/dashboard.json';
+import produtosPt from '../public/locales/pt/produtos.json';
+import produtosEn from '../public/locales/en/produtos.json';
 
 
 if (!i18n.isInitialized) {
@@ -17,18 +19,20 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos'],
       defaultNS: 'settings',
       resources: {
         en: {
           settings: settingsEn,
           sidebar: sidebarEn,
           dashboard: dashboardEn,
+          produtos: produtosEn,
         },
         pt: {
           settings: settingsPt,
           sidebar: sidebarPt,
           dashboard: dashboardPt,
+          produtos: produtosPt,
         },
       },
       detection: {

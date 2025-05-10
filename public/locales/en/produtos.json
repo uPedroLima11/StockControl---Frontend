@@ -1,0 +1,19 @@
+{
+      "titulo": "Products",
+      "nome": "Name",
+      "descricao": "Description",
+      "preco": "Price",
+      "quantidade": "Quantity",
+      "foto": "Photo URL",
+      "fornecedor": "Supplier",
+      "categoria": "Category",
+      "estoque": "Stock",
+      "novo": "New Product",
+      "selecionarFornecedor": "Select Supplier",
+      "selecionarCategoria": "Select Category",
+      "fechar": "Close",
+      "salvar": "Save",
+      "excluir": "Delete",
+      "criar": "Create",
+      "buscar": "Search Product"  
+  }
