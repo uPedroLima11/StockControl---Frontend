@@ -96,7 +96,7 @@ export default function CriarEmpresa() {
       } else {
         Swal.fire({
           icon: "error",
-          title: "Oops... algo deu errado!",
+          title: "Oops... algo deu errado! tente novamente",
           text: "Email já existente ou erro ao criar empresa.",
           confirmButtonColor: "#013C3C",
         });
