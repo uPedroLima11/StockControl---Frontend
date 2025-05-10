@@ -18,5 +18,6 @@
     "from": "From",
     "read": "Read",
     "unread": "Unread",
-    "no_notifications": "No notifications"
+    "no_notifications": "No notifications",
+    "Data": "Date"
   }
