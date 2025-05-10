@@ -1,4 +1,4 @@
- {
+{
     "notifications": "Notificações",
     "dashboard": "Dashboard",
     "summary": "Resumo",
@@ -8,14 +8,15 @@
     "suppliers": "Fornecedores",
     "settings": "Configurações",
     "account": "Conta",
+    "create_company": "Criar Empresa",
     "activation": "Ativação",
     "logout": "Sair",
-    "create_company": "Criar Empresa",
-    "invite_title": "Convite para entrar na empresa",
-    "invite_description": "Você recebeu um convite para fazer parte da empresa",
+    "invite_title": "Convite",
+    "invite_description": "Você foi convidado para a empresa",
+    "unknown_company": "Empresa desconhecida",
     "accept": "Aceitar",
-    "from": "Enviado por",
+    "from": "De",
     "read": "Lida",
     "unread": "Não lida",
     "no_notifications": "Nenhuma notificação"
- }
+  }

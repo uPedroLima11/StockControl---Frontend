@@ -12,51 +12,47 @@ import { useUsuarioStore } from "../context/usuario";
 import { ConviteI } from "@/utils/types/convite";
 import { useTranslation } from "react-i18next";
 
-
 export default function Sidebar() {
+  const { t } = useTranslation("sidebar");
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const { logar, usuario } = useUsuarioStore();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { t } = useTranslation("sidebar");
-
 
   useEffect(() => {
     audioRef.current = new Audio('/notification-sound.mp3');
     audioRef.current.volume = 0.3;
-  }, []);
 
-  useEffect(() => {
-    const usuarioSalvo = typeof window !== "undefined" ? localStorage.getItem("client_key") : null;
+    const usuarioSalvo = localStorage.getItem("client_key");
     const usuarioId = usuarioSalvo?.replace(/"/g, "");
 
-    async function buscaUsuarios(idUsuario: string) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if (response.status === 200) {
-        const dados = await response.json();
-        logar(dados);
+    async function fetchData() {
+      if (!usuarioId) return;
+
+      try {
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+        if (userResponse.status === 200) {
+          const userData = await userResponse.json();
+          logar(userData);
+        }
+
+        const companyResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioId}`);
+        if (companyResponse.status === 200) {
+          const companyData = await companyResponse.json();
+          setFotoEmpresa(companyData.foto);
+          setNomeEmpresa(companyData.nome);
+        }
+
+        await checkNotifications(usuarioId);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     }
 
-    async function buscaEmpresa(idUsuario: string) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-      if (response.status === 200) {
-        const dados = await response.json();
-        if (dados) {
-          setFotoEmpresa(dados.foto);
-          setNomeEmpresa(dados.nome);
-        }
-      }
-    }
-    async function verificarNotificacoes(idUsuario: string) {
+    async function checkNotifications(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
       const notificacoes = await response.json();
       const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => !n.lida);
@@ -67,39 +63,31 @@ export default function Sidebar() {
           audioRef.current.play().catch(e => console.log("Erro ao tocar som:", e));
         }
       }
-
       setTemNotificacaoNaoLida(possuiNaoLidas);
     }
-    if (usuarioId) {
-      buscaUsuarios(usuarioId);
-      buscaEmpresa(usuarioId);
-      verificarNotificacoes(usuarioId);
 
-      const intervalId = setInterval(() => {
-        if (usuarioId) {
-          verificarNotificacoes(usuarioId);
-        }
-      }, 30000);
+    fetchData();
 
-      return () => clearInterval(intervalId);
-    }
+    const intervalId = setInterval(() => {
+      if (usuarioId) checkNotifications(usuarioId);
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, [logar]);
+
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const toggleNotifications = async () => {
-    setShowNotifications(!showNotifications);
-
-    if (!showNotifications && usuario?.id) {
+    if (usuario?.id) {
       await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuarioId: usuario.id }),
       });
       setTemNotificacaoNaoLida(false);
     }
+    setShowNotifications(!showNotifications);
   };
 
   return (
@@ -121,37 +109,43 @@ export default function Sidebar() {
               <span className="text-lg relative">
                 <FaBell />
                 {temNotificacaoNaoLida && (
-                  <>
-                    <span className="text-sm md:inline">{t("notifications")}</span>
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
-                  </>
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
                 )}
               </span>
-              <span className="text-sm md:inline">{isMounted ? t("notifications") : "..."}</span>
+              <span className="text-sm md:inline">{t("notifications")}</span>
             </button>
 
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
-            {isMounted && <SidebarLink href="#" icon={<FaChartBar />} label={t("summary")} />}
-            {isMounted && <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />}
+            <SidebarLink href="#" icon={<FaChartBar />} label={t("summary")} />
+            <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
             <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />
-            <SidebarLink href="/Fornecedores" icon={<FaTruck />} label={t("suppliers")} />
+            <SidebarLink href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />
             <SidebarLink href="/configuracoes" icon={<FaWrench />} label={t("settings")} />
             <SidebarLink href="/conta" icon={<FaUser />} label={t("account")} />
 
             <Link href="/empresa" className="flex items-center gap-2">
-              <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
-              <h1 className="text-sm font-medium">{nomeEmpresa ?? t("create_company")}</h1>
+              <Image
+                src={fotoEmpresa || "/contadefault.png"}
+                alt="Foto da Empresa"
+                width={40}
+                height={40}
+                className="rounded-full object-cover border border-gray-300"
+              />
+              <h1 className="text-sm font-medium">{nomeEmpresa || t("create_company")}</h1>
             </Link>
           </nav>
         </div>
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
           <SidebarLink href="/ativacao" icon={<FaWrench />} label={t("activation")} />
-          <button onClick={() => {
-            localStorage.removeItem("client_key");
-            window.location.href = "/";
-          }} className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
+          <button
+            onClick={() => {
+              localStorage.removeItem("client_key");
+              window.location.href = "/";
+            }}
+            className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm"
+          >
             <span className="text-lg">
               <FaSignOutAlt />
             </span>
@@ -160,7 +154,12 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      <NotificacaoPainel isVisible={showNotifications} onClose={() => setShowNotifications(false)} />
+      {showNotifications && (
+        <NotificacaoPainel
+          isVisible={showNotifications}
+          onClose={() => setShowNotifications(false)}
+        />
+      )}
     </>
   );
 }
@@ -181,15 +180,18 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   const { usuario } = useUsuarioStore();
 
   useEffect(() => {
-    async function buscaDados() {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario?.id}`);
-      const dados = await response.json();
-      setNotificacoes(dados);
+    async function fetchNotifications() {
+      if (!usuario?.id) return;
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
+        setNotificacoes(await response.json());
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
     }
 
-    if (usuario?.id) {
-      buscaDados();
-    }
+    if (isVisible) fetchNotifications();
 
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
@@ -197,16 +199,10 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       }
     };
 
-    if (isVisible) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isVisible, usuario]);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isVisible, onClose, usuario]);
 
   async function handleInviteResponse(id: string, convite: ConviteI) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
@@ -270,9 +266,17 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   });
 
   return (
-    <div ref={panelRef} className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <div
+      ref={panelRef}
+      className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      style={{
+        transform: isVisible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.3s ease-in-out"
+      }}
+    >
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">Notificações</h2>
+        <h2 className="text-lg font-bold">{t("notifications")}</h2>
         <button onClick={onClose} className="text-white">✕</button>
       </div>
       <div className="space-y-4 text-sm max-h-[80vh] overflow-y-auto">

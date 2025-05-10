@@ -1,0 +1,32 @@
+
+{
+    "intro": {
+      "linha1": "Manage your inventory",
+      "linha2": "in a simple and smart way"
+    },
+    "dashboardTitulo": "Dashboard",
+    "resumo": {
+      "titulo": "Inventory Summary",
+      "lucroMensal": "Monthly Sales Profit",
+      "custoItens": "Item Cost",
+      "itensDisponiveis": "Available Items"
+    },
+    "atividades": {
+      "titulo": "Recent Activities",
+      "itensRecebidos": "Items Received",
+      "custoItens": "Item Cost",
+      "itensAjustados": "Adjusted Items",
+      "itensRemovidos": "Removed Items",
+      "ajusteCusto": "Cost Increase / Reduction"
+    },
+    "estoqueBaixo": {
+      "titulo": "Low Stock Products",
+      "colunas": {
+        "produto": "Product",
+        "estoqueAtual": "Current Stock",
+        "estoqueIdeal": "Ideal Stock",
+        "valorAtual": "Current Value",
+        "valorIdeal": "Ideal Value"
+      }
+    }
+  }

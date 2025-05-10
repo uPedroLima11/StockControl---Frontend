@@ -1,0 +1,32 @@
+
+{
+      "intro": {
+        "linha1": "Controle seu estoque de",
+        "linha2": "forma simples e inteligente"
+      },
+      "dashboardTitulo": "Dashboard",
+      "resumo": {
+        "titulo": "Resumo do Inventário",
+        "lucroMensal": "Lucro de Venda Mensal",
+        "custoItens": "Custo Itens",
+        "itensDisponiveis": "Itens Disponíveis"
+      },
+      "atividades": {
+        "titulo": "Atividades Recentes",
+        "itensRecebidos": "Itens Recebidos",
+        "custoItens": "Custo Itens",
+        "itensAjustados": "Itens Ajustados",
+        "itensRemovidos": "Itens Removidos",
+        "ajusteCusto": "Aumento / Redução de Custos"
+      },
+      "estoqueBaixo": {
+        "titulo": "Produtos com Estoque Baixo",
+        "colunas": {
+          "produto": "Produto",
+          "estoqueAtual": "Estoque Atual",
+          "estoqueIdeal": "Estoque Ideal",
+          "valorAtual": "Valor Atual",
+          "valorIdeal": "Valor Ideal"
+        }
+      }
+    }

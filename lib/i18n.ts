@@ -6,6 +6,9 @@ import settingsEn from '../public/locales/en/settings.json';
 import sidebarEn from '../public/locales/en/sidebar.json';
 import settingsPt from '../public/locales/pt/settings.json';
 import sidebarPt from '../public/locales/pt/sidebar.json';
+import dashboardPt from '../public/locales/pt/dashboard.json';
+import dashboardEn from '../public/locales/en/dashboard.json';
+
 
 if (!i18n.isInitialized) {
   i18n
@@ -14,16 +17,18 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar'],
+      ns: ['settings', 'sidebar', 'dashboard'],
       defaultNS: 'settings',
       resources: {
         en: {
           settings: settingsEn,
           sidebar: sidebarEn,
+          dashboard: dashboardEn,
         },
         pt: {
           settings: settingsPt,
           sidebar: sidebarPt,
+          dashboard: dashboardPt,
         },
       },
       detection: {
