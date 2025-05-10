@@ -1,0 +1,60 @@
+{
+
+      "titulo": "Minha Empresa",
+      "carregando": "Carregando dados da empresa...",
+      "empresaNaoEncontrada": "Empresa não encontrada.",
+      "dadosEmpresa": "Dados da Empresa",
+      "logoEmpresa": "Logo da Empresa",
+      "altLogoEmpresa": "Logo da empresa",
+      "alterarLogo": "Alterar Logo",
+      "editarDados": "Editar Dados",
+      "deletarEmpresa": "Deletar Empresa",
+      "sairEmpresa": "Sair da Empresa",
+      "naoInformado": "Não informado",
+      "campos": {
+        "nome": "Nome da Empresa",
+        "endereco": "Endereço",
+        "pais": "País",
+        "estado": "Estado",
+        "cidade": "Cidade",
+        "cep": "CEP",
+        "telefone": "Telefone",
+        "email": "Email Corporativo"
+      },
+      "modal": {
+        "alterarLogo": {
+          "titulo": "Alterar Logo",
+          "urlImagem": "URL da nova imagem",
+          "altPreview": "Preview da nova imagem"
+        },
+        "editarEmpresa": {
+          "titulo": "Editar Empresa"
+        },
+        "excluir": {
+          "titulo": "Tem certeza?",
+          "texto": "Essa ação não pode ser desfeita!",
+          "confirmar": "Sim, deletar!",
+          "cancelar": "Cancelar"
+        },
+        "sair": {
+          "titulo": "Sair da empresa?",
+          "texto": "Você perderá o acesso aos dados da empresa.",
+          "confirmar": "Sim, sair!",
+          "cancelar": "Cancelar"
+        },
+        "cancelar": "Cancelar",
+        "salvar": "Salvar"
+      },
+      "erros": {
+        "usuarioNaoLogado": "Usuário não logado",
+        "erroBuscarEmpresa": "Erro inesperado ao buscar empresa",
+        "erroAtualizarFoto": "Erro ao atualizar foto",
+        "erroAtualizarLogo": "Erro ao atualizar a logo da empresa",
+        "erroAtualizarEmpresa": "Erro ao atualizar empresa",
+        "erroEditarEmpresa": "Erro ao editar empresa",
+        "erroExcluirEmpresa": "Erro ao excluir a empresa",
+        "erroSairEmpresa": "Erro ao sair da empresa",
+        "erroProcessarExclusao": "Erro ao processar exclusão/saída da empresa"
+      }
+    }
+  

@@ -6,6 +6,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { EmpresaI } from "@/utils/types/empresa";
+import { useTranslation } from "react-i18next";
 
 export default function MinhaConta() {
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -17,6 +18,7 @@ export default function MinhaConta() {
     email: "",
   });
   const [modoDark, setModoDark] = useState(false);
+  const { t } = useTranslation("conta");
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -103,14 +105,14 @@ export default function MinhaConta() {
     if (!(atualizarDados.status === 200)) {
       Swal.fire({
         icon: "error",
-        title: "Algo deu errado!",
-        text: "Email ja Existente !",
-        confirmButtonText: "Ok",
+        title: t("modal.erro.titulo"),
+        text: t("modal.erro.emailExistente"),
+        confirmButtonText: t("modal.botaoOk"),
         confirmButtonColor: "#013C3C",
       });
     } else {
       Swal.fire({
-        title: "Alteração realizada com sucesso!",
+        title: t("modal.sucesso.titulo"),
         icon: "success",
         confirmButtonColor: "#013C3C",
       });
@@ -123,12 +125,12 @@ export default function MinhaConta() {
     if (!usuario) return;
 
     await Swal.fire({
-      title: "Tem certeza?",
-      text: "Essa ação não pode ser desfeita!",
+      title: t("modal.excluir.titulo"),
+      text: t("modal.excluir.texto"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sim, deletar!",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: t("modal.excluir.confirmar"),
+      cancelButtonText: t("modal.excluir.cancelar"),
     }).then(async (result) => {
       if (result.isConfirmed) {
         const excluirDados = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuario.id}`, {
@@ -136,7 +138,7 @@ export default function MinhaConta() {
         });
         if (excluirDados.status === 204) {
           Swal.fire({
-            title: "Conta excluída com sucesso!",
+            title: t("modal.excluir.sucesso"),
             icon: "success",
             confirmButtonColor: "#013C3C",
           });
@@ -145,9 +147,9 @@ export default function MinhaConta() {
         } else {
           Swal.fire({
             icon: "error",
-            title: "Algo deu errado!",
-            text: "Não foi possível excluir a conta.",
-            confirmButtonText: "Ok",
+            title: t("modal.erro.titulo"),
+            text: t("modal.erro.excluirConta"),
+            confirmButtonText: t("modal.botaoOk"),
             confirmButtonColor: "#013C3C",
           });
         }
@@ -165,13 +167,13 @@ export default function MinhaConta() {
           border: modoDark ? "1px solid #374151" : "2px solid #000000"
         }}
       >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>Minha conta</h1>
+        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
 
         <div
           className="border-b mb-4 pb-2"
           style={{ borderColor: "var(--cor-borda)" }}
         >
-          <h2 className="text-lg font-semibold underline">Email</h2>
+          <h2 className="text-lg font-semibold underline">{t("email")}</h2>
           <p className="mt-1">{usuarioLogado?.email || "..."}</p>
         </div>
 
@@ -179,7 +181,7 @@ export default function MinhaConta() {
           className="border-b mb-6 pb-6"
           style={{ borderColor: "var(--cor-borda)" }}
         >
-          <h2 className="text-lg font-semibold mb-4">Senha</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("senha")}</h2>
           <Link
             href="/esqueci"
             className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm hover:bg-[var(--cor-destaque)] hover:text-white"
@@ -187,10 +189,9 @@ export default function MinhaConta() {
               borderColor: "var(--cor-destaque)",
               color: "var(--cor-texto)",
               backgroundColor: modoDark ? "transparent" : "transparent",
-
             }}
           >
-            Trocar Minha Senha
+            {t("trocarSenha")}
           </Link>
         </div>
 
@@ -198,23 +199,23 @@ export default function MinhaConta() {
           className="border-b mb-4 pb-2"
           style={{ borderColor: "var(--cor-borda)" }}
         >
-          <h2 className="text-lg font-semibold">Informações da Conta</h2>
+          <h2 className="text-lg font-semibold">{t("informacoesConta")}</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>
-              Nome da Empresa: <strong>{empresa?.nome || "Adicionar"}</strong>
+              {t("empresa.nome")}: <strong>{empresa?.nome || t("adicionar")}</strong>
             </p>
             <p>
-              Cargo na Empresa: <strong>{usuarioLogado?.tipo || "Adicionar"}</strong>
+              {t("empresa.cargo")}: <strong>{usuarioLogado?.tipo || t("adicionar")}</strong>
             </p>
-            <p>Nome: {usuarioLogado?.nome?.split(" ")[0] || "Adicionar"}</p>
-            <p>Sobrenome: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || "Adicionar"}</p>
-            <p>Endereço: {empresa?.endereco || "Adicionar"}</p>
-            <p>País: {empresa?.pais || "Adicionar"}</p>
-            <p>Estado: {empresa?.estado || "Adicionar"}</p>
-            <p>Cidade: {empresa?.cidade || "Adicionar"}</p>
-            <p>Cep: {empresa?.cep || "Adicionar"}</p>
-            <p>Telefone: {empresa?.telefone || "Adicionar"}</p>
-            <p>Email da Empresa: {empresa?.email || "Adicionar"}</p>
+            <p>{t("nome")}: {usuarioLogado?.nome?.split(" ")[0] || t("adicionar")}</p>
+            <p>{t("sobrenome")}: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || t("adicionar")}</p>
+            <p>{t("empresa.endereco")}: {empresa?.endereco || t("adicionar")}</p>
+            <p>{t("empresa.pais")}: {empresa?.pais || t("adicionar")}</p>
+            <p>{t("empresa.estado")}: {empresa?.estado || t("adicionar")}</p>
+            <p>{t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}</p>
+            <p>{t("empresa.cep")}: {empresa?.cep || t("adicionar")}</p>
+            <p>{t("empresa.telefone")}: {empresa?.telefone || t("adicionar")}</p>
+            <p>{t("empresa.email")}: {empresa?.email || t("adicionar")}</p>
           </div>
         </div>
 
@@ -225,10 +226,9 @@ export default function MinhaConta() {
             style={{
               backgroundColor: "var(--cor-destaque)",
               color: "#FFFFFF",
-
             }}
           >
-            Editar Perfil
+            {t("editarPerfil")}
           </button>
           <button
             onClick={handleExcluir}
@@ -236,10 +236,9 @@ export default function MinhaConta() {
             style={{
               backgroundColor: "#ee1010",
               color: "#FFFFFF",
-
             }}
           >
-            Excluir Conta
+            {t("excluirConta")}
           </button>
         </div>
       </div>
@@ -253,10 +252,10 @@ export default function MinhaConta() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">Editar Informações</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("modal.editarTitulo")}</h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Nome</label>
+              <label className="block text-sm font-medium mb-1">{t("modal.nome")}</label>
               <input
                 type="text"
                 value={form.nome}
@@ -271,7 +270,7 @@ export default function MinhaConta() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Email</label>
+              <label className="block text-sm font-medium mb-1">{t("modal.email")}</label>
               <input
                 type="email"
                 value={form.email}
@@ -294,7 +293,7 @@ export default function MinhaConta() {
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 onClick={handleSalvar}
@@ -303,7 +302,7 @@ export default function MinhaConta() {
                   backgroundColor: "var(--cor-destaque)",
                 }}
               >
-                Salvar
+                {t("modal.salvar")}
               </button>
             </div>
           </div>

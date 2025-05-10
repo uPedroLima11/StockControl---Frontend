@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 interface Empresa {
   id: string;
@@ -34,6 +35,7 @@ export default function Empresa() {
   const router = useRouter();
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
+  const { t } = useTranslation("empresa");
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -95,7 +97,7 @@ export default function Empresa() {
       try {
         const userId = localStorage.getItem("client_key");
         if (!userId) {
-          console.warn("Usuário não logado");
+          console.warn(t("erros.usuarioNaoLogado"));
           return;
         }
 
@@ -110,7 +112,7 @@ export default function Empresa() {
         }
 
         if (!res.ok) {
-          throw new Error(`Erro inesperado ao buscar empresa: ${res.status}`);
+          throw new Error(t("erros.erroBuscarEmpresa"));
         }
 
         const data = await res.json();
@@ -130,7 +132,7 @@ export default function Empresa() {
     };
 
     fetchEmpresa();
-  }, [logar, router]);
+  }, [logar, router, t]);
 
   const atualizarFoto = async () => {
     if (!empresa) return;
@@ -160,14 +162,14 @@ export default function Empresa() {
         body: JSON.stringify(empresaAtualizada),
       });
 
-      if (!res.ok) throw new Error("Erro ao atualizar foto");
+      if (!res.ok) throw new Error(t("erros.erroAtualizarFoto"));
 
       const data = await res.json();
       setEmpresa(data);
       setModalAberto(false);
       window.location.reload();
     } catch (err) {
-      console.error("Erro ao atualizar a logo da empresa:", err);
+      console.error(t("erros.erroAtualizarLogo"), err);
     }
   };
 
@@ -190,14 +192,14 @@ export default function Empresa() {
         body: JSON.stringify(empresaAtualizada),
       });
 
-      if (!res.ok) throw new Error("Erro ao atualizar empresa");
+      if (!res.ok) throw new Error(t("erros.erroAtualizarEmpresa"));
 
       const data = await res.json();
       setEmpresa(data);
       setModalEdicaoAberto(false);
       window.location.reload();
     } catch (error) {
-      console.error("Erro ao editar empresa:", error);
+      console.error(t("erros.erroEditarEmpresa"), error);
     }
   };
 
@@ -209,12 +211,12 @@ export default function Empresa() {
 
       if (tipoUsuario === "PROPRIETARIO") {
         const confirm = await Swal.fire({
-          title: "Tem certeza?",
-          text: "Essa ação não pode ser desfeita!",
+          title: t("modal.excluir.titulo"),
+          text: t("modal.excluir.texto"),
           icon: "warning",
           showCancelButton: true,
-          confirmButtonText: "Sim, deletar!",
-          cancelButtonText: "Cancelar",
+          confirmButtonText: t("modal.excluir.confirmar"),
+          cancelButtonText: t("modal.excluir.cancelar"),
         });
 
         if (confirm.isConfirmed) {
@@ -222,19 +224,19 @@ export default function Empresa() {
             method: "DELETE",
           });
 
-          if (!res.ok) throw new Error("Erro ao excluir a empresa");
+          if (!res.ok) throw new Error(t("erros.erroExcluirEmpresa"));
 
           router.push("/criarempresa");
           window.location.reload();
         }
       } else {
         const confirm = await Swal.fire({
-          title: "Sair da empresa?",
-          text: "Você perderá o acesso aos dados da empresa.",
+          title: t("modal.sair.titulo"),
+          text: t("modal.sair.texto"),
           icon: "warning",
           showCancelButton: true,
-          confirmButtonText: "Sim, sair!",
-          cancelButtonText: "Cancelar",
+          confirmButtonText: t("modal.sair.confirmar"),
+          cancelButtonText: t("modal.sair.cancelar"),
         });
 
         if (confirm.isConfirmed) {
@@ -249,7 +251,7 @@ export default function Empresa() {
             }),
           });
 
-          if (!res.ok) throw new Error("Erro ao sair da empresa");
+          if (!res.ok) throw new Error(t("erros.erroSairEmpresa"));
 
           router.push("/criarempresa");
           window.location.reload();
@@ -258,14 +260,14 @@ export default function Empresa() {
       router.push("/criarempresa");
       window.location.reload();
     } catch (error) {
-      console.error("Erro ao processar exclusão/saída da empresa:", error);
+      console.error(t("erros.erroProcessarExclusao"), error);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p className="font-mono" style={{ color: "var(--cor-texto)" }}>Carregando dados da empresa...</p>
+        <p className="font-mono" style={{ color: "var(--cor-texto)" }}>{t("carregando")}</p>
       </div>
     );
   }
@@ -273,7 +275,7 @@ export default function Empresa() {
   if (!empresa) {
     return (
       <div className="min-h-screen flex justify-center items-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p className="text-red-600 font-mono">Empresa não encontrada.</p>
+        <p className="text-red-600 font-mono">{t("empresaNaoEncontrada")}</p>
       </div>
     );
   }
@@ -288,31 +290,31 @@ export default function Empresa() {
           border: modoDark ? "1px solid #374151" : "2px solid #000000"
         }}
       >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>Minha Empresa</h1>
+        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
 
         <div
           className="border-b mb-4 pb-2"
           style={{ borderColor: "var(--cor-borda)" }}
         >
-          <h2 className="text-lg font-semibold underline">Dados da Empresa</h2>
+          <h2 className="text-lg font-semibold underline">{t("dadosEmpresa")}</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>
-              Nome da Empresa: <strong>{empresa.nome}</strong>
+              {t("campos.nome")}: <strong>{empresa.nome}</strong>
             </p>
-            <p>Endereço: {empresa.endereco || "Não informado"}</p>
-            <p>País: {empresa.pais || "Não informado"}</p>
-            <p>Estado: {empresa.estado || "Não informado"}</p>
-            <p>Cidade: {empresa.cidade || "Não informado"}</p>
-            <p>CEP: {empresa.cep || "Não informado"}</p>
-            <p>Telefone: {empresa.telefone || "Não informado"}</p>
-            <p>Email Corporativo: {empresa.email}</p>
+            <p>{t("campos.endereco")}: {empresa.endereco || t("naoInformado")}</p>
+            <p>{t("campos.pais")}: {empresa.pais || t("naoInformado")}</p>
+            <p>{t("campos.estado")}: {empresa.estado || t("naoInformado")}</p>
+            <p>{t("campos.cidade")}: {empresa.cidade || t("naoInformado")}</p>
+            <p>{t("campos.cep")}: {empresa.cep || t("naoInformado")}</p>
+            <p>{t("campos.telefone")}: {empresa.telefone || t("naoInformado")}</p>
+            <p>{t("campos.email")}: {empresa.email}</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
           <div>
-            <h2 className="text-lg font-semibold mb-2">Logo da Empresa</h2>
-            {empresa.foto && <Image src={empresa.foto} alt="Logo da empresa" width={128} height={128} className="rounded mb-4" />}
+            <h2 className="text-lg font-semibold mb-2">{t("logoEmpresa")}</h2>
+            {empresa.foto && <Image src={empresa.foto} alt={t("altLogoEmpresa")} width={128} height={128} className="rounded mb-4" />}
             {tipoUsuario !== "FUNCIONARIO" && (
               <button
                 onClick={() => setModalAberto(true)}
@@ -324,7 +326,7 @@ export default function Empresa() {
                 }}
               >
                 <FaCloudUploadAlt />
-                Alterar Logo
+                {t("alterarLogo")}
               </button>
             )}
           </div>
@@ -339,10 +341,9 @@ export default function Empresa() {
               style={{
                 backgroundColor: "#2563eb",
                 color: "#FFFFFF",
-
               }}
             >
-              Editar Dados
+              {t("editarDados")}
             </button>
           )}
 
@@ -353,10 +354,9 @@ export default function Empresa() {
               style={{
                 backgroundColor: "#ee1010",
                 color: "#FFFFFF",
-
               }}
             >
-              {tipoUsuario === "PROPRIETARIO" ? "Deletar Empresa" : "Sair da Empresa"}
+              {tipoUsuario === "PROPRIETARIO" ? t("deletarEmpresa") : t("sairEmpresa")}
             </button>
           )}
         </div>
@@ -371,9 +371,9 @@ export default function Empresa() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">Alterar Logo</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("modal.alterarLogo.titulo")}</h2>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">URL da nova imagem</label>
+              <label className="block text-sm font-medium mb-1">{t("modal.alterarLogo.urlImagem")}</label>
               <input
                 type="text"
                 className="w-full rounded p-2"
@@ -386,7 +386,7 @@ export default function Empresa() {
                 onChange={(e) => setNovaFoto(e.target.value)}
               />
             </div>
-            {novaFoto && <Image src={novaFoto} alt="Preview" width={128} height={128} className="rounded mb-4" />}
+            {novaFoto && <Image src={novaFoto} alt={t("modal.alterarLogo.altPreview")} width={128} height={128} className="rounded mb-4" />}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setModalAberto(false)}
@@ -396,17 +396,16 @@ export default function Empresa() {
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 onClick={atualizarFoto}
                 className="px-4 py-2 text-white rounded"
                 style={{
                   backgroundColor: "#10b981",
-
                 }}
               >
-                Salvar
+                {t("modal.salvar")}
               </button>
             </div>
           </div>
@@ -422,11 +421,11 @@ export default function Empresa() {
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">Editar Empresa</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("modal.editarEmpresa.titulo")}</h2>
 
             {["nome", "email", "telefone", "endereco", "pais", "estado", "cidade", "cep"].map((key) => (
               <div key={key} className="mb-3">
-                <label className="block text-sm font-medium mb-1">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
                 <input
                   type="text"
                   className="w-full rounded p-2"
@@ -450,7 +449,7 @@ export default function Empresa() {
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
               >
-                Cancelar
+                {t("modal.cancelar")}
               </button>
               <button
                 onClick={editarDadosEmpresa}
@@ -459,7 +458,7 @@ export default function Empresa() {
                   backgroundColor: "#10b981",
                 }}
               >
-                Salvar
+                {t("modal.salvar")}
               </button>
             </div>
           </div>

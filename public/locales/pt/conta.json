@@ -1,0 +1,48 @@
+{
+ 
+      "titulo": "Minha conta",
+      "email": "Email",
+      "senha": "Senha",
+      "trocarSenha": "Trocar Minha Senha",
+      "informacoesConta": "Informações da Conta",
+      "editarPerfil": "Editar Perfil",
+      "excluirConta": "Excluir Conta",
+      "adicionar": "Adicionar",
+      "nome": "Nome",
+      "sobrenome": "Sobrenome",
+      "empresa": {
+        "nome": "Nome da Empresa",
+        "cargo": "Cargo na Empresa",
+        "endereco": "Endereço",
+        "pais": "País",
+        "estado": "Estado",
+        "cidade": "Cidade",
+        "cep": "CEP",
+        "telefone": "Telefone",
+        "email": "Email da Empresa"
+      },
+      "modal": {
+        "editarTitulo": "Editar Informações",
+        "nome": "Nome",
+        "email": "Email",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erro": {
+          "titulo": "Algo deu errado!",
+          "emailExistente": "Email já existente!",
+          "excluirConta": "Não foi possível excluir a conta."
+        },
+        "sucesso": {
+          "titulo": "Alteração realizada com sucesso!"
+        },
+        "excluir": {
+          "titulo": "Tem certeza?",
+          "texto": "Essa ação não pode ser desfeita!",
+          "confirmar": "Sim, deletar!",
+          "cancelar": "Cancelar",
+          "sucesso": "Conta excluída com sucesso!"
+        },
+        "botaoOk": "Ok"
+      }
+    }
+  

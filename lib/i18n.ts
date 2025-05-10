@@ -12,6 +12,10 @@ import produtosPt from '../public/locales/pt/produtos.json';
 import produtosEn from '../public/locales/en/produtos.json';
 import usuariosPt from '../public/locales/pt/usuarios.json';
 import usuariosEn from '../public/locales/en/usuarios.json';
+import contaPt from '../public/locales/pt/conta.json';
+import contaEn from '../public/locales/en/conta.json';
+import empresaPt from '../public/locales/pt/empresa.json';
+import empresaEn from '../public/locales/en/empresa.json';
 
 
 if (!i18n.isInitialized) {
@@ -21,7 +25,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -30,6 +34,8 @@ if (!i18n.isInitialized) {
           dashboard: dashboardEn,
           produtos: produtosEn,
           usuarios: usuariosEn,
+          conta: contaEn,
+          empresa: empresaEn,
         },
         pt: {
           settings: settingsPt,
@@ -37,6 +43,8 @@ if (!i18n.isInitialized) {
           dashboard: dashboardPt,
           produtos: produtosPt,
           usuarios: usuariosPt,
+          conta: contaPt,
+          empresa: empresaPt,
         },
       },
       detection: {
