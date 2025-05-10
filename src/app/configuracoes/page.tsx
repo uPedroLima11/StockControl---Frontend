@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaSun, FaMoon, FaBell, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { FaSun, FaMoon, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 
 export default function Configuracoes() {
   const [modoDark, setModoDark] = useState(false);
@@ -64,7 +64,7 @@ export default function Configuracoes() {
         </h2>
 
         <ul className="space-y-4 text-sm font-medium">
-          {["Idioma", "Notificações", "Permissões", "Integrações", "Alterar senha"].map((item) => (
+          {["Idioma", "Permissões", "Integrações", "Alterar senha"].map((item) => (
             <li
               key={item}
               className="cursor-pointer hover:underline"
@@ -99,7 +99,7 @@ export default function Configuracoes() {
             }}
           >
             {somNotificacao ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
-            {somNotificacao ? "Som: Ativado" : "Som: Desativado"}
+            {somNotificacao ? "Som: Ativado" : "Som : Desativado"}
           </button>
         </div>
       </aside>
