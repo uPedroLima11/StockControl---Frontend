@@ -78,13 +78,19 @@ export default function Configuracoes() {
         </h2>
 
         <ul className="space-y-4 text-sm font-medium">
-          {[t("permissions"), t("integrations"), t("change_password")].map((item, i) => (
-            <li
-              key={i}
-              className="cursor-pointer hover:underline"
-              style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
-            >
-              {item}
+          {[
+            { label: t("permissions"), link: "/permissions" },
+            { label: t("integrations"), link: "/integrations" },
+            { label: t("change_password"), link: "/esqueci" },
+          ].map((item, i) => (
+            <li key={i}>
+              <a
+          href={item.link}
+          className="cursor-pointer hover:underline"
+          style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
+              >
+          {item.label}
+              </a>
             </li>
           ))}
         </ul>
