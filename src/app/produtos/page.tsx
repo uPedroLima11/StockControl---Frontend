@@ -16,6 +16,8 @@ export default function Produtos() {
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
   const [categorias, setCategorias] = useState<CategoriaI[]>([]);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
+  const [busca, setBusca] = useState("");
+  const [modoDark, setModoDark] = useState(false);
   const [form, setForm] = useState<ProdutoI>({
     id: "",
     nome: "",
@@ -32,72 +34,53 @@ export default function Produtos() {
     createdAt: new Date(),
     updatedAt: new Date(),
   });
-  const [busca, setBusca] = useState("");
-  const [modoDark, setModoDark] = useState(false);
 
   useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativado = temaSalvo === "true";
-    setModoDark(ativado);
+    const initialize = async () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
 
-    const root = document.documentElement;
+      const root = document.documentElement;
 
-    if (ativado) {
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#FFFFFF");
-      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-    } else {
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-fonte", "#000000");
-      root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
-    }
-  }, []);
+      if (ativado) {
+        root.style.setProperty("--cor-fundo", "#20252B");
+        root.style.setProperty("--cor-fonte", "#FFFFFF");
+        root.style.setProperty("--cor-subtitulo", "#A3A3A3");
+        root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
+      } else {
+        root.style.setProperty("--cor-fundo", "#FFFFFF");
+        root.style.setProperty("--cor-fonte", "#000000");
+        root.style.setProperty("--cor-subtitulo", "#4B5563");
+        root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+      }
 
-  useEffect(() => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-    const buscarUsuario = async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
-      const usuario = await response.json();
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
+
+      if (usuario.empresaId) {
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const todosProdutos: ProdutoI[] = await responseProdutos.json();
+        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
+        setProdutos(produtosDaEmpresa);
+      }
+
+      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
+      const fornecedoresData = await responseFornecedores.json();
+      setFornecedores(fornecedoresData);
+
+      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
+      const categoriasData = await responseCategorias.json();
+      setCategorias(categoriasData);
     };
 
-    buscarUsuario();
-  }, []);
-
-  useEffect(() => {
-    if (!empresaId) return;
-
-    const buscarProdutos = async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-      const todosProdutos: ProdutoI[] = await response.json();
-      const produtosDaEmpresa = todosProdutos.filter(p => p.empresaId === empresaId);
-      setProdutos(produtosDaEmpresa);
-    };
-
-    buscarProdutos();
-  }, [empresaId]);
-
-  useEffect(() => {
-    const buscarFornecedores = async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
-      const data = await res.json();
-      setFornecedores(data);
-    };
-
-    const buscarCategorias = async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
-      const data = await res.json();
-      setCategorias(data);
-    };
-
-    buscarFornecedores();
-    buscarCategorias();
+    initialize();
   }, []);
 
   useEffect(() => {
@@ -211,9 +194,7 @@ export default function Produtos() {
     }
   };
 
-  const produtosFiltrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()));
 
   const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
 
@@ -229,17 +210,10 @@ export default function Produtos() {
             className="flex items-center border rounded-full px-4 py-2 shadow-sm"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
+              borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input
-              type="text"
-              placeholder="Buscar Produto"
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
+            <input type="text" placeholder="Buscar Produto" className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
 
@@ -262,13 +236,17 @@ export default function Produtos() {
           className="border rounded-xl overflow-x-auto shadow"
           style={{
             backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000"
+            borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
           <table className="w-full text-sm font-mono">
             <thead className="border-b">
               <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4"><div className="flex items-center gap-1"><FaCog /> Nome</div></th>
+                <th className="py-3 px-4">
+                  <div className="flex items-center gap-1">
+                    <FaCog /> Nome
+                  </div>
+                </th>
                 <th className="py-3 px-4">Fornecedor</th>
                 <th className="py-3 px-4">Categoria</th>
                 <th className="py-3 px-4 text-center">Estoque</th>
@@ -276,10 +254,13 @@ export default function Produtos() {
               </tr>
             </thead>
             <tbody>
-              {produtosFiltrados.map(produto => (
+              {produtosFiltrados.map((produto) => (
                 <tr
                   key={produto.id}
-                  onClick={() => { setModalVisualizar(produto); setForm(produto); }}
+                  onClick={() => {
+                    setModalVisualizar(produto);
+                    setForm(produto);
+                  }}
                   className="border-b hover:bg-opacity-50 transition cursor-pointer"
                   style={{
                     color: "var(--cor-fonte)",
@@ -290,10 +271,16 @@ export default function Produtos() {
                     <Image src={produto.foto || "/out.jpg"} width={30} height={30} className="rounded" alt={produto.nome} />
                     <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
                   </td>
-                  <td className="py-3 px-3">{produto.fornecedor?.nome || "-"}</td>
-                  <td className="py-3 px-3">{produto.categoria?.nome || "-"}</td>
+                  <td className="py-3 px-3 text-center">{produto.fornecedor?.nome || "-"}</td>
+                  <td className="py-3 px-3 text-center">{produto.categoria?.nome || "-"}</td>
                   <td className="py-3 px-4 text-center">{produto.quantidade || "-"}</td>
-                  <td className="py-3 px-3">R${produto.preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                  <td className="py-3 px-3 text-center">
+                    R$
+                    {produto.preco
+                      .toFixed(2)
+                      .replace(".", ",")
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -306,73 +293,24 @@ export default function Produtos() {
               className="p-6 rounded-lg shadow-xl w-full max-w-lg"
               style={{
                 backgroundColor: "var(--cor-fundo-bloco)",
-                color: "var(--cor-fonte)"
+                color: "var(--cor-fonte)",
               }}
             >
               <h2 className="text-xl font-bold mb-4">{modalVisualizar ? "Visualizar Produto" : "Novo Produto"}</h2>
 
-              <input
-                placeholder="Nome"
-                value={form.nome || ""}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              />
+              <input placeholder="Nome" value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
 
-              <input
-                placeholder="Descrição"
-                value={form.descricao || ""}
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              />
+              <input placeholder="Descrição" value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
 
-              <input
-                placeholder="Preço"
-                type="text"
-                value={form.preco || ""}
-                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              />
+              <input placeholder="Preço" type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
 
-              <input
-                placeholder="Quantidade"
-                type="number"
-                value={form.quantidade || ""}
-                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              />
+              <input placeholder="Quantidade" type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
 
-              <input
-                placeholder="Foto (URL) (Não obrigatório)"
-                value={form.foto || ""}
-                onChange={(e) => setForm({ ...form, foto: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              />
+              <input placeholder="Foto (URL) (Não obrigatório)" value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }} />
 
-              {form.foto && (
-                <img
-                  src={form.foto}
-                  alt="Preview"
-                  className="w-44 h-44 object-cover rounded mb-4"
-                />
-              )}
+              {form.foto && <img src={form.foto} alt="Preview" className="w-44 h-44 object-cover rounded mb-4" />}
 
-              <select
-                value={form.fornecedorId || ""}
-                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              >
+              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }}>
                 <option value="">Selecione o Fornecedor</option>
                 {fornecedores.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -381,13 +319,7 @@ export default function Produtos() {
                 ))}
               </select>
 
-              <select
-                value={form.categoriaId || ""}
-                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? 'border-white' : 'border-gray-300'}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ color: "var(--cor-fonte)" }}
-              >
+              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ color: "var(--cor-fonte)" }}>
                 <option value="">Selecione a Categoria</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -398,35 +330,28 @@ export default function Produtos() {
 
               <div className="flex justify-between mt-4">
                 <button
-                  onClick={() => { setModalAberto(false); setModalVisualizar(null); }}
+                  onClick={() => {
+                    setModalAberto(false);
+                    setModalVisualizar(null);
+                  }}
                   className="hover:underline"
                   style={{ color: "var(--cor-fonte)" }}
                 >
                   Fechar
                 </button>
                 {modalVisualizar ? (
-                  podeEditar && <>
-                    <button
-                      onClick={handleUpdate}
-                      className="px-4 py-2 rounded hover:bg-blue-700"
-                      style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      className="px-4 py-2 rounded hover:bg-red-700"
-                      style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
-                    >
-                      Excluir
-                    </button>
-                  </>
+                  podeEditar && (
+                    <>
+                      <button onClick={handleUpdate} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                        Salvar
+                      </button>
+                      <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                        Excluir
+                      </button>
+                    </>
+                  )
                 ) : (
-                  <button
-                    onClick={handleSubmit}
-                    className="px-4 py-2 rounded hover:bg-[#00443f]"
-                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? '#FFFFFF' : '#000000'}` }}
-                  >
+                  <button onClick={handleSubmit} className="px-4 py-2 rounded hover:bg-[#00443f]" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
                     Criar Produto
                   </button>
                 )}
