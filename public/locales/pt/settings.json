@@ -9,5 +9,6 @@
     "sound_on": "Som: Ativado",
     "sound_off": "Som: Desativado",
     "preferences": "Preferências",
-    "preferences_desc": "Escolha uma categoria à esquerda para visualizar e modificar configurações."
+    "preferences_desc": "Escolha uma categoria à esquerda para visualizar e modificar configurações.",
+    "change_language": "Trocar Idioma"
 }
