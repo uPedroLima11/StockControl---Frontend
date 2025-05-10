@@ -1,0 +1,15 @@
+{
+    "settings": "Settings",
+    "language": "Language",
+    "permissions": "Permissions",
+    "integrations": "Integrations",
+    "change_password": "Change Password",
+    "light_mode": "Light Mode",
+    "dark_mode": "Dark Mode",
+    "sound_on": "Sound: On",
+    "sound_off": "Sound: Off",
+    "preferences": "Preferences",
+    "preferences_desc": "Choose a category on the left to view and modify settings."
+      }
+      
+  

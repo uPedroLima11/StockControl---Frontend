@@ -10,6 +10,8 @@ import {
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "../context/usuario";
 import { ConviteI } from "@/utils/types/convite";
+import { useTranslation } from "react-i18next";
+
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +20,13 @@ export default function Sidebar() {
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const { logar, usuario } = useUsuarioStore();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { t } = useTranslation("sidebar");
 
 
   useEffect(() => {
@@ -114,32 +122,32 @@ export default function Sidebar() {
                 <FaBell />
                 {temNotificacaoNaoLida && (
                   <>
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                    <span className="text-sm md:inline">{t("notifications")}</span>
                     <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
                   </>
                 )}
               </span>
-              <span className="text-sm md:inline">Notificações</span>
+              <span className="text-sm md:inline">{isMounted ? t("notifications") : "..."}</span>
             </button>
 
-            <SidebarLink href="/dashboard" icon={<FaFileAlt />} label="Dashboard" />
-            <SidebarLink href="#" icon={<FaChartBar />} label="Resumo" />
-            <SidebarLink href="/produtos" icon={<FaBoxOpen />} label="Produtos" />
-            <SidebarLink href="/usuarios" icon={<FaUser />} label="Usuários" />
-            <SidebarLink href="/suporte" icon={<FaHeadset />} label="Suporte" />
-            <SidebarLink href="/Fornecedores" icon={<FaTruck />} label="Fornecedores" />
-            <SidebarLink href="/configuracoes" icon={<FaWrench />} label="Configurações" />
-            <SidebarLink href="/conta" icon={<FaUser />} label="Conta" />
+            <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
+            {isMounted && <SidebarLink href="#" icon={<FaChartBar />} label={t("summary")} />}
+            {isMounted && <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />}
+            <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
+            <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />
+            <SidebarLink href="/Fornecedores" icon={<FaTruck />} label={t("suppliers")} />
+            <SidebarLink href="/configuracoes" icon={<FaWrench />} label={t("settings")} />
+            <SidebarLink href="/conta" icon={<FaUser />} label={t("account")} />
 
             <Link href="/empresa" className="flex items-center gap-2">
               <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
-              <h1 className="text-sm font-medium">{nomeEmpresa ?? "Criar Empresa"}</h1>
+              <h1 className="text-sm font-medium">{nomeEmpresa ?? t("create_company")}</h1>
             </Link>
           </nav>
         </div>
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
-          <SidebarLink href="/ativacao" icon={<FaWrench />} label="Ativação" />
+          <SidebarLink href="/ativacao" icon={<FaWrench />} label={t("activation")} />
           <button onClick={() => {
             localStorage.removeItem("client_key");
             window.location.href = "/";
@@ -147,7 +155,7 @@ export default function Sidebar() {
             <span className="text-lg">
               <FaSignOutAlt />
             </span>
-            <span className="text-sm md:inline">Sair</span>
+            <span className="text-sm md:inline">{t("logout")}</span>
           </button>
         </div>
       </aside>
@@ -167,6 +175,7 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
 }
 
 function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
+  const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const { usuario } = useUsuarioStore();
@@ -225,17 +234,14 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       return (
         <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold">Convite para entrar na empresa</h3>
+            <h3 className="font-bold">{t("invite_title")}</h3>
             <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
           </div>
 
-          <p>Você recebeu um convite para fazer parte da empresa {notificacao.convite.empresa.nome}.</p>
+          <p>{t("invite_description")} {notificacao.convite.empresa.nome}.</p>
 
-          <button
-            onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}
-            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
-          >
-            Aceitar
+          <button className="py-2 px-4 bg-[#013C3C] text-white rounded-lg">
+            {t("accept")}
           </button>
         </div>
       );
@@ -254,8 +260,8 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
 
         <p>{descricaoMensagem}</p>
-        <p className="text-sm text-gray-400">Enviado por: {nomeEnviadoPor}</p>
-        <p>{notificacao.lida ? "Lida" : "Não lida"}</p>
+        <p className="text-sm text-gray-400">{t("from")}: {nomeEnviadoPor}</p>
+        <p>{notificacao.lida ? t("read") : t("unread")}</p>
       </div>
     );
   });
@@ -270,7 +276,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         {notificacoes.length > 0 ? (
           notificacaoTable
         ) : (
-          <p className="text-center py-4">Nenhuma notificação</p>
+          <p className="text-center py-4">{t("no_notifications")}</p>
         )}
       </div>
     </div>

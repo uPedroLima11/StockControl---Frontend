@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaSun, FaMoon, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import i18n from "i18next";
+import Image from "next/image";
 
 export default function Configuracoes() {
   const [modoDark, setModoDark] = useState(false);
   const [somNotificacao, setSomNotificacao] = useState(true);
+  const { t } = useTranslation("settings");
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -47,6 +51,10 @@ export default function Configuracoes() {
     localStorage.setItem("somNotificacao", String(novoSom));
   };
 
+  const mudarIdioma = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="flex min-h-screen px-4 py-10 bg-[var(--cor-fundo)]">
       <aside
@@ -60,13 +68,13 @@ export default function Configuracoes() {
           className="text-lg font-bold mb-6"
           style={{ color: modoDark ? "#FFFFFF" : "#111827" }}
         >
-          Configurações
+          {t("settings")}
         </h2>
 
         <ul className="space-y-4 text-sm font-medium">
-          {["Idioma", "Permissões", "Integrações", "Alterar senha"].map((item) => (
+          {[t("language"), t("permissions"), t("integrations"), t("change_password")].map((item, i) => (
             <li
-              key={item}
+              key={i}
               className="cursor-pointer hover:underline"
               style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
             >
@@ -86,7 +94,7 @@ export default function Configuracoes() {
             }}
           >
             {modoDark ? <FaSun size={16} /> : <FaMoon size={16} />}
-            {modoDark ? "Modo Claro" : "Modo Escuro"}
+            {modoDark ? t("light_mode") : t("dark_mode")}
           </button>
 
           <button
@@ -99,8 +107,19 @@ export default function Configuracoes() {
             }}
           >
             {somNotificacao ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
-            {somNotificacao ? "Som: Ativado" : "Som : Desativado"}
+            {somNotificacao ? t("sound_on") : t("sound_off")}
           </button>
+
+          <div className="flex items-center justify-center gap-10 mt-4">
+            <button onClick={() => mudarIdioma("pt")} className="flex items-center gap-2">
+              <Image src="/brasil.png" alt="Português" width={30} height={20} quality={100} />
+              <span>Português</span>
+            </button>
+            <button onClick={() => mudarIdioma("en")} className="flex items-center gap-2">
+              <Image src="/ingles.png" alt="English" width={25} height={20} quality={100} />
+              <span>English</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -109,11 +128,11 @@ export default function Configuracoes() {
           className="text-2xl font-bold mb-4"
           style={{ color: modoDark ? "#FFFFFF" : "#000000" }}
         >
-          Preferências
+          {t("preferences")}
         </h1>
 
         <p style={{ color: modoDark ? "#D1D5DB" : "#4B5563" }}>
-          Escolha uma categoria à esquerda para visualizar e modificar configurações.
+          {t("preferences_desc")}
         </p>
       </main>
     </div>

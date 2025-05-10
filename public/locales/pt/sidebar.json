@@ -1,0 +1,21 @@
+ {
+    "notifications": "Notificações",
+    "dashboard": "Dashboard",
+    "summary": "Resumo",
+    "products": "Produtos",
+    "users": "Usuários",
+    "support": "Suporte",
+    "suppliers": "Fornecedores",
+    "settings": "Configurações",
+    "account": "Conta",
+    "activation": "Ativação",
+    "logout": "Sair",
+    "create_company": "Criar Empresa",
+    "invite_title": "Convite para entrar na empresa",
+    "invite_description": "Você recebeu um convite para fazer parte da empresa",
+    "accept": "Aceitar",
+    "from": "Enviado por",
+    "read": "Lida",
+    "unread": "Não lida",
+    "no_notifications": "Nenhuma notificação"
+ }

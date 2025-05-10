@@ -1,3 +1,5 @@
+const { i18n } = require('./next-i18next.config');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -10,7 +12,6 @@ const nextConfig = {
         protocol: "https",
         hostname: "files.tecnoblog.net",
       },
-
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
@@ -25,7 +26,8 @@ const nextConfig = {
       },
     ],
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
+  i18n,
 };
 
 export default nextConfig;

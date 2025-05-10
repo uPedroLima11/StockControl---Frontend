@@ -1,0 +1,21 @@
+{
+    "notifications": "Notifications",
+        "dashboard": "Dashboard",
+        "summary": "Summary",
+        "products": "Products",
+        "users": "Users",
+        "support": "Support",
+        "suppliers": "Suppliers",
+        "settings": "Settings",
+        "account": "Account",
+        "activation": "Activation",
+        "logout": "Logout",
+        "create_company": "Create Company",
+        "invite_title": "Invitation to join the company",
+        "invite_description": "You received an invitation to join the company",
+        "accept": "Accept",
+        "from": "Sent by",
+        "read": "Read",
+        "unread": "Unread",
+        "no_notifications": "No notifications"
+}
