@@ -226,7 +226,7 @@ export default function MinhaConta() {
             style={{
               backgroundColor: "var(--cor-destaque)",
               color: "#FFFFFF",
-             
+
             }}
           >
             Editar Perfil
@@ -237,7 +237,7 @@ export default function MinhaConta() {
             style={{
               backgroundColor: "#ee1010",
               color: "#FFFFFF",
-              
+
             }}
           >
             Excluir Conta

@@ -52,14 +52,14 @@ export default function Sidebar() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
       const notificacoes = await response.json();
       const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => !n.lida);
-      
+
       if (possuiNaoLidas && !temNotificacaoNaoLida) {
         const somAtivado = localStorage.getItem("somNotificacao") !== "false";
         if (somAtivado && audioRef.current) {
           audioRef.current.play().catch(e => console.log("Erro ao tocar som:", e));
         }
       }
-      
+
       setTemNotificacaoNaoLida(possuiNaoLidas);
     }
     if (usuarioId) {
@@ -96,7 +96,7 @@ export default function Sidebar() {
 
   return (
     <>
-          <audio ref={audioRef} src="/notification-sound.mp3" preload="auto" />
+      <audio ref={audioRef} src="/notification-sound.mp3" preload="auto" />
       <button className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-2 rounded-full" onClick={toggleSidebar}>
         <FaBars />
       </button>
@@ -228,9 +228,9 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
             <h3 className="font-bold">Convite para entrar na empresa</h3>
             <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
           </div>
-          
+
           <p>Você recebeu um convite para fazer parte da empresa {notificacao.convite.empresa.nome}.</p>
-          
+
           <button
             onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}
             className="py-2 px-4 bg-[#013C3C] text-white rounded-lg"
@@ -240,19 +240,19 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
       );
     }
-    
+
     const descricao = notificacao.descricao;
     const partesDescricao = descricao.split(": ");
     const nomeEnviadoPor = partesDescricao[0]?.replace("Enviado por", "").trim() || "Desconhecido";
     const descricaoMensagem = partesDescricao.slice(1).join(": ").trim();
-    
+
     return (
       <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold">{notificacao.titulo}</h3>
           <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
         </div>
-        
+
         <p>{descricaoMensagem}</p>
         <p className="text-sm text-gray-400">Enviado por: {nomeEnviadoPor}</p>
         <p>{notificacao.lida ? "Lida" : "Não lida"}</p>

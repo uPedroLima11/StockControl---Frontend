@@ -314,7 +314,7 @@ export default function Empresa() {
             <h2 className="text-lg font-semibold mb-2">Logo da Empresa</h2>
             {empresa.foto && <Image src={empresa.foto} alt="Logo da empresa" width={128} height={128} className="rounded mb-4" />}
             {tipoUsuario !== "FUNCIONARIO" && (
-                <button
+              <button
                 onClick={() => setModalAberto(true)}
                 className="flex items-center gap-2 px-6 py-2 rounded-lg transition font-mono text-sm font-bold"
                 style={{
@@ -322,10 +322,10 @@ export default function Empresa() {
                   color: "var(--cor-texto)",
                   backgroundColor: "transparent",
                 }}
-                >
+              >
                 <FaCloudUploadAlt />
                 Alterar Logo
-                </button>
+              </button>
             )}
           </div>
 
