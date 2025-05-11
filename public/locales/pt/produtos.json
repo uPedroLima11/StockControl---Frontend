@@ -16,5 +16,8 @@
   "salvar": "Salvar",
   "excluir": "Excluir",
   "criar": "Criar",
-  "buscar": "Buscar Produto"
+  "buscar": "Buscar Produto",
+  "editarProduto": "Editar Produto",
+  "selecionarImagem": "Selecionar Imagem"
+  
 }

@@ -1,4 +1,8 @@
 {
+    "modal": {
+        "convite.Enviado.titulo": "Invitation Sent",
+        "convite.Enviado.texto": "Invitation successfully sent to the provided email."
+    },
     "titulo": "Create Company",
     "botaoCriar": "Create Company",
     "erro": {

@@ -108,7 +108,6 @@ export default function Produtos() {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
 
-      // Criar preview da imagem
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -187,7 +186,7 @@ export default function Produtos() {
 
   const handleUpdate = async () => {
     if (!modalVisualizar) return;
-
+  
     try {
       const formData = new FormData();
       
@@ -200,18 +199,24 @@ export default function Produtos() {
       formData.append("preco", form.preco.toString());
       formData.append("quantidade", form.quantidade.toString());
       formData.append("quantidadeMin", form.quantidadeMin.toString());
+      
       if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
       if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-
+  
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
         body: formData,
       });
-
+  
       if (response.ok) {
+        const updatedProduto = await response.json();
+        
         setModalVisualizar(null);
         setFile(null);
         setPreview(null);
+        
+        setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
+        
         Swal.fire({
           position: "center",
           icon: "success",
@@ -219,17 +224,23 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500,
         });
-        setTimeout(() => window.location.reload(), 1600);
       } else {
         const errorText = await response.text();
-        Swal.fire({ icon: "error", title: "Erro!", text: `Erro ao atualizar produto: ${errorText}` });
+        Swal.fire({ 
+          icon: "error", 
+          title: "Erro!", 
+          text: `Erro ao atualizar produto: ${errorText}` 
+        });
       }
     } catch (err) {
       console.error("Erro ao atualizar produto:", err);
-      Swal.fire({ icon: "error", title: "Erro!", text: "Erro inesperado ao tentar atualizar." });
+      Swal.fire({ 
+        icon: "error", 
+        title: "Erro!", 
+        text: "Erro inesperado ao tentar atualizar." 
+      });
     }
   };
-
   const handleDelete = async () => {
     if (!modalVisualizar) return;
 
