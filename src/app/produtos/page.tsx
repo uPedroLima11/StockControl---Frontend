@@ -134,16 +134,15 @@ export default function Produtos() {
       formData.append("preco", form.preco.toString());
       formData.append("quantidade", form.quantidade.toString());
       formData.append("quantidadeMin", form.quantidadeMin.toString());
-      formData.append("empresaId", empresaId);
-      
       if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
       if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-  
+      formData.append("empresaId", empresaId);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
         body: formData,
       });
-  
+
       if (response.ok) {
         setModalAberto(false);
         setForm({
@@ -184,11 +183,16 @@ export default function Produtos() {
       Swal.fire("Erro!", "Erro de conexão com o servidor", "error");
     }
   };
+
   const handleUpdate = async () => {
     if (!modalVisualizar) return;
   
     try {
       const formData = new FormData();
+      
+      if (file) {
+        formData.append("foto", file);
+      }
       
       formData.append("nome", form.nome);
       formData.append("descricao", form.descricao);
@@ -198,19 +202,10 @@ export default function Produtos() {
       
       if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
       if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-      
-      if (file) {
-        formData.append("foto", file);
-      } else if (form.foto) {
-        formData.append("manterFoto", "true");
-      } else {
-        formData.append("removerFoto", "true");
-      }
   
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
         body: formData,
-      
       });
   
       if (response.ok) {
