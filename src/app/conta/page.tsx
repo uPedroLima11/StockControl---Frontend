@@ -203,10 +203,7 @@ export default function MinhaConta() {
               {t("empresa.cargo")}: <strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong>
             </p>
             <p>
-              {t("nome")}: {usuarioLogado?.nome?.split(" ")[0] || t("adicionar")}
-            </p>
-            <p>
-              {t("sobrenome")}: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || t("adicionar")}
+              {t("nome")}: {usuarioLogado?.nome || t("adicionar")}
             </p>
             <p>
               {t("empresa.endereco")}: {empresa?.endereco || t("adicionar")}
@@ -221,10 +218,10 @@ export default function MinhaConta() {
               {t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}
             </p>
             <p>
-              {t("empresa.cep")}: {empresa?.cep || t("adicionar")}
+                {t("empresa.cep")}: {empresa?.cep ? `${empresa.cep.slice(0, 5)}-${empresa.cep.slice(5)}` : t("adicionar")}
             </p>
             <p>
-              {t("empresa.telefone")}: {empresa?.telefone || t("adicionar")}
+              {t("empresa.telefone")}: {empresa?.telefone ? `(${empresa.telefone.slice(0, 2)}) ${empresa.telefone.slice(2)}` : t("adicionar")}
             </p>
             <p>
               {t("empresa.email")}: {empresa?.email || t("adicionar")}
