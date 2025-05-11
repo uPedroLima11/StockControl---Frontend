@@ -219,7 +219,6 @@ export default function Produtos() {
         setPreview(null);
         
         setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-        window.location.reload();
         Swal.fire({
           position: "center",
           icon: "success",
@@ -227,6 +226,7 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500,
         });
+      setTimeout(() => window.location.reload(), 1600);
       } else {
         const errorText = await response.text();
         Swal.fire({ 
