@@ -174,14 +174,14 @@ export default function Dashboard() {
               </thead>
               <tbody style={{ color: "var(--cor-fonte)" }}>
                 {produtos
-                  .filter((produto) => produto.quantidade < 10)
+                  .filter((produto) => produto.quantidade < 10 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
                   .map((produto) => (
                     <tr key={produto.id} className="border-b">
                       <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
                       <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
-                      <td className="py-2 pr-4 text-center whitespace-nowrap">10</td>
+                      <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidadeMin}</td>
                       <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
-                        {produto.quantidade < 5 ? (
+                        {produto.quantidade < produto.quantidadeMin ? (
                           <div className="flex items-center gap-1">
                             <LuShieldAlert size={18} color="#dc143c" /> {"Crítico"}
                           </div>

@@ -7,6 +7,7 @@ export interface ProdutoI {
     descricao: string;
     preco: number;
     quantidade: number;
+    quantidadeMin: number;
     foto?: string;
     fornecedorId?: string;
     categoriaId?: string;

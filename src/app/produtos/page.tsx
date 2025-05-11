@@ -26,6 +26,7 @@ export default function Produtos() {
     descricao: "",
     preco: 0,
     quantidade: 0,
+    quantidadeMin: 0,
     foto: "",
     fornecedorId: "",
     categoriaId: "",
@@ -103,11 +104,12 @@ export default function Produtos() {
     try {
       const precoFormatado = parseFloat(form.preco.toString().replace(/\./g, "").replace(",", "."));
       const quantidadeFormatada = parseFloat(form.quantidade.toString());
+      const quantidadeMinFormatada = parseFloat(form.quantidadeMin.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada, empresaId }),
+        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada,quantidadeMin: quantidadeMinFormatada , empresaId }),
       });
 
       if (response.ok) {
@@ -118,6 +120,7 @@ export default function Produtos() {
           descricao: "",
           preco: 0,
           quantidade: 0,
+          quantidadeMin: 0,
           foto: "",
           fornecedorId: "",
           categoriaId: "",
@@ -308,6 +311,8 @@ export default function Produtos() {
               <input placeholder={t("preco")} type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
               <input placeholder={t("quantidade")} type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              
+              <input placeholder={t("quantidadeMinima")} type="number" value={form.quantidadeMin || ""} onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
               <input placeholder={t("foto")} value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
