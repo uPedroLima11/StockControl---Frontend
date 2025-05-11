@@ -177,20 +177,20 @@ export default function Dashboard() {
                   .filter((produto) => produto.quantidade < 10)
                   .map((produto) => (
                     <tr key={produto.id} className="border-b">
-                    <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
-                    <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
-                    <td className="py-2 pr-4 text-center whitespace-nowrap">10</td>
-                    <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
-                      {produto.quantidade < 5 ? (
-                      <div className="flex items-center gap-1">
-                        <LuShieldAlert size={18} color="#dc143c" /> {"Crítico"}
-                      </div>
-                      ) : (
-                      <div className="flex items-center gap-1">
-                        <LuTriangleAlert size={18} color="#FFFF00" /> {"Atenção"}
-                      </div>
-                      )}
-                    </td>
+                      <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
+                      <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
+                      <td className="py-2 pr-4 text-center whitespace-nowrap">10</td>
+                      <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
+                        {produto.quantidade < 5 ? (
+                          <div className="flex items-center gap-1">
+                            <LuShieldAlert size={18} color="#dc143c" /> {"Crítico"}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <LuTriangleAlert size={18} color="#FFFF00" /> {"Atenção"}
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
               </tbody>

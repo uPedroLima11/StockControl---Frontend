@@ -143,18 +143,14 @@ export default function CriarEmpresa() {
     }
   }
 
-  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-    modoDark
-      ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-      : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-  }`;
+  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${modoDark ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]" : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"}`;
 
   return (
-    <div 
+    <div
       className="flex flex-col items-center justify-center p-6 min-h-screen"
       style={{
         backgroundColor: "var(--cor-fundo)",
-        color: "var(--cor-texto)"
+        color: "var(--cor-texto)",
       }}
     >
       <h1 className="text-3xl font-bold mb-6">{t("titulo")}</h1>
@@ -169,8 +165,8 @@ export default function CriarEmpresa() {
         <input {...register("cep")} placeholder={t("campos.cep")} className={inputClass} />
         <input {...register("foto")} placeholder={t("campos.foto")} className={inputClass} />
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="w-full text-white font-bold py-2 px-4 rounded transition"
           style={{
             backgroundColor: "var(--cor-botao)",

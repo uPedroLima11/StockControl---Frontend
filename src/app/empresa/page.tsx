@@ -36,7 +36,7 @@ export default function Empresa() {
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("empresa");
-  
+
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
@@ -267,7 +267,9 @@ export default function Empresa() {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p className="font-mono" style={{ color: "var(--cor-texto)" }}>{t("carregando")}</p>
+        <p className="font-mono" style={{ color: "var(--cor-texto)" }}>
+          {t("carregando")}
+        </p>
       </div>
     );
   }
@@ -287,27 +289,40 @@ export default function Empresa() {
         style={{
           backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
           color: modoDark ? "#FFFFFF" : "#000000",
-          border: modoDark ? "1px solid #374151" : "2px solid #000000"
+          border: modoDark ? "1px solid #374151" : "2px solid #000000",
         }}
       >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
+        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>
+          {t("titulo")}
+        </h1>
 
-        <div
-          className="border-b mb-4 pb-2"
-          style={{ borderColor: "var(--cor-borda)" }}
-        >
+        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
           <h2 className="text-lg font-semibold underline">{t("dadosEmpresa")}</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>
               {t("campos.nome")}: <strong>{empresa.nome}</strong>
             </p>
-            <p>{t("campos.endereco")}: {empresa.endereco || t("naoInformado")}</p>
-            <p>{t("campos.pais")}: {empresa.pais || t("naoInformado")}</p>
-            <p>{t("campos.estado")}: {empresa.estado || t("naoInformado")}</p>
-            <p>{t("campos.cidade")}: {empresa.cidade || t("naoInformado")}</p>
-            <p>{t("campos.cep")}: {empresa.cep || t("naoInformado")}</p>
-            <p>{t("campos.telefone")}: {empresa.telefone || t("naoInformado")}</p>
-            <p>{t("campos.email")}: {empresa.email}</p>
+            <p>
+              {t("campos.endereco")}: {empresa.endereco || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.pais")}: {empresa.pais || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.estado")}: {empresa.estado || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.cidade")}: {empresa.cidade || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.cep")}: {empresa.cep || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.telefone")}: {empresa.telefone || t("naoInformado")}
+            </p>
+            <p>
+              {t("campos.email")}: {empresa.email}
+            </p>
           </div>
         </div>
 
@@ -368,7 +383,7 @@ export default function Empresa() {
             className="p-6 rounded-lg shadow-lg w-full max-w-sm"
             style={{
               backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              color: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
             <h2 className="text-xl font-semibold mb-4">{t("modal.alterarLogo.titulo")}</h2>
@@ -380,7 +395,7 @@ export default function Empresa() {
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                   borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
                 value={novaFoto}
                 onChange={(e) => setNovaFoto(e.target.value)}
@@ -393,7 +408,7 @@ export default function Empresa() {
                 className="px-4 py-2 rounded"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
               >
                 {t("modal.cancelar")}
@@ -418,7 +433,7 @@ export default function Empresa() {
             className="p-6 rounded-lg shadow-lg w-full max-w-md"
             style={{
               backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              color: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
             <h2 className="text-xl font-semibold mb-4">{t("modal.editarEmpresa.titulo")}</h2>
@@ -432,7 +447,7 @@ export default function Empresa() {
                   style={{
                     backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                     borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    color: modoDark ? "#FFFFFF" : "#000000",
                   }}
                   value={empresaEditada?.[key as EmpresaChave] || ""}
                   onChange={(e) => setEmpresaEditada({ ...empresaEditada, [key as EmpresaChave]: e.target.value })}
@@ -446,7 +461,7 @@ export default function Empresa() {
                 className="px-4 py-2 rounded"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
               >
                 {t("modal.cancelar")}

@@ -166,23 +166,19 @@ export default function MinhaConta() {
         style={{
           backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
           color: modoDark ? "#FFFFFF" : "#000000",
-          border: modoDark ? "1px solid #374151" : "2px solid #000000"
+          border: modoDark ? "1px solid #374151" : "2px solid #000000",
         }}
       >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
+        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>
+          {t("titulo")}
+        </h1>
 
-        <div
-          className="border-b mb-4 pb-2"
-          style={{ borderColor: "var(--cor-borda)" }}
-        >
+        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
           <h2 className="text-lg font-semibold underline">{t("email")}</h2>
           <p className="mt-1">{usuarioLogado?.email || "..."}</p>
         </div>
 
-        <div
-          className="border-b mb-6 pb-6"
-          style={{ borderColor: "var(--cor-borda)" }}
-        >
+        <div className="border-b mb-6 pb-6" style={{ borderColor: "var(--cor-borda)" }}>
           <h2 className="text-lg font-semibold mb-4">{t("senha")}</h2>
           <Link
             href="/esqueci"
@@ -197,10 +193,7 @@ export default function MinhaConta() {
           </Link>
         </div>
 
-        <div
-          className="border-b mb-4 pb-2"
-          style={{ borderColor: "var(--cor-borda)" }}
-        >
+        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
           <h2 className="text-lg font-semibold">{t("informacoesConta")}</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>
@@ -209,15 +202,33 @@ export default function MinhaConta() {
             <p>
               {t("empresa.cargo")}: <strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong>
             </p>
-            <p>{t("nome")}: {usuarioLogado?.nome?.split(" ")[0] || t("adicionar")}</p>
-            <p>{t("sobrenome")}: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || t("adicionar")}</p>
-            <p>{t("empresa.endereco")}: {empresa?.endereco || t("adicionar")}</p>
-            <p>{t("empresa.pais")}: {empresa?.pais || t("adicionar")}</p>
-            <p>{t("empresa.estado")}: {empresa?.estado || t("adicionar")}</p>
-            <p>{t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}</p>
-            <p>{t("empresa.cep")}: {empresa?.cep || t("adicionar")}</p>
-            <p>{t("empresa.telefone")}: {empresa?.telefone || t("adicionar")}</p>
-            <p>{t("empresa.email")}: {empresa?.email || t("adicionar")}</p>
+            <p>
+              {t("nome")}: {usuarioLogado?.nome?.split(" ")[0] || t("adicionar")}
+            </p>
+            <p>
+              {t("sobrenome")}: {usuarioLogado?.nome?.split(" ").slice(1).join(" ") || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.endereco")}: {empresa?.endereco || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.pais")}: {empresa?.pais || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.estado")}: {empresa?.estado || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.cep")}: {empresa?.cep || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.telefone")}: {empresa?.telefone || t("adicionar")}
+            </p>
+            <p>
+              {t("empresa.email")}: {empresa?.email || t("adicionar")}
+            </p>
           </div>
         </div>
 
@@ -251,7 +262,7 @@ export default function MinhaConta() {
             className="p-6 rounded shadow-lg w-full max-w-md"
             style={{
               backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              color: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
             <h2 className="text-xl font-semibold mb-4">{t("modal.editarTitulo")}</h2>
@@ -266,7 +277,7 @@ export default function MinhaConta() {
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                   borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
               />
             </div>
@@ -281,7 +292,7 @@ export default function MinhaConta() {
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                   borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
               />
             </div>
@@ -292,7 +303,7 @@ export default function MinhaConta() {
                 className="px-4 py-2 rounded hover:bg-gray-400"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  color: modoDark ? "#FFFFFF" : "#000000",
                 }}
               >
                 {t("modal.cancelar")}
