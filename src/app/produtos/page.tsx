@@ -4,7 +4,7 @@ import { ProdutoI } from "@/utils/types/produtos";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaSearch, FaCog } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
@@ -37,6 +37,9 @@ export default function Produtos() {
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const initialize = async () => {
@@ -58,7 +61,6 @@ export default function Produtos() {
         root.style.setProperty("--cor-subtitulo", "#4B5563");
         root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
         root.style.setProperty("--cor-teste", "#000000");
-
       }
 
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -95,21 +97,51 @@ export default function Produtos() {
         ...modalVisualizar,
         preco: parseFloat(modalVisualizar.preco.toFixed(2)),
         quantidade: modalVisualizar.quantidade,
+        quantidadeMin: modalVisualizar.quantidadeMin || 0,
       });
+      setPreview(modalVisualizar.foto || null);
     }
   }, [modalVisualizar]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!empresaId) return alert("Empresa não identificada.");
+    if (!empresaId) {
+      Swal.fire("Erro", "Empresa não identificada.", "error");
+      return;
+    }
+    
     try {
-      const precoFormatado = parseFloat(form.preco.toString().replace(/\./g, "").replace(",", "."));
-      const quantidadeFormatada = parseFloat(form.quantidade.toString());
-      const quantidadeMinFormatada = parseFloat(form.quantidadeMin.toString());
+      const formData = new FormData();
+      
+      if (file) {
+        formData.append("foto", file);
+      }
+      
+      formData.append("nome", form.nome);
+      formData.append("descricao", form.descricao);
+      formData.append("preco", form.preco.toString());
+      formData.append("quantidade", form.quantidade.toString());
+      formData.append("quantidadeMin", form.quantidadeMin.toString());
+      if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
+      if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
+      formData.append("empresaId", empresaId);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada,quantidadeMin: quantidadeMinFormatada , empresaId }),
+        body: formData,
       });
 
       if (response.ok) {
@@ -131,13 +163,25 @@ export default function Produtos() {
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-        window.location.reload();
+        setFile(null);
+        setPreview(null);
+        
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Produto criado com sucesso!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        
+        setTimeout(() => window.location.reload(), 1600);
       } else {
-        const err = await response.json();
-        alert(err.mensagem || "Erro ao cadastrar produto");
+        const errorText = await response.text();
+        Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorText}`, "error");
       }
     } catch (err) {
       console.error("Erro ao criar produto:", err);
+      Swal.fire("Erro!", "Erro de conexão com o servidor", "error");
     }
   };
 
@@ -145,17 +189,29 @@ export default function Produtos() {
     if (!modalVisualizar) return;
 
     try {
-      const precoFormatado = parseFloat(form.preco.toString().replace(/\./g, "").replace(",", "."));
-      const quantidadeFormatada = parseFloat(form.quantidade.toString());
+      const formData = new FormData();
+      
+      if (file) {
+        formData.append("foto", file);
+      }
+      
+      formData.append("nome", form.nome);
+      formData.append("descricao", form.descricao);
+      formData.append("preco", form.preco.toString());
+      formData.append("quantidade", form.quantidade.toString());
+      formData.append("quantidadeMin", form.quantidadeMin.toString());
+      if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
+      if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, preco: precoFormatado, quantidade: quantidadeFormatada }),
+        body: formData,
       });
 
       if (response.ok) {
         setModalVisualizar(null);
+        setFile(null);
+        setPreview(null);
         Swal.fire({
           position: "center",
           icon: "success",
@@ -165,7 +221,8 @@ export default function Produtos() {
         });
         setTimeout(() => window.location.reload(), 1600);
       } else {
-        Swal.fire({ icon: "error", title: "Erro!", text: "Erro ao atualizar produto." });
+        const errorText = await response.text();
+        Swal.fire({ icon: "error", title: "Erro!", text: `Erro ao atualizar produto: ${errorText}` });
       }
     } catch (err) {
       console.error("Erro ao atualizar produto:", err);
@@ -202,7 +259,9 @@ export default function Produtos() {
     }
   };
 
-  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()));
+  const produtosFiltrados = produtos.filter((produto) => 
+    produto.nome.toLowerCase().includes(busca.toLowerCase())
+  );
 
   const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
 
@@ -221,7 +280,14 @@ export default function Produtos() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input type="text" placeholder={t("buscar")} className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
+            <input 
+              type="text" 
+              placeholder={t("buscar")} 
+              className="outline-none font-mono text-sm bg-transparent" 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+              style={{ color: "var(--cor-fonte)" }} 
+            />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
 
@@ -276,7 +342,16 @@ export default function Produtos() {
                   }}
                 >
                   <td className="py-3 px-4 flex items-center gap-2">
-                    <Image src={produto.foto || "/out.jpg"} width={30} height={30} className="rounded" alt={produto.nome} />
+                    <Image 
+                      src={produto.foto || "/out.jpg"} 
+                      width={30} 
+                      height={30} 
+                      className="rounded" 
+                      alt={produto.nome} 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/out.jpg";
+                      }}
+                    />
                     <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
                   </td>
                   <td className="py-3 px-3 text-center">{produto.fornecedor?.nome || "-"}</td>
@@ -304,21 +379,102 @@ export default function Produtos() {
                 color: "var(--cor-fonte)",
               }}
             >
-              <input placeholder={t("nome")} value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <h2 className="text-xl font-bold mb-4">
+                {modalVisualizar ? t("editarProduto") : t("novoProduto")}
+              </h2>
 
-              <input placeholder={t("descricao")} value={form.descricao || ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <input 
+                placeholder={t("nome")} 
+                value={form.nome || ""} 
+                onChange={(e) => setForm({ ...form, nome: e.target.value })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
 
-              <input placeholder={t("preco")} type="text" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <input 
+                placeholder={t("descricao")} 
+                value={form.descricao || ""} 
+                onChange={(e) => setForm({ ...form, descricao: e.target.value })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
 
-              <input placeholder={t("quantidade")} type="number" value={form.quantidade || ""} onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
-              
-              <input placeholder={t("quantidadeMinima")} type="number" value={form.quantidadeMin || ""} onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <input 
+                placeholder={t("preco")} 
+                type="number" 
+                value={form.preco || ""} 
+                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
 
-              <input placeholder={t("foto")} value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <input 
+                placeholder={t("quantidade")} 
+                type="number" 
+                value={form.quantidade || ""} 
+                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
 
-              {form.foto && <img src={form.foto} alt="Preview" className="w-44 h-44 object-cover rounded mb-4" />}
+              <input 
+                placeholder={t("quantidadeMinima")} 
+                type="number" 
+                value={form.quantidadeMin || ""} 
+                onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
 
-              <select value={form.fornecedorId || ""} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}>
+              {podeEditar && (
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm">{t("foto")}</label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 rounded border text-sm"
+                    style={{
+                      backgroundColor: "#1a25359f",
+                      color: "var(--cor-fonte)",
+                      borderColor: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                  >
+                    {t("selecionarImagem")}
+                  </button>
+                </div>
+              )}
+
+              {(preview || form.foto) && (
+                <div className="mb-4">
+                  <img 
+                    src={preview || form.foto || ""} 
+                    alt="Preview" 
+                    className="w-44 h-44 object-cover rounded"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/out.jpg";
+                    }}
+                  />
+                </div>
+              )}
+
+              <select 
+                value={form.fornecedorId || ""} 
+                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+              >
                 <option value="">{t("selecionarFornecedor")}</option>
                 {fornecedores.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -327,7 +483,13 @@ export default function Produtos() {
                 ))}
               </select>
 
-              <select value={form.categoriaId || ""} onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}>
+              <select 
+                value={form.categoriaId || ""} 
+                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+              >
                 <option value="">{t("selecionarCategoria")}</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -339,8 +501,10 @@ export default function Produtos() {
               <div className="flex justify-between mt-4">
                 <button
                   onClick={() => {
-                  setModalAberto(false);
-                  setModalVisualizar(null);
+                    setModalAberto(false);
+                    setModalVisualizar(null);
+                    setFile(null);
+                    setPreview(null);
                   }}
                   className="hover:underline"
                   style={{ color: "var(--cor-fonte)" }}
@@ -349,18 +513,42 @@ export default function Produtos() {
                 </button>
                 {modalVisualizar ? (
                   podeEditar && (
-                  <>
-                    <button onClick={handleUpdate} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                    {t("salvar")}
-                    </button>
-                    <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                    {t("excluir")}
-                    </button>
-                  </>
+                    <>
+                      <button 
+                        onClick={handleUpdate} 
+                        className="px-4 py-2 rounded hover:bg-blue-700" 
+                        style={{ 
+                          backgroundColor: "#1a25359f", 
+                          color: "var(--cor-fonte)", 
+                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                        }}
+                      >
+                        {t("salvar")}
+                      </button>
+                      <button 
+                        onClick={handleDelete} 
+                        className="px-4 py-2 rounded hover:bg-red-700" 
+                        style={{ 
+                          backgroundColor: "#1a25359f", 
+                          color: "var(--cor-fonte)", 
+                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                        }}
+                      >
+                        {t("excluir")}
+                      </button>
+                    </>
                   )
                 ) : (
-                  <button onClick={handleSubmit} className="px-4 py-2 rounded hover:bg-[#00443f]" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                  {t("criar")}
+                  <button 
+                    onClick={handleSubmit} 
+                    className="px-4 py-2 rounded hover:bg-[#00443f]" 
+                    style={{ 
+                      backgroundColor: "#1a25359f", 
+                      color: "var(--cor-fonte)", 
+                      border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                    }}
+                  >
+                    {t("criar")}
                   </button>
                 )}
               </div>
