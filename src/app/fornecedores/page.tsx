@@ -79,6 +79,7 @@ export default function Fornecedores() {
         foto: form.foto,
       }),
     });
+    console.log("Response:", response);
 
     if (response.status === 201) {
       Swal.fire({
@@ -87,6 +88,42 @@ export default function Fornecedores() {
         confirmButtonColor: "#013C3C",
       });
       setModalAberto(false);
+      window.location.reload();
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Algo deu errado, tente novamente.",
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  }
+
+  async function handleEditarFornecedor() {
+    if (!modalVisualizar) return;
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome: form.nome,
+        email: form.email,
+        cnpj: form.cnpj,
+        telefone: form.telefone,
+        categoria: form.categoria,
+        foto: form.foto,
+      }),
+    });
+
+    if (response.status === 200) {
+      Swal.fire({
+        text: "Fornecedor atualizado com sucesso!",
+        icon: "success",
+        confirmButtonColor: "#013C3C",
+      });
+      setModalVisualizar(null);
       window.location.reload();
     } else {
       Swal.fire({
@@ -306,7 +343,7 @@ export default function Fornecedores() {
               {modalVisualizar ? (
                 podeEditar && (
                   <>
-                    <button onClick={handleAdicionarFornecedor} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    <button onClick={handleEditarFornecedor} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
                       Salvar
                     </button>
                     <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>

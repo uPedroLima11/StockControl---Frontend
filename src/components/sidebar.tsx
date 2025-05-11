@@ -3,12 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  FaBars, FaBell, FaBoxOpen, FaFileAlt,
-  FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck,
-  FaCheck,
-  FaCheckDouble
-} from "react-icons/fa";
+import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { FaClipboardUser } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
@@ -27,7 +22,7 @@ export default function Sidebar() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    audioRef.current = new Audio('/notification-sound.mp3');
+    audioRef.current = new Audio("/notification-sound.mp3");
     audioRef.current.volume = 0.3;
 
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -79,7 +74,6 @@ export default function Sidebar() {
     return () => clearInterval(intervalId);
   }, [logar]);
 
-
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const toggleNotifications = async () => {
@@ -123,7 +117,7 @@ export default function Sidebar() {
             </button>
 
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
-            <SidebarLink href="#" icon={<FaClipboardUser />} label={t("summary")} />
+            <SidebarLink href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
             <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
             <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />
@@ -132,13 +126,7 @@ export default function Sidebar() {
             <SidebarLink href="/conta" icon={<FaUser />} label={t("account")} />
 
             <Link href="/empresa" className="flex items-center gap-2">
-              <Image
-                src={fotoEmpresa || "/contadefault.png"}
-                alt="Foto da Empresa"
-                width={40}
-                height={40}
-                className="rounded-full object-cover border border-gray-300"
-              />
+              <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
               <h1 className="text-sm font-medium">{nomeEmpresa || t("create_company")}</h1>
             </Link>
           </nav>
@@ -161,12 +149,7 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {showNotifications && (
-        <NotificacaoPainel
-          isVisible={showNotifications}
-          onClose={() => setShowNotifications(false)}
-        />
-      )}
+      {showNotifications && <NotificacaoPainel isVisible={showNotifications} onClose={() => setShowNotifications(false)} />}
     </>
   );
 }
@@ -210,7 +193,6 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isVisible, usuario]);
 
-
   async function handleInviteResponse(id: string, convite: ConviteI) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
       method: "PUT",
@@ -234,12 +216,12 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
-    return data.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return data.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -249,20 +231,23 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold">{t("invite_title")}</h3>
-            <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
+            <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">
+              ✕
+            </button>
           </div>
 
-          <p>{t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.</p>
-          
+          <p>
+            {t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.
+          </p>
+
           <div className="flex justify-between items-center text-xs text-gray-400">
-            <span>{t("from")}: {notificacao.convite?.empresa?.nome || t("unknown_company")}</span>
+            <span>
+              {t("from")}: {notificacao.convite?.empresa?.nome || t("unknown_company")}
+            </span>
             <span>{formatarData(notificacao.createdAt)}</span>
           </div>
 
-          <button
-            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2"
-            onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}
-          >
+          <button className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2" onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}>
             {t("accept")}
           </button>
         </div>
@@ -278,16 +263,22 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold">{notificacao.titulo}</h3>
-          <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">✕</button>
+          <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">
+            ✕
+          </button>
         </div>
 
         <p>{descricaoMensagem}</p>
-        
+
         <div className="flex flex-col text-xs mt-2 text-gray-400 gap-1">
-          <span>{t("from")}: {nomeEnviadoPor}</span>
-          <span>{t("Data")}: {formatarData(notificacao.createdAt)}</span>
+          <span>
+            {t("from")}: {nomeEnviadoPor}
+          </span>
+          <span>
+            {t("Data")}: {formatarData(notificacao.createdAt)}
+          </span>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span className="text-xs flex items-center gap-1">
             {notificacao.lida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
@@ -301,15 +292,11 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     <div ref={panelRef} className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">{t("notifications")}</h2>
-        <button onClick={onClose} className="text-white">✕</button>
+        <button onClick={onClose} className="text-white">
+          ✕
+        </button>
       </div>
-      <div className="space-y-4 text-sm max-h-[80vh] overflow-y-auto">
-        {notificacoes.length > 0 ? (
-          notificacaoTable
-        ) : (
-          <p className="text-center py-4">{t("no_notifications")}</p>
-        )}
-      </div>
+      <div className="space-y-4 text-sm max-h-[80vh] overflow-y-auto">{notificacoes.length > 0 ? notificacaoTable : <p className="text-center py-4">{t("no_notifications")}</p>}</div>
     </div>
   );
 }
