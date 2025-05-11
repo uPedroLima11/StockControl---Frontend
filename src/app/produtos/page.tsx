@@ -127,6 +127,8 @@ export default function Produtos() {
       
       if (file) {
         formData.append("foto", file);
+      } else if (form.foto) {
+        formData.append("foto", form.foto);
       }
       
       formData.append("nome", form.nome);
@@ -145,7 +147,8 @@ export default function Produtos() {
 
       if (response.ok) {
         setModalAberto(false);
-        setForm({
+        setForm((prevForm) => ({
+          ...prevForm,
           id: "",
           nome: "",
           descricao: "",
@@ -161,7 +164,7 @@ export default function Produtos() {
           empresa: "",
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        }));
         setFile(null);
         setPreview(null);
         
@@ -216,7 +219,7 @@ export default function Produtos() {
         setPreview(null);
         
         setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-        
+        window.location.reload();
         Swal.fire({
           position: "center",
           icon: "success",

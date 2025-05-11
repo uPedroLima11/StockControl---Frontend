@@ -1,4 +1,7 @@
 {
+  "novoProduto": "New Product",
+  "editarProduto": "Edit Product",
+  "selecionarImagem": "Select Image",
   "titulo": "Products",
   "nome": "Name",
   "descricao": "Description",
