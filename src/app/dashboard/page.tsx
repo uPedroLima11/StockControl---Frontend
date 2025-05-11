@@ -174,7 +174,7 @@ export default function Dashboard() {
               </thead>
               <tbody style={{ color: "var(--cor-fonte)" }}>
                 {produtos
-                  .filter((produto) => produto.quantidade < 10 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
+                  .filter((produto) => produto.quantidade < (produto.quantidadeMin + 5) && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
                   .map((produto) => (
                     <tr key={produto.id} className="border-b">
                       <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
