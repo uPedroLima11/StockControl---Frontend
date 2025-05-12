@@ -11,6 +11,8 @@ export default function Fornecedores() {
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
   const [modalVisualizar, setModalVisualizar] = useState<FornecedorI | null>(null);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [form, setForm] = useState<FornecedorI>({
     id: "",
     nome: "",
@@ -62,22 +64,35 @@ export default function Fornecedores() {
     initialize();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFotoFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   async function handleAdicionarFornecedor() {
     if (!empresaId) return alert("Empresa não identificada.");
 
+    const formData = new FormData();
+    formData.append('nome', form.nome);
+    formData.append('email', form.email);
+    formData.append('cnpj', form.cnpj);
+    formData.append('telefone', form.telefone);
+    formData.append('categoria', form.categoria);
+    if (fotoFile) {
+      formData.append('foto', fotoFile);
+    }
+
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nome: form.nome,
-        email: form.email,
-        cnpj: form.cnpj,
-        telefone: form.telefone,
-        categoria: form.categoria,
-        foto: form.foto,
-      }),
+      body: formData,
     });
 
     if (response.status === 201) {
@@ -93,6 +108,47 @@ export default function Fornecedores() {
         icon: "error",
         title: "Oops...",
         text: "Algo deu errado, tente novamente.",
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  }
+
+  async function handleSalvarFornecedor() {
+    if (!modalVisualizar?.id) return;
+
+    const formData = new FormData();
+    formData.append('nome', form.nome);
+    formData.append('email', form.email);
+    formData.append('cnpj', form.cnpj);
+    formData.append('telefone', form.telefone);
+    formData.append('categoria', form.categoria);
+    if (fotoFile) {
+      formData.append('foto', fotoFile);
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          text: "Fornecedor atualizado com sucesso!",
+          icon: "success",
+          confirmButtonColor: "#013C3C",
+        });
+        setModalVisualizar(null);
+        window.location.reload();
+      } else {
+        throw new Error("Erro ao atualizar fornecedor");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar fornecedor:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Algo deu errado ao atualizar o fornecedor.",
         confirmButtonColor: "#013C3C",
       });
     }
@@ -290,7 +346,24 @@ export default function Fornecedores() {
 
             <input placeholder="Categoria" value={form.categoria || ""} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
 
-            <input placeholder="Foto" value={form.foto || ""} onChange={(e) => setForm({ ...form, foto: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <div className="mb-3">
+              <label className="block mb-1">Foto</label>
+              {fotoPreview || form.foto ? (
+                <img
+                  src={fotoPreview || form.foto || ""}
+                  alt="Preview"
+                  className="w-20 h-20 object-cover rounded-full mb-2"
+                />
+              ) : null}
+              <input
+                type="file"
+                onChange={handleFileChange}
+                accept="image/*"
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+              />
+            </div>
 
             <div className="flex justify-between mt-4">
               <button
@@ -306,10 +379,26 @@ export default function Fornecedores() {
               {modalVisualizar ? (
                 podeEditar && (
                   <>
-                    <button onClick={handleAdicionarFornecedor} className="px-4 py-2 rounded hover:bg-blue-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    <button
+                      onClick={handleSalvarFornecedor}
+                      className="px-4 py-2 rounded hover:bg-blue-700"
+                      style={{
+                        backgroundColor: "#1a25359f",
+                        color: "var(--cor-fonte)",
+                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                      }}
+                    >
                       Salvar
                     </button>
-                    <button onClick={handleDelete} className="px-4 py-2 rounded hover:bg-red-700" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-2 rounded hover:bg-red-700"
+                      style={{
+                        backgroundColor: "#1a25359f",
+                        color: "var(--cor-fonte)",
+                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                      }}
+                    >
                       Excluir
                     </button>
                   </>
