@@ -81,13 +81,13 @@ export default function Fornecedores() {
     if (!empresaId) return alert("Empresa não identificada.");
 
     const formData = new FormData();
-    formData.append('nome', form.nome);
-    formData.append('email', form.email);
-    formData.append('cnpj', form.cnpj);
-    formData.append('telefone', form.telefone);
-    formData.append('categoria', form.categoria);
+    formData.append("nome", form.nome);
+    formData.append("email", form.email);
+    formData.append("cnpj", form.cnpj);
+    formData.append("telefone", form.telefone);
+    formData.append("categoria", form.categoria);
     if (fotoFile) {
-      formData.append('foto', fotoFile);
+      formData.append("foto", fotoFile);
     }
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
@@ -117,13 +117,13 @@ export default function Fornecedores() {
     if (!modalVisualizar?.id) return;
 
     const formData = new FormData();
-    formData.append('nome', form.nome);
-    formData.append('email', form.email);
-    formData.append('cnpj', form.cnpj);
-    formData.append('telefone', form.telefone);
-    formData.append('categoria', form.categoria);
+    formData.append("nome", form.nome);
+    formData.append("email", form.email);
+    formData.append("cnpj", form.cnpj);
+    formData.append("telefone", form.telefone);
+    formData.append("categoria", form.categoria);
     if (fotoFile) {
-      formData.append('foto', fotoFile);
+      formData.append("foto", fotoFile);
     }
 
     try {
@@ -348,21 +348,8 @@ export default function Fornecedores() {
 
             <div className="mb-3">
               <label className="block mb-1">Foto</label>
-              {fotoPreview || form.foto ? (
-                <img
-                  src={fotoPreview || form.foto || ""}
-                  alt="Preview"
-                  className="w-20 h-20 object-cover rounded-full mb-2"
-                />
-              ) : null}
-              <input
-                type="file"
-                onChange={handleFileChange}
-                accept="image/*"
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              />
+              {fotoPreview || form.foto ? <img src={fotoPreview || form.foto || ""} alt="Preview" className="w-20 h-20 object-cover rounded-full mb-2" /> : null}
+              <input type="file" onChange={handleFileChange} accept="image/*" disabled={Boolean(!podeEditar && modalVisualizar)} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
             </div>
 
             <div className="flex justify-between mt-4">
@@ -385,7 +372,7 @@ export default function Fornecedores() {
                       style={{
                         backgroundColor: "#1a25359f",
                         color: "var(--cor-fonte)",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
                       Salvar
@@ -396,7 +383,7 @@ export default function Fornecedores() {
                       style={{
                         backgroundColor: "#1a25359f",
                         color: "var(--cor-fonte)",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
                       Excluir
