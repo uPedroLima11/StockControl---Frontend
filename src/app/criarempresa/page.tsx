@@ -17,14 +17,15 @@ type Inputs = {
   estado?: string;
   cidade?: string;
   cep?: string;
-  foto?: string;
+  foto?: FileList;
 };
 
 export default function CriarEmpresa() {
-  const { register, handleSubmit } = useForm<Inputs>();
+  const { register, handleSubmit, setValue } = useForm<Inputs>();
   const router = useRouter();
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const [modoDark, setModoDark] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const { logar } = useUsuarioStore();
   const { t } = useTranslation("criarempresa");
 
@@ -114,17 +115,43 @@ export default function CriarEmpresa() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setValue("foto", e.target.files);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   async function onSubmit(data: Inputs) {
     const usuarioSalvo = localStorage.getItem("client_key") as string;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     try {
+      const formData = new FormData();
+      formData.append('nome', data.nome);
+      formData.append('email', data.email);
+      if (data.telefone) formData.append('telefone', data.telefone);
+      if (data.endereco) formData.append('endereco', data.endereco);
+      if (data.pais) formData.append('pais', data.pais);
+      if (data.estado) formData.append('estado', data.estado);
+      if (data.cidade) formData.append('cidade', data.cidade);
+      if (data.cep) formData.append('cep', data.cep);
+      if (data.foto && data.foto[0]) {
+        formData.append('foto', data.foto[0]);
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "user-id": usuarioValor || "",
         },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       if (response.ok) {
@@ -163,7 +190,23 @@ export default function CriarEmpresa() {
         <input {...register("estado")} placeholder={t("campos.estado")} className={inputClass} />
         <input {...register("cidade")} placeholder={t("campos.cidade")} className={inputClass} />
         <input {...register("cep")} placeholder={t("campos.cep")} className={inputClass} />
-        <input {...register("foto")} placeholder={t("campos.foto")} className={inputClass} />
+
+        <div className="mb-4">
+          <label className="block mb-2">{t("campos.foto")}</label>
+          {fotoPreview && (
+            <img
+              src={fotoPreview}
+              alt="Preview"
+              className="w-20 h-20 object-cover rounded-full mb-2"
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className={`w-full p-2 rounded border ${modoDark ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]" : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"}`}
+          />
+        </div>
 
         <button
           type="submit"

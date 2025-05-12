@@ -24,14 +24,14 @@ export default function Dashboard() {
 
     if (ativado) {
       root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#FFFFFF");
+      root.style.setProperty("--cor-fonte", "#fffff2");
       root.style.setProperty("--cor-subtitulo", "#A3A3A3");
       root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
     } else {
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-fundo", "#fffff2");
       root.style.setProperty("--cor-fonte", "#000000");
       root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+      root.style.setProperty("--cor-fundo-bloco", "#fffff2");
     }
   }, []);
 
@@ -96,7 +96,7 @@ export default function Dashboard() {
             className="border-2 rounded-xl p-6 shadow-md"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#fffff2" : "#000000",
             }}
           >
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
@@ -134,7 +134,7 @@ export default function Dashboard() {
             className="border-2 rounded-xl p-6 shadow-md"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#fffff2" : "#000000",
             }}
           >
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
@@ -164,7 +164,7 @@ export default function Dashboard() {
             className="border-2 rounded-xl p-6 shadow-md overflow-x-auto"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#fffff2" : "#000000",
             }}
           >
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>

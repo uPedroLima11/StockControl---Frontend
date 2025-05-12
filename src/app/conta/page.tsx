@@ -34,22 +34,22 @@ export default function MinhaConta() {
     if (ativado) {
       root.classList.add("dark");
       root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
+      root.style.setProperty("--cor-texto", "#fffff2");
       root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
       root.style.setProperty("--cor-borda", "#374151");
       root.style.setProperty("--cor-cinza", "#A3A3A3");
       root.style.setProperty("--cor-destaque", "#00332C");
       document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
+      document.body.style.color = "#fffff2";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-fundo", "#fffff2");
       root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+      root.style.setProperty("--cor-fundo-bloco", "#fffff2");
       root.style.setProperty("--cor-borda", "#E5E7EB");
       root.style.setProperty("--cor-cinza", "#4B5563");
       root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#FFFFFF";
+      document.body.style.backgroundColor = "#fffff2";
       document.body.style.color = "#000000";
     }
   };
@@ -164,8 +164,8 @@ export default function MinhaConta() {
       <div
         className="w-full max-w-md rounded p-6 shadow-md"
         style={{
-          backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-          color: modoDark ? "#FFFFFF" : "#000000",
+          backgroundColor: modoDark ? "#1F2937" : "#fffff2",
+          color: modoDark ? "#fffff2" : "#000000",
           border: modoDark ? "1px solid #374151" : "2px solid #000000",
         }}
       >
@@ -235,7 +235,7 @@ export default function MinhaConta() {
             className="mt-4 px-5 py-2 rounded transition w-full cursor-pointer"
             style={{
               backgroundColor: "var(--cor-destaque)",
-              color: "#FFFFFF",
+              color: "#fffff2",
             }}
           >
             {t("editarPerfil")}
@@ -245,7 +245,7 @@ export default function MinhaConta() {
             className="mt-4 px-6 py-2 rounded transition w-full cursor-pointer"
             style={{
               backgroundColor: "#ee1010",
-              color: "#FFFFFF",
+              color: "#fffff2",
             }}
           >
             {t("excluirConta")}
@@ -258,8 +258,8 @@ export default function MinhaConta() {
           <div
             className="p-6 rounded shadow-lg w-full max-w-md"
             style={{
-              backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000",
+              backgroundColor: modoDark ? "#1F2937" : "#fffff2",
+              color: modoDark ? "#fffff2" : "#000000",
             }}
           >
             <h2 className="text-xl font-semibold mb-4">{t("modal.editarTitulo")}</h2>
@@ -274,7 +274,7 @@ export default function MinhaConta() {
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                   borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000",
+                  color: modoDark ? "#fffff2" : "#000000",
                 }}
               />
             </div>
@@ -289,7 +289,7 @@ export default function MinhaConta() {
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                   borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000",
+                  color: modoDark ? "#fffff2" : "#000000",
                 }}
               />
             </div>
@@ -300,7 +300,7 @@ export default function MinhaConta() {
                 className="px-4 py-2 rounded hover:bg-gray-400"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000",
+                  color: modoDark ? "#fffff2" : "#000000",
                 }}
               >
                 {t("modal.cancelar")}

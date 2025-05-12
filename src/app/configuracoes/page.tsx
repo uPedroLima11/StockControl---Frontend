@@ -27,14 +27,14 @@ export default function Configuracoes() {
     if (ativado) {
       root.classList.add("dark");
       root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
+      root.style.setProperty("--cor-texto", "#fffff2");
       document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
+      document.body.style.color = "#fffff2";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
+      root.style.setProperty("--cor-fundo", "#fffff2");
       root.style.setProperty("--cor-texto", "#000000");
-      document.body.style.backgroundColor = "#FFFFFF";
+      document.body.style.backgroundColor = "#fffff2";
       document.body.style.color = "#000000";
     }
   };
@@ -72,7 +72,7 @@ export default function Configuracoes() {
       >
         <h2
           className="text-lg font-bold mb-6"
-          style={{ color: modoDark ? "#FFFFFF" : "#111827" }}
+          style={{ color: modoDark ? "#fffff2" : "#111827" }}
         >
           {t("settings")}
         </h2>
@@ -114,7 +114,7 @@ export default function Configuracoes() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#374151",
+              color: modoDark ? "#fffff2" : "#374151",
               borderColor: modoDark ? "#4B5563" : "#D1D5DB",
             }}
           >
@@ -127,7 +127,7 @@ export default function Configuracoes() {
             className="flex items-center justify-between px-4 py-2 rounded-lg border w-full transition duration-200 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#374151",
+              color: modoDark ? "#fffff2" : "#374151",
               borderColor: modoDark ? "#4B5563" : "#D1D5DB",
             }}
           >
