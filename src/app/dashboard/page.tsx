@@ -37,7 +37,14 @@ export default function Dashboard() {
 
   async function fetchContagem() {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem`);
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const usuario = await responseUsuario.json();
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`);
       if (response.status === 200) {
         const data = await response.json();
         setContagemProdutos(data.contagemQuantidade);
@@ -174,7 +181,7 @@ export default function Dashboard() {
               </thead>
               <tbody style={{ color: "var(--cor-fonte)" }}>
                 {produtos
-                  .filter((produto) => produto.quantidade < (produto.quantidadeMin + 5) && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
+                  .filter((produto) => produto.quantidade < produto.quantidadeMin + 5 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
                   .map((produto) => (
                     <tr key={produto.id} className="border-b">
                       <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
