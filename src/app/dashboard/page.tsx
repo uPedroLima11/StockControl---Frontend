@@ -31,7 +31,7 @@ export default function Dashboard() {
       root.style.setProperty("--cor-fundo", "#fffff2");
       root.style.setProperty("--cor-fonte", "#000000");
       root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#fffff2");
+      root.style.setProperty("--cor-fundo-bloco", "#ececec");
     }
   }, []);
 

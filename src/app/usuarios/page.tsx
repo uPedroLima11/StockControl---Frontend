@@ -324,7 +324,7 @@ export default function Usuarios() {
 
       <div className="overflow-x-auto rounded-lg">
         <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
-          <thead className="border-b" style={{ borderColor: "var(--cor-borda)", color: "var(--cor-cinza)" }}>
+          <thead className="border" style={{ backgroundColor: modoDark ? "#1a25359f" : "#ececec" }}>
             <tr>
               <th className="px-6 py-4">{t("nomeUsuario")}</th>
               <th className="px-6 py-4">{t("funcao")}</th>
@@ -345,8 +345,8 @@ export default function Usuarios() {
                 <tr 
                   key={usuario.id} 
                   className="rounded-md shadow-sm"
-                  style={{ 
-                    backgroundColor: modoDark ? "#2A2F36" : "#F3F4F6",
+                 style={{ backgroundColor: modoDark ? "#1a25359f" : "#ececec",
+                  
                     border: modoDark ? "1px solid #374151" : "1px solid #E5E7EB"
                   }}
                 >

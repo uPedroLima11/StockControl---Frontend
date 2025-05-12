@@ -43,9 +43,9 @@ export default function MinhaConta() {
       document.body.style.color = "#fffff2";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#fffff2");
+      root.style.setProperty("--cor-fundo", "#ffffff");
       root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#fffff2");
+      root.style.setProperty("--cor-fundo-bloco", "#ececec");
       root.style.setProperty("--cor-borda", "#E5E7EB");
       root.style.setProperty("--cor-cinza", "#4B5563");
       root.style.setProperty("--cor-destaque", "#00332C");

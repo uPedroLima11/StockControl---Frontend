@@ -25,7 +25,7 @@ export default function Fornecedores() {
         root.style.setProperty("--cor-fundo", "#FFFFFF");
         root.style.setProperty("--cor-fonte", "#000000");
         root.style.setProperty("--cor-subtitulo", "#4B5563");
-        root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+        root.style.setProperty("--cor-fundo-bloco", "#ececec");
       }
 
       const responseLogs = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs`);
