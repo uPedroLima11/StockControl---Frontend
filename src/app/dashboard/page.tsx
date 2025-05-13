@@ -9,6 +9,7 @@ import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
 export default function Dashboard() {
   const [contagemProdutos, setContagemProdutos] = useState(0);
   const [contagemValor, setContagemValor] = useState(0);
+  const [contagemLucro, setContagemLucro] = useState(0);
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const { t } = useTranslation("dashboard");
@@ -52,6 +53,14 @@ export default function Dashboard() {
       } else {
         setContagemProdutos(0);
         setContagemValor(0);
+      }
+
+      const responseLucro = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
+      if (responseLucro.status === 200) {
+        const data = await responseLucro.json();
+        setContagemLucro(data.total._sum.valorVenda);
+      } else {
+        setContagemLucro(0);
       }
     } catch (error) {
       console.error("Erro de conexão:", error);
@@ -105,7 +114,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  R$ 407.00
+                  {contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("resumo.lucroMensal")}
