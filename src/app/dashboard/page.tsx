@@ -56,17 +56,12 @@ export default function Dashboard() {
           const data = await response.json();
           setContagemProdutos(data.contagemQuantidade);
           setContagemValor(data.contagemPreco);
-        } else {
-          setContagemProdutos(0);
-          setContagemValor(0);
         }
 
         const responseLucro = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         if (responseLucro.status === 200) {
           const data = await responseLucro.json();
           setContagemLucro(data.total._sum.valorVenda);
-        } else {
-          setContagemLucro(0);
         }
       }
     } catch (error) {
