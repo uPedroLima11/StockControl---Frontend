@@ -48,6 +48,7 @@
         "proprietario": "OWNER",
         "salvarCargo": "Save Role",
         "remover": "Remove",
+        "nenhumaEmpresa": "You don't belong to any company",
         "confirmacaoRemocao": {
             "titulo": "Are you sure?",
             "texto": "Do you really want to remove the user from the company?",

@@ -19,5 +19,8 @@
     "read": "Read",
     "unread": "Unread",
     "no_notifications": "No notifications",
-    "Data": "Date"
+    "Data": "Date",
+    "sells": "Sells",
+    "nenhumaEmpresa": "You don't belong to any company"
+
   }

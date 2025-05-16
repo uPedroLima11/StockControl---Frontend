@@ -204,7 +204,7 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <LuTriangleAlert size={18} color="#FFFF00" /> {"Atenção"}
+                            <LuTriangleAlert size={18} color="#eead2d" /> {"Atenção"}
                           </div>
                         )}
                       </td>

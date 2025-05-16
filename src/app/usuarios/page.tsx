@@ -69,28 +69,36 @@ export default function Usuarios() {
 
     const fetchDados = async (idUsuario: string) => {
       try {
-        const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
-        if (!resEmpresa.ok) throw new Error(t("erroEmpresaNaoCadastrada"));
-
-        const empresaData = await resEmpresa.json();
-        const empresaIdRecebido = empresaData.id;
-
-        const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
-        if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
-
-        const todosUsuarios: UsuarioI[] = await resUsuarios.json();
-        const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
-
-        setUsuarios(usuariosDaEmpresa);
-      } catch (err: unknown) {
-        console.error("Erro ao carregar dados:", err);
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError(t("erroDesconhecido"));
-        }
-      } finally {
+      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      if (!resEmpresa.ok) {
         setLoading(false);
+        return;
+      }
+
+      const empresaData = await resEmpresa.json();
+      if (!empresaData || !empresaData.id) {
+        setLoading(false);
+        return;
+      }
+
+      const empresaIdRecebido = empresaData.id;
+
+      const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+      if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
+
+      const todosUsuarios: UsuarioI[] = await resUsuarios.json();
+      const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
+
+      setUsuarios(usuariosDaEmpresa);
+      } catch (err: unknown) {
+      console.error("Erro ao carregar dados:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t("erroDesconhecido"));
+      }
+      } finally {
+      setLoading(false);
       }
     };
 
@@ -296,30 +304,32 @@ export default function Usuarios() {
     <div className="min-h-screen py-10 px-4 md:px-16" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
-        <div className="flex space-x-4">
-          <button
-            className="px-4 py-2 rounded-sm font-bold text-sm transition"
-            style={{
-              backgroundColor: modoDark ? "#00332C" : "#55D6BE",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
-            }}
-            onClick={() => setShowModalConvite(true)}
-          >
-            {t("convidarUsuario")}
-          </button>
-          <button
-            className="px-4 py-2 rounded-sm font-bold text-sm transition"
-            style={{
-              backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
-              color: "#FFFFFF",
-              border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
-            }}
-            onClick={() => setShowModalMensagem(true)}
-          >
-            {t("enviarMensagem")}
-          </button>
-        </div>
+        {usuarioLogado?.empresaId && (
+          <div className="flex space-x-4">
+            <button
+              className="px-4 py-2 rounded-sm font-bold text-sm transition"
+              style={{
+          backgroundColor: modoDark ? "#00332C" : "#55D6BE",
+          color: modoDark ? "#FFFFFF" : "#000000",
+          border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+              }}
+              onClick={() => setShowModalConvite(true)}
+            >
+              {t("convidarUsuario")}
+            </button>
+            <button
+              className="px-4 py-2 rounded-sm font-bold text-sm transition"
+              style={{
+          backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
+          color: "#FFFFFF",
+          border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+              }}
+              onClick={() => setShowModalMensagem(true)}
+            >
+              {t("enviarMensagem")}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg">
@@ -337,7 +347,7 @@ export default function Usuarios() {
             {usuarios.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center">
-                  {t("nenhumUsuario")}
+                  {usuarioLogado?.empresaId ? t("nenhumUsuario") : t("nenhumaEmpresa")}
                 </td>
               </tr>
             ) : (

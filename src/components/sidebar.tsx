@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
-import { FaClipboardUser } from "react-icons/fa6";
+import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaSellcast } from "react-icons/fa";
+import { FaCartShopping, FaClipboardUser } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
@@ -119,6 +119,7 @@ export default function Sidebar() {
             <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
             <SidebarLink href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
             <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
+            <SidebarLink href="/vendas" icon={<FaCartShopping />} label={t("sells")} />
             <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
             <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />
             <SidebarLink href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />
