@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaSellcast } from "react-icons/fa";
+import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
