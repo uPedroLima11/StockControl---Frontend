@@ -32,7 +32,7 @@ export default function Configuracoes() {
       document.body.style.color = "#fffff2";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#fffff2");
+      root.style.setProperty("--cor-fundo", "#ffffff");
       root.style.setProperty("--cor-texto", "#000000");
       document.body.style.backgroundColor = "#fffff2";
       document.body.style.color = "#000000";
@@ -66,7 +66,7 @@ export default function Configuracoes() {
       <aside
         className="w-64 rounded-xl shadow-md p-6 h-fit"
         style={{
-          backgroundColor: modoDark ? "#1F2937" : "#ecececec",
+          backgroundColor: modoDark ? "#1F2937" : "#ffffff",
           border: `1px solid ${modoDark ? "#374151" : "#E5E7EB"}`,
         }}
       >

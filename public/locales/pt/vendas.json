@@ -1,0 +1,18 @@
+{
+      "titulo": "Controle de Vendas",
+      "buscarProduto": "Buscar produto...",
+      "produto": "Produto",
+      "estoque": "Estoque",
+      "preco": "Preço",
+      "acoes": "Ações",
+      "adicionar": "Adicionar",
+      "carrinho": "Carrinho",
+      "carrinhoVazio": "Seu carrinho está vazio",
+      "subtotal": "Subtotal",
+      "finalizarVenda": "Finalizar Venda",
+      "vendasRecentes": "Vendas Recentes",
+      "semVendas": "Nenhuma venda realizada ainda",
+      "quantidade": "Quantidade",
+      "remover": "Remover",
+      "totalVendas": "Total em Vendas"
+  }

@@ -97,10 +97,14 @@ export default function Sidebar() {
 
       <aside className={`fixed top-0 h-screen w-64 bg-[#013C3C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div>
-          <Link href="/" className="bg-[#1C1C1C] py-4 flex justify-center items-center gap-2">
+            <Link
+            href="/"
+            className="bg-[#1C1C1C] py-4 flex justify-center items-center gap-2"
+            onClick={() => setTimeout(() => window.location.reload(), 500)}
+            >
             <Image src="/icone.png" alt="Logo" width={28} height={28} />
             <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
-          </Link>
+            </Link>
 
           <nav className="flex flex-col items-start px-4 py-6 gap-4 text-white text-sm">
             <button onClick={toggleNotifications} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">

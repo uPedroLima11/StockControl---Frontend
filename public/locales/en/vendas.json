@@ -1,0 +1,19 @@
+{
+
+      "titulo": "Sales Management",
+      "buscarProduto": "Search product...",
+      "produto": "Product",
+      "estoque": "Stock",
+      "preco": "Price",
+      "acoes": "Actions",
+      "adicionar": "Add",
+      "carrinho": "Shopping Cart",
+      "carrinhoVazio": "Your cart is empty",
+      "subtotal": "Subtotal",
+      "finalizarVenda": "Complete Sale",
+      "vendasRecentes": "Recent Sales",
+      "semVendas": "No sales yet",
+      "quantidade": "Quantity",
+      "remover": "Remove",
+      "totalVendas": "Total Sales"
+  }
