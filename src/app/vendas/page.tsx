@@ -63,7 +63,10 @@ export default function Vendas() {
 
       const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
       const vendasData = await responseVendas.json();
-      setVendas(vendasData.vendas);
+      const vendasOrdenadas = vendasData.vendas.sort((a: VendaI, b: VendaI) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setVendas(vendasOrdenadas);
 
       const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
       const totalData = await responseTotal.json();
@@ -165,7 +168,10 @@ export default function Vendas() {
 
       const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
       const vendasData = await responseVendas.json();
-      setVendas(vendasData.vendas);
+      const vendasOrdenadas = vendasData.vendas.sort((a: VendaI, b: VendaI) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setVendas(vendasOrdenadas);
 
       const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
       const totalData = await responseTotal.json();
