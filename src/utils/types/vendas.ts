@@ -7,6 +7,7 @@ export interface VendaI {
     valorCompra: number;
     createdAt: Date;
     updatedAt: Date;
+    usuarioId: string;
     produto?: { 
         nome: string;
         preco: number;

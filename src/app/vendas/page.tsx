@@ -122,6 +122,10 @@ export default function Vendas() {
   };
 
   const finalizarVenda = async () => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     if (!empresaId || carrinho.length === 0) return;
 
     try {
@@ -136,6 +140,7 @@ export default function Vendas() {
             produtoId: Number(item.produto.id),
             quantidade: item.quantidade,
             valorCompra: item.produto.preco * 0.8,
+            UsuarioId: usuarioValor,
           }),
         });
       });
