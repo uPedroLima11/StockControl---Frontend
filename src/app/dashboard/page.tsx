@@ -57,7 +57,7 @@ export default function Dashboard() {
           setContagemProdutos(data.contagemQuantidade);
           setContagemValor(data.contagemPreco);
         }
-
+       
         const responseLucro = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         if (responseLucro.status === 200) {
           const data = await responseLucro.json();
@@ -115,7 +115,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  {contagemLucro > 0 ? contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("resumo.lucroMensal")}
@@ -123,7 +123,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemValor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  {contagemValor > 0 ? contagemValor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("resumo.custoItens")}

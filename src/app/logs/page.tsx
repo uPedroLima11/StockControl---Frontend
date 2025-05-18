@@ -3,10 +3,11 @@ import { LogsI } from "@/utils/types/logs";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-export default function Fornecedores() {
+export default function Logs() {
   const [modoDark, setModoDark] = useState(false);
   const [logs, setLogs] = useState<LogsI[]>([]);
   const [busca, setBusca] = useState("");
+  const [nomesUsuarios, setNomesUsuarios] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const initialize = async () => {
@@ -15,7 +16,6 @@ export default function Fornecedores() {
       setModoDark(ativado);
 
       const root = document.documentElement;
-
       if (ativado) {
         root.style.setProperty("--cor-fundo", "#20252B");
         root.style.setProperty("--cor-fonte", "#FFFFFF");
@@ -30,8 +30,27 @@ export default function Fornecedores() {
 
       const responseLogs = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs`);
       const logsData = await responseLogs.json();
-      console.log(logsData);
       setLogs(logsData);
+
+      const logsComUsuario = logsData.filter((log: LogsI) => log.usuarioId);
+      const usuariosMap: Record<string, string> = {};
+
+      for (const log of logsComUsuario) {
+        if (!usuariosMap[log.usuarioId!]) {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${log.usuarioId}`);
+            const usuario = await response.json();
+            if (usuario && usuario.nome) {
+              usuariosMap[log.usuarioId!] = usuario.nome;
+            }
+          } catch (error) {
+            console.error(`Erro ao buscar usuário ${log.usuarioId}:`, error);
+            usuariosMap[log.usuarioId!] = "Usuário não encontrado";
+          }
+        }
+      }
+
+      setNomesUsuarios(usuariosMap);
     };
 
     initialize();
@@ -47,12 +66,14 @@ export default function Fornecedores() {
       minute: "2-digit",
     });
   }
+
   return (
     <div className="flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-          Fornecedores
+          Logs
         </h1>
+        
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <div
             className="flex items-center border rounded-full px-4 py-2 shadow-sm"
@@ -61,7 +82,14 @@ export default function Fornecedores() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input type="text" placeholder="Buscar Logs" className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
+            <input 
+              type="text" 
+              placeholder="Buscar Logs" 
+              className="outline-none font-mono text-sm bg-transparent" 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+              style={{ color: "var(--cor-fonte)" }} 
+            />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
         </div>
@@ -84,12 +112,15 @@ export default function Fornecedores() {
             </thead>
             <tbody>
               {logs
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase()))
                 .slice(0, 10)
                 .map((log) => (
                   <tr key={log.id} className="border-b">
-                    <td className="py-3 px-4 text-center">Lucas Pereira</td>
+                    <td className="py-3 px-4 text-center">
+                      {log.usuarioId 
+                        ? (nomesUsuarios[log.usuarioId] || "Carregando...") 
+                        : "Não Informado"}
+                    </td>
                     <td className="py-3 px-4 text-center">{log.tipo}</td>
                     <td className="py-3 px-4 text-center">{log.descricao}</td>
                     <td className="py-3 px-4 text-center">{formatarData(log.createdAt)}</td>

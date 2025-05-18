@@ -15,6 +15,7 @@ export interface ProdutoI {
     fornecedor?: FornecedorI;
     categoria?: CategoriaI;
     empresa?: string;
+    usuarioId?: string;
     createdAt: Date;
     updatedAt: Date;
 }

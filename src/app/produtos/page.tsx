@@ -34,6 +34,7 @@ export default function Produtos() {
     fornecedor: undefined,
     categoria: undefined,
     empresa: "",
+    usuarioId: "",
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -117,20 +118,23 @@ export default function Produtos() {
   };
 
   const handleSubmit = async () => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     if (!empresaId) {
       Swal.fire("Erro", "Empresa não identificada.", "error");
       return;
     }
-    
+
     try {
       const formData = new FormData();
-      
+
       if (file) {
         formData.append("foto", file);
       } else if (form.foto) {
         formData.append("foto", form.foto);
       }
-      
+
       formData.append("nome", form.nome);
       formData.append("descricao", form.descricao);
       formData.append("preco", form.preco.toString());
@@ -139,6 +143,7 @@ export default function Produtos() {
       if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
       if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
       formData.append("empresaId", empresaId);
+      formData.append("usuarioId", usuarioValor)
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
         method: "POST",
@@ -162,12 +167,13 @@ export default function Produtos() {
           fornecedor: undefined,
           categoria: undefined,
           empresa: "",
+          usuarioId: "",
           createdAt: new Date(),
           updatedAt: new Date(),
         }));
         setFile(null);
         setPreview(null);
-        
+
         Swal.fire({
           position: "center",
           icon: "success",
@@ -175,7 +181,7 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500,
         });
-        
+
         setTimeout(() => window.location.reload(), 1600);
       } else {
         const errorText = await response.text();
@@ -188,36 +194,41 @@ export default function Produtos() {
   };
 
   const handleUpdate = async () => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     if (!modalVisualizar) return;
-  
+
     try {
       const formData = new FormData();
-      
+
       if (file) {
         formData.append("foto", file);
       }
-      
+
       formData.append("nome", form.nome);
       formData.append("descricao", form.descricao);
       formData.append("preco", form.preco.toString());
       formData.append("quantidade", form.quantidade.toString());
       formData.append("quantidadeMin", form.quantidadeMin.toString());
-      
+      formData.append("usuarioId", usuarioValor);
+
+
       if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
       if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-  
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
         method: "PUT",
         body: formData,
       });
-  
+
       if (response.ok) {
         const updatedProduto = await response.json();
-        
+
         setModalVisualizar(null);
         setFile(null);
         setPreview(null);
-        
+
         setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
         Swal.fire({
           position: "center",
@@ -226,21 +237,21 @@ export default function Produtos() {
           showConfirmButton: false,
           timer: 1500,
         });
-      setTimeout(() => window.location.reload(), 1600);
+        setTimeout(() => window.location.reload(), 1600);
       } else {
         const errorText = await response.text();
-        Swal.fire({ 
-          icon: "error", 
-          title: "Erro!", 
-          text: `Erro ao atualizar produto: ${errorText}` 
+        Swal.fire({
+          icon: "error",
+          title: "Erro!",
+          text: `Erro ao atualizar produto: ${errorText}`
         });
       }
     } catch (err) {
       console.error("Erro ao atualizar produto:", err);
-      Swal.fire({ 
-        icon: "error", 
-        title: "Erro!", 
-        text: "Erro inesperado ao tentar atualizar." 
+      Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: "Erro inesperado ao tentar atualizar."
       });
     }
   };
@@ -273,7 +284,7 @@ export default function Produtos() {
     }
   };
 
-  const produtosFiltrados = produtos.filter((produto) => 
+  const produtosFiltrados = produtos.filter((produto) =>
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
@@ -294,13 +305,13 @@ export default function Produtos() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input 
-              type="text" 
-              placeholder={t("buscar")} 
-              className="outline-none font-mono text-sm bg-transparent" 
-              value={busca} 
-              onChange={(e) => setBusca(e.target.value)} 
-              style={{ color: "var(--cor-fonte)" }} 
+            <input
+              type="text"
+              placeholder={t("buscar")}
+              className="outline-none font-mono text-sm bg-transparent"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              style={{ color: "var(--cor-fonte)" }}
             />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
@@ -332,7 +343,7 @@ export default function Produtos() {
               <tr style={{ color: "var(--cor-fonte)" }}>
                 <th className="py-3 px-4">
                   <div className="flex items-center gap-1">
-                   <FaCog /> {t("nome")}
+                    <FaCog /> {t("nome")}
                   </div>
                 </th>
                 <th>{t("fornecedor")}</th>
@@ -356,12 +367,12 @@ export default function Produtos() {
                   }}
                 >
                   <td className="py-3 px-4 flex items-center gap-2">
-                    <Image 
-                      src={produto.foto || "/out.jpg"} 
-                      width={30} 
-                      height={30} 
-                      className="rounded" 
-                      alt={produto.nome} 
+                    <Image
+                      src={produto.foto || "/out.jpg"}
+                      width={30}
+                      height={30}
+                      className="rounded"
+                      alt={produto.nome}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/out.jpg";
                       }}
@@ -397,52 +408,52 @@ export default function Produtos() {
                 {modalVisualizar ? t("editarProduto") : t("novoProduto")}
               </h2>
 
-              <input 
-                placeholder={t("nome")} 
-                value={form.nome || ""} 
-                onChange={(e) => setForm({ ...form, nome: e.target.value })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              <input
+                placeholder={t("nome")}
+                value={form.nome || ""}
+                onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
-              <input 
-                placeholder={t("descricao")} 
-                value={form.descricao || ""} 
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              <input
+                placeholder={t("descricao")}
+                value={form.descricao || ""}
+                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
-              <input 
-                placeholder={t("preco")} 
-                type="number" 
-                value={form.preco || ""} 
-                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              <input
+                placeholder={t("preco")}
+                type="number"
+                value={form.preco || ""}
+                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
-              <input 
-                placeholder={t("quantidade")} 
-                type="number" 
-                value={form.quantidade || ""} 
-                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              <input
+                placeholder={t("quantidade")}
+                type="number"
+                value={form.quantidade || ""}
+                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
-              <input 
-                placeholder={t("quantidadeMinima")} 
-                type="number" 
-                value={form.quantidadeMin || ""} 
-                onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              <input
+                placeholder={t("quantidadeMinima")}
+                type="number"
+                value={form.quantidadeMin || ""}
+                onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
               {podeEditar && (
@@ -471,9 +482,9 @@ export default function Produtos() {
 
               {(preview || form.foto) && (
                 <div className="mb-4">
-                  <img 
-                    src={preview || form.foto || ""} 
-                    alt="Preview" 
+                  <img
+                    src={preview || form.foto || ""}
+                    alt="Preview"
                     className="w-44 h-44 object-cover rounded"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/out.jpg";
@@ -482,11 +493,11 @@ export default function Produtos() {
                 </div>
               )}
 
-              <select 
-                value={form.fornecedorId || ""} 
-                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
+              <select
+                value={form.fornecedorId || ""}
+                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
                 style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               >
                 <option value="">{t("selecionarFornecedor")}</option>
@@ -497,11 +508,11 @@ export default function Produtos() {
                 ))}
               </select>
 
-              <select 
-                value={form.categoriaId || ""} 
-                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
+              <select
+                value={form.categoriaId || ""}
+                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
                 style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               >
                 <option value="">{t("selecionarCategoria")}</option>
@@ -528,24 +539,24 @@ export default function Produtos() {
                 {modalVisualizar ? (
                   podeEditar && (
                     <>
-                      <button 
-                        onClick={handleUpdate} 
-                        className="px-4 py-2 rounded hover:bg-blue-700" 
-                        style={{ 
-                          backgroundColor: "#1a25359f", 
-                          color: "var(--cor-fonte)", 
-                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                      <button
+                        onClick={handleUpdate}
+                        className="px-4 py-2 rounded hover:bg-blue-700"
+                        style={{
+                          backgroundColor: "#1a25359f",
+                          color: "var(--cor-fonte)",
+                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
                         }}
                       >
                         {t("salvar")}
                       </button>
-                      <button 
-                        onClick={handleDelete} 
-                        className="px-4 py-2 rounded hover:bg-red-700" 
-                        style={{ 
-                          backgroundColor: "#1a25359f", 
-                          color: "var(--cor-fonte)", 
-                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                      <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 rounded hover:bg-red-700"
+                        style={{
+                          backgroundColor: "#1a25359f",
+                          color: "var(--cor-fonte)",
+                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
                         }}
                       >
                         {t("excluir")}
@@ -553,13 +564,13 @@ export default function Produtos() {
                     </>
                   )
                 ) : (
-                  <button 
-                    onClick={handleSubmit} 
-                    className="px-4 py-2 rounded hover:bg-[#00443f]" 
-                    style={{ 
-                      backgroundColor: "#1a25359f", 
-                      color: "var(--cor-fonte)", 
-                      border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                  <button
+                    onClick={handleSubmit}
+                    className="px-4 py-2 rounded hover:bg-[#00443f]"
+                    style={{
+                      backgroundColor: "#1a25359f",
+                      color: "var(--cor-fonte)",
+                      border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
                     }}
                   >
                     {t("criar")}
