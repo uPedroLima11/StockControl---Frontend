@@ -38,7 +38,7 @@ export default function Sidebar() {
           logar(userData);
         }
 
-        const companyResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioId}`);
+        const companyResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
         if (companyResponse.status === 200) {
           const companyData = await companyResponse.json();
           setFotoEmpresa(companyData.foto);

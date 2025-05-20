@@ -19,6 +19,12 @@
   "criar": "Criar",
   "buscar": "Buscar Produto",
   "editarProduto": "Editar Produto",
-  "selecionarImagem": "Selecionar Imagem"
-  
+  "selecionarImagem": "Selecionar Imagem",
+  "empresaNaoAtivada": {
+    "titulo": "Empresa não ativada",
+    "mensagem": "Sua empresa ainda não foi ativada. Você precisa completar o processo de ativação para continuar.",
+    "botao": "Ativar agora",
+    "alertaTitulo": "Atenção!",
+    "alertaMensagem": "Sua empresa ainda não foi ativada. Por favor, complete a ativação."
+  }
 }

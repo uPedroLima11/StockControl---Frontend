@@ -1,10 +1,9 @@
 {
-    
     "roles": {
-    "FUNCIONARIO": "Funcionário",
-    "ADMIN": "Administrador",
-    "PROPRIETARIO": "Proprietário"
-  }, 
+        "FUNCIONARIO": "Funcionário",
+        "ADMIN": "Administrador",
+        "PROPRIETARIO": "Proprietário"
+    },
     "titulo": "Usuários",
     "carregando": "Carregando Usuarios...",
     "convidarUsuario": "Convidar Usuário",
@@ -16,14 +15,18 @@
     "acao": "Ação",
     "nenhumUsuario": "Nenhum usuário encontrado",
     "nenhumaEmpresa": "Você não pertence a nenhuma empresa",
-
     "modal": {
+        "conviteEnviado.titulo": "Convite enviado",
+       "conviteEnviado.texto": "O convite foi enviado com sucesso",
         "usuarioVinculado.texto": "O usuário já está vinculado a uma empresa",
         "usuarioVinculado.titulo": "Usuário já vinculado",
         "botaoOk": "OK",
         "mensagemEnviada.titulo": "Mensagem enviada",
         "mensagemEnviada.texto": "A mensagem foi enviada com sucesso",
         "mensagemEnviada.botaoOk": "OK",
+        "mensagemEnviada.erro.titulo": "Erro ao enviar mensagem",
+        "mensagemEnviada.erro.textoEnviarNotificacao": "Não foi possível enviar a notificação.",
+        "mensagemEnviada.erro.textoInterno": "Ocorreu um erro interno ao enviar a mensagem.",
         "usuario": "Usuário",
         "convidarUsuario": "Convidar Usuário",
         "emailUsuario": "E-mail do Usuário:",

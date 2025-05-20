@@ -70,7 +70,7 @@ export default function MinhaConta() {
         setUsuarioLogado(dados);
       }
 
-      const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
       if (responseEmpresa.status === 200) {
         const dados = await responseEmpresa.json();
         setEmpresa(dados);

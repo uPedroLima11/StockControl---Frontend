@@ -1,0 +1,15 @@
+{
+    "titulo": "Ativação da Empresa",
+    "subtitulo": "Insira o código de ativação fornecido após o pagamento para liberar todas as funcionalidades do sistema",
+    "codigoAtivacao": "Código de Ativação",
+    "codigoPlaceholder": "XXXX-XXXX-XXXX",
+    "codigoHelp": "O código será fornecido após a confirmação do pagamento",
+    "botaoAtivar": "Ativar Empresa",
+    "botaoAtivando": "Ativando...",
+    "acessoRestrito": "Acesso Restrito",
+    "apenasProprietarios": "Apenas proprietários da empresa podem acessar esta funcionalidade",
+    "voltarDashboard": "Voltar ao Dashboard",
+    "empresaAtivada": "Empresa ativada com sucesso!",
+    "erroCodigoInvalido": "Formato de código inválido",
+    "erroCodigoVazio": "Por favor, insira o código de ativação"
+  }

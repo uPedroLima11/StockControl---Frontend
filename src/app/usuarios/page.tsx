@@ -69,7 +69,7 @@ export default function Usuarios() {
 
     const fetchDados = async (idUsuario: string) => {
       try {
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
       if (!resEmpresa.ok) {
         setLoading(false);
         return;
@@ -168,7 +168,7 @@ export default function Usuarios() {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const idUsuario = usuarioSalvo.replace(/"/g, "");
 
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
       const empresa = await resEmpresa.json();
 
       const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);

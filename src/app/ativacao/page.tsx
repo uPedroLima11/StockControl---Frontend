@@ -13,9 +13,41 @@ export default function AtivacaoPage() {
   const [empresaId, setEmpresaId] = useState('')
   const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null)
   const [loading, setLoading] = useState(false)
+  const [modoDark, setModoDark] = useState(false)
   const router = useRouter()
-    const { t } = useTranslation("Ativacao");
-  
+  const { t } = useTranslation("ativacao")
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark")
+    const ativo = temaSalvo === "true"
+    setModoDark(ativo)
+    aplicarTema(ativo)
+  }, [])
+
+  const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement
+    if (ativado) {
+      root.classList.add("dark")
+      root.style.setProperty("--cor-fundo", "#20252B")
+      root.style.setProperty("--cor-texto", "#FFFFFF")
+      root.style.setProperty("--cor-fundo-bloco", "#1a25359f")
+      root.style.setProperty("--cor-borda", "#374151")
+      root.style.setProperty("--cor-cinza", "#A3A3A3")
+      root.style.setProperty("--cor-destaque", "#00332C")
+      document.body.style.backgroundColor = "#20252B"
+      document.body.style.color = "#FFFFFF"
+    } else {
+      root.classList.remove("dark")
+      root.style.setProperty("--cor-fundo", "#FFFFFF")
+      root.style.setProperty("--cor-texto", "#000000")
+      root.style.setProperty("--cor-fundo-bloco", "#ececec")
+      root.style.setProperty("--cor-borda", "#E5E7EB")
+      root.style.setProperty("--cor-cinza", "#4B5563")
+      root.style.setProperty("--cor-destaque", "#00332C")
+      document.body.style.backgroundColor = "#FFFFFF"
+      document.body.style.color = "#000000"
+    }
+  }
 
   useEffect(() => {
     const checkUsuario = async () => {
@@ -29,19 +61,20 @@ export default function AtivacaoPage() {
         const userRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${userId}`)
         const userData = await userRes.json()
 
-        if (!userRes.ok) throw new Error('Erro ao buscar dados do usuário')
+        if (!userRes.ok) throw new Error(t('erroBuscarUsuario'))
 
         setTipoUsuario(userData.tipo)
+        
 
-        const empresaRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${userId}`)
+        const empresaRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${userId}`)
         const empresaData = await empresaRes.json()
 
-        if (!empresaRes.ok) throw new Error('Erro ao buscar dados da empresa')
+        if (!empresaRes.ok) throw new Error(t('erroBuscarEmpresa'))
 
         setEmpresaId(empresaData.id)
 
         if (empresaData.ChaveAtivacao) {
-          toast.success('Esta empresa já está ativada')
+          toast.success(t('empresaAtivada'))
           router.push('/dashboard')
         }
       } catch (error: any) {
@@ -51,7 +84,7 @@ export default function AtivacaoPage() {
     }
 
     checkUsuario()
-  }, [router])
+  }, [router, t])
 
   const handleAtivar = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,11 +92,11 @@ export default function AtivacaoPage() {
 
     try {
       if (!codigo.trim()) {
-        throw new Error('Por favor, insira o código de ativação')
+        throw new Error(t('erroCodigoVazio'))
       }
 
       if (codigo.length < 10 || !codigo.includes('-')) {
-        throw new Error('Formato de código inválido')
+        throw new Error(t('erroCodigoInvalido'))
       }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/chave/${codigo}`, {
@@ -74,13 +107,13 @@ export default function AtivacaoPage() {
 
       if (!res.ok) {
         const errorData = await res.json()
-        throw new Error(errorData.message || 'Erro ao ativar empresa')
+        throw new Error(errorData.message || t('erroAtivacao'))
       }
 
-      toast.success('Empresa ativada com sucesso!')
+      toast.success(t('empresaAtivada'))
       router.push('/dashboard')
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao ativar empresa')
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }
@@ -88,22 +121,22 @@ export default function AtivacaoPage() {
 
   if (tipoUsuario && tipoUsuario !== "PROPRIETARIO") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <div className="p-8 rounded-lg shadow-lg max-w-md w-full text-center" style={{ backgroundColor: "var(--cor-fundo-bloco)" }}>
           <div className="flex justify-center mb-4">
             <FaLock className="text-red-500 text-4xl" />
           </div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-            Acesso Restrito
+          <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--cor-texto)" }}>
+            {t('acessoRestrito')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Apenas proprietários da empresa podem acessar esta funcionalidade.
+          <p className="mb-6" style={{ color: "var(--cor-cinza)" }}>
+            {t('apenasProprietarios')}
           </p>
           <button
             onClick={() => router.push('/dashboard')}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Voltar ao Dashboard
+            {t('voltarDashboard')}
           </button>
         </div>
       </div>
@@ -111,37 +144,48 @@ export default function AtivacaoPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div 
+        className="p-8 rounded-lg shadow-lg max-w-md w-full"
+        style={{ 
+          backgroundColor: "var(--cor-fundo-bloco)",
+          border: `1px solid var(--cor-borda)`
+        }}
+      >
         <div className="flex justify-center mb-6">
           <FaCheckCircle className="text-green-500 text-5xl" />
         </div>
         
-        <h2 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-white">
-          Ativação da Empresa
+        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
+          {t('titulo')}
         </h2>
         
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
-          Insira o código de ativação fornecido após o pagamento para liberar todas as funcionalidades do sistema.
+        <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
+          {t('subtitulo')}
         </p>
 
         <form onSubmit={handleAtivar} className="space-y-6">
           <div>
-            <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Código de Ativação
+            <label htmlFor="codigo" className="block text-sm font-medium mb-1" style={{ color: "var(--cor-texto)" }}>
+              {t('codigoAtivacao')}
             </label>
             <input
               id="codigo"
               type="text"
               value={codigo}
               onChange={(e) => setCodigo(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-              placeholder="XXXX-XXXX-XXXX"
+              className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                border: `1px solid var(--cor-borda)`,
+                color: "var(--cor-texto)"
+              }}
+              placeholder={t('codigoPlaceholder')}
               required
               disabled={loading}
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              O código será fornecido após a confirmação do pagamento
+            <p className="mt-1 text-xs" style={{ color: "var(--cor-cinza)" }}>
+              {t('codigoHelp')}
             </p>
           </div>
 
@@ -149,11 +193,11 @@ export default function AtivacaoPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                loading ? 'opacity-70 cursor-not-allowed bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
               }`}
             >
-              {loading ? 'Ativando...' : 'Ativar Empresa'}
+              {loading ? t('botaoAtivando') : t('botaoAtivar')}
             </button>
           </div>
         </form>

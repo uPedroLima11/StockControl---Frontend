@@ -1,0 +1,15 @@
+{
+    "titulo": "Company Activation",
+    "subtitulo": "Enter the activation code provided after payment to unlock all system features",
+    "codigoAtivacao": "Activation Code",
+    "codigoPlaceholder": "XXXX-XXXX-XXXX",
+    "codigoHelp": "The code will be provided after payment confirmation",
+    "botaoAtivar": "Activate Company",
+    "botaoAtivando": "Activating...",
+    "acessoRestrito": "Restricted Access",
+    "apenasProprietarios": "Only company owners can access this feature",
+    "voltarDashboard": "Back to Dashboard",
+    "empresaAtivada": "Company successfully activated!",
+    "erroCodigoInvalido": "Invalid code format",
+    "erroCodigoVazio": "Please enter the activation code"
+  }

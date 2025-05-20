@@ -104,7 +104,7 @@ export default function Empresa() {
         const usuarioSalvo = localStorage.getItem("client_key") as string;
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioValor}`);
 
         if (res.status === 404) {
           router.push("/criarempresa");

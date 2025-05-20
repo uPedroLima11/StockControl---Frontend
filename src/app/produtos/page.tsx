@@ -5,13 +5,15 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [modalVisualizar, setModalVisualizar] = useState<ProdutoI | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
@@ -20,6 +22,8 @@ export default function Produtos() {
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("produtos");
+  const router = useRouter();
+
   const [form, setForm] = useState<ProdutoI>({
     id: "",
     nome: "",
@@ -38,9 +42,51 @@ export default function Produtos() {
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const verificarAtivacaoEmpresa = async (empresaId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da empresa");
+      }
+      const empresaData = await response.json();
+      
+      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+      
+      setEmpresaAtivada(ativada);
+      return ativada;
+    } catch (error) {
+      console.error("Erro ao verificar ativação da empresa:", error);
+      return false;
+    }
+  };
+  
+
+  const mostrarAlertaNaoAtivada = () => {
+    Swal.fire({
+      title: t("empresaNaoAtivada.titulo"),
+      text: t("empresaNaoAtivada.mensagem"),
+      icon: "warning",
+      confirmButtonText: t("empresaNaoAtivada.botao"),
+      confirmButtonColor: "#3085d6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/ativacao");
+      }
+    });
+  };
+
+  const handleAcaoProtegida = (acao: () => void) => {
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
+    acao();
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -69,24 +115,39 @@ export default function Produtos() {
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      if (!responseUsuario.ok) {
+        console.error("Erro ao buscar dados do usuário");
+        return;
+      }
       const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
 
       if (usuario.empresaId) {
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-        const todosProdutos: ProdutoI[] = await responseProdutos.json();
-        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
-        setProdutos(produtosDaEmpresa);
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
+
+        if (ativada) {
+          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+          if (responseProdutos.ok) {
+            const todosProdutos = await responseProdutos.json();
+            const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId);
+            setProdutos(produtosDaEmpresa);
+          }
+        }
       }
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
-      const fornecedoresData = await responseFornecedores.json();
-      setFornecedores(fornecedoresData);
+      if (responseFornecedores.ok) {
+        const fornecedoresData = await responseFornecedores.json();
+        setFornecedores(fornecedoresData);
+      }
 
       const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
-      const categoriasData = await responseCategorias.json();
-      setCategorias(categoriasData);
+      if (responseCategorias.ok) {
+        const categoriasData = await responseCategorias.json();
+        setCategorias(categoriasData);
+      }
     };
 
     initialize();
@@ -118,177 +179,204 @@ export default function Produtos() {
   };
 
   const handleSubmit = async () => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-    if (!empresaId) {
-      Swal.fire("Erro", "Empresa não identificada.", "error");
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-
-      if (file) {
-        formData.append("foto", file);
-      } else if (form.foto) {
-        formData.append("foto", form.foto);
+    handleAcaoProtegida(async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      if (!empresaId) {
+        Swal.fire("Erro", "Empresa não identificada.", "error");
+        return;
       }
 
-      formData.append("nome", form.nome);
-      formData.append("descricao", form.descricao);
-      formData.append("preco", form.preco.toString());
-      formData.append("quantidade", form.quantidade.toString());
-      formData.append("quantidadeMin", form.quantidadeMin.toString());
-      if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
-      if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-      formData.append("empresaId", empresaId);
-      formData.append("usuarioId", usuarioValor)
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
+      }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
 
-      if (response.ok) {
-        setModalAberto(false);
-        setForm((prevForm) => ({
-          ...prevForm,
-          id: "",
-          nome: "",
-          descricao: "",
-          preco: 0,
-          quantidade: 0,
-          quantidadeMin: 0,
-          foto: "",
-          fornecedorId: "",
-          categoriaId: "",
-          empresaId: "",
-          fornecedor: undefined,
-          categoria: undefined,
-          empresa: "",
-          usuarioId: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }));
-        setFile(null);
-        setPreview(null);
+        if (file) {
+          formData.append("foto", file);
+        } else if (form.foto) {
+          formData.append("foto", form.foto);
+        }
 
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Produto criado com sucesso!",
-          showConfirmButton: false,
-          timer: 1500,
+        formData.append("nome", form.nome);
+        formData.append("descricao", form.descricao);
+        formData.append("preco", form.preco.toString());
+        formData.append("quantidade", form.quantidade.toString());
+        formData.append("quantidadeMin", form.quantidadeMin.toString());
+        if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
+        if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
+        formData.append("empresaId", empresaId);
+        formData.append("usuarioId", usuarioValor);
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+          method: "POST",
+          body: formData,
         });
 
-        setTimeout(() => window.location.reload(), 1600);
-      } else {
-        const errorText = await response.text();
-        Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorText}`, "error");
+        if (response.ok) {
+          setModalAberto(false);
+          setForm({
+            id: "",
+            nome: "",
+            descricao: "",
+            preco: 0,
+            quantidade: 0,
+            quantidadeMin: 0,
+            foto: "",
+            fornecedorId: "",
+            categoriaId: "",
+            empresaId: "",
+            fornecedor: undefined,
+            categoria: undefined,
+            empresa: "",
+            usuarioId: "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          setFile(null);
+          setPreview(null);
+
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Produto criado com sucesso!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          setTimeout(() => window.location.reload(), 1600);
+        } else {
+          const errorText = await response.text();
+          Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorText}`, "error");
+        }
+      } catch (err) {
+        console.error("Erro ao criar produto:", err);
+        Swal.fire("Erro!", "Erro de conexão com o servidor", "error");
       }
-    } catch (err) {
-      console.error("Erro ao criar produto:", err);
-      Swal.fire("Erro!", "Erro de conexão com o servidor", "error");
-    }
+    });
   };
 
   const handleUpdate = async () => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-    if (!modalVisualizar) return;
+    handleAcaoProtegida(async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      if (!modalVisualizar) return;
 
-    try {
-      const formData = new FormData();
-
-      if (file) {
-        formData.append("foto", file);
+      if (empresaId) {
+        const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+        if (!empresaAtivada) {
+          mostrarAlertaNaoAtivada();
+          return;
+        }
       }
 
-      formData.append("nome", form.nome);
-      formData.append("descricao", form.descricao);
-      formData.append("preco", form.preco.toString());
-      formData.append("quantidade", form.quantidade.toString());
-      formData.append("quantidadeMin", form.quantidadeMin.toString());
-      formData.append("usuarioId", usuarioValor);
+      try {
+        const formData = new FormData();
 
+        if (file) {
+          formData.append("foto", file);
+        }
 
-      if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
-      if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
+        formData.append("nome", form.nome);
+        formData.append("descricao", form.descricao);
+        formData.append("preco", form.preco.toString());
+        formData.append("quantidade", form.quantidade.toString());
+        formData.append("quantidadeMin", form.quantidadeMin.toString());
+        formData.append("usuarioId", usuarioValor);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
-        method: "PUT",
-        body: formData,
-      });
+        if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
+        if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
 
-      if (response.ok) {
-        const updatedProduto = await response.json();
-
-        setModalVisualizar(null);
-        setFile(null);
-        setPreview(null);
-
-        setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Produto atualizado com sucesso!",
-          showConfirmButton: false,
-          timer: 1500,
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
+          method: "PUT",
+          body: formData,
         });
-        setTimeout(() => window.location.reload(), 1600);
-      } else {
-        const errorText = await response.text();
+
+        if (response.ok) {
+          const updatedProduto = await response.json();
+
+          setModalVisualizar(null);
+          setFile(null);
+          setPreview(null);
+
+          setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Produto atualizado com sucesso!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          setTimeout(() => window.location.reload(), 1600);
+        } else {
+          const errorText = await response.text();
+          Swal.fire({
+            icon: "error",
+            title: "Erro!",
+            text: `Erro ao atualizar produto: ${errorText}`
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao atualizar produto:", err);
         Swal.fire({
           icon: "error",
           title: "Erro!",
-          text: `Erro ao atualizar produto: ${errorText}`
+          text: "Erro inesperado ao tentar atualizar."
         });
       }
-    } catch (err) {
-      console.error("Erro ao atualizar produto:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: "Erro inesperado ao tentar atualizar."
-      });
-    }
-  };
-  const handleDelete = async () => {
-    if (!modalVisualizar) return;
-
-    const result = await Swal.fire({
-      title: "Tem certeza?",
-      text: "Você não poderá reverter isso!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sim, deletar!",
-      cancelButtonText: "Cancelar",
     });
+  };
 
-    if (result.isConfirmed) {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
-          method: "DELETE",
-        });
-        Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
-        setModalVisualizar(null);
-        window.location.reload();
-      } catch (err) {
-        console.error("Erro ao excluir produto:", err);
-        Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
+  const handleDelete = async () => {
+    handleAcaoProtegida(async () => {
+      if (!modalVisualizar) return;
+
+      if (empresaId) {
+        const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+        if (!empresaAtivada) {
+          mostrarAlertaNaoAtivada();
+          return;
+        }
       }
-    }
+
+      const result = await Swal.fire({
+        title: "Tem certeza?",
+        text: "Você não poderá reverter isso!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
+            method: "DELETE",
+          });
+          Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
+          setModalVisualizar(null);
+          window.location.reload();
+        } catch (err) {
+          console.error("Erro ao excluir produto:", err);
+          Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
+        }
+      }
+    });
   };
 
   const produtosFiltrados = produtos.filter((produto) =>
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
-  const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
+  const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
   return (
     <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -296,6 +384,20 @@ export default function Produtos() {
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
         </h1>
+
+        {empresaId && !empresaAtivada && (
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
+              color: modoDark ? "#FFFFFF" : "#1E3A8A"
+            }}>
+            <FaLock className="text-xl" />
+            <div>
+              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <div
@@ -318,7 +420,7 @@ export default function Produtos() {
 
           {podeEditar && (
             <button
-              onClick={() => setModalAberto(true)}
+              onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",

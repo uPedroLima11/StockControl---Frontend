@@ -1,14 +1,12 @@
 {
   "novoProduto": "New Product",
-  "editarProduto": "Edit Product",
-  "selecionarImagem": "Select Image",
   "titulo": "Products",
   "nome": "Name",
   "descricao": "Description",
   "preco": "Price",
   "quantidade": "Quantity",
   "quantidadeMinima": "Minimum Quantity",
-  "foto": "Photo URL",
+  "foto": "Image URL",
   "fornecedor": "Supplier",
   "categoria": "Category",
   "estoque": "Stock",
@@ -19,5 +17,14 @@
   "salvar": "Save",
   "excluir": "Delete",
   "criar": "Create",
-  "buscar": "Search Product"
+  "buscar": "Search Product",
+  "editarProduto": "Edit Product",
+  "selecionarImagem": "Select Image",
+  "empresaNaoAtivada": {
+    "titulo": "Company Not Activated",
+    "mensagem": "Your company has not been activated yet. You need to complete the activation process to continue.",
+    "botao": "Activate now",
+    "alertaTitulo": "Attention!",
+    "alertaMensagem": "Your company has not been activated. Please complete the activation."
+  }
 }

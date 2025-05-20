@@ -30,7 +30,7 @@ export default function Navbar() {
     }
 
     const buscaEmpresa = async (idUsuario: string) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
       if (response.status === 200) {
         const dados = await response.json();
         setFotoEmpresa(dados?.foto || '/contadefault.png');

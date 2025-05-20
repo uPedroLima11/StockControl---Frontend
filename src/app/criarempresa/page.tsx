@@ -103,7 +103,7 @@ export default function CriarEmpresa() {
 
   const fetchEmpresa = async (idUsuario: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${idUsuario}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${idUsuario}`);
       if (response.ok) {
         const data = await response.json();
         if (data.empresa) {
