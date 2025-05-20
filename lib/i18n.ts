@@ -22,6 +22,7 @@ import vendasPt from '../public/locales/pt/vendas.json';
 import vendasEn from '../public/locales/en/vendas.json';
 
 
+
 if (!i18n.isInitialized) {
   i18n
     .use(LanguageDetector)
