@@ -85,11 +85,11 @@ export default function Configuracoes() {
           ].map((item, i) => (
             <li key={i}>
               <a
-          href={item.link}
-          className="cursor-pointer hover:underline"
-          style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
+                href={item.link}
+                className="cursor-pointer hover:underline"
+                style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
               >
-          {item.label}
+                {item.label}
               </a>
             </li>
           ))}
@@ -136,9 +136,8 @@ export default function Configuracoes() {
           </button>
 
           <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${
-              mostrarIdiomas ? "max-h-40" : "max-h-0"
-            }`}
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${mostrarIdiomas ? "max-h-40" : "max-h-0"
+              }`}
           >
             <div className="flex flex-col gap-2 mt-2">
               <button
