@@ -1,12 +1,15 @@
 "use client";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaPhoneAlt } from "react-icons/fa";
+import { FaCog, FaSearch, FaPhoneAlt, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 
 export default function Fornecedores() {
   const [modoDark, setModoDark] = useState(false);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorI[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
@@ -26,6 +29,48 @@ export default function Fornecedores() {
     Produto: [],
   });
   const [busca, setBusca] = useState("");
+  const { t } = useTranslation("fornecedores");
+  const router = useRouter();
+
+  const verificarAtivacaoEmpresa = async (empresaId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da empresa");
+      }
+      const empresaData = await response.json();
+      
+      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+      
+      setEmpresaAtivada(ativada);
+      return ativada;
+    } catch (error) {
+      console.error("Erro ao verificar ativação da empresa:", error);
+      return false;
+    }
+  };
+
+  const mostrarAlertaNaoAtivada = () => {
+    Swal.fire({
+      title: t("empresaNaoAtivada.titulo"),
+      text: t("empresaNaoAtivada.mensagem"),
+      icon: "warning",
+      confirmButtonText: t("empresaNaoAtivada.botao"),
+      confirmButtonColor: "#3085d6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/ativacao");
+      }
+    });
+  };
+
+  const handleAcaoProtegida = (acao: () => void) => {
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
+    acao();
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -56,6 +101,11 @@ export default function Fornecedores() {
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
 
+      if (usuario.empresaId) {
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
+      }
+
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
       const fornecedoresData = await responseFornecedores.json();
       setFornecedores(fornecedoresData);
@@ -78,109 +128,133 @@ export default function Fornecedores() {
   };
 
   async function handleAdicionarFornecedor() {
-    if (!empresaId) return alert("Empresa não identificada.");
+    handleAcaoProtegida(async () => {
+      if (!empresaId) return alert("Empresa não identificada.");
 
-    const formData = new FormData();
-    formData.append("nome", form.nome);
-    formData.append("email", form.email);
-    formData.append("cnpj", form.cnpj);
-    formData.append("telefone", form.telefone);
-    formData.append("categoria", form.categoria);
-    if (fotoFile) {
-      formData.append("foto", fotoFile);
-    }
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
+      }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-      method: "POST",
-      body: formData,
-    });
+      const formData = new FormData();
+      formData.append("nome", form.nome);
+      formData.append("email", form.email);
+      formData.append("cnpj", form.cnpj);
+      formData.append("telefone", form.telefone);
+      formData.append("categoria", form.categoria);
+      if (fotoFile) {
+        formData.append("foto", fotoFile);
+      }
 
-    if (response.status === 201) {
-      Swal.fire({
-        text: "Fornecedor adicionado com sucesso!",
-        icon: "success",
-        confirmButtonColor: "#013C3C",
-      });
-      setModalAberto(false);
-      window.location.reload();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Algo deu errado, tente novamente.",
-        confirmButtonColor: "#013C3C",
-      });
-    }
-  }
-
-  async function handleSalvarFornecedor() {
-    if (!modalVisualizar?.id) return;
-
-    const formData = new FormData();
-    formData.append("nome", form.nome);
-    formData.append("email", form.email);
-    formData.append("cnpj", form.cnpj);
-    formData.append("telefone", form.telefone);
-    formData.append("categoria", form.categoria);
-    if (fotoFile) {
-      formData.append("foto", fotoFile);
-    }
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-        method: "PUT",
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        method: "POST",
         body: formData,
       });
 
-      if (response.ok) {
+      if (response.status === 201) {
         Swal.fire({
-          text: "Fornecedor atualizado com sucesso!",
+          text: "Fornecedor adicionado com sucesso!",
           icon: "success",
           confirmButtonColor: "#013C3C",
         });
-        setModalVisualizar(null);
+        setModalAberto(false);
         window.location.reload();
       } else {
-        throw new Error("Erro ao atualizar fornecedor");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Algo deu errado, tente novamente.",
+          confirmButtonColor: "#013C3C",
+        });
       }
-    } catch (error) {
-      console.error("Erro ao atualizar fornecedor:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Algo deu errado ao atualizar o fornecedor.",
-        confirmButtonColor: "#013C3C",
-      });
-    }
+    });
+  }
+
+  async function handleSalvarFornecedor() {
+    handleAcaoProtegida(async () => {
+      if (!modalVisualizar?.id) return;
+
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("nome", form.nome);
+      formData.append("email", form.email);
+      formData.append("cnpj", form.cnpj);
+      formData.append("telefone", form.telefone);
+      formData.append("categoria", form.categoria);
+      if (fotoFile) {
+        formData.append("foto", fotoFile);
+      }
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+          method: "PUT",
+          body: formData,
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            text: "Fornecedor atualizado com sucesso!",
+            icon: "success",
+            confirmButtonColor: "#013C3C",
+          });
+          setModalVisualizar(null);
+          window.location.reload();
+        } else {
+          throw new Error("Erro ao atualizar fornecedor");
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar fornecedor:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Algo deu errado ao atualizar o fornecedor.",
+          confirmButtonColor: "#013C3C",
+        });
+      }
+    });
   }
 
   async function handleDelete() {
-    if (!modalVisualizar) return;
+    handleAcaoProtegida(async () => {
+      if (!modalVisualizar) return;
 
-    const result = await Swal.fire({
-      title: "Tem certeza?",
-      text: "Você não poderá reverter isso!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sim, deletar!",
-      cancelButtonText: "Cancelar",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-          method: "DELETE",
-        });
-        Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
-        setModalVisualizar(null);
-        window.location.reload();
-      } catch (err) {
-        console.error("Erro ao excluir produto:", err);
-        Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
       }
-    }
+
+      const result = await Swal.fire({
+        title: "Tem certeza?",
+        text: "Você não poderá reverter isso!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+            method: "DELETE",
+          });
+          Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
+          setModalVisualizar(null);
+          window.location.reload();
+        } catch (err) {
+          console.error("Erro ao excluir produto:", err);
+          Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
+        }
+      }
+    });
   }
 
   function handleEntrarContato(fornecedor: FornecedorI) {
@@ -190,13 +264,29 @@ export default function Fornecedores() {
     window.open(urlWhatsApp, "_blank");
   }
 
-  const podeEditar = tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO";
+  const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
+  
   return (
     <div className="flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-          Fornecedores
+          {t("titulo")}
         </h1>
+
+        {empresaId && !empresaAtivada && (
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
+              color: modoDark ? "#FFFFFF" : "#1E3A8A"
+            }}>
+            <FaLock className="text-xl" />
+            <div>
+              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <div
             className="flex items-center border rounded-full px-4 py-2 shadow-sm"
@@ -205,13 +295,20 @@ export default function Fornecedores() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input type="text" placeholder="Buscar Fornecedor" className="outline-none font-mono text-sm bg-transparent" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: "var(--cor-fonte)" }} />
+            <input 
+              type="text" 
+              placeholder={t("buscar")} 
+              className="outline-none font-mono text-sm bg-transparent" 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+              style={{ color: "var(--cor-fonte)" }} 
+            />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
 
           {podeEditar && (
             <button
-              onClick={() => setModalAberto(true)}
+              onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
@@ -219,7 +316,7 @@ export default function Fornecedores() {
                 color: modoDark ? "#FFFFFF" : "#00332C",
               }}
             >
-              Adicionar Fornecedor
+              {t("novoFornecedor")}
             </button>
           )}
         </div>
@@ -236,16 +333,16 @@ export default function Fornecedores() {
               <tr style={{ color: "var(--cor-fonte)" }}>
                 <th className="flex items-center justify-center py-3 px-4">
                   <div className="flex items-center gap-1">
-                    <FaCog /> Foto
+                    <FaCog /> {t("foto")}
                   </div>
                 </th>
-                <th className="py-3 px-4 text-center">Nome</th>
-                <th className="py-3 px-4 text-center">CNPJ</th>
-                <th className="py-3 px-4 text-center">Email</th>
-                <th className="py-3 px-4 text-center">Telefone</th>
-                <th className="py-3 px-4 text-center">Categoria</th>
-                <th className="py-3 px-4 text-center">Adicionado em</th>
-                <th className="py-3 px-4 text-center">Contato</th>
+                <th className="py-3 px-4 text-center">{t("nome")}</th>
+                <th className="py-3 px-4 text-center">{t("cnpj")}</th>
+                <th className="py-3 px-4 text-center">{t("email")}</th>
+                <th className="py-3 px-4 text-center">{t("telefone")}</th>
+                <th className="py-3 px-4 text-center">{t("categoria")}</th>
+                <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
+                <th className="py-3 px-4 text-center">{t("contato")}</th>
               </tr>
             </thead>
             <tbody>
@@ -317,7 +414,12 @@ export default function Fornecedores() {
                       {new Date(fornecedor.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <FaPhoneAlt onClick={() => handleEntrarContato(fornecedor)} color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl" />
+                      <FaPhoneAlt 
+                        onClick={() => handleEntrarContato(fornecedor)} 
+                        color="#25D366" 
+                        size={32} 
+                        className="cursor-pointer m-auto border-2 p-1 rounded-2xl" 
+                      />
                     </td>
                   </tr>
                 ))}
@@ -334,22 +436,64 @@ export default function Fornecedores() {
               color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl font-bold mb-4">{modalVisualizar ? "Visualizar Fornecedor" : "Novo Fornecedor"}</h2>
+            <h2 className="text-xl font-bold mb-4">{modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}</h2>
 
-            <input placeholder="Nome" value={form.nome || ""} onChange={(e) => setForm({ ...form, nome: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <input 
+              placeholder={t("nome")} 
+              value={form.nome || ""} 
+              onChange={(e) => setForm({ ...form, nome: e.target.value })} 
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+              disabled={Boolean(!podeEditar && modalVisualizar)} 
+              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            />
 
-            <input placeholder="Email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <input 
+              placeholder={t("email")} 
+              value={form.email || ""} 
+              onChange={(e) => setForm({ ...form, email: e.target.value })} 
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+              disabled={Boolean(!podeEditar && modalVisualizar)} 
+              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            />
 
-            <input placeholder="cnpj" value={form.cnpj || ""} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <input 
+              placeholder={t("cnpj")} 
+              value={form.cnpj || ""} 
+              onChange={(e) => setForm({ ...form, cnpj: e.target.value })} 
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+              disabled={Boolean(!podeEditar && modalVisualizar)} 
+              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            />
 
-            <input placeholder="Telefone" value={form.telefone || ""} onChange={(e) => setForm({ ...form, telefone: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <input 
+              placeholder={t("telefone")} 
+              value={form.telefone || ""} 
+              onChange={(e) => setForm({ ...form, telefone: e.target.value })} 
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+              disabled={Boolean(!podeEditar && modalVisualizar)} 
+              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            />
 
-            <input placeholder="Categoria" value={form.categoria || ""} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} disabled={Boolean(!podeEditar && modalVisualizar)} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+            <input 
+              placeholder={t("categoria")} 
+              value={form.categoria || ""} 
+              onChange={(e) => setForm({ ...form, categoria: e.target.value })} 
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+              disabled={Boolean(!podeEditar && modalVisualizar)} 
+              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            />
 
             <div className="mb-3">
-              <label className="block mb-1">Foto</label>
+              <label className="block mb-1">{t("foto")}</label>
               {fotoPreview || form.foto ? <img src={fotoPreview || form.foto || ""} alt="Preview" className="w-20 h-20 object-cover rounded-full mb-2" /> : null}
-              <input type="file" onChange={handleFileChange} accept="image/*" disabled={Boolean(!podeEditar && modalVisualizar)} className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} />
+              <input 
+                type="file" 
+                onChange={handleFileChange} 
+                accept="image/*" 
+                disabled={Boolean(!podeEditar && modalVisualizar)} 
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+              />
             </div>
 
             <div className="flex justify-between mt-4">
@@ -361,7 +505,7 @@ export default function Fornecedores() {
                 className="hover:underline"
                 style={{ color: "var(--cor-fonte)" }}
               >
-                Fechar
+                {t("fechar")}
               </button>
               {modalVisualizar ? (
                 podeEditar && (
@@ -375,7 +519,7 @@ export default function Fornecedores() {
                         border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
-                      Salvar
+                      {t("salvar")}
                     </button>
                     <button
                       onClick={handleDelete}
@@ -386,13 +530,21 @@ export default function Fornecedores() {
                         border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
-                      Excluir
+                      {t("excluir")}
                     </button>
                   </>
                 )
               ) : (
-                <button onClick={handleAdicionarFornecedor} className="px-4 py-2 rounded hover:bg-[#00443f]" style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)", border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` }}>
-                  Afiliar Fornecedor
+                <button 
+                  onClick={handleAdicionarFornecedor} 
+                  className="px-4 py-2 rounded hover:bg-[#00443f]" 
+                  style={{ 
+                    backgroundColor: "#1a25359f", 
+                    color: "var(--cor-fonte)", 
+                    border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                  }}
+                >
+                  {t("afiliarFornecedor")}
                 </button>
               )}
             </div>

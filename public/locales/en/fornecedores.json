@@ -1,0 +1,25 @@
+{
+      "titulo": "Suppliers",
+      "buscar": "Search Supplier",
+      "novoFornecedor": "Add Supplier",
+      "foto": "Photo",
+      "nome": "Name",
+      "cnpj": "Tax ID",
+      "email": "Email",
+      "telefone": "Phone",
+      "categoria": "Category",
+      "adicionadoEm": "Added on",
+      "contato": "Contact",
+      "visualizarFornecedor": "View Supplier",
+      "salvar": "Save",
+      "excluir": "Delete",
+      "fechar": "Close",
+      "afiliarFornecedor": "Add Supplier",
+      "empresaNaoAtivada": {
+        "alertaTitulo": "Company not activated",
+        "alertaMensagem": "You need to activate your company to manage suppliers.",
+        "titulo": "Activation required",
+        "mensagem": "Your company needs to be activated before you can manage suppliers.",
+        "botao": "Activate now"
+      }
+  }
