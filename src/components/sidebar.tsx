@@ -26,7 +26,7 @@ export default function Sidebar() {
     try {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
         method: 'POST'
       });
@@ -44,7 +44,7 @@ export default function Sidebar() {
     const usuarioId = usuarioSalvo?.replace(/"/g, "");
 
     const estoqueInterval = setInterval(verificarEstoque, 60 * 60 * 1000);
-    
+
     verificarEstoque();
 
     async function fetchData() {
@@ -62,9 +62,9 @@ export default function Sidebar() {
           const companyData = await companyResponse.json();
           setFotoEmpresa(companyData.foto);
           setNomeEmpresa(companyData.nome);
-          setPossuiEmpresa(true); 
+          setPossuiEmpresa(true);
         } else {
-          setPossuiEmpresa(false); 
+          setPossuiEmpresa(false);
         }
 
         await checkNotifications(usuarioId);
@@ -166,7 +166,7 @@ export default function Sidebar() {
           {possuiEmpresa && (
             <SidebarLink href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} />
           )}
-          
+
           <button
             onClick={() => {
               localStorage.removeItem("client_key");

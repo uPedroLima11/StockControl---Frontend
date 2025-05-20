@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaCog,} from "react-icons/fa";
+import { FaCog, } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
@@ -56,7 +56,7 @@ export default function Usuarios() {
       document.body.style.color = "#000000";
     }
   };
-  
+
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -69,36 +69,36 @@ export default function Usuarios() {
 
     const fetchDados = async (idUsuario: string) => {
       try {
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
-      if (!resEmpresa.ok) {
-        setLoading(false);
-        return;
-      }
+        const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
+        if (!resEmpresa.ok) {
+          setLoading(false);
+          return;
+        }
 
-      const empresaData = await resEmpresa.json();
-      if (!empresaData || !empresaData.id) {
-        setLoading(false);
-        return;
-      }
+        const empresaData = await resEmpresa.json();
+        if (!empresaData || !empresaData.id) {
+          setLoading(false);
+          return;
+        }
 
-      const empresaIdRecebido = empresaData.id;
+        const empresaIdRecebido = empresaData.id;
 
-      const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
-      if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
+        const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+        if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
 
-      const todosUsuarios: UsuarioI[] = await resUsuarios.json();
-      const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
+        const todosUsuarios: UsuarioI[] = await resUsuarios.json();
+        const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
-      setUsuarios(usuariosDaEmpresa);
+        setUsuarios(usuariosDaEmpresa);
       } catch (err: unknown) {
-      console.error("Erro ao carregar dados:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(t("erroDesconhecido"));
-      }
+        console.error("Erro ao carregar dados:", err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(t("erroDesconhecido"));
+        }
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     };
 
@@ -121,7 +121,7 @@ export default function Usuarios() {
         });
         return;
       }
-  
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,9 +132,9 @@ export default function Usuarios() {
           nomeRemetente: usuarioLogado?.nome,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.status === 201) {
         Swal.fire({
           title: t("modal.mensagemEnviada.titulo"),
@@ -311,9 +311,9 @@ export default function Usuarios() {
             <button
               className="px-4 py-2 rounded-sm font-bold text-sm transition"
               style={{
-          backgroundColor: modoDark ? "#00332C" : "#55D6BE",
-          color: modoDark ? "#FFFFFF" : "#000000",
-          border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+                backgroundColor: modoDark ? "#00332C" : "#55D6BE",
+                color: modoDark ? "#FFFFFF" : "#000000",
+                border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
               }}
               onClick={() => setShowModalConvite(true)}
             >
@@ -322,9 +322,9 @@ export default function Usuarios() {
             <button
               className="px-4 py-2 rounded-sm font-bold text-sm transition"
               style={{
-          backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
-          color: "#FFFFFF",
-          border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+                backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
+                color: "#FFFFFF",
+                border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
               }}
               onClick={() => setShowModalMensagem(true)}
             >
@@ -354,11 +354,12 @@ export default function Usuarios() {
               </tr>
             ) : (
               usuarios.map((usuario) => (
-                <tr 
-                  key={usuario.id} 
+                <tr
+                  key={usuario.id}
                   className="rounded-md shadow-sm"
-                 style={{ backgroundColor: modoDark ? "#1a25359f" : "#ececec",
-                  
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#ececec",
+
                     border: modoDark ? "1px solid #374151" : "1px solid #E5E7EB"
                   }}
                 >
@@ -386,9 +387,9 @@ export default function Usuarios() {
 
       {showModalConvite && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div 
+          <div
             className="p-6 rounded-lg w-full max-w-md"
-            style={{ 
+            style={{
               backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
@@ -405,7 +406,7 @@ export default function Usuarios() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full border p-3 rounded-md mt-2"
-                  style={{ 
+                  style={{
                     backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
                     color: modoDark ? "#FFFFFF" : "#000000"
                   }}
@@ -441,9 +442,9 @@ export default function Usuarios() {
 
       {showModalMensagem && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div 
+          <div
             className="p-6 rounded-lg w-full max-w-md"
-            style={{ 
+            style={{
               backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
@@ -460,7 +461,7 @@ export default function Usuarios() {
                   value={usuarioLogado?.nome || ""}
                   readOnly
                   className="w-full p-3 rounded-md mt-2"
-                  style={{ 
+                  style={{
                     backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
                     color: modoDark ? "#FFFFFF" : "#000000"
                   }}
@@ -471,7 +472,7 @@ export default function Usuarios() {
               </label>
               <select
                 className="w-full p-2 mb-4 rounded border"
-                style={{ 
+                style={{
                   backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
                   borderColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000"
@@ -492,7 +493,7 @@ export default function Usuarios() {
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 className="w-full p-2 mb-4 rounded border"
-                style={{ 
+                style={{
                   backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
                   borderColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000"
@@ -504,7 +505,7 @@ export default function Usuarios() {
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 className="w-full p-2 mb-4 rounded border"
-                style={{ 
+                style={{
                   backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
                   borderColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000"
@@ -540,9 +541,9 @@ export default function Usuarios() {
 
       {modalEditarUsuario && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div 
+          <div
             className="p-6 rounded-lg w-full max-w-md"
-            style={{ 
+            style={{
               backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
               color: modoDark ? "#FFFFFF" : "#000000"
             }}
@@ -555,7 +556,7 @@ export default function Usuarios() {
               value={novoTipo}
               onChange={(e) => setNovoTipo(e.target.value)}
               className="w-full p-2 mb-4 rounded border"
-              style={{ 
+              style={{
                 backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
                 borderColor: modoDark ? "#374151" : "#D1D5DB",
                 color: modoDark ? "#FFFFFF" : "#000000"
