@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { FaCheckCircle, FaLock, FaSun, FaMoon } from 'react-icons/fa';
+import { FaCheckCircle, FaLock } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
