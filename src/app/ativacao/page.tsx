@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
-import { FaCheckCircle, FaLock } from 'react-icons/fa'
+import { FaCheckCircle, FaLock, FaSun, FaMoon } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO"
@@ -30,23 +30,34 @@ export default function AtivacaoPage() {
       root.classList.add("dark")
       root.style.setProperty("--cor-fundo", "#20252B")
       root.style.setProperty("--cor-texto", "#FFFFFF")
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f")
+      root.style.setProperty("--cor-fundo-bloco", "#1F2937")
       root.style.setProperty("--cor-borda", "#374151")
       root.style.setProperty("--cor-cinza", "#A3A3A3")
-      root.style.setProperty("--cor-destaque", "#00332C")
+      root.style.setProperty("--cor-destaque", "#3B82F6")
+      root.style.setProperty("--cor-botao", "#3B82F6")
+      root.style.setProperty("--cor-botao-hover", "#2563EB")
       document.body.style.backgroundColor = "#20252B"
       document.body.style.color = "#FFFFFF"
     } else {
       root.classList.remove("dark")
       root.style.setProperty("--cor-fundo", "#FFFFFF")
       root.style.setProperty("--cor-texto", "#000000")
-      root.style.setProperty("--cor-fundo-bloco", "#ececec")
+      root.style.setProperty("--cor-fundo-bloco", "#F9FAFB")
       root.style.setProperty("--cor-borda", "#E5E7EB")
       root.style.setProperty("--cor-cinza", "#4B5563")
-      root.style.setProperty("--cor-destaque", "#00332C")
+      root.style.setProperty("--cor-destaque", "#3B82F6")
+      root.style.setProperty("--cor-botao", "#3B82F6")
+      root.style.setProperty("--cor-botao-hover", "#2563EB")
       document.body.style.backgroundColor = "#FFFFFF"
       document.body.style.color = "#000000"
     }
+  }
+
+  const alternarTema = () => {
+    const novoTema = !modoDark
+    setModoDark(novoTema)
+    localStorage.setItem("modoDark", String(novoTema))
+    aplicarTema(novoTema)
   }
 
   useEffect(() => {
@@ -65,7 +76,6 @@ export default function AtivacaoPage() {
 
         setTipoUsuario(userData.tipo)
         
-
         const empresaRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${userId}`)
         const empresaData = await empresaRes.json()
 
@@ -122,7 +132,10 @@ export default function AtivacaoPage() {
   if (tipoUsuario && tipoUsuario !== "PROPRIETARIO") {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <div className="p-8 rounded-lg shadow-lg max-w-md w-full text-center" style={{ backgroundColor: "var(--cor-fundo-bloco)" }}>
+        <div className="p-8 rounded-lg shadow-lg max-w-md w-full text-center" style={{ 
+          backgroundColor: "var(--cor-fundo-bloco)",
+          border: "1px solid var(--cor-borda)"
+        }}>
           <div className="flex justify-center mb-4">
             <FaLock className="text-red-500 text-4xl" />
           </div>
@@ -134,7 +147,7 @@ export default function AtivacaoPage() {
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="w-full bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
           >
             {t('voltarDashboard')}
           </button>
@@ -145,11 +158,25 @@ export default function AtivacaoPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={alternarTema}
+          className="p-2 rounded-full"
+          style={{
+            backgroundColor: modoDark ? "#374151" : "#E5E7EB",
+            color: modoDark ? "#FBBF24" : "#374151"
+          }}
+          aria-label={modoDark ? t('light_mode') : t('dark_mode')}
+        >
+          {modoDark ? <FaSun size={20} /> : <FaMoon size={20} />}
+        </button>
+      </div>
+      
       <div 
-        className="p-8 rounded-lg shadow-lg max-w-md w-full"
+        className="p-8 rounded-lg shadow-lg max-w-md w-full relative"
         style={{ 
           backgroundColor: "var(--cor-fundo-bloco)",
-          border: `1px solid var(--cor-borda)`
+          border: "1px solid var(--cor-borda)"
         }}
       >
         <div className="flex justify-center mb-6">
@@ -174,10 +201,10 @@ export default function AtivacaoPage() {
               type="text"
               value={codigo}
               onChange={(e) => setCodigo(e.target.value)}
-              className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-[var(--cor-botao)] focus:border-[var(--cor-botao)] transition-colors"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                border: `1px solid var(--cor-borda)`,
+                backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
+                border: "1px solid var(--cor-borda)",
                 color: "var(--cor-texto)"
               }}
               placeholder={t('codigoPlaceholder')}
@@ -193,8 +220,8 @@ export default function AtivacaoPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                loading ? 'opacity-70 cursor-not-allowed bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--cor-botao)] transition-colors ${
+                loading ? 'opacity-70 cursor-not-allowed' : 'bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)]'
               }`}
             >
               {loading ? t('botaoAtivando') : t('botaoAtivar')}
