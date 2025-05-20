@@ -146,7 +146,6 @@ export default function Usuarios() {
         setUsuarioSelecionado(null);
         setShowModalMensagem(false);
       } else {
-        const errorData = await response.json();
         Swal.fire({
           title: t("modal.erro.titulo"),
           text: data.message || t("modal.erro.textoEnviarNotificacao"),
