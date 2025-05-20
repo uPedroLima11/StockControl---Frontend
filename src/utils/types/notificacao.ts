@@ -12,6 +12,8 @@ export interface NotificacaoI {
   titulo: string;
   descricao: string;
   lida: boolean;
+  empresaId: string;
+  empresa?: UsuarioI;
   usuarioId: string;  
   usuario?: UsuarioI;
   convite: ConviteI | null;

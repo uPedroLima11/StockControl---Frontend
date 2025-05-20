@@ -121,7 +121,7 @@ export default function Usuarios() {
         });
         return;
       }
-
+  
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,8 +132,10 @@ export default function Usuarios() {
           nomeRemetente: usuarioLogado?.nome,
         }),
       });
-
-      if (response.ok) {
+      
+      const data = await response.json();
+      
+      if (response.status === 201) {
         Swal.fire({
           title: t("modal.mensagemEnviada.titulo"),
           text: t("modal.mensagemEnviada.texto", { email: usuarioSelecionado.email }),
@@ -144,9 +146,10 @@ export default function Usuarios() {
         setUsuarioSelecionado(null);
         setShowModalMensagem(false);
       } else {
+        const errorData = await response.json();
         Swal.fire({
           title: t("modal.erro.titulo"),
-          text: t("modal.erro.textoEnviarNotificacao"),
+          text: data.message || t("modal.erro.textoEnviarNotificacao"),
           icon: "error",
         });
       }

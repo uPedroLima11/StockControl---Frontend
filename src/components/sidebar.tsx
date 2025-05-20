@@ -22,12 +22,30 @@ export default function Sidebar() {
   const { logar, usuario } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const verificarEstoque = async () => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
+        method: 'POST'
+      });
+      console.log("Verificação de estoque:", await response.json());
+    } catch (error) {
+      console.error("Erro ao verificar estoque:", error);
+    }
+  };
+
   useEffect(() => {
     audioRef.current = new Audio("/notification-sound.mp3");
     audioRef.current.volume = 0.3;
 
     const usuarioSalvo = localStorage.getItem("client_key");
     const usuarioId = usuarioSalvo?.replace(/"/g, "");
+
+    const estoqueInterval = setInterval(verificarEstoque, 60 * 60 * 1000);
+    
+    verificarEstoque();
 
     async function fetchData() {
       if (!usuarioId) return;
@@ -71,11 +89,14 @@ export default function Sidebar() {
 
     fetchData();
 
-    const intervalId = setInterval(() => {
+    const notificationInterval = setInterval(() => {
       if (usuarioId) checkNotifications(usuarioId);
     }, 30000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(estoqueInterval);
+      clearInterval(notificationInterval);
+    };
   }, [logar]);
 
   const toggleSidebar = () => setIsOpen(!isOpen);

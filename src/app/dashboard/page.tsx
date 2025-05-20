@@ -20,9 +20,9 @@ export default function Dashboard() {
     setModoDark(ativado);
     fetchContagem();
     fetchProdutos();
-
+  
     const root = document.documentElement;
-
+  
     if (ativado) {
       root.style.setProperty("--cor-fundo", "#20252B");
       root.style.setProperty("--cor-fonte", "#fffff2");
