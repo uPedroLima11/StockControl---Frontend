@@ -19,7 +19,7 @@ export default function Sidebar() {
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const [possuiEmpresa, setPossuiEmpresa] = useState(false);
-  const { logar, usuario } = useUsuarioStore();
+  const { logar, } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const verificarEstoque = async () => {
@@ -260,6 +260,10 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         const userResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`);
         const userData = await userResponse.json();
         const empresaId = userData.empresaId;
+
+        if (!empresaId) {
+          console.warn("Empresa ID não encontrado.");
+        }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
         const todasNotificacoes: NotificacaoI[] = await response.json();
