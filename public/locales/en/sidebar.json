@@ -21,6 +21,12 @@
     "no_notifications": "No notifications",
     "Data": "Date",
     "sells": "Sells",
-    "nenhumaEmpresa": "You don't belong to any company"
+    "nenhumaEmpresa": "You don't belong to any company",
+    "marcarLidas": "Mark as read",
+ "mostrarTodas": "All",
+ "mostrarLidas": "Read",
+ "semNotificacoesLidas": "You have no read notifications",
+ "NenhumaNotificacao": "You have no unread notifications"
+
 
   }

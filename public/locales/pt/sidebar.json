@@ -20,5 +20,11 @@
   "unread": "Não lida",
   "no_notifications": "Nenhuma notificação",
   "Data": "Data",
-  "sells": "Vendas"
+  "sells": "Vendas",
+ "marcarLidas": "Ler Todas",
+ "mostrarTodas": "Todas",
+ "mostrarLidas": "Lidas",
+ "semNotificacoesLidas": "Você não possui notificações lidas",
+ "NenhumaNotificacao": "Você não possui nenhuma Notificação não lida"
+
 }

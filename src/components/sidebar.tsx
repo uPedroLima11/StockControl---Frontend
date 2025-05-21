@@ -74,19 +74,29 @@ export default function Sidebar() {
     }
 
     async function checkNotifications(idUsuario: string) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-      const notificacoes = await response.json();
-      const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => !n.lida);
-
-      if (possuiNaoLidas && !temNotificacaoNaoLida) {
-        const somAtivado = localStorage.getItem("somNotificacao") !== "false";
-        if (somAtivado && audioRef.current) {
-          audioRef.current.play();
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+        const notificacoes = await response.json();
+    
+        const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => {
+          if (n.empresaId) {
+            return !n.NotificacaoLida?.some(nl => nl.usuarioId === idUsuario);
+          }
+          return !n.lida;
+        });
+    
+        setTemNotificacaoNaoLida(possuiNaoLidas);
+        
+        if (possuiNaoLidas) {
+          const somAtivado = localStorage.getItem("somNotificacao") !== "false";
+          if (somAtivado && audioRef.current) {
+            audioRef.current.play();
+          }
         }
+      } catch (error) {
+        console.error("Erro ao verificar notificações:", error);
       }
-      setTemNotificacaoNaoLida(possuiNaoLidas);
     }
-
     fetchData();
 
     const notificationInterval = setInterval(() => {
@@ -102,14 +112,6 @@ export default function Sidebar() {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const toggleNotifications = async () => {
-    if (usuario?.id) {
-      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuarioId: usuario.id }),
-      });
-      setTemNotificacaoNaoLida(false);
-    }
     setShowNotifications(!showNotifications);
   };
 
@@ -200,19 +202,83 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
+  const [mostrarLidas, setMostrarLidas] = useState(false);
   const { usuario } = useUsuarioStore();
+
+  const handleMarkAllAsRead = async () => {
+    if (!usuario?.id) return;
+  
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuarioId: usuario.id }),
+      });
+  
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacoes-lidas/marcar-todas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuarioId: usuario.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao marcar notificações como lidas');
+      }
+
+      setNotificacoes(prev => prev.map(n => {
+        if (n.empresaId) {
+          return {
+            ...n,
+            NotificacaoLida: [...(n.NotificacaoLida || []), { 
+              notificacaoId: n.id, 
+              usuarioId: usuario.id, 
+              createdAt: new Date() 
+            }]
+          };
+        } else {
+          return { ...n, lida: true };
+        }
+      }));
+      
+      setTimeout(() => {
+        onClose();
+      }, 500);
+      
+    } catch (error) {
+      console.error("Erro ao marcar notificações como lidas:", error);
+    }
+  };
+  const toggleMostrarLidas = () => {
+    setMostrarLidas(!mostrarLidas);
+  };
 
   useEffect(() => {
     async function fetchNotifications() {
       if (!usuario?.id) return;
 
       try {
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`);
+        const userData = await userResponse.json();
+        const empresaId = userData.empresaId;
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
-        setNotificacoes(await response.json());
+        const todasNotificacoes: NotificacaoI[] = await response.json();
+
+
+        const notificacoesFiltradas = todasNotificacoes.filter((n) => {
+          if (!n.empresaId) {
+            return mostrarLidas ? n.lida : !n.lida;
+          }
+          const foiLida = n.NotificacaoLida?.some(nl => nl.usuarioId === usuario.id);
+          return mostrarLidas ? foiLida : !foiLida;
+        });
+
+        setNotificacoes(notificacoesFiltradas);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
     }
+
 
     if (isVisible) fetchNotifications();
 
@@ -224,7 +290,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isVisible, usuario]);
+  }, [isVisible, usuario, mostrarLidas]);
 
   async function handleInviteResponse(id: string, convite: ConviteI) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
@@ -259,7 +325,10 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   };
 
   const notificacaoTable = notificacoes.map((notificacao) => {
-    if (notificacao.convite) {
+    const isLida = notificacao.empresaId 
+      ? notificacao.NotificacaoLida?.some(nl => nl.usuarioId === usuario?.id)
+      : notificacao.lida;
+      if (notificacao.convite) {
       return (
         <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
           <div className="flex justify-between items-center mb-4">
@@ -313,23 +382,57 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-xs flex items-center gap-1">
-            {notificacao.lida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
-            {notificacao.lida ? t("read") : t("unread")}
-          </span>
-        </div>
+        <span className="text-xs flex items-center gap-1">
+          {isLida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
+          {isLida ? t("read") : t("unread")}
+        </span>
+      </div>
       </div>
     );
   });
+
   return (
-    <div ref={panelRef} className={`fixed top-0 left-0 w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-transform duration-300 z-50 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <div
+      ref={panelRef}
+      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        }`}
+      style={{
+        borderTop: "2px solid #015959",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
+      }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">{t("notifications")}</h2>
-        <button onClick={onClose} className="text-white">
-          ✕
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleMarkAllAsRead}
+            className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+          >
+            {t("marcarLidas")}
+          </button>
+          <button
+            onClick={toggleMostrarLidas}
+            className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+          >
+            {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
+          </button>
+          <button
+            onClick={onClose}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
       </div>
-      <div className="space-y-4 text-sm max-h-[80vh] overflow-y-auto">{notificacoes.length > 0 ? notificacaoTable : <p className="text-center py-4">{t("no_notifications")}</p>}</div>
+      <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+        {notificacoes.length > 0 ? (
+          notificacaoTable
+        ) : (
+          <p className="text-center py-4 text-gray-300">
+            {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
