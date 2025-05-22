@@ -8,6 +8,7 @@ export interface FornecedorI {
     email: string;
     categoria: string;
     foto?: string;
+    empresaId: string;
     createdAt: string;
     updatedAt: string;
     Produto: ProdutoI[];

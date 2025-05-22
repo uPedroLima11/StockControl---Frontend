@@ -24,6 +24,7 @@ export default function Fornecedores() {
     telefone: "",
     categoria: "",
     foto: "",
+    empresaId: "",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     Produto: [],
@@ -346,81 +347,94 @@ export default function Fornecedores() {
               </tr>
             </thead>
             <tbody>
-              {fornecedores
-                .filter((fornecedor) => fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) || fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
+                {fornecedores
+                .filter(
+                  (fornecedor) =>
+                  fornecedor.empresaId === empresaId &&
+                  (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                    fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
+                )
                 .map((fornecedor) => (
                   <tr key={fornecedor.id} className="cursor-pointer border-b">
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center flex items-center justify-center"
-                    >
-                      {fornecedor.foto ? <img src={fornecedor.foto || "/contadefault.png"} alt={fornecedor.nome} className="text-center w-10 h-10 rounded-full" /> : <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.nome}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.cnpj}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.email}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.categoria}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {new Date(fornecedor.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <FaPhoneAlt 
-                        onClick={() => handleEntrarContato(fornecedor)} 
-                        color="#25D366" 
-                        size={32} 
-                        className="cursor-pointer m-auto border-2 p-1 rounded-2xl" 
-                      />
-                    </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center flex items-center justify-center"
+                  >
+                    {fornecedor.foto ? (
+                    <img
+                      src={fornecedor.foto || "/contadefault.png"}
+                      alt={fornecedor.nome}
+                      className="text-center w-10 h-10 rounded-full"
+                    />
+                    ) : (
+                    <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
+                    )}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {fornecedor.nome}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {fornecedor.cnpj}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {fornecedor.email}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {fornecedor.categoria}
+                  </td>
+                  <td
+                    onClick={() => {
+                    setModalVisualizar(fornecedor);
+                    setForm(fornecedor);
+                    }}
+                    className="py-3 px-4 text-center"
+                  >
+                    {new Date(fornecedor.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <FaPhoneAlt
+                    onClick={() => handleEntrarContato(fornecedor)}
+                    color="#25D366"
+                    size={32}
+                    className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                    />
+                  </td>
                   </tr>
                 ))}
             </tbody>
