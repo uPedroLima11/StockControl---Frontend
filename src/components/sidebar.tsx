@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
@@ -231,7 +231,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
   const [mostrarLidas, setMostrarLidas] = useState(false);
   const { usuario } = useUsuarioStore();
 
-  const marcarTodasComoLidas = async () => {
+  const marcarTodasComoLidas = useCallback(async () => {
     if (!usuario?.id) return;
 
     try {
@@ -257,13 +257,13 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     } catch (erro) {
       console.error("Erro ao marcar notificações como lidas:", erro);
     }
-  };
+  }, [usuario?.id]);
 
-  const alternarMostrarLidas = () => {
+  const alternarMostrarLidas = useCallback(() => {
     setMostrarLidas(!mostrarLidas);
-  };
+  }, [mostrarLidas]);
 
-  const buscarNotificacoes = async (): Promise<NotificacaoI[]> => {
+  const buscarNotificacoes = useCallback(async (): Promise<NotificacaoI[]> => {
     if (!usuario?.id) return [];
   
     try {
@@ -289,7 +289,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
       console.error("Erro ao buscar notificações:", erro);
       return [];
     }
-  };
+  }, [usuario?.id, mostrarLidas]);
 
   useEffect(() => {
     async function carregarNotificacoes() {
@@ -309,9 +309,9 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [estaVisivel, usuario, mostrarLidas]);
+  }, [estaVisivel, usuario, mostrarLidas, aoFechar, buscarNotificacoes]);
 
-  async function responderConvite(id: string, convite: ConviteI) {
+  const responderConvite = useCallback(async (id: string, convite: ConviteI) => {
     const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
       method: "PUT",
       headers: {
@@ -323,9 +323,9 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     if (resposta.ok) {
       window.location.href = "/empresa";
     }
-  }
+  }, []);
 
-  async function deletarNotificacao(id: string) {
+  const deletarNotificacao = useCallback(async (id: string) => {
     if (!usuario?.id) return;
   
     try {
@@ -337,7 +337,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     } catch (erro) {
       console.error("Erro ao deletar notificação:", erro);
     }
-  }
+  }, [usuario?.id]);
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
@@ -425,50 +425,52 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
   return (
     <div
-      ref={panelRef}
-      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
-      style={{
-        borderTop: "2px solid #015959",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
-      }}
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">{t("notifications")}</h2>
-        <div className="flex gap-2">
+    ref={panelRef}
+    className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
+    style={{
+      borderTop: "2px solid #015959",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
+    }}
+  >
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-lg font-bold">{t("notifications")}</h2>
+      <div className="flex gap-2">
+        {!mostrarLidas && (
           <button
             onClick={marcarTodasComoLidas}
             className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
           >
             {t("marcarLidas")}
           </button>
-          <button
-            onClick={alternarMostrarLidas}
-            className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
-          >
-            {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
-          </button>
-          <button
-            onClick={aoFechar}
-            className="text-white hover:text-gray-300 transition-colors"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-      <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
-        {mostrarLidas && (
-          <div className="text-center py-2 text-gray-300 italic text-xs">
-            As mensagens da "{nomeEmpresa}" não podem ser deletadas
-          </div>
         )}
-        {notificacoes.length > 0 ? (
-          tabelaNotificacoes
-        ) : (
-          <p className="text-center py-4 text-gray-300">
-            {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
-          </p>
-        )}
+        <button
+          onClick={alternarMostrarLidas}
+          className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+        >
+          {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
+        </button>
+        <button
+          onClick={aoFechar}
+          className="text-white hover:text-gray-300 transition-colors"
+        >
+          ✕
+        </button>
       </div>
     </div>
+    <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+      {mostrarLidas && (
+        <div className="text-center py-2 text-gray-300 italic text-xs">
+        {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
+      </div>
+      )}
+      {notificacoes.length > 0 ? (
+        tabelaNotificacoes
+      ) : (
+        <p className="text-center py-4 text-gray-300">
+          {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
+        </p>
+      )}
+    </div>
+  </div>
   );
 }

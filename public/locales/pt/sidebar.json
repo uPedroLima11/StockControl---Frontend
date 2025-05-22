@@ -21,10 +21,10 @@
   "no_notifications": "Nenhuma notificação",
   "Data": "Data",
   "sells": "Vendas",
- "marcarLidas": "Ler Todas",
- "mostrarTodas": "Todas",
- "mostrarLidas": "Lidas",
- "semNotificacoesLidas": "Você não possui notificações lidas",
- "NenhumaNotificacao": "Você não possui nenhuma Notificação não lida"
-
+  "marcarLidas": "Ler Todas",
+  "mostrarTodas": "Todas",
+  "mostrarLidas": "Lidas",
+  "semNotificacoesLidas": "Você não possui notificações lidas",
+  "NenhumaNotificacao": "Você não possui nenhuma Notificação não lida",
+  "empresa_nao_pode_ser_deletada": "As mensagens da \"{{nomeEmpresa}}\" não podem ser deletadas"
 }
