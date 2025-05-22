@@ -13,116 +13,132 @@ import { useTranslation } from "react-i18next";
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
-  const [isOpen, setIsOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [estaAberto, setEstaAberto] = useState(false);
+  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const [possuiEmpresa, setPossuiEmpresa] = useState(false);
-  const { logar, } = useUsuarioStore();
+  const { logar } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioInicializado, setAudioInicializado] = useState(false);
 
   const verificarEstoque = async () => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
         method: 'POST'
       });
-      console.log("Verificação de estoque:", await response.json());
-    } catch (error) {
-      console.error("Erro ao verificar estoque:", error);
+      console.log("Verificação de estoque:", await resposta.json());
+    } catch (erro) {
+      console.error("Erro ao verificar estoque:", erro);
+    }
+  };
+
+  const inicializarAudio = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/notification-sound.mp3");
+      audioRef.current.volume = 0.3;
+      setAudioInicializado(true);
     }
   };
 
   useEffect(() => {
-    audioRef.current = new Audio("/notification-sound.mp3");
-    audioRef.current.volume = 0.3;
-
     const usuarioSalvo = localStorage.getItem("client_key");
     const usuarioId = usuarioSalvo?.replace(/"/g, "");
 
-    const estoqueInterval = setInterval(verificarEstoque, 60 * 60 * 1000);
-
+    const intervaloEstoque = setInterval(verificarEstoque, 60 * 60 * 1000);
     verificarEstoque();
 
-    async function fetchData() {
+    async function carregarDados() {
       if (!usuarioId) return;
 
       try {
-        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
-        if (userResponse.status === 200) {
-          const userData = await userResponse.json();
-          logar(userData);
+        const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+        if (respostaUsuario.status === 200) {
+          const dadosUsuario = await respostaUsuario.json();
+          logar(dadosUsuario);
         }
 
-        const companyResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
-        if (companyResponse.status === 200) {
-          const companyData = await companyResponse.json();
-          setFotoEmpresa(companyData.foto);
-          setNomeEmpresa(companyData.nome);
+        const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
+        if (respostaEmpresa.status === 200) {
+          const dadosEmpresa = await respostaEmpresa.json();
+          setFotoEmpresa(dadosEmpresa.foto);
+          setNomeEmpresa(dadosEmpresa.nome);
           setPossuiEmpresa(true);
         } else {
           setPossuiEmpresa(false);
         }
 
-        await checkNotifications(usuarioId);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        await verificarNotificacoes(usuarioId);
+      } catch (erro) {
+        console.error("Erro ao carregar dados:", erro);
       }
     }
 
-    async function checkNotifications(idUsuario: string) {
+    async function verificarNotificacoes(idUsuario: string) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-        const notificacoes = await response.json();
-    
-        const possuiNaoLidas = notificacoes.some((n: NotificacaoI) => {
+        const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+        const notificacoes = await resposta.json();
+
+        const temNaoLidas = notificacoes.some((n: NotificacaoI) => {
           if (n.empresaId) {
-            return !n.NotificacaoLida?.some(nl => nl.usuarioId === idUsuario);
+            return n.NotificacaoLida?.length === 0;
           }
           return !n.lida;
         });
-    
-        setTemNotificacaoNaoLida(possuiNaoLidas);
-        
-        if (possuiNaoLidas) {
+
+        setTemNotificacaoNaoLida(temNaoLidas);
+
+        if (temNaoLidas && audioInicializado) {
           const somAtivado = localStorage.getItem("somNotificacao") !== "false";
           if (somAtivado && audioRef.current) {
-            audioRef.current.play();
+            try {
+              await audioRef.current.play();
+            } catch (erro) {
+              console.error("Erro ao reproduzir som:", erro);
+            }
           }
         }
-      } catch (error) {
-        console.error("Erro ao verificar notificações:", error);
+      } catch (erro) {
+        console.error("Erro ao verificar notificações:", erro);
       }
     }
-    fetchData();
 
-    const notificationInterval = setInterval(() => {
-      if (usuarioId) checkNotifications(usuarioId);
+    carregarDados();
+
+    const intervaloNotificacoes = setInterval(() => {
+      if (usuarioId) verificarNotificacoes(usuarioId);
     }, 30000);
 
     return () => {
-      clearInterval(estoqueInterval);
-      clearInterval(notificationInterval);
+      clearInterval(intervaloEstoque);
+      clearInterval(intervaloNotificacoes);
     };
-  }, [logar]);
+  }, [logar, audioInicializado]);
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  const alternarSidebar = () => {
+    inicializarAudio();
+    setEstaAberto(!estaAberto);
+  };
 
-  const toggleNotifications = async () => {
-    setShowNotifications(!showNotifications);
+  const alternarNotificacoes = async () => {
+    inicializarAudio();
+    setMostrarNotificacoes(!mostrarNotificacoes);
   };
 
   return (
     <>
-      <audio ref={audioRef} src="/notification-sound.mp3" preload="auto" />
-      <button className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-2 rounded-full" onClick={toggleSidebar}>
+      <button 
+        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-2 rounded-full" 
+        onClick={alternarSidebar}
+      >
         <FaBars />
       </button>
 
-      <aside className={`fixed top-0 h-screen w-64 bg-[#013C3C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed top-0 h-screen w-64 bg-[#013C3C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}>
         <div>
           <Link
             href="/"
@@ -134,7 +150,7 @@ export default function Sidebar() {
           </Link>
 
           <nav className="flex flex-col items-start px-4 py-6 gap-4 text-white text-sm">
-            <button onClick={toggleNotifications} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
+            <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
               <span className="text-lg relative">
                 <FaBell />
                 {temNotificacaoNaoLida && (
@@ -147,15 +163,15 @@ export default function Sidebar() {
               <span className="text-sm md:inline">{t("notifications")}</span>
             </button>
 
-            <SidebarLink href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
-            <SidebarLink href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
-            <SidebarLink href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
-            <SidebarLink href="/vendas" icon={<FaCartShopping />} label={t("sells")} />
-            <SidebarLink href="/usuarios" icon={<FaUser />} label={t("users")} />
-            <SidebarLink href="/suporte" icon={<FaHeadset />} label={t("support")} />
-            <SidebarLink href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />
-            <SidebarLink href="/configuracoes" icon={<FaWrench />} label={t("settings")} />
-            <SidebarLink href="/conta" icon={<FaUser />} label={t("account")} />
+            <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
+            <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
+            <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
+            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} />
+            <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} />
+            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} />
+            <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />
+            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} />
+            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} />
 
             <Link href="/empresa" className="flex items-center gap-2">
               <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
@@ -166,7 +182,7 @@ export default function Sidebar() {
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
           {possuiEmpresa && (
-            <SidebarLink href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} />
+            <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} />
           )}
 
           <button
@@ -184,12 +200,18 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {showNotifications && <NotificacaoPainel isVisible={showNotifications} onClose={() => setShowNotifications(false)} />}
+      {mostrarNotificacoes && (
+        <PainelNotificacoes 
+          estaVisivel={mostrarNotificacoes} 
+          aoFechar={() => setMostrarNotificacoes(false)} 
+          nomeEmpresa={nomeEmpresa} 
+        />
+      )}
     </>
   );
 }
 
-function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+function LinkSidebar({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
   return (
     <Link href={href} className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f]">
       <span className="text-lg">{icon}</span>
@@ -198,106 +220,99 @@ function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNod
   );
 }
 
-function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) {
+function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: { 
+  estaVisivel: boolean; 
+  aoFechar: () => void; 
+  nomeEmpresa: string | null 
+}) {
   const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const [mostrarLidas, setMostrarLidas] = useState(false);
   const { usuario } = useUsuarioStore();
 
-  const handleMarkAllAsRead = async () => {
+  const marcarTodasComoLidas = async () => {
     if (!usuario?.id) return;
-  
+
     try {
       await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuarioId: usuario.id }),
       });
-  
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacoes-lidas/marcar-todas`, {
+
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacoes-lidas/marcar-todas`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuarioId: usuario.id }),
       });
 
-      if (!response.ok) {
+      if (!resposta.ok) {
         throw new Error('Falha ao marcar notificações como lidas');
       }
 
-      setNotificacoes(prev => prev.map(n => {
-        if (n.empresaId) {
-          return {
-            ...n,
-            NotificacaoLida: [...(n.NotificacaoLida || []), { 
-              notificacaoId: n.id, 
-              usuarioId: usuario.id, 
-              createdAt: new Date() 
-            }]
-          };
-        } else {
-          return { ...n, lida: true };
-        }
-      }));
-      
-      setTimeout(() => {
-        onClose();
-      }, 500);
-      
-    } catch (error) {
-      console.error("Erro ao marcar notificações como lidas:", error);
+      const notificacoesAtualizadas = await buscarNotificacoes();
+      setNotificacoes(notificacoesAtualizadas);
+
+    } catch (erro) {
+      console.error("Erro ao marcar notificações como lidas:", erro);
     }
   };
-  const toggleMostrarLidas = () => {
+
+  const alternarMostrarLidas = () => {
     setMostrarLidas(!mostrarLidas);
   };
 
-  useEffect(() => {
-    async function fetchNotifications() {
-      if (!usuario?.id) return;
-
-      try {
-        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`);
-        const userData = await userResponse.json();
-        const empresaId = userData.empresaId;
-
-        if (!empresaId) {
-          console.warn("Empresa ID não encontrado.");
+  const buscarNotificacoes = async (): Promise<NotificacaoI[]> => {
+    if (!usuario?.id) return [];
+  
+    try {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
+      const todasNotificacoes: NotificacaoI[] = await resposta.json();
+  
+      const notificacoesComStatus = todasNotificacoes.map(n => ({
+        ...n,
+        lida: n.empresaId 
+          ? n.NotificacaoLida?.some(nl => nl.usuarioId === usuario.id) || false
+          : n.lida
+      }));
+  
+      return notificacoesComStatus.filter(n => {
+        if (mostrarLidas) {
+          return n.lida;
+        } else {
+          return !n.lida;
         }
+      });
+  
+    } catch (erro) {
+      console.error("Erro ao buscar notificações:", erro);
+      return [];
+    }
+  };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
-        const todasNotificacoes: NotificacaoI[] = await response.json();
-
-
-        const notificacoesFiltradas = todasNotificacoes.filter((n) => {
-          if (!n.empresaId) {
-            return mostrarLidas ? n.lida : !n.lida;
-          }
-          const foiLida = n.NotificacaoLida?.some(nl => nl.usuarioId === usuario.id);
-          return mostrarLidas ? foiLida : !foiLida;
-        });
-
-        setNotificacoes(notificacoesFiltradas);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
+  useEffect(() => {
+    async function carregarNotificacoes() {
+      const notificacoes = await buscarNotificacoes();
+      setNotificacoes(notificacoes);
     }
 
-
-    if (isVisible) fetchNotifications();
+    if (estaVisivel) {
+      carregarNotificacoes();
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        onClose();
+        aoFechar();
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isVisible, usuario, mostrarLidas]);
+  }, [estaVisivel, usuario, mostrarLidas]);
 
-  async function handleInviteResponse(id: string, convite: ConviteI) {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
+  async function responderConvite(id: string, convite: ConviteI) {
+    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -305,16 +320,23 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
       body: JSON.stringify({ empresaId: convite.empresaId }),
     });
 
-    if (response.ok) {
+    if (resposta.ok) {
       window.location.href = "/empresa";
     }
   }
 
-  async function handleDeleteNotification(id: string) {
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}`, {
-      method: "DELETE",
-    });
-    setNotificacoes((prev) => prev.filter((n) => n.id !== id));
+  async function deletarNotificacao(id: string) {
+    if (!usuario?.id) return;
+  
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}?usuarioId=${usuario.id}`, {
+        method: "DELETE"
+      });
+  
+      setNotificacoes(prev => prev.filter(n => n.id !== id));
+    } catch (erro) {
+      console.error("Erro ao deletar notificação:", erro);
+    }
   }
 
   const formatarData = (dataString: string | Date) => {
@@ -328,16 +350,17 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
     });
   };
 
-  const notificacaoTable = notificacoes.map((notificacao) => {
-    const isLida = notificacao.empresaId 
+  const tabelaNotificacoes = notificacoes.map((notificacao) => {
+    const estaLida = notificacao.empresaId
       ? notificacao.NotificacaoLida?.some(nl => nl.usuarioId === usuario?.id)
       : notificacao.lida;
-      if (notificacao.convite) {
+      
+    if (notificacao.convite) {
       return (
         <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold">{t("invite_title")}</h3>
-            <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">
+            <button onClick={() => deletarNotificacao(notificacao.id)} className="text-white">
               ✕
             </button>
           </div>
@@ -353,7 +376,10 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
             <span>{formatarData(notificacao.createdAt)}</span>
           </div>
 
-          <button className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2" onClick={() => notificacao.convite && handleInviteResponse(usuario?.id || "", notificacao.convite)}>
+          <button 
+            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2" 
+            onClick={() => notificacao.convite && responderConvite(usuario?.id || "", notificacao.convite)}
+          >
             {t("accept")}
           </button>
         </div>
@@ -362,23 +388,25 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
 
     const descricao = notificacao.descricao;
     const partesDescricao = descricao.split(": ");
-    const nomeEnviadoPor = partesDescricao[0]?.replace("Enviado por", "").trim() || "Desconhecido";
-    const descricaoMensagem = partesDescricao.slice(1).join(": ").trim();
+    const nomeRemetente = partesDescricao[0]?.replace("Enviado por", "").trim() || "Desconhecido";
+    const mensagem = partesDescricao.slice(1).join(": ").trim();
 
     return (
       <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold">{notificacao.titulo}</h3>
-          <button onClick={() => handleDeleteNotification(notificacao.id)} className="text-white">
-            ✕
-          </button>
+          {!notificacao.empresaId && (
+            <button onClick={() => deletarNotificacao(notificacao.id)} className="text-white">
+              ✕
+            </button>
+          )}
         </div>
 
-        <p>{descricaoMensagem}</p>
+        <p>{mensagem}</p>
 
         <div className="flex flex-col text-xs mt-2 text-gray-400 gap-1">
           <span>
-            {t("from")}: {nomeEnviadoPor}
+            {t("from")}: {nomeRemetente}
           </span>
           <span>
             {t("Data")}: {formatarData(notificacao.createdAt)}
@@ -386,11 +414,11 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
 
         <div className="flex justify-between items-center">
-        <span className="text-xs flex items-center gap-1">
-          {isLida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
-          {isLida ? t("read") : t("unread")}
-        </span>
-      </div>
+          <span className="text-xs flex items-center gap-1">
+            {estaLida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
+            {estaLida ? t("read") : t("unread")}
+          </span>
+        </div>
       </div>
     );
   });
@@ -398,8 +426,7 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
   return (
     <div
       ref={panelRef}
-      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
-        }`}
+      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
       style={{
         borderTop: "2px solid #015959",
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
@@ -409,19 +436,19 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         <h2 className="text-lg font-bold">{t("notifications")}</h2>
         <div className="flex gap-2">
           <button
-            onClick={handleMarkAllAsRead}
+            onClick={marcarTodasComoLidas}
             className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
           >
             {t("marcarLidas")}
           </button>
           <button
-            onClick={toggleMostrarLidas}
+            onClick={alternarMostrarLidas}
             className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
           >
             {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
           </button>
           <button
-            onClick={onClose}
+            onClick={aoFechar}
             className="text-white hover:text-gray-300 transition-colors"
           >
             ✕
@@ -429,8 +456,13 @@ function NotificacaoPainel({ isVisible, onClose }: { isVisible: boolean; onClose
         </div>
       </div>
       <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+        {mostrarLidas && (
+          <div className="text-center py-2 text-gray-300 italic text-xs">
+            As mensagens da "{nomeEmpresa}" não podem ser deletadas
+          </div>
+        )}
         {notificacoes.length > 0 ? (
-          notificacaoTable
+          tabelaNotificacoes
         ) : (
           <p className="text-center py-4 text-gray-300">
             {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
