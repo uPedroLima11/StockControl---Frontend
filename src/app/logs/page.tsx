@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
+type TipoLog = "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA";
+
 export default function Logs() {
   const { t } = useTranslation("logs");
   const [modoDark, setModoDark] = useState(false);
@@ -69,8 +71,12 @@ export default function Logs() {
     });
   }
 
-  const traduzirTipoLog = (tipo: string) => {
-    return t(`logs.tipos_logs.${tipo}` as any) || tipo;
+  const traduzirTipoLog = (tipo: string): string => {
+    const tiposValidos: TipoLog[] = ["CRIACAO", "ATUALIZACAO", "EXCLUSAO", "BAIXA"];
+    if (tiposValidos.includes(tipo as TipoLog)) {
+      return t(`logs.tipos_logs.${tipo as TipoLog}`);
+    }
+    return tipo;
   };
 
   return (

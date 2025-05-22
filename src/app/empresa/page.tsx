@@ -69,6 +69,7 @@ export default function Empresa() {
     }
   };
 
+
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -132,6 +133,18 @@ export default function Empresa() {
     };
 
     fetchEmpresa();
+
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const fileName = target.files?.[0]?.name || t("empresa.nenhumArquivoEscolhido");
+        const displayElement = fileInput.nextElementSibling?.querySelector('.text-gray-500');
+        if (displayElement) {
+          displayElement.textContent = fileName;
+        }
+      });
+    }
   }, [logar, router, t]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
