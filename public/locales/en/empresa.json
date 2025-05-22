@@ -1,60 +1,66 @@
 {
-
-      "titulo": "My Company",
-      "carregando": "Loading company data...",
-      "empresaNaoEncontrada": "Company not found.",
-      "dadosEmpresa": "Company Data",
-      "logoEmpresa": "Company Logo",
-      "altLogoEmpresa": "Company logo",
-      "alterarLogo": "Change Logo",
-      "editarDados": "Edit Data",
-      "deletarEmpresa": "Delete Company",
-      "sairEmpresa": "Leave Company",
-      "naoInformado": "Not informed",
-      "campos": {
-        "nome": "Company Name",
-        "endereco": "Address",
-        "pais": "Country",
-        "estado": "State",
-        "cidade": "City",
-        "cep": "ZIP Code",
-        "telefone": "Phone",
-        "email": "Corporate Email"
-      },
-      "modal": {
-        "alterarLogo": {
-          "titulo": "Change Logo",
-          "urlImagem": "URL of new image",
-          "altPreview": "Preview of new image"
-        },
-        "editarEmpresa": {
-          "titulo": "Edit Company"
-        },
-        "excluir": {
-          "titulo": "Are you sure?",
-          "texto": "This action cannot be undone!",
-          "confirmar": "Yes, delete it!",
-          "cancelar": "Cancel"
-        },
-        "sair": {
-          "titulo": "Leave company?",
-          "texto": "You will lose access to company data.",
-          "confirmar": "Yes, leave!",
-          "cancelar": "Cancel"
-        },
-        "cancelar": "Cancel",
-        "salvar": "Save"
-      },
-      "erros": {
-        "usuarioNaoLogado": "User not logged in",
-        "erroBuscarEmpresa": "Unexpected error when searching for company",
-        "erroAtualizarFoto": "Error updating photo",
-        "erroAtualizarLogo": "Error updating company logo",
-        "erroAtualizarEmpresa": "Error updating company",
-        "erroEditarEmpresa": "Error editing company",
-        "erroExcluirEmpresa": "Error deleting company",
-        "erroSairEmpresa": "Error leaving company",
-        "erroProcessarExclusao": "Error processing deletion/exit from company"
-      }
-    }
-  
+  "empresa":{
+    "escolherArquivo": "Choose file",
+    "nenhumArquivoEscolhido": "No file chosen",
+    "preVisualizacao": "Preview"
+    },
+  "titulo": "My Company",
+  "Pré-visualização:": "Preview",
+  "carregando": "Loading company data...",
+  "empresaNaoEncontrada": "Company not found.",
+  "dadosEmpresa": "Company Data",
+  "logoEmpresa": "Company Logo",
+  "altLogoEmpresa": "Company logo",
+  "alterarLogo": "Change Logo",
+  "editarDados": "Edit Data",
+  "deletarEmpresa": "Delete Company",
+  "sairEmpresa": "Leave Company",
+  "naoInformado": "Not informed",
+  "escolherArquivo": "Choose File",
+  "nenhumArquivoEscolhido": "No file chosen",
+  "campos": {
+    "nome": "Company Name",
+    "endereco": "Address",
+    "pais": "Country",
+    "estado": "State",
+    "cidade": "City",
+    "cep": "ZIP Code",
+    "telefone": "Phone",
+    "email": "Corporate Email"
+  },
+  "modal": {
+    "alterarLogo": {
+      "titulo": "Change Logo",
+      "urlImagem": "URL of new image",
+      "altPreview": "Preview of new image"
+    },
+    "editarEmpresa": {
+      "titulo": "Edit Company"
+    },
+    "excluir": {
+      "titulo": "Are you sure?",
+      "texto": "This action cannot be undone!",
+      "confirmar": "Yes, delete it!",
+      "cancelar": "Cancel"
+    },
+    "sair": {
+      "titulo": "Leave company?",
+      "texto": "You will lose access to company data.",
+      "confirmar": "Yes, leave!",
+      "cancelar": "Cancel"
+    },
+    "cancelar": "Cancel",
+    "salvar": "Save"
+  },
+  "erros": {
+    "usuarioNaoLogado": "User not logged in",
+    "erroBuscarEmpresa": "Unexpected error when searching for company",
+    "erroAtualizarFoto": "Error updating photo",
+    "erroAtualizarLogo": "Error updating company logo",
+    "erroAtualizarEmpresa": "Error updating company",
+    "erroEditarEmpresa": "Error editing company",
+    "erroExcluirEmpresa": "Error deleting company",
+    "erroSairEmpresa": "Error leaving company",
+    "erroProcessarExclusao": "Error processing deletion/exit from company"
+  }
+}

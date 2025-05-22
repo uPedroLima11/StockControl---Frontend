@@ -164,7 +164,7 @@ export default function Empresa() {
       if (empresaEditada.estado) formData.append('estado', empresaEditada.estado);
       if (empresaEditada.cidade) formData.append('cidade', empresaEditada.cidade);
       if (empresaEditada.cep) formData.append('cep', empresaEditada.cep);
-      
+
       if (fotoFile) {
         formData.append('foto', fotoFile);
       } else if (empresaEditada.foto === null) {
@@ -324,11 +324,11 @@ export default function Empresa() {
           <div>
             <h2 className="text-lg font-semibold mb-2">{t("logoEmpresa")}</h2>
             {empresa.foto && (
-              <Image 
-                src={empresa.foto} 
-                alt={t("altLogoEmpresa")} 
-                width={128} 
-                height={128} 
+              <Image
+                src={empresa.foto}
+                alt={t("altLogoEmpresa")}
+                width={128}
+                height={128}
                 className="rounded mb-4"
               />
             )}
@@ -383,140 +383,156 @@ export default function Empresa() {
       </div>
 
       {modalEdicaoAberto && empresaEditada && (
-      <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-        <div
-        className="p-6 rounded-lg shadow-lg w-full max-w-md"
-        style={{
-          backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-          color: modoDark ? "#FFFFFF" : "#000000",
-        }}
-        >
-        <h2 className="text-xl font-semibold mb-4">{t("modal.editarEmpresa.titulo")}</h2>
-
-        {["nome", "email"].map((key) => (
-          <div key={key} className="mb-3">
-          <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
-          <input
-            type="text"
-            className="w-full rounded p-2"
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div
+            className="p-6 rounded-lg shadow-lg w-full max-w-md"
             style={{
-            backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-            borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            color: modoDark ? "#FFFFFF" : "#000000",
-            }}
-            value={empresaEditada[key as EmpresaChave] || ""}
-            onChange={(e) => setEmpresaEditada({ 
-            ...empresaEditada, 
-            [key as EmpresaChave]: e.target.value 
-            })}
-          />
-          </div>
-        ))}
-
-        {["telefone", "endereco", "pais", "estado", "cidade", "cep"].reduce((acc, key, index, array) => {
-          if (index % 2 === 0) {
-          acc.push(array.slice(index, index + 2));
-          }
-          return acc;
-        }, [] as string[][]).map((pair, index) => (
-          <div key={index} className="flex gap-2 mb-3">
-          {pair.map((key) => (
-            <div key={key} className="flex-1">
-            <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
-            <input
-              type="text"
-              className="w-full rounded p-2"
-              style={{
-              backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+              backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
               color: modoDark ? "#FFFFFF" : "#000000",
-              }}
-              value={empresaEditada[key as EmpresaChave] || ""}
-              onChange={(e) => setEmpresaEditada({ 
-              ...empresaEditada, 
-              [key as EmpresaChave]: e.target.value 
-              })}
-            />
-            </div>
-          ))}
-          </div>
-        ))}
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">{t("logoEmpresa")}</label>
-          <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="w-full rounded p-2"
-          style={{
-            backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-            borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            color: modoDark ? "#FFFFFF" : "#000000",
-          }}
-          />
-          {fotoPreview && (
-          <div className="mt-2">
-            <p className="text-sm mb-1">Pré-visualização:</p>
-            <Image 
-            src={fotoPreview} 
-            alt="Preview" 
-            width={128} 
-            height={128} 
-            className="rounded"
-            />
-          </div>
-          )}
-          {empresa.foto && !fotoPreview && (
-          <div className="mt-2">
-            <p className="text-sm mb-1">Foto atual:</p>
-            <Image 
-            src={empresa.foto} 
-            alt="Foto atual" 
-            width={128} 
-            height={128} 
-            className="rounded"
-            />
-            <button
-            type="button"
-            onClick={() => {
-              setEmpresaEditada({ ...empresaEditada, foto: null });
-              setFotoPreview(null);
             }}
-            className="mt-2 text-sm text-red-500"
-            >
-            </button>
-          </div>
-          )}
-        </div>
+          >
+            <h2 className="text-xl font-semibold mb-4">{t("modal.editarEmpresa.titulo")}</h2>
 
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-          onClick={() => {
-            setModalEdicaoAberto(false);
-            setFotoFile(null);
-            setFotoPreview(null);
-          }}
-          className="px-4 py-2 rounded"
-          style={{
-            backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-            color: modoDark ? "#FFFFFF" : "#000000",
-          }}
-          >
-          {t("modal.cancelar")}
-          </button>
-          <button
-          onClick={editarDadosEmpresa}
-          className="px-4 py-2 text-white rounded"
-          style={{
-            backgroundColor: "#10b981",
-          }}
-          >
-          {t("modal.salvar")}
-          </button>
+            {["nome", "email"].map((key) => (
+              <div key={key} className="mb-3">
+                <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
+                <input
+                  type="text"
+                  className="w-full rounded p-2"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  value={empresaEditada[key as EmpresaChave] || ""}
+                  onChange={(e) => setEmpresaEditada({
+                    ...empresaEditada,
+                    [key as EmpresaChave]: e.target.value
+                  })}
+                />
+              </div>
+            ))}
+
+            {["telefone", "endereco", "pais", "estado", "cidade", "cep"].reduce((acc, key, index, array) => {
+              if (index % 2 === 0) {
+                acc.push(array.slice(index, index + 2));
+              }
+              return acc;
+            }, [] as string[][]).map((pair, index) => (
+              <div key={index} className="flex gap-2 mb-3">
+                {pair.map((key) => (
+                  <div key={key} className="flex-1">
+                    <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
+                    <input
+                      type="text"
+                      className="w-full rounded p-2"
+                      style={{
+                        backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                        borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                        color: modoDark ? "#FFFFFF" : "#000000",
+                      }}
+                      value={empresaEditada[key as EmpresaChave] || ""}
+                      onChange={(e) => setEmpresaEditada({
+                        ...empresaEditada,
+                        [key as EmpresaChave]: e.target.value
+                      })}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">{t("logoEmpresa")}</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  id="fileInput"
+                />
+                <div className="flex items-center justify-between p-2 rounded border"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                  }}>
+                  <span className="text-sm">
+                    {t("empresa.escolherArquivo")}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {t("empresa.nenhumArquivoEscolhido")}
+                  </span>
+                </div>
+              </div>
+
+              {fotoPreview && (
+                <div className="mt-2">
+                    <p className="text-sm mb-1">{t("empresa.preVisualizacao")}:</p>
+                  <Image
+                    src={fotoPreview}
+                    alt="Preview"
+                    width={128}
+                    height={128}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              {empresa.foto && !fotoPreview && (
+                <div className="mt-2">
+                  <p className="text-sm mb-1">Foto atual:</p>
+                  <Image
+                    src={empresa.foto}
+                    alt="Foto atual"
+                    width={128}
+                    height={128}
+                    className="rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmpresaEditada({ ...empresaEditada, foto: null });
+                      setFotoPreview(null);
+                    }}
+                    className="mt-2 text-sm text-red-500"
+                  >
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setModalEdicaoAberto(false);
+                  setFotoFile(null);
+                  setFotoPreview(null);
+                }}
+                className="px-4 py-2 rounded"
+                style={{
+                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000",
+                }}
+              >
+                {t("modal.cancelar")}
+              </button>
+              <button
+                onClick={editarDadosEmpresa}
+                className="px-4 py-2 text-white rounded"
+                style={{
+                  backgroundColor: "#10b981",
+                }}
+              >
+                {t("modal.salvar")}
+              </button>
+            </div>
+          </div>
         </div>
-        </div>
-      </div>
       )}
     </div>
   );

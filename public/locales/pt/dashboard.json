@@ -20,6 +20,8 @@
         "ajusteCusto": "Aumento / Redução de Custos"
       },
       "estoqueBaixo": {
+        "estadoCritico": "Critico",
+        "estadoAtencao": "Atenção",
         "titulo": "Produtos com Estoque Baixo",
         "colunas": {
           "produto": "Produto",

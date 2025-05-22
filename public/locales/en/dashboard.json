@@ -20,6 +20,8 @@
       "ajusteCusto": "Cost Increase / Reduction"
     },
     "estoqueBaixo": {
+      "estadoCritico": "Critical",
+      "estadoAtencao": "Attention",
       "titulo": "Low Stock Products",
       "colunas": {
         "produto": "Product",
@@ -27,6 +29,7 @@
         "estoqueIdeal": "Minimal Stock",
         "valorAtual": "Current Value",
         "valorIdeal": "Ideal Value"
+        
       }
-    }
+        }
   }

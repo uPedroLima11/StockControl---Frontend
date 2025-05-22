@@ -79,8 +79,7 @@ export default function Configuracoes() {
 
         <ul className="space-y-4 text-sm font-medium">
           {[
-            { label: t("permissions"), link: "/permissions" },
-            { label: t("integrations"), link: "/integrations" },
+            { label: t("faleconosco"), link: "/suporte" },
             { label: t("change_password"), link: "/esqueci" },
           ].map((item, i) => (
             <li key={i}>

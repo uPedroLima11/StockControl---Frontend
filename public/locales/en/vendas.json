@@ -15,5 +15,6 @@
       "semVendas": "No sales yet",
       "quantidade": "Quantity",
       "remover": "Remove",
-      "totalVendas": "Total Sales"
+      "totalVendas": "Total Sales",
+      "vendaSucesso": "Sale completed successfully"
   }

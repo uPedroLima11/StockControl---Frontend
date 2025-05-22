@@ -2,8 +2,10 @@
 import { LogsI } from "@/utils/types/logs";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function Logs() {
+  const { t } = useTranslation("logs");
   const [modoDark, setModoDark] = useState(false);
   const [logs, setLogs] = useState<LogsI[]>([]);
   const [busca, setBusca] = useState("");
@@ -45,7 +47,7 @@ export default function Logs() {
             }
           } catch (error) {
             console.error(`Erro ao buscar usuário ${log.usuarioId}:`, error);
-            usuariosMap[log.usuarioId!] = "Usuário não encontrado";
+            usuariosMap[log.usuarioId!] = t("logs.usuario_nao_encontrado");
           }
         }
       }
@@ -54,7 +56,7 @@ export default function Logs() {
     };
 
     initialize();
-  }, []);
+  }, [t]);
 
   function formatarData(dataString: string | Date) {
     const data = new Date(dataString);
@@ -67,11 +69,15 @@ export default function Logs() {
     });
   }
 
+  const traduzirTipoLog = (tipo: string) => {
+    return t(`logs.tipos_logs.${tipo}` as any) || tipo;
+  };
+
   return (
     <div className="flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-          Logs
+          {t("logs.titulo")}
         </h1>
         
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
@@ -84,7 +90,7 @@ export default function Logs() {
           >
             <input 
               type="text" 
-              placeholder="Buscar Logs" 
+              placeholder={t("logs.placeholder_busca")} 
               className="outline-none font-mono text-sm bg-transparent" 
               value={busca} 
               onChange={(e) => setBusca(e.target.value)} 
@@ -104,10 +110,10 @@ export default function Logs() {
           <table className="w-full text-sm font-mono">
             <thead className="border-b">
               <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4 text-center">Usuário</th>
-                <th className="py-3 px-4 text-center">Tipo</th>
-                <th className="py-3 px-4 text-center">Descrição</th>
-                <th className="py-3 px-4 text-center">Data de Criação</th>
+                <th className="py-3 px-4 text-center">{t("logs.usuario")}</th>
+                <th className="py-3 px-4 text-center">{t("logs.tipo")}</th>
+                <th className="py-3 px-4 text-center">{t("logs.descricao")}</th>
+                <th className="py-3 px-4 text-center">{t("logs.datacriacao")}</th>
               </tr>
             </thead>
             <tbody>
@@ -118,10 +124,10 @@ export default function Logs() {
                   <tr key={log.id} className="border-b">
                     <td className="py-3 px-4 text-center">
                       {log.usuarioId 
-                        ? (nomesUsuarios[log.usuarioId] || "Carregando...") 
-                        : "Não Informado"}
+                        ? (nomesUsuarios[log.usuarioId] || t("logs.carregando")) 
+                        : t("logs.usuario_nao_informado")}
                     </td>
-                    <td className="py-3 px-4 text-center">{log.tipo}</td>
+                    <td className="py-3 px-4 text-center">{traduzirTipoLog(log.tipo)}</td>
                     <td className="py-3 px-4 text-center">{log.descricao}</td>
                     <td className="py-3 px-4 text-center">{formatarData(log.createdAt)}</td>
                   </tr>

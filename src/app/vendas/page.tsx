@@ -153,7 +153,7 @@ export default function Vendas() {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Venda realizada com sucesso!",
+        title: t("vendaSucesso"),
         showConfirmButton: false,
         timer: 1500,
       });

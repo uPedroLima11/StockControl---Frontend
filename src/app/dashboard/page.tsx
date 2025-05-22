@@ -199,12 +199,12 @@ export default function Dashboard() {
                       <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidadeMin}</td>
                       <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
                         {produto.quantidade < produto.quantidadeMin ? (
-                          <div className="flex items-center gap-1">
-                            <LuShieldAlert size={18} color="#dc143c" /> {"Crítico"}
-                          </div>
+                            <div className="flex items-center gap-1">
+                            <LuShieldAlert size={18} color="#dc143c" /> {t("estoqueBaixo.estadoCritico")}
+                            </div>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <LuTriangleAlert size={18} color="#eead2d" /> {"Atenção"}
+                            <LuTriangleAlert size={18} color="#eead2d" /> {t("estoqueBaixo.estadoAtencao")}
                           </div>
                         )}
                       </td>

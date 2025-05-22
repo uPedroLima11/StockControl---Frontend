@@ -1,0 +1,18 @@
+{
+    "logs": {
+        "titulo": "Logs",
+        "placeholder_busca": "Search Logs",
+        "usuario": "User",
+        "tipo": "Type",
+        "descricao": "Description",
+        "datacriacao": "Creation Date",
+    "usuario_nao_encontrado": "User not found",
+    "usuario_nao_informado": "Not Informed",
+    "carregando": "Loading...",
+    "tipos_logs": {
+        "CRIACAO": "Creation",
+        "ATUALIZACAO": "Update",
+        "EXCLUSAO": "Deletion",
+        "BAIXA": "Write-off"
+    }
+}}

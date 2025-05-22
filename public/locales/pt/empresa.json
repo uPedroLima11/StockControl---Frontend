@@ -1,4 +1,9 @@
-{
+{   
+    "empresa":{
+    "escolherArquivo": "Escolher arquivo",
+    "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
+    "preVisualizacao": "Pré visualização"
+    },
     "titulo": "Minha Empresa",
     "carregando": "Carregando dados da empresa...",
     "empresaNaoEncontrada": "Empresa não encontrada.",
@@ -54,5 +59,6 @@
         "erroExcluirEmpresa": "Erro ao excluir a empresa",
         "erroSairEmpresa": "Erro ao sair da empresa",
         "erroProcessarExclusao": "Erro ao processar exclusão/saída da empresa"
-    }
+    },
+    "preview": "Pré-visualização"
 }

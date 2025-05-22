@@ -26,5 +26,21 @@
     "botao": "Ativar agora",
     "alertaTitulo": "Atenção!",
     "alertaMensagem": "Sua empresa ainda não foi ativada. Por favor, complete a ativação."
+  },
+  "produtoCriadoSucesso": {
+    "titulo": "Produto criado com sucesso!"
+  },
+  "produtoExcluidoSucesso": {
+    "titulo": "Produto excluído com sucesso!",
+    "mensagem": "O produto foi deletado com sucesso do sistema."
+  },
+  "produtoAtualizadoSucesso": {
+    "titulo": "Produto atualizado com sucesso!"
+  },
+  "confirmacaoExclusao": {
+    "titulo": "Tem certeza?",
+    "mensagem": "Você não poderá reverter esta ação!",
+    "botaoConfirmar": "Sim, excluir!",
+    "botaoCancelar": "Cancelar"
   }
 }

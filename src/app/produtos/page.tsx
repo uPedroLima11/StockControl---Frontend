@@ -241,13 +241,13 @@ export default function Produtos() {
           setFile(null);
           setPreview(null);
 
-          Swal.fire({
+            Swal.fire({
             position: "center",
             icon: "success",
-            title: "Produto criado com sucesso!",
+            title: t("produtoCriadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-          });
+            });
 
           setTimeout(() => window.location.reload(), 1600);
         } else {
@@ -306,13 +306,13 @@ export default function Produtos() {
           setPreview(null);
 
           setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-          Swal.fire({
+            Swal.fire({
             position: "center",
             icon: "success",
-            title: "Produto atualizado com sucesso!",
+            title: t("produtoAtualizadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-          });
+            });
           setTimeout(() => window.location.reload(), 1600);
         } else {
           const errorText = await response.text();
@@ -346,14 +346,14 @@ export default function Produtos() {
       }
 
       const result = await Swal.fire({
-        title: "Tem certeza?",
-        text: "Você não poderá reverter isso!",
+        title: t("confirmacaoExclusao.titulo"),
+        text: t("confirmacaoExclusao.mensagem"),
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, deletar!",
-        cancelButtonText: "Cancelar",
+        confirmButtonText: t("confirmacaoExclusao.botaoConfirmar"),
+        cancelButtonText: t("confirmacaoExclusao.botaoCancelar"),
       });
 
       if (result.isConfirmed) {
@@ -361,7 +361,11 @@ export default function Produtos() {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
             method: "DELETE",
           });
-          Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
+            Swal.fire(
+            t("produtoExcluidoSucesso.titulo"),
+            t("produtoExcluidoSucesso.mensagem"),
+            "success"
+            );
           setModalVisualizar(null);
           window.location.reload();
         } catch (err) {

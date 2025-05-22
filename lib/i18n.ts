@@ -26,6 +26,8 @@ import fornecedoresPt from '../public/locales/pt/fornecedores.json';
 import fornecedoresEn from '../public/locales/en/fornecedores.json';
 import suporteEn from '../public/locales/en/suporte.json';
 import suportePt from '../public/locales/pt/suporte.json';
+import logsPt from '../public/locales/pt/logs.json';
+import logsEn from '../public/locales/en/logs.json';
 
 
 
@@ -36,7 +38,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -52,6 +54,7 @@ if (!i18n.isInitialized) {
           ativacao: ativacaoEn,
           fornecedores: fornecedoresEn,
           suporte: suporteEn,
+          logs: logsEn,
         },
         pt: {
           settings: settingsPt,
@@ -66,6 +69,7 @@ if (!i18n.isInitialized) {
           ativacao: ativacaoPt,
           fornecedores: fornecedoresPt,
           suporte: suportePt,
+          logs: logsPt,
         },
       },
       detection: {

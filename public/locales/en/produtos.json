@@ -26,5 +26,21 @@
     "botao": "Activate now",
     "alertaTitulo": "Attention!",
     "alertaMensagem": "Your company has not been activated. Please complete the activation."
+  },
+  "produtoCriadoSucesso": {
+    "titulo": "Product created successfully!"
+  },
+  "produtoExcluidoSucesso": {
+    "titulo": "Product deleted successfully!",
+    "mensagem": "The product has been successfully removed from the system."
+  },
+  "produtoAtualizadoSucesso": {
+    "titulo": "Product updated successfully!"
+  },
+  "confirmacaoExclusao": {
+    "titulo": "Are you sure?",
+    "mensagem": "You will not be able to undo this action!",
+    "botaoConfirmar": "Yes, delete!",
+    "botaoCancelar": "Cancel"
   }
 }
