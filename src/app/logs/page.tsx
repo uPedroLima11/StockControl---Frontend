@@ -12,9 +12,11 @@ export default function Logs() {
   const [logs, setLogs] = useState<LogsI[]>([]);
   const [busca, setBusca] = useState("");
   const [nomesUsuarios, setNomesUsuarios] = useState<Record<string, string>>({});
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     const initialize = async () => {
+      setCarregando(true);
       const temaSalvo = localStorage.getItem("modoDark");
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
@@ -32,29 +34,60 @@ export default function Logs() {
         root.style.setProperty("--cor-fundo-bloco", "#ececec");
       }
 
-      const responseLogs = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs`);
-      const logsData = await responseLogs.json();
-      setLogs(logsData);
-
-      const logsComUsuario = logsData.filter((log: LogsI) => log.usuarioId);
-      const usuariosMap: Record<string, string> = {};
-
-      for (const log of logsComUsuario) {
-        if (!usuariosMap[log.usuarioId!]) {
-          try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${log.usuarioId}`);
-            const usuario = await response.json();
-            if (usuario && usuario.nome) {
-              usuariosMap[log.usuarioId!] = usuario.nome;
-            }
-          } catch (error) {
-            console.error(`Erro ao buscar usuário ${log.usuarioId}:`, error);
-            usuariosMap[log.usuarioId!] = t("logs.usuario_nao_encontrado");
-          }
+      try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (!usuarioSalvo) {
+          setLogs([]);
+          setCarregando(false);
+          return;
         }
-      }
+        
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+        const usuarioData = await responseUsuario.json();
 
-      setNomesUsuarios(usuariosMap);
+        if (!usuarioData || !usuarioData.empresaId) {
+          setLogs([]);
+          setCarregando(false);
+          return;
+        }
+
+        const responseLogs = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs`);
+        let logsData = await responseLogs.json();
+
+        logsData = logsData.filter((log: LogsI) => log.empresaId === usuarioData.empresaId);
+
+        setLogs(logsData);
+
+        const usuariosUnicos = new Set<string>(
+          logsData
+            .filter((log: LogsI) => log.usuarioId)
+            .map((log: LogsI) => log.usuarioId as string)
+        );
+        
+        const usuariosMap: Record<string, string> = {};
+        
+        await Promise.all(
+          Array.from(usuariosUnicos).map(async (usuarioId: string) => {
+            try {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+              const usuario = await response.json();
+              if (usuario && usuario.nome) {
+                usuariosMap[usuarioId] = usuario.nome;
+              }
+            } catch (error) {
+              console.error(`Erro ao buscar usuário ${usuarioId}:`, error);
+              usuariosMap[usuarioId] = t("logs.nenhum_log_encontrado");
+            }
+          })
+        );
+        setNomesUsuarios(usuariosMap);
+      } catch (error) {
+        console.error("Erro ao carregar logs:", error);
+        setLogs([]);
+      } finally {
+        setCarregando(false);
+      }
     };
 
     initialize();
@@ -78,6 +111,14 @@ export default function Logs() {
     }
     return tipo;
   };
+
+  if (carregando) {
+    return (
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <p style={{ color: "var(--cor-fonte)" }}>{t("logs.carregando")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -113,33 +154,39 @@ export default function Logs() {
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          <table className="w-full text-sm font-mono">
-            <thead className="border-b">
-              <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4 text-center">{t("logs.usuario")}</th>
-                <th className="py-3 px-4 text-center">{t("logs.tipo")}</th>
-                <th className="py-3 px-4 text-center">{t("logs.descricao")}</th>
-                <th className="py-3 px-4 text-center">{t("logs.datacriacao")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs
-                .filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase()))
-                .slice(0, 10)
-                .map((log) => (
-                  <tr key={log.id} className="border-b">
-                    <td className="py-3 px-4 text-center">
-                      {log.usuarioId 
-                        ? (nomesUsuarios[log.usuarioId] || t("logs.carregando")) 
-                        : t("logs.usuario_nao_informado")}
-                    </td>
-                    <td className="py-3 px-4 text-center">{traduzirTipoLog(log.tipo)}</td>
-                    <td className="py-3 px-4 text-center">{log.descricao}</td>
-                    <td className="py-3 px-4 text-center">{formatarData(log.createdAt)}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          {logs.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {t("logs.nenhum_log_encontrado")}
+            </div>
+          ) : (
+            <table className="w-full text-sm font-mono">
+              <thead className="border-b">
+                <tr style={{ color: "var(--cor-fonte)" }}>
+                  <th className="py-3 px-4 text-center">{t("logs.usuario")}</th>
+                  <th className="py-3 px-4 text-center">{t("logs.tipo")}</th>
+                  <th className="py-3 px-4 text-center">{t("logs.descricao")}</th>
+                  <th className="py-3 px-4 text-center">{t("logs.datacriacao")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs
+                  .filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase()))
+                  .slice(0, 10)
+                  .map((log) => (
+                    <tr key={log.id} className="border-b">
+                      <td className="py-3 px-4 text-center">
+                        {log.usuarioId 
+                          ? (nomesUsuarios[log.usuarioId] || t("logs.carregando")) 
+                          : t("logs.usuario_nao_informado")}
+                      </td>
+                      <td className="py-3 px-4 text-center">{traduzirTipoLog(log.tipo)}</td>
+                      <td className="py-3 px-4 text-center">{log.descricao}</td>
+                      <td className="py-3 px-4 text-center">{formatarData(log.createdAt)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

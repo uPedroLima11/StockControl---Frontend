@@ -6,6 +6,7 @@
         "tipo": "Type",
         "descricao": "Description",
         "datacriacao": "Creation Date",
+        "nenhum_log_encontrado": "No Logs found",
         "usuario_nao_encontrado": "User not found",
         "usuario_nao_informado": "Not Informed",
         "carregando": "Loading...",

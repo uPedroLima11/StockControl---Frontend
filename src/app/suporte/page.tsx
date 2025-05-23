@@ -100,7 +100,7 @@ export default function Suporte() {
             onChange={(e) => setMensagem(e.target.value)}
             required
             rows={6}
-            className="w-full px-5 py-3 rounded-lg border text-base outline-none resize-none"
+            className="w-full px-5 py-3 rounded-lg border text-base text-white outline-none resize-none"
             style={{
               backgroundColor: modoDark ? "#374151" : "#F9FAFB",
               color: modoDark ? "#e3f6f5" : "#111827",
@@ -110,7 +110,7 @@ export default function Suporte() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg font-medium text-base transition"
+            className="w-full cursor-pointer py-3 rounded-lg font-medium text-base transition"
             style={{
               backgroundColor: modoDark ? "#4B5563" : "#2563EB",
               color: modoDark ? "#fffff2" : "#ffffff",

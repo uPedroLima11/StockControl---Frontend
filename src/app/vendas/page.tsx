@@ -16,6 +16,7 @@ export default function Vendas() {
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const [totalVendas, setTotalVendas] = useState(0);
+  const [carregando, setCarregando] = useState(true);
   const { t } = useTranslation("vendas");
 
   useEffect(() => {
@@ -48,33 +49,68 @@ export default function Vendas() {
     }
 
     const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
+    if (!usuarioSalvo) {
+      setCarregando(false);
+      return;
+    }
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
     const initialize = async () => {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
-      const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
-
-      const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-      const todosProdutos: ProdutoI[] = await responseProdutos.json();
-      const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
-      setProdutos(produtosDaEmpresa);
-
-      const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
-      const vendasData = await responseVendas.json();
-      const vendasOrdenadas = vendasData.vendas.sort((a: VendaI, b: VendaI) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setVendas(vendasOrdenadas);
-
-      const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
-      const totalData = await responseTotal.json();
-      setTotalVendas(totalData.total._sum.valorVenda || 0);
+      try {
+        setCarregando(true);
+        
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+        const usuario = await responseUsuario.json();
+        
+        if (!usuario || !usuario.empresaId) {
+          setProdutos([]);
+          setVendas([]);
+          setTotalVendas(0);
+          setCarregando(false);
+          return;
+        }
+        
+        setEmpresaId(usuario.empresaId);
+    
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const todosProdutos: ProdutoI[] = await responseProdutos.json();
+        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
+        setProdutos(produtosDaEmpresa);
+    
+        const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
+        if (!responseVendas.ok) {
+          throw new Error('Erro ao carregar vendas');
+        }
+        
+        const vendasData = await responseVendas.json();
+        
+        const vendasDaEmpresa = vendasData.vendas || [];
+        
+        const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setVendas(vendasOrdenadas);
+    
+        const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
+        const totalData = await responseTotal.json();
+        setTotalVendas(totalData.total._sum.valorVenda || 0);
+        
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        Swal.fire({
+          icon: "error",
+          title: t("erroCarregarDados"),
+          text: t("tenteNovamente"),
+        });
+        setVendas([]);
+        setTotalVendas(0);
+      } finally {
+        setCarregando(false);
+      }
     };
 
     initialize();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (carrinho.length > 0) {
@@ -131,6 +167,21 @@ export default function Vendas() {
 
     if (!empresaId || carrinho.length === 0) return;
 
+    if (carregando) {
+      return (
+        <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+          <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
+        </div>
+      );
+    }
+  
+    if (!empresaId) {
+      return (
+        <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+          <p style={{ color: "var(--cor-fonte)" }}>{t("semEmpresa")}</p>
+        </div>
+      );
+    }
     try {
       const promises = carrinho.map(item => {
         return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {

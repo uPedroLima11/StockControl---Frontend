@@ -4,6 +4,7 @@ export interface LogsI {
     usuario: {
         nome: string;
     };
+    empresaId: string; 
     descricao: string;
     tipo: "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO";
     createdAt: Date;
