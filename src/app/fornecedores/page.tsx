@@ -25,6 +25,7 @@ export default function Fornecedores() {
     categoria: "",
     foto: "",
     empresaId: "",
+    usuarioId: "",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     Produto: [],
@@ -129,6 +130,9 @@ export default function Fornecedores() {
   };
 
   async function handleAdicionarFornecedor() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!empresaId) return alert("Empresa não identificada.");
 
@@ -144,10 +148,11 @@ export default function Fornecedores() {
       formData.append("cnpj", form.cnpj);
       formData.append("telefone", form.telefone);
       formData.append("categoria", form.categoria);
+      formData.append("empresaId", empresaId);
+      formData.append("usuarioId", usuarioValor || "");
       if (fotoFile) {
         formData.append("foto", fotoFile);
       }
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         method: "POST",
         body: formData,
@@ -173,6 +178,9 @@ export default function Fornecedores() {
   }
 
   async function handleSalvarFornecedor() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
@@ -188,6 +196,9 @@ export default function Fornecedores() {
       formData.append("cnpj", form.cnpj);
       formData.append("telefone", form.telefone);
       formData.append("categoria", form.categoria);
+      formData.append("empresaId", empresaId || "");
+      formData.append("usuarioId", usuarioValor || "");
+      
       if (fotoFile) {
         formData.append("foto", fotoFile);
       }
