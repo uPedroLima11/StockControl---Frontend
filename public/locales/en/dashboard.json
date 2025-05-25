@@ -12,7 +12,7 @@
       "itensDisponiveis": "stock quantity"
     },
     "atividades": {
-      "titulo": "Recent Activities",
+      "titulo": "Activities",
       "itensRecebidos": "Items Received",
       "custoItens": "Item Cost",
       "itensAjustados": "Adjusted Items",
