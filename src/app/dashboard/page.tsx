@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [contagemLucro, setContagemLucro] = useState(0);
   const [contagemVendas, setContagemVendas] = useState(0);
   const [contagemFornecedores, setContagemFornecedores] = useState(0);
+  const [contagemFuncionarios, setContagemFuncionarios] = useState(0);
   const [vendas30Dias, setVendas30Dias] = useState(0);
   const [todasVendas, setTodasVendas] = useState<VendaI[]>([]);
   const [modoDark, setModoDark] = useState(false);
@@ -28,6 +29,7 @@ export default function Dashboard() {
     fetchProdutos();
     fetchFornecedores();
     fetchVendas();
+    fetchFuncionarios();
 
     localStorage.setItem("TotalVendas", JSON.stringify(todasVendas));
 
@@ -81,6 +83,22 @@ export default function Dashboard() {
     }
   }
 
+  async function fetchFuncionarios() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+    const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+    const usuario = await responseUsuario.json();
+    const responseFuncionarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/contagem/${usuario.empresaId}`);
+    if (responseFuncionarios.status === 200) {
+      const data = await responseFuncionarios.json();
+      setContagemFuncionarios(data.quantidade);
+    } else {
+      setContagemFuncionarios(0);
+    }
+  }
+
   async function fetchFornecedores() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
@@ -91,7 +109,6 @@ export default function Dashboard() {
     const responseFornecedor = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/contagem/${usuario.empresaId}`);
     if (responseFornecedor.status === 200) {
       const data = await responseFornecedor.json();
-      console.log(data);
       setContagemFornecedores(data._count.id);
     } else {
       setContagemFornecedores(0);
@@ -185,7 +202,7 @@ export default function Dashboard() {
                   {contagemLucro > 0 ? contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("resumo.lucroMensal")}
+                  {t("resumo.lucroTotal")}
                 </p>
               </div>
               <div>
@@ -218,7 +235,7 @@ export default function Dashboard() {
               {t("atividades.titulo")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6 text-center">
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
                   {contagemVendas}
@@ -249,6 +266,14 @@ export default function Dashboard() {
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   Itens Cadastrados
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                  {contagemFuncionarios}
+                </p>
+                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                  Funcionários
                 </p>
               </div>
             </div>
