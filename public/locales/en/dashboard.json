@@ -7,7 +7,7 @@
     "dashboardTitulo": "Dashboard",
     "resumo": {
       "titulo": "Inventory Summary",
-      "lucroMensal": "Monthly Sales Profit",
+      "lucroMensal": "Total Sales Profit",
       "custoItens": "Item Cost",
       "itensDisponiveis": "stock quantity"
     },

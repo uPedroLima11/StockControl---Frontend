@@ -1,15 +1,18 @@
 "use client";
 
 import { ProdutoI } from "@/utils/types/produtos";
+import { VendaI } from "@/utils/types/vendas";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
 
 export default function Dashboard() {
-  const [contagemProdutos, setContagemProdutos] = useState(0);
+  const [contagemProduto, setContagemProduto] = useState(0);
+  const [contagemEstoque, setContagemEstoque] = useState(0);
   const [contagemValor, setContagemValor] = useState(0);
   const [contagemLucro, setContagemLucro] = useState(0);
+  const [contagemVendas, setContagemVendas] = useState(0);
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const { t } = useTranslation("dashboard");
@@ -20,9 +23,9 @@ export default function Dashboard() {
     setModoDark(ativado);
     fetchContagem();
     fetchProdutos();
-  
+
     const root = document.documentElement;
-  
+
     if (ativado) {
       root.style.setProperty("--cor-fundo", "#20252B");
       root.style.setProperty("--cor-fonte", "#fffff2");
@@ -46,7 +49,7 @@ export default function Dashboard() {
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) {
-        setContagemProdutos(0);
+        setContagemEstoque(0);
         setContagemValor(0);
         setContagemLucro(0);
         return;
@@ -54,14 +57,16 @@ export default function Dashboard() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`);
         if (response.status === 200) {
           const data = await response.json();
-          setContagemProdutos(data.contagemQuantidade);
+          setContagemEstoque(data.contagemQuantidade);
           setContagemValor(data.contagemPreco);
+          setContagemProduto(data.count);
         }
-       
+
         const responseLucro = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         if (responseLucro.status === 200) {
           const data = await responseLucro.json();
-          setContagemLucro(data.total._sum.valorVenda);
+          setContagemLucro(data.total);
+          setContagemVendas(data.quantidadeVendas);
         }
       }
     } catch (error) {
@@ -131,7 +136,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemProdutos}
+                  {contagemEstoque}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("resumo.itensDisponiveis")}
@@ -150,23 +155,32 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
               {t("atividades.titulo")}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 text-center">
-              {[
-                ["10", t("atividades.itensRecebidos")],
-                ["R$ 57.30", t("atividades.custoItens")],
-                ["5", t("atividades.itensAjustados")],
-                ["12", t("atividades.itensRemovidos")],
-                ["R$ 24.00 / R$ 3.00", t("atividades.ajusteCusto")],
-              ].map(([valor, texto]) => (
-                <div key={texto}>
-                  <p className="text-lg font-bold" style={{ color: "var(--cor-fonte)" }}>
-                    {valor}
-                  </p>
-                  <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                    {texto}
-                  </p>
-                </div>
-              ))}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+              <div>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                  {contagemVendas}
+                </p>
+                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                  Contagem de Vendas
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                  {contagemLucro > 0 ? contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
+                </p>
+                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                  {t("resumo.lucroMensal")}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                  {contagemProduto}
+                </p>
+                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                  Itens Cadastrados
+                </p>
+              </div>
             </div>
           </div>
 
@@ -199,9 +213,9 @@ export default function Dashboard() {
                       <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidadeMin}</td>
                       <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
                         {produto.quantidade < produto.quantidadeMin ? (
-                            <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1">
                             <LuShieldAlert size={18} color="#dc143c" /> {t("estoqueBaixo.estadoCritico")}
-                            </div>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-1">
                             <LuTriangleAlert size={18} color="#eead2d" /> {t("estoqueBaixo.estadoAtencao")}

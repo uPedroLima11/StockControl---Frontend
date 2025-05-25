@@ -7,7 +7,7 @@
       "dashboardTitulo": "Dashboard",
       "resumo": {
         "titulo": "Resumo do Inventário",
-        "lucroMensal": "Lucro de Venda Mensal",
+        "lucroMensal": "Lucro de Venda Total",
         "custoItens": "Custo Itens",
         "itensDisponiveis": "Quantidade em estoque"
       },
