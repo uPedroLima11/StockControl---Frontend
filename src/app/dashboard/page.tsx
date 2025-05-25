@@ -13,6 +13,9 @@ export default function Dashboard() {
   const [contagemValor, setContagemValor] = useState(0);
   const [contagemLucro, setContagemLucro] = useState(0);
   const [contagemVendas, setContagemVendas] = useState(0);
+  const [contagemFornecedores, setContagemFornecedores] = useState(0);
+  const [vendas30Dias, setVendas30Dias] = useState(0);
+  const [todasVendas, setTodasVendas] = useState<any[]>([]);
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const { t } = useTranslation("dashboard");
@@ -23,6 +26,8 @@ export default function Dashboard() {
     setModoDark(ativado);
     fetchContagem();
     fetchProdutos();
+    fetchFornecedores();
+    fetchVendas();
 
     const root = document.documentElement;
 
@@ -74,6 +79,23 @@ export default function Dashboard() {
     }
   }
 
+  async function fetchFornecedores() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+    const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+    const usuario = await responseUsuario.json();
+    const responseFornecedor = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/contagem/${usuario.empresaId}`);
+    if (responseFornecedor.status === 200) {
+      const data = await responseFornecedor.json();
+      console.log(data);
+      setContagemFornecedores(data._count.id);
+    } else {
+      setContagemFornecedores(0);
+    }
+  }
+
   async function fetchProdutos() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
@@ -86,6 +108,44 @@ export default function Dashboard() {
     const todosProdutos: ProdutoI[] = await responseProdutos.json();
     const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
     setProdutos(produtosDaEmpresa);
+  }
+
+  async function fetchVendas() {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const usuario = await responseUsuario.json();
+
+      if (!usuario.empresaId) {
+        setTodasVendas([]);
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTodasVendas(data.vendas ||  []);
+        calcularVendas30Dias(data.vendas ||  []);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar vendas:", error);
+    }
+  }
+
+  function calcularVendas30Dias(vendas: any[]) {
+    const data30DiasAtras = new Date();
+    data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
+
+    const vendasFiltradas = vendas.filter(venda => {
+      const dataVenda = new Date(venda.createdAt);
+      return dataVenda >= data30DiasAtras;
+    });
+
+    const total = vendasFiltradas.reduce((sum, venda) => sum + venda.valorVenda, 0);
+    setVendas30Dias(total);
   }
 
   return (
@@ -156,7 +216,7 @@ export default function Dashboard() {
               {t("atividades.titulo")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6 text-center">
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
                   {contagemVendas}
@@ -167,10 +227,18 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemLucro > 0 ? contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
+                  {vendas30Dias.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("resumo.lucroMensal")}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                  {contagemFornecedores}
+                </p>
+                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                  Fornecedores
                 </p>
               </div>
               <div>
