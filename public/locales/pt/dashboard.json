@@ -1,35 +1,34 @@
-
 {
-      "intro": {
-        "linha1": "Controle seu estoque de",
-        "linha2": "forma simples e inteligente"
-      },
-      "dashboardTitulo": "Dashboard",
-      "resumo": {
-        "titulo": "Resumo do Inventário",
-        "lucroTotal": "Lucro de Venda Total",
-        "lucroMensal": "Lucro de Venda Mensal",
-        "custoItens": "Custo Itens",
-        "itensDisponiveis": "Quantidade em estoque"
-      },
-      "atividades": {
-        "titulo": "Atividades",
-        "itensRecebidos": "Itens Recebidos",
-        "custoItens": "Custo Itens",
-        "itensAjustados": "Itens Ajustados",
-        "itensRemovidos": "Itens Removidos",
-        "ajusteCusto": "Aumento / Redução de Custos"
-      },
-      "estoqueBaixo": {
-        "estadoCritico": "Critico",
-        "estadoAtencao": "Atenção",
-        "titulo": "Produtos com Estoque Baixo",
-        "colunas": {
-          "produto": "Produto",
-          "estoqueAtual": "Estoque Atual",
-          "estoqueIdeal": "Estoque Mínimo",
-          "valorAtual": "Valor Atual",
-          "valorIdeal": "Valor Ideal"
-        }
-      }
+  "intro": {
+    "linha1": "Controle seu estoque de",
+    "linha2": "forma simples e inteligente"
+  },
+  "dashboardTitulo": "Dashboard",
+  "resumo": {
+    "titulo": "Resumo do Inventário",
+    "lucroTotal": "Lucro de Venda Total",
+    "custoItens": "Custo Itens",
+    "itensDisponiveis": "Quantidade em Estoque"
+  },
+  "atividades": {
+    "titulo": "Atividades",
+    "itensDisponiveis": "Quantidade em estoque",
+    "lucroMensal": "Lucro de Venda Mensal",
+    "contagemVendas": "Contagem de Vendas",
+    "contagemFornecedores": "Fornecedores",
+    "contagemItens": "Itens cadastrados",
+    "contagemFuncionarios": "Funcionários"
+  },
+  "estoqueBaixo": {
+    "estadoCritico": "Critico",
+    "estadoAtencao": "Atenção",
+    "titulo": "Produtos com Estoque Baixo",
+    "colunas": {
+      "produto": "Produto",
+      "estoqueAtual": "Estoque Atual",
+      "estoqueIdeal": "Estoque Mínimo",
+      "valorAtual": "Valor Atual",
+      "valorIdeal": "Valor Ideal"
     }
+  }
+}

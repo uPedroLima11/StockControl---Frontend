@@ -241,7 +241,7 @@ export default function Dashboard() {
                   {contagemVendas}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  Contagem de Vendas
+                  {t("atividades.contagemVendas")}
                 </p>
               </div>
               <div>
@@ -249,7 +249,7 @@ export default function Dashboard() {
                   {vendas30Dias.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("resumo.lucroMensal")}
+                  {t("atividades.lucroMensal")}
                 </p>
               </div>
               <div>
@@ -257,7 +257,7 @@ export default function Dashboard() {
                   {contagemFornecedores}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  Fornecedores
+                  {t("atividades.contagemFornecedores")}
                 </p>
               </div>
               <div>
@@ -265,7 +265,7 @@ export default function Dashboard() {
                   {contagemProduto}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  Itens Cadastrados
+                  {t("atividades.contagemItens")}
                 </p>
               </div>
               <div>
@@ -273,7 +273,7 @@ export default function Dashboard() {
                   {contagemFuncionarios}
                 </p>
                 <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  Funcionários
+                  {t("atividades.contagemFuncionarios")}
                 </p>
               </div>
             </div>

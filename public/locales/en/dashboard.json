@@ -1,36 +1,34 @@
-
 {
-    "intro": {
-      "linha1": "Manage your inventory",
-      "linha2": "in a simple and smart way"
-    },
-    "dashboardTitulo": "Dashboard",
-    "resumo": {
-      "titulo": "Inventory Summary",
-      "lucroTotal": "Total Sales Profit",
-      "lucroMensal": "Monthly Sales Profit",
-      "custoItens": "Item Cost",
-      "itensDisponiveis": "stock quantity"
-    },
-    "atividades": {
-      "titulo": "Activities",
-      "itensRecebidos": "Items Received",
-      "custoItens": "Item Cost",
-      "itensAjustados": "Adjusted Items",
-      "itensRemovidos": "Removed Items",
-      "ajusteCusto": "Cost Increase / Reduction"
-    },
-    "estoqueBaixo": {
-      "estadoCritico": "Critical",
-      "estadoAtencao": "Attention",
-      "titulo": "Low Stock Products",
-      "colunas": {
-        "produto": "Product",
-        "estoqueAtual": "Current Stock",
-        "estoqueIdeal": "Minimal Stock",
-        "valorAtual": "Current Value",
-        "valorIdeal": "Ideal Value"
-        
-      }
-        }
+  "intro": {
+    "linha1": "Manage your inventory",
+    "linha2": "in a simple and smart way"
+  },
+  "dashboardTitulo": "Dashboard",
+  "resumo": {
+    "titulo": "Inventory Summary",
+    "lucroTotal": "Total Sales Profit",
+    "custoItens": "Item Cost",
+    "itensDisponiveis":"Available Items"
+  },
+  "atividades": {
+    "titulo": "Activities",
+    "itensDisponiveis": "Available Items",
+    "lucroMensal": "Monthly Sales Profit",
+    "contagemVendas": "Sales Count",
+    "contagemFornecedores": "Suppliers",
+    "contagemItens": "Registered Items",
+    "contagemFuncionarios": "Employees"
+  },
+  "estoqueBaixo": {
+    "estadoCritico": "Critical",
+    "estadoAtencao": "Attention",
+    "titulo": "Low Stock Products",
+    "colunas": {
+      "produto": "Product",
+      "estoqueAtual": "Current Stock",
+      "estoqueIdeal": "Minimal Stock",
+      "valorAtual": "Current Value",
+      "valorIdeal": "Ideal Value"
+    }
   }
+}
