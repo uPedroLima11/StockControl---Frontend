@@ -123,85 +123,85 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
           Desenvolvedores
         </h2>
-        
+
         <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
           <div className="md:w-1/2">
             <p className="text-lg text-gray-600 mb-6">
-              Nossa equipe de desenvolvimento é composta por profissionais apaixonados por tecnologia 
+              Nossa equipe de desenvolvimento é composta por profissionais apaixonados por tecnologia
               e inovação, dedicados a criar soluções que fazem a diferença.
             </p>
             <p className="text-lg text-gray-600">
-              Combinamos expertise técnica com criatividade para entregar produtos de alta qualidade 
+              Combinamos expertise técnica com criatividade para entregar produtos de alta qualidade
               que superam as expectativas dos nossos clientes.
             </p>
           </div>
-          
-            <div className="md:w-1/2 flex flex-col items-center gap-8 justify-center">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Pedros' TI</h3>
-              <div className="flex flex-col sm:flex-row gap-8">
+
+          <div className="md:w-1/2 flex flex-col items-center gap-8 justify-center">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Pedros&apos; TI</h3>
+            <div className="flex flex-col sm:flex-row gap-8">
               <div className="flex flex-col items-center">
                 <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-200"></div>
-                <div className="relative bg-white p-1 rounded-lg shadow-lg">
-                  <a 
-                  href="https://www.linkedin.com/in/upedrolima/" 
-                  target="_blank" 
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-200"></div>
+                  <div className="relative bg-white p-1 rounded-lg shadow-lg">
+                    <a
+                      href="https://www.linkedin.com/in/upedrolima/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Image
+                        src="/pedrolima.jpg"
+                        alt="Desenvolvedor 1"
+                        width={160}
+                        height={160}
+                        quality={100}
+                        className="w-40 h-40 object-cover rounded-md"
+                      />
+                    </a>
+                  </div>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/upedrolima/"
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="block"
-                  >
-                  <Image 
-                    src="/pedrolima.jpg" 
-                    alt="Desenvolvedor 1"
-                    width={160}
-                    height={160}
-                    quality={100}
-                    className="w-40 h-40 object-cover rounded-md"
-                  />
-                  </a>
-                </div>
-                </div>
-                <a 
-                href="https://www.linkedin.com/in/upedrolima/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="mt-4 text-lg font-medium text-gray-800 hover:text-blue-600 transition-colors"
+                  className="mt-4 text-lg font-medium text-gray-800 hover:text-blue-600 transition-colors"
                 >
-                Pedro Lima
+                  Pedro Lima
                 </a>
               </div>
-              
+
               <div className="flex flex-col items-center">
                 <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-200"></div>
-                <div className="relative bg-white p-1 rounded-lg shadow-lg">
-                  <a 
-                  href="https://www.linkedin.com/in/phasiqueira/" 
-                  target="_blank" 
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-200"></div>
+                  <div className="relative bg-white p-1 rounded-lg shadow-lg">
+                    <a
+                      href="https://www.linkedin.com/in/phasiqueira/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Image
+                        src="/pedrosiqueira.jpg"
+                        alt="Desenvolvedor 2"
+                        width={160}
+                        height={160}
+                        quality={100}
+                        className="w-40 h-40 object-cover rounded-md"
+                      />
+                    </a>
+                  </div>
+                </div>
+                <a
+                  href="https://www.linkedin.com/in/phasiqueira/"
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="block"
-                  >
-                  <Image 
-                    src="/pedrosiqueira.jpg" 
-                    alt="Desenvolvedor 2"
-                    width={160}
-                    height={160}
-                    quality={100}
-                    className="w-40 h-40 object-cover rounded-md"
-                  />
-                  </a>
-                </div>
-                </div>
-                <a 
-                href="https://www.linkedin.com/in/phasiqueira/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="mt-4 text-lg font-medium text-gray-800 hover:text-blue-600 transition-colors"
+                  className="mt-4 text-lg font-medium text-gray-800 hover:text-blue-600 transition-colors"
                 >
-                Pedro Siqueira
+                  Pedro Siqueira
                 </a>
-              </div>
               </div>
             </div>
+          </div>
         </div>
       </section>
 
