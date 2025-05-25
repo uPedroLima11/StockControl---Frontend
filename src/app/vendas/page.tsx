@@ -93,7 +93,7 @@ export default function Vendas() {
     
         const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         const totalData = await responseTotal.json();
-        setTotalVendas(totalData.total._sum.valorVenda || 0);
+        setTotalVendas(totalData.total || 0);
         
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
