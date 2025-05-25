@@ -171,6 +171,7 @@ export default function Logs() {
               <tbody>
                 {logs
                   .filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase()))
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                   .slice(0, 10)
                   .map((log) => (
                     <tr key={log.id} className="border-b">
