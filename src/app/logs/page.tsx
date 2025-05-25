@@ -112,6 +112,28 @@ export default function Logs() {
     return tipo;
   };
 
+  const traduzirDescricao = (descricao: string): string => {
+    if (descricao.includes("Produto Vendido")) {
+      const partes = descricao.split(":");
+      const nomeProduto = partes[1]?.split("|")[0]?.trim() || "";
+      const quantidade = descricao.match(/Quantidade:\s*(\d+)/)?.[1] || "";
+      return t("logs.descricoes.produto_vendido", { nome: nomeProduto, quantidade });
+    }
+    if (descricao.includes("Produto Excluido")) {
+      const nomeProduto = descricao.split(":")[1]?.trim() || "";
+      return t("logs.descricoes.produto_excluido", { nome: nomeProduto });
+    }
+    if (descricao.includes("Produto Atualizado")) {
+      const nomeProduto = descricao.split(":")[1]?.trim() || "";
+      return t("logs.descricoes.produto_atualizado", { nome: nomeProduto });
+    }
+    if (descricao.includes("Produto criado")) {
+      const nomeProduto = descricao.split(":")[1]?.trim() || "";
+      return t("logs.descricoes.produto_criado", { nome: nomeProduto });
+    }
+    return descricao;
+  };
+
   if (carregando) {
     return (
       <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -181,7 +203,7 @@ export default function Logs() {
                           : t("logs.usuario_nao_informado")}
                       </td>
                       <td className="py-3 px-4 text-center">{traduzirTipoLog(log.tipo)}</td>
-                      <td className="py-3 px-4 text-center">{log.descricao}</td>
+                      <td className="py-3 px-4 text-center">{traduzirDescricao(log.descricao)}</td>
                       <td className="py-3 px-4 text-center">{formatarData(log.createdAt)}</td>
                     </tr>
                   ))}

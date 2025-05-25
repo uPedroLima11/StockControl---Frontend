@@ -15,6 +15,12 @@
             "ATUALIZACAO": "Update",
             "EXCLUSAO": "Deletion",
             "BAIXA": "Write-off"
+        },
+        "descricoes": {
+            "produto_vendido": "Product Sold: {{nome}} (Quantity: {{quantidade}})",
+            "produto_excluido": "Product Deleted: {{nome}}",
+            "produto_atualizado": "Product Updated: {{nome}}",
+            "produto_criado": "Product Created: {{nome}}"
         }
     }
 }
