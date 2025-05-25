@@ -15,7 +15,7 @@ export default function Dashboard() {
   const [contagemVendas, setContagemVendas] = useState(0);
   const [contagemFornecedores, setContagemFornecedores] = useState(0);
   const [vendas30Dias, setVendas30Dias] = useState(0);
-  const [todasVendas, setTodasVendas] = useState<any[]>([]);
+  const [todasVendas, setTodasVendas] = useState<VendaI[]>([]);
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const { t } = useTranslation("dashboard");
@@ -28,6 +28,8 @@ export default function Dashboard() {
     fetchProdutos();
     fetchFornecedores();
     fetchVendas();
+
+    localStorage.setItem("TotalVendas", JSON.stringify(todasVendas));
 
     const root = document.documentElement;
 
@@ -135,7 +137,7 @@ export default function Dashboard() {
     }
   }
 
-  function calcularVendas30Dias(vendas: any[]) {
+  function calcularVendas30Dias(vendas: VendaI[]) {
     const data30DiasAtras = new Date();
     data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
 
