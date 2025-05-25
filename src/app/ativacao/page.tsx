@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { FaCheckCircle, FaLock } from 'react-icons/fa';
+import { FaCheckCircle, FaLock, FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
 
@@ -43,7 +44,7 @@ export default function AtivacaoPage() {
       root.classList.remove("dark");
       root.style.setProperty("--cor-fundo", "#FFFFFF");
       root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#F9FAFB");
+      root.style.setProperty("--cor-fundo-bloco", "#ececec");
       root.style.setProperty("--cor-borda", "#E5E7EB");
       root.style.setProperty("--cor-cinza", "#4B5563");
       root.style.setProperty("--cor-destaque", "#3B82F6");
@@ -124,6 +125,9 @@ export default function AtivacaoPage() {
       }
 
       toast.success(t('empresaAtivada'));
+      setEmpresaAtivada(true);
+      
+      
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -205,21 +209,21 @@ export default function AtivacaoPage() {
         }}
       >
         <div className="flex justify-center mb-6">
-          <FaCheckCircle className="text-green-500 text-5xl" />
+          <FaLock className="text-blue-500 text-5xl" />
         </div>
 
         <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
-          {t('titulo')}
+          Ativação da Empresa
         </h2>
 
         <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
-          {t('subtitulo')}
+          Insira o código de ativação fornecido após o pagamento para liberar todas as funcionalidades do sistema
         </p>
 
         <form onSubmit={handleAtivar} className="space-y-6">
           <div>
             <label htmlFor="codigo" className="block text-sm font-medium mb-1" style={{ color: "var(--cor-texto)" }}>
-              {t('codigoAtivacao')}
+              Código de Ativação
             </label>
             <input
               id="codigo"
@@ -232,12 +236,12 @@ export default function AtivacaoPage() {
                 border: "1px solid var(--cor-borda)",
                 color: "var(--cor-texto)",
               }}
-              placeholder={t('codigoPlaceholder')}
+              placeholder="XXXX-XXXX-XXXX"
               required
               disabled={loading}
             />
-            <p className="mt-1 text-xs" style={{ color: "var(--cor-cinza)" }}>
-              {t('codigoHelp')}
+            <p className="mt-1 text-xs text-center" style={{ color: "var(--cor-cinza)" }}>
+              O código será fornecido após a confirmação do pagamento
             </p>
           </div>
 
@@ -249,10 +253,30 @@ export default function AtivacaoPage() {
                 loading ? 'opacity-70 cursor-not-allowed' : 'bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)]'
               }`}
             >
-              {loading ? t('botaoAtivando') : t('botaoAtivar')}
+              {loading ? 'Ativando...' : 'Ativar Empresa'}
             </button>
           </div>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm" style={{ color: "var(--cor-cinza)" }}>
+            Caso não tenha efetuado o pagamento
+          </p>
+            <Link 
+              href="https://wa.me/+5553981185633" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={`inline-flex items-center mt-2 transition-colors ${
+              modoDark 
+                ? 'text-green-500 hover:text-green-800' 
+                : 'text-green-800 hover:text-green-500'
+              }`}
+            >
+              <FaShoppingCart className="mr-2" />
+              <span className="font-medium">CLIQUE AQUI</span>
+              <span className="ml-1">para comprar a ativação</span>
+            </Link>
+        </div>
       </div>
     </div>
   );
