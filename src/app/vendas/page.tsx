@@ -12,7 +12,7 @@ export default function Vendas() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const [vendas, setVendas] = useState<VendaI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [carrinho, setCarrinho] = useState<{produto: ProdutoI, quantidade: number}[]>([]);
+  const [carrinho, setCarrinho] = useState<{ produto: ProdutoI, quantidade: number }[]>([]);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const [totalVendas, setTotalVendas] = useState(0);
@@ -58,10 +58,10 @@ export default function Vendas() {
     const initialize = async () => {
       try {
         setCarregando(true);
-        
+
         const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
         const usuario = await responseUsuario.json();
-        
+
         if (!usuario || !usuario.empresaId) {
           setProdutos([]);
           setVendas([]);
@@ -69,32 +69,44 @@ export default function Vendas() {
           setCarregando(false);
           return;
         }
-        
+
         setEmpresaId(usuario.empresaId);
-    
+
         const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
         setProdutos(produtosDaEmpresa);
-    
+
         const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
         if (!responseVendas.ok) {
           throw new Error('Erro ao carregar vendas');
         }
-        
+
         const vendasData = await responseVendas.json();
-        
+
         const vendasDaEmpresa = vendasData.vendas || [];
-        
-        const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+
+        const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) =>
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
         );
         setVendas(vendasOrdenadas);
-    
+
         const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         const totalData = await responseTotal.json();
-        setTotalVendas(totalData.total || 0);
-        
+
+        let total = 0;
+        if (totalData?.total?._sum?.valorVenda) {
+          total = totalData.total._sum.valorVenda;
+        } else if (totalData?.sum) {
+          total = totalData.sum;
+        } else if (totalData?.total) {
+          total = totalData.total;
+        } else if (typeof totalData === 'number') {
+          total = totalData;
+        }
+
+        setTotalVendas(total);
+
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         Swal.fire({
@@ -122,12 +134,12 @@ export default function Vendas() {
 
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     const itemExistente = carrinho.find(item => item.produto.id === produto.id);
-    
+
     if (itemExistente) {
       if (itemExistente.quantidade < produto.quantidade) {
         setCarrinho(carrinho.map(item =>
-          item.produto.id === produto.id 
-            ? {...item, quantidade: item.quantidade + 1} 
+          item.produto.id === produto.id
+            ? { ...item, quantidade: item.quantidade + 1 }
             : item
         ));
       } else {
@@ -135,7 +147,7 @@ export default function Vendas() {
       }
     } else {
       if (produto.quantidade > 0) {
-        setCarrinho([...carrinho, {produto, quantidade: 1}]);
+        setCarrinho([...carrinho, { produto, quantidade: 1 }]);
       } else {
         Swal.fire("Aviso", "Produto sem estoque disponível", "warning");
       }
@@ -148,11 +160,11 @@ export default function Vendas() {
 
   const atualizarQuantidade = (produtoId: string, novaQuantidade: number) => {
     const produto = produtos.find(p => p.id === produtoId);
-    
+
     if (produto && novaQuantidade > 0 && novaQuantidade <= produto.quantidade) {
       setCarrinho(carrinho.map(item =>
-        item.produto.id === produtoId 
-          ? {...item, quantidade: novaQuantidade} 
+        item.produto.id === produtoId
+          ? { ...item, quantidade: novaQuantidade }
           : item
       ));
     } else if (novaQuantidade < 1) {
@@ -167,22 +179,9 @@ export default function Vendas() {
 
     if (!empresaId || carrinho.length === 0) return;
 
-    if (carregando) {
-      return (
-        <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-          <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
-        </div>
-      );
-    }
-  
-    if (!empresaId) {
-      return (
-        <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-          <p style={{ color: "var(--cor-fonte)" }}>{t("semEmpresa")}</p>
-        </div>
-      );
-    }
     try {
+      setCarregando(true);
+
       const promises = carrinho.map(item => {
         return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
           method: "POST",
@@ -199,9 +198,14 @@ export default function Vendas() {
         });
       });
 
-      await Promise.all(promises);
-      
-      Swal.fire({
+      const responses = await Promise.all(promises);
+
+      const allSuccessful = responses.every(response => response.ok);
+      if (!allSuccessful) {
+        throw new Error('Algumas vendas não foram processadas corretamente');
+      }
+
+      await Swal.fire({
         position: "center",
         icon: "success",
         title: t("vendaSucesso"),
@@ -212,34 +216,55 @@ export default function Vendas() {
       setCarrinho([]);
       localStorage.removeItem('carrinhoVendas');
 
-      const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-      const todosProdutos: ProdutoI[] = await responseProdutos.json();
-      const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === empresaId);
-      setProdutos(produtosDaEmpresa);
+      try {
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const todosProdutos: ProdutoI[] = await responseProdutos.json();
+        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === empresaId);
+        setProdutos(produtosDaEmpresa);
 
-      const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
-      const vendasData = await responseVendas.json();
-      const vendasOrdenadas = vendasData.vendas.sort((a: VendaI, b: VendaI) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setVendas(vendasOrdenadas);
+        const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
+        const vendasData = await responseVendas.json();
 
-      const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
-      const totalData = await responseTotal.json();
-      setTotalVendas(totalData.total._sum.valorVenda || 0);
+        const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) =>
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        );
+        setVendas(vendasOrdenadas);
+
+        const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
+        const totalData = await responseTotal.json();
+        setTotalVendas(totalData?.total?._sum?.valorVenda || 0);
+
+      } catch (updateError) {
+        console.error("Erro ao atualizar dados:", updateError);
+      }
+
     } catch (err) {
       console.error("Erro ao finalizar venda:", err);
-      Swal.fire("Erro!", "Não foi possível finalizar a venda.", "error");
+      await Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: t("erroFinalizarVenda"),
+      });
+    } finally {
+      setCarregando(false);
     }
   };
 
-  const produtosFiltrados = produtos.filter((produto) => 
+  const produtosFiltrados = produtos.filter((produto) =>
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
-  const totalCarrinho = carrinho.reduce((total, item) => 
+  const totalCarrinho = carrinho.reduce((total, item) =>
     total + (item.produto.preco * item.quantidade), 0
   );
+
+  if (carregando && !empresaId) {
+    return (
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -258,13 +283,13 @@ export default function Vendas() {
                   borderColor: modoDark ? "#FFFFFF" : "#000000",
                 }}
               >
-                <input 
-                  type="text" 
-                  placeholder={t("buscarProduto")} 
-                  className="outline-none font-mono text-sm bg-transparent" 
-                  value={busca} 
-                  onChange={(e) => setBusca(e.target.value)} 
-                  style={{ color: "var(--cor-fonte)" }} 
+                <input
+                  type="text"
+                  placeholder={t("buscarProduto")}
+                  className="outline-none font-mono text-sm bg-transparent"
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  style={{ color: "var(--cor-fonte)" }}
                 />
                 <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
               </div>
@@ -303,12 +328,12 @@ export default function Vendas() {
                       }}
                     >
                       <td className="py-3 px-4 flex items-center gap-2">
-                        <Image 
-                          src={produto.foto || "/out.jpg"} 
-                          width={30} 
-                          height={30} 
-                          className="rounded" 
-                          alt={produto.nome} 
+                        <Image
+                          src={produto.foto || "/out.jpg"}
+                          width={30}
+                          height={30}
+                          className="rounded"
+                          alt={produto.nome}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/out.jpg";
                           }}
@@ -372,11 +397,11 @@ export default function Vendas() {
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          <Image 
-                            src={item.produto.foto || "/out.jpg"} 
-                            width={30} 
-                            height={30} 
-                            className="rounded" 
+                          <Image
+                            src={item.produto.foto || "/out.jpg"}
+                            width={30}
+                            height={30}
+                            className="rounded"
                             alt={item.produto.nome}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "/out.jpg";
@@ -386,7 +411,7 @@ export default function Vendas() {
                             {item.produto.nome}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           <input
                             type="number"
@@ -401,11 +426,11 @@ export default function Vendas() {
                               border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                             }}
                           />
-                          
+
                           <span style={{ color: "var(--cor-fonte)" }}>
                             R$ {(item.produto.preco * item.quantidade).toFixed(2).replace(".", ",")}
                           </span>
-                          
+
                           <button
                             onClick={() => removerDoCarrinho(item.produto.id)}
                             className="p-1 rounded-full"
@@ -428,13 +453,15 @@ export default function Vendas() {
 
                     <button
                       onClick={finalizarVenda}
+                      disabled={carregando}
                       className="w-full border-2 py-2 rounded-lg font-medium mt-4 cursor-pointer"
                       style={{
                         backgroundColor: modoDark ? "#1a25359f" : "#00332C",
                         color: "#FFFFFF",
+                        opacity: carregando ? 0.7 : 1,
                       }}
                     >
-                      {t("finalizarVenda")}
+                      {carregando ? t("processando") : t("finalizarVenda")}
                     </button>
                   </div>
                 </>
@@ -467,17 +494,17 @@ export default function Vendas() {
                       }}
                     >
                       <div>
-                        <p style={{ color: "var(--cor-fonte)" }}>{venda.produto?.nome}</p>
+                        <p style={{ color: "var(--cor-fonte)" }}>{venda.produto?.nome || "Produto desconhecido"}</p>
                         <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                          {new Date(venda.createdAt).toLocaleDateString()}
+                          {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
                         </p>
                       </div>
                       <div className="text-right">
                         <p style={{ color: "var(--cor-fonte)" }}>
-                          {venda.quantidade} x R$ {venda.produto?.preco.toFixed(2).replace(".", ",")}
+                          {venda.quantidade} x R$ {(venda.produto?.preco || 0).toFixed(2).replace(".", ",")}
                         </p>
                         <p className="font-medium" style={{ color: modoDark ? "#FBBF24" : "#00332C" }}>
-                          R$ {venda.valorVenda.toFixed(2).replace(".", ",")}
+                          R$ {(venda.valorVenda || 0).toFixed(2).replace(".", ",")}
                         </p>
                       </div>
                     </div>

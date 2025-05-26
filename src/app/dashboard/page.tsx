@@ -295,7 +295,7 @@ export default function Dashboard() {
                   <th className="py-2 pr-4 text-start whitespace-nowrap">{t("estoqueBaixo.colunas.produto")}</th>
                   <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
                   <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
-                  <th className="py-2 pr-4 text-center whitespace-nowrap">Estado</th>
+                  <th className="py-2 pr-4 text-center whitespace-nowrap">{t("Estado")}</th>
                 </tr>
               </thead>
               <tbody style={{ color: "var(--cor-fonte)" }}>

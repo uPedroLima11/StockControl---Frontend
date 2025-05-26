@@ -202,81 +202,81 @@ export default function AtivacaoPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div
-        className="p-8 rounded-lg shadow-lg max-w-md w-full relative"
-        style={{
-          backgroundColor: "var(--cor-fundo-bloco)",
-          border: "1px solid var(--cor-borda)",
-        }}
+      className="p-8 rounded-lg shadow-lg max-w-md w-full relative"
+      style={{
+        backgroundColor: "var(--cor-fundo-bloco)",
+        border: "1px solid var(--cor-borda)",
+      }}
       >
-        <div className="flex justify-center mb-6">
-          <FaLock className="text-blue-500 text-5xl" />
-        </div>
+      <div className="flex justify-center mb-6">
+        <FaLock className="text-blue-500 text-5xl" />
+      </div>
 
-        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
-          Ativação da Empresa
-        </h2>
+      <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
+        {t('ativacaoTitulo')}
+      </h2>
 
-        <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
-          Insira o código de ativação fornecido após o pagamento para liberar todas as funcionalidades do sistema
+      <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
+        {t('ativacaoDescricao')}
+      </p>
+
+      <form onSubmit={handleAtivar} className="space-y-6">
+        <div>
+        <label htmlFor="codigo" className="block text-sm font-medium mb-1" style={{ color: "var(--cor-texto)" }}>
+          {t('codigoAtivacao')}
+        </label>
+        <input
+          id="codigo"
+          type="text"
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+          className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-[var(--cor-botao)] focus:border-[var(--cor-botao)] transition-colors"
+          style={{
+          backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
+          border: "1px solid var(--cor-borda)",
+          color: "var(--cor-texto)",
+          }}
+          placeholder={t('codigoAtivacaoPlaceholder')}
+          required
+          disabled={loading}
+        />
+        <p className="mt-1 text-xs text-center" style={{ color: "var(--cor-cinza)" }}>
+          {t('codigoAtivacaoAjuda')}
         </p>
-
-        <form onSubmit={handleAtivar} className="space-y-6">
-          <div>
-            <label htmlFor="codigo" className="block text-sm font-medium mb-1" style={{ color: "var(--cor-texto)" }}>
-              Código de Ativação
-            </label>
-            <input
-              id="codigo"
-              type="text"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-[var(--cor-botao)] focus:border-[var(--cor-botao)] transition-colors"
-              style={{
-                backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-                border: "1px solid var(--cor-borda)",
-                color: "var(--cor-texto)",
-              }}
-              placeholder="XXXX-XXXX-XXXX"
-              required
-              disabled={loading}
-            />
-            <p className="mt-1 text-xs text-center" style={{ color: "var(--cor-cinza)" }}>
-              O código será fornecido após a confirmação do pagamento
-            </p>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--cor-botao)] transition-colors ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)]'
-              }`}
-            >
-              {loading ? 'Ativando...' : 'Ativar Empresa'}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm" style={{ color: "var(--cor-cinza)" }}>
-            Caso não tenha efetuado o pagamento
-          </p>
-            <Link 
-              href="https://wa.me/+5553981185633" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`inline-flex items-center mt-2 transition-colors ${
-              modoDark 
-                ? 'text-green-500 hover:text-green-800' 
-                : 'text-green-800 hover:text-green-500'
-              }`}
-            >
-              <FaShoppingCart className="mr-2" />
-              <span className="font-medium">CLIQUE AQUI</span>
-              <span className="ml-1">para comprar a ativação</span>
-            </Link>
         </div>
+
+        <div>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--cor-botao)] transition-colors ${
+          loading ? 'opacity-70 cursor-not-allowed' : 'bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)]'
+          }`}
+        >
+          {loading ? t('ativando') : t('ativarEmpresa')}
+        </button>
+        </div>
+      </form>
+
+      <div className="mt-6 text-center">
+        <p className="text-sm" style={{ color: "var(--cor-cinza)" }}>
+        {t('naoEfetuouPagamento')}
+        </p>
+        <Link 
+          href="https://wa.me/+5553981185633" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={`inline-flex items-center mt-2 transition-colors ${
+          modoDark 
+          ? 'text-green-500 hover:text-green-800' 
+          : 'text-green-800 hover:text-green-500'
+          }`}
+        >
+          <FaShoppingCart className="mr-2" />
+          <span className="font-medium">{t('cliqueAqui')}</span>
+          <span className="ml-1">{t('paraComprarAtivacao')}</span>
+        </Link>
+      </div>
       </div>
     </div>
   );

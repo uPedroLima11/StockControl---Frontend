@@ -11,10 +11,16 @@
     "carregando": "Carregando...",
     "nenhum_log_encontrado": "Nenhum Log encontrado",
     "tipos_logs": {
-    "CRIACAO": "Criação",
-    "ATUALIZACAO": "Atualização",
-    "EXCLUSAO": "Exclusão",
-    "BAIXA": "Baixa"
+      "CRIACAO": "Criação",
+      "ATUALIZACAO": "Atualização",
+      "EXCLUSAO": "Exclusão",
+      "BAIXA": "Baixa"
+    },
+    "descricoes": {
+      "produto_vendido": "Produto vendido: {{nome}} (Quantidade: {{quantidade}})",
+      "produto_excluido": "Produto excluído: {{nome}}",
+      "produto_atualizado": "Produto atualizado: {{nome}}",
+      "produto_criado": "Produto criado: {{nome}}"
     }
   }
 }

@@ -17,5 +17,14 @@
       "apenasProprietarios": "Only company owners can access this feature",
       "voltarDashboard": "Back to Dashboard",
       "empresaJaAtivada": "Your Company is already activated",
-      "empresaJaAtivadaMensagem": "You have already successfully activated your company. No need to activate again."
+      "empresaJaAtivadaMensagem": "You have already successfully activated your company. No need to activate again.",
+      "ativacaoTitulo": "Company Activation",
+      "ativacaoDescricao": "Enter the activation code provided after payment to unlock all system features",
+      "codigoAtivacaoPlaceholder": "XXXX-XXXX-XXXX",
+      "codigoAtivacaoAjuda": "The code will be provided after payment confirmation",
+      "ativarEmpresa": "Activate Company",
+      "ativando": "Activating...",
+      "naoEfetuouPagamento": "If you have not made the payment",
+      "cliqueAqui": "CLICK HERE",
+      "paraComprarAtivacao": "to purchase the activation"
 }
