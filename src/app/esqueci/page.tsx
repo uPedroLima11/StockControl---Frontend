@@ -1,8 +1,46 @@
 "use client";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
 import { HiEnvelope } from "react-icons/hi2";
+import Swal from "sweetalert2";
+
+type Inputs = {
+  email: string;
+};
 
 export default function Esqueci() {
+  const { register, handleSubmit } = useForm<Inputs>();
+
+  async function enviaRecuperacao(data: Inputs) {
+    const token = Math.floor(100000 + Math.random() * 900000);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        recuperacao: token.toString(),
+      }),
+    });
+
+    await fetch("https://n8n-render-7cc2.onrender.com/webhook-test/esqueci-senha" as string, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: data.email,
+        codigo: token.toString(),
+      }),
+    });
+
+    if (!response.ok) {
+      Swal.fire({
+        title: "Erro",
+        text: "Usuário não encontrado ou email inválido.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  }
   return (
     <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">
       <div>
@@ -11,7 +49,7 @@ export default function Esqueci() {
           <span className="p-0 pr-2 text-white text-center text-2xl font-semibold whitespace-nowrap">StockControl</span>
         </Link>
       </div>
-      <form className="md:w-2/6">
+      <form onSubmit={handleSubmit(enviaRecuperacao)} className="md:w-2/6">
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
           Email registrado:
         </label>
@@ -19,7 +57,7 @@ export default function Esqueci() {
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiEnvelope className="text-gray-400" />
           </div>
-          <input type="email" className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
+          <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
         </div>
         <button type="submit" className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
           Enviar Email
