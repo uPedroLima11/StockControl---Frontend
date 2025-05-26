@@ -1,6 +1,6 @@
 "use client";
 import { HiEnvelope, HiLockClosed, HiMiniIdentification } from "react-icons/hi2";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import Link from "next/link";
