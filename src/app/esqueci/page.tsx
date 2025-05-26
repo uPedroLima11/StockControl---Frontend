@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { HiEnvelope } from "react-icons/hi2";
 import Swal from "sweetalert2";
 
@@ -10,6 +12,8 @@ type Inputs = {
 
 export default function Esqueci() {
   const { register, handleSubmit } = useForm<Inputs>();
+  const { t } = useTranslation("esqueci");
+  const [enviado, setEnviado] = useState(false);
 
   async function enviaRecuperacao(data: Inputs) {
     const token = Math.floor(100000 + Math.random() * 900000);
@@ -23,7 +27,7 @@ export default function Esqueci() {
       }),
     });
 
-    await fetch("https://n8n-render-7cc2.onrender.com/webhook-test/esqueci-senha" as string, {
+    await fetch(`${process.env.NEXT_PUBLIC_URL_ESQUECI}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -40,6 +44,7 @@ export default function Esqueci() {
         confirmButtonText: "OK",
       });
     }
+    setEnviado(true);
   }
   return (
     <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">
@@ -62,6 +67,7 @@ export default function Esqueci() {
         <button type="submit" className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
           Enviar Email
         </button>
+        {enviado && <p className="text-green-500 text-base">{t("mensagemEnviada")}</p>}
       </form>
     </div>
   );
