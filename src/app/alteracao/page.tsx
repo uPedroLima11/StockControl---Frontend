@@ -1,8 +1,72 @@
 "use client";
-import Link from "next/link";
 import { HiEnvelope, HiLockClosed, HiMiniIdentification } from "react-icons/hi2";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import Link from "next/link";
+
+type Inputs = {
+  email: string;
+  codigoVerificacao: string;
+  senha: string;
+  confirmaSenha: string;
+};
 
 export default function Alteracao() {
+  const { register, handleSubmit } = useForm<Inputs>();
+  const router = useRouter();
+
+  async function verificaAlteracao(data: Inputs) {
+    try {
+      if (data.senha !== data.confirmaSenha) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "As senhas não coincidem.",
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/recuperacao/alterar`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          senha: data.senha,
+          recuperacao: data.codigoVerificacao,
+        }),
+      });
+
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Senha alterada com sucesso!",
+          confirmButtonColor: "#013C3C",
+        }).then(() => {
+          router.push("/login");
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Algo deu errado.",
+          text: "Verifique se o email já está cadastrado ou se a senha possui letra maiuscula e (?!# etc).",
+          confirmButtonColor: "#013C3C",
+        });
+      }
+    } catch (err) {
+      console.error("Erro na requisição:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Algo deu errado.",
+        text: "Verifique se o email já está cadastrado ou se a senha possui letra maiuscula e (?!# etc).",
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  }
+
   return (
     <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">
       <div>
@@ -11,7 +75,7 @@ export default function Alteracao() {
           <span className="p-0 pr-2 text-white text-center text-2xl font-semibold whitespace-nowrap">StockControl</span>
         </Link>
       </div>
-      <form className="md:w-2/6">
+      <form onSubmit={handleSubmit(verificaAlteracao)} className="md:w-2/6">
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
           Email registrado:
         </label>
@@ -19,7 +83,7 @@ export default function Alteracao() {
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiEnvelope className="text-gray-400" />
           </div>
-          <input type="email" className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
+          <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
         </div>
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
           Código de verificação:
@@ -28,7 +92,7 @@ export default function Alteracao() {
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiLockClosed className="text-gray-400" />
           </div>
-          <input type="text" className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite o Código de verificação" required />
+          <input type="text" {...register("codigoVerificacao")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite o Código de verificação" required />
         </div>
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
           Nova senha:
@@ -37,7 +101,7 @@ export default function Alteracao() {
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiMiniIdentification className="text-gray-400" />
           </div>
-          <input type="password"  className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite sua nova senha aqui" required />
+          <input type="password" {...register("senha")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite sua nova senha aqui" required />
         </div>
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
           Confirme sua nova senha:
@@ -46,7 +110,7 @@ export default function Alteracao() {
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiMiniIdentification className="text-gray-400" />
           </div>
-          <input type="password"  className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Confirme sua senha" required />
+          <input type="password" {...register("confirmaSenha")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Confirme sua senha" required />
         </div>
         <button type="submit" className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
           Alterar Senha
