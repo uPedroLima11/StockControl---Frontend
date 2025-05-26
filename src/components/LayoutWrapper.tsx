@@ -17,7 +17,8 @@ export default function LayoutWrapper({
   const isPublicPage =
     pathname === "/login" ||
     pathname === "/registro" ||
-    pathname === "/esqueci";
+    pathname === "/esqueci" || 
+    pathname === "/alteracao"; 
 
   if (isHome) {
     return (
