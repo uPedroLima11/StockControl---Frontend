@@ -132,6 +132,7 @@ export default function Vendas() {
     }
   }, [carrinho]);
 
+
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     const itemExistente = carrinho.find(item => item.produto.id === produto.id);
 
@@ -146,31 +147,43 @@ export default function Vendas() {
         Swal.fire("Aviso", "Quantidade em estoque insuficiente", "warning");
       }
     } else {
-      if (produto.quantidade > 0) {
-        setCarrinho([...carrinho, { produto, quantidade: 1 }]);
-      } else {
-        Swal.fire("Aviso", "Produto sem estoque disponível", "warning");
-      }
+      setCarrinho([...carrinho, { produto, quantidade: 1 }]);
     }
   };
 
+  const atualizarQuantidade = (produtoId: string, novaQuantidade: number | "") => {
+    const produto = produtos.find(p => p.id === produtoId);
+
+    setCarrinho(prevCarrinho => {
+      return prevCarrinho
+        .map(item => {
+          if (item.produto.id === produtoId) {
+            if (novaQuantidade === "" || isNaN(Number(novaQuantidade))) {
+              return { ...item, quantidade: 0 };
+            }
+
+            const quantidadeNum = Number(novaQuantidade);
+
+            if (produto && quantidadeNum > produto.quantidade) {
+              Swal.fire("Aviso", "Quantidade em estoque insuficiente", "warning");
+              return item;
+            }
+
+            if (quantidadeNum < 0) {
+              return { ...item, quantidade: 0 };
+            }
+
+            return { ...item, quantidade: quantidadeNum };
+          }
+          return item;
+        })
+        .filter(item => item.quantidade >= 0);
+    });
+  };
   const removerDoCarrinho = (produtoId: string) => {
     setCarrinho(carrinho.filter(item => item.produto.id !== produtoId));
   };
 
-  const atualizarQuantidade = (produtoId: string, novaQuantidade: number) => {
-    const produto = produtos.find(p => p.id === produtoId);
-
-    if (produto && novaQuantidade > 0 && novaQuantidade <= produto.quantidade) {
-      setCarrinho(carrinho.map(item =>
-        item.produto.id === produtoId
-          ? { ...item, quantidade: novaQuantidade }
-          : item
-      ));
-    } else if (novaQuantidade < 1) {
-      removerDoCarrinho(produtoId);
-    }
-  };
 
   const finalizarVenda = async () => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -414,11 +427,30 @@ export default function Vendas() {
 
                         <div className="flex items-center gap-2">
                           <input
-                            type="number"
-                            min="1"
+                            type="text"
+                            min="0"
                             max={item.produto.quantidade}
                             value={item.quantidade}
-                            onChange={(e) => atualizarQuantidade(item.produto.id, parseInt(e.target.value) || 1)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === "") {
+                                atualizarQuantidade(item.produto.id, 0);
+                              }
+                              else if (/^\d+$/.test(value)) {
+                                const numValue = parseInt(value, 10);
+                                if (item.quantidade === 0) {
+                                  atualizarQuantidade(item.produto.id, numValue);
+                                }
+                                else {
+                                  atualizarQuantidade(item.produto.id, numValue);
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value === "" || !/^\d+$/.test(e.target.value)) {
+                                atualizarQuantidade(item.produto.id, 0);
+                              }
+                            }}
                             className="w-16 p-1 rounded text-center"
                             style={{
                               backgroundColor: "transparent",

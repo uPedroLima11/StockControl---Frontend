@@ -16,5 +16,6 @@
     "remover": "Remove",
     "totalVendas": "Total Sales",
     "vendaSucesso": "Sale completed successfully",
-    "erroFinalizarVenda": "Error completing sale"
+    "erroFinalizarVenda": "Error completing sale",
+    "processando": "Processing..."
 }

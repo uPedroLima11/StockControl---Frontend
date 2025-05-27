@@ -7,7 +7,8 @@
     "email": "Email",
     "mensagem": "Mensagem",
     "enviar_mensagem": "Enviar mensagem",
-    "mensagemEnviada": "Mensagem enviada com sucesso"
+    "mensagemEnviada": "Mensagem enviada com sucesso",
+    "processando": "Processando..."
 }
   
   

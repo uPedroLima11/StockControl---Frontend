@@ -14,37 +14,43 @@ export default function Esqueci() {
   const { register, handleSubmit } = useForm<Inputs>();
   const { t } = useTranslation("esqueci");
   const [enviado, setEnviado] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   async function enviaRecuperacao(data: Inputs) {
-    const token = Math.floor(100000 + Math.random() * 900000);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        recuperacao: token.toString(),
-      }),
-    });
-
-    await fetch(`${process.env.NEXT_PUBLIC_URL_ESQUECI}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: data.email,
-        codigo: token.toString(),
-      }),
-    });
-
-    if (!response.ok) {
-      Swal.fire({
-        title: "Erro",
-        text: "Usuário não encontrado ou email inválido.",
-        icon: "error",
-        confirmButtonText: "OK",
+    setCarregando(true);
+    try {
+      const token = Math.floor(100000 + Math.random() * 900000);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recuperacao: token.toString(),
+        }),
       });
+
+      await fetch(`${process.env.NEXT_PUBLIC_URL_ESQUECI}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          codigo: token.toString(),
+        }),
+      });
+
+      if (!response.ok) {
+        Swal.fire({
+          title: "Erro",
+          text: "Usuário não encontrado ou email inválido.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+      setEnviado(true);
+    } finally {
+      setCarregando(false);
     }
-    setEnviado(true);
   }
   return (
     <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] w-screen h-screen">
@@ -64,10 +70,12 @@ export default function Esqueci() {
           </div>
           <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
         </div>
-        <button type="submit" className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
+        <button type="submit" disabled={carregando} className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
           Enviar Email
         </button>
-        {enviado && <p className="text-green-500 text-base">{t("mensagemEnviada")}</p>}
+        {carregando ? t("processando") : null}
+
+        {enviado && <p className="text-green-500 mt-4 text-base">{t("mensagemEnviada")}</p>}
       </form>
     </div>
   );

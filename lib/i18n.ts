@@ -28,6 +28,8 @@ import suporteEn from '../public/locales/en/suporte.json';
 import suportePt from '../public/locales/pt/suporte.json';
 import logsPt from '../public/locales/pt/logs.json';
 import logsEn from '../public/locales/en/logs.json';
+import esqueciEn from '../public/locales/en/esqueci.json';
+import esqueciPt from '../public/locales/pt/esqueci.json';
 
 
 
@@ -38,7 +40,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -55,6 +57,7 @@ if (!i18n.isInitialized) {
           fornecedores: fornecedoresEn,
           suporte: suporteEn,
           logs: logsEn,
+          esqueci: esqueciEn,
         },
         pt: {
           settings: settingsPt,
@@ -70,6 +73,7 @@ if (!i18n.isInitialized) {
           fornecedores: fornecedoresPt,
           suporte: suportePt,
           logs: logsPt,
+          esqueci: esqueciPt,
         },
       },
       detection: {

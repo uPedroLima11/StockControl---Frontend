@@ -72,13 +72,13 @@ export default function Sidebar() {
           setPossuiEmpresa(false);
         }
 
-        await verificarNotificacoes(usuarioId);
+        await verificarNotificacoes(usuarioId, true);
       } catch (erro) {
         console.error("Erro ao carregar dados:", erro);
       }
     }
 
-    async function verificarNotificacoes(idUsuario: string) {
+    async function verificarNotificacoes(idUsuario: string, tocarSomImediato = false) {
       try {
         const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
         const notificacoes = await resposta.json();
@@ -96,7 +96,9 @@ export default function Sidebar() {
           const somAtivado = localStorage.getItem("somNotificacao") !== "false";
           if (somAtivado && audioRef.current) {
             try {
-              await audioRef.current.play();
+              if (tocarSomImediato || true) {
+                await audioRef.current.play();
+              }
             } catch (erro) {
               console.error("Erro ao reproduzir som:", erro);
             }

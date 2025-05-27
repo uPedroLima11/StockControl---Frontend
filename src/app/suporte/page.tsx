@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 export default function Suporte() {
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("suporte");
-
+  const [carregando, setCarregando] = useState(false);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -38,17 +38,22 @@ export default function Suporte() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCarregando(true);
 
-    await fetch(process.env.NEXT_PUBLIC_URL_SUPORTE as string, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, email, mensagem }),
-    });
+    try {
+      await fetch(process.env.NEXT_PUBLIC_URL_SUPORTE as string, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email, mensagem }),
+      });
 
-    setEnviado(true);
-    setNome("");
-    setEmail("");
-    setMensagem("");
+      setEnviado(true);
+      setNome("");
+      setEmail("");
+      setMensagem("");
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -110,13 +115,14 @@ export default function Suporte() {
 
           <button
             type="submit"
+            disabled={carregando}
             className="w-full cursor-pointer py-3 rounded-lg font-medium text-base transition"
             style={{
               backgroundColor: modoDark ? "#4B5563" : "#2563EB",
               color: modoDark ? "#fffff2" : "#ffffff",
             }}
-          >
-            {t("enviar_mensagem")}
+          >  {carregando ? t("processando") : t("enviar_mensagem")}
+
           </button>
 
           {enviado && (

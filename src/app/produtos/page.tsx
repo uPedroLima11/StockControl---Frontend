@@ -535,6 +535,7 @@ export default function Produtos() {
               <input
                 placeholder={t("preco")}
                 type="number"
+                min={0}
                 value={form.preco || ""}
                 onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
                 className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
@@ -545,6 +546,7 @@ export default function Produtos() {
               <input
                 placeholder={t("quantidade")}
                 type="number"
+                min={0}
                 value={form.quantidade || ""}
                 onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
                 className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
@@ -555,6 +557,7 @@ export default function Produtos() {
               <input
                 placeholder={t("quantidadeMinima")}
                 type="number"
+                min={0}
                 value={form.quantidadeMin || ""}
                 onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
                 className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
@@ -637,7 +640,7 @@ export default function Produtos() {
                     setFile(null);
                     setPreview(null);
                   }}
-                  className="hover:underline"
+                  className="cursor-pointer hover:underline"
                   style={{ color: "var(--cor-fonte)" }}
                 >
                   {t("fechar")}
@@ -647,7 +650,7 @@ export default function Produtos() {
                     <>
                       <button
                         onClick={handleUpdate}
-                        className="px-4 py-2 rounded hover:bg-blue-700"
+                        className="px-4 cursor-pointer py-2 rounded hover:bg-blue-700"
                         style={{
                           backgroundColor: "#1a25359f",
                           color: "var(--cor-fonte)",
@@ -658,7 +661,7 @@ export default function Produtos() {
                       </button>
                       <button
                         onClick={handleDelete}
-                        className="px-4 py-2 rounded hover:bg-red-700"
+                        className="cursor-pointer px-4 py-2 rounded hover:bg-red-700"
                         style={{
                           backgroundColor: "#1a25359f",
                           color: "var(--cor-fonte)",
@@ -672,7 +675,7 @@ export default function Produtos() {
                 ) : (
                   <button
                     onClick={handleSubmit}
-                    className="px-4 py-2 rounded hover:bg-[#00443f]"
+                    className="cursor-pointer px-4 py-2 rounded hover:bg-[#00443f]"
                     style={{
                       backgroundColor: "#1a25359f",
                       color: "var(--cor-fonte)",
