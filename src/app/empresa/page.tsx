@@ -526,7 +526,7 @@ export default function Empresa() {
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="px-4 py-2 rounded"
+                className="px-4 py-2 rounded cursor-pointer"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000",
@@ -536,7 +536,7 @@ export default function Empresa() {
               </button>
               <button
                 onClick={editarDadosEmpresa}
-                className="px-4 py-2 text-white rounded"
+                className="px-4 py-2 text-white rounded cursor-pointer"
                 style={{
                   backgroundColor: "#10b981",
                 }}

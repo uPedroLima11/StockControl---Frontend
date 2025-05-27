@@ -210,7 +210,7 @@ export default function CriarEmpresa() {
 
         <button
           type="submit"
-          className="w-full cursor-pointer text-white font-bold py-2 px-4 rounded transition"
+          className="w-full cursor-pointer text-white font-bold py-2 px-4 rounded transition "
           style={{
             backgroundColor: "var(--cor-botao)",
             color: "#FFFFFF",

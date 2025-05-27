@@ -41,8 +41,8 @@ export default function Esqueci() {
 
       if (!response.ok) {
         Swal.fire({
-          title: "Erro",
-          text: "Usuário não encontrado ou email inválido.",
+          title: t("erroTitulo"),
+          text: t("erroTexto"),
           icon: "error",
           confirmButtonText: "OK",
         });
@@ -62,18 +62,18 @@ export default function Esqueci() {
       </div>
       <form onSubmit={handleSubmit(enviaRecuperacao)} className="md:w-2/6">
         <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
-          Email registrado:
+          {t("emailRegistrado")}
         </label>
         <div className="relative mb-6">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
             <HiEnvelope className="text-gray-400" />
           </div>
-          <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Digite seu email aqui" required />
+          <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder={t("digiteEmail")} required />
         </div>
         <button type="submit" disabled={carregando} className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
-          Enviar Email
+          {t("enviarEmail")}
         </button>
-        {carregando ? t("processando") : null}
+        {carregando ? <span className="text-green-500">{t("processando")}</span> : null}
 
         {enviado && <p className="text-green-500 mt-4 text-base">{t("mensagemEnviada")}</p>}
       </form>

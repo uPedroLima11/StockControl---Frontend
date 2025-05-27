@@ -1,3 +1,9 @@
 {
-    "mensagemEnviada": "O código has been sent to your email address"
+    "processando": "Processing...",
+    "mensagemEnviada": "Recovery email sent successfully! Please check your inbox.",
+    "emailRegistrado": "Registered email:",
+    "digiteEmail": "Enter your email here",
+    "enviarEmail": "Send Email",
+    "erroTitulo": "Error",
+    "erroTexto": "User not found or invalid email."
 }

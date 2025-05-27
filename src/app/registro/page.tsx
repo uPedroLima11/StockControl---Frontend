@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
@@ -201,13 +202,13 @@ export default function Registro() {
 
         <button
           type="submit"
-          className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg w-full px-5 py-2.5 text-center text-base md:text-lg"
+          className="text-white cursor-pointer bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg w-full px-5 py-2.5 text-center text-base md:text-lg"
         >
           Registrar-se
         </button>
 
         <div className="flex justify-between pt-5">
-          <Link href="/login" className="text-white font-italic hover:text-[#b37400] text-sm md:text-base">
+          <Link href="/login" className="text-white font-italic hover:text-[#b37400] text-sm md:text-base cursor-pointer">
             já possuo login
           </Link>
         </div>

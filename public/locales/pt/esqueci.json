@@ -1,4 +1,9 @@
 {
-
-    "mensagemEnviada":"O código foi enviado para o seu endereço de e-mail"
+    "processando": "Processando...",
+    "mensagemEnviada": "Email de recuperação enviado com sucesso! Verifique sua caixa de entrada.",
+    "emailRegistrado": "Email registrado:",
+    "digiteEmail": "Digite seu email aqui",
+    "enviarEmail": "Enviar Email",
+    "erroTitulo": "Erro",
+    "erroTexto": "Usuário não encontrado ou email inválido."
 }

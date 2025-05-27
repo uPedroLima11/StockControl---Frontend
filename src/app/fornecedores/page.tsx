@@ -527,7 +527,7 @@ export default function Fornecedores() {
                   setModalAberto(false);
                   setModalVisualizar(null);
                 }}
-                className="hover:underline"
+                className="hover:underline cursor-pointer"
                 style={{ color: "var(--cor-fonte)" }}
               >
                 {t("fechar")}
@@ -537,7 +537,7 @@ export default function Fornecedores() {
                   <>
                     <button
                       onClick={handleSalvarFornecedor}
-                      className="px-4 py-2 rounded hover:bg-blue-700"
+                      className="px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
                       style={{
                         backgroundColor: "#1a25359f",
                         color: "var(--cor-fonte)",
@@ -548,7 +548,7 @@ export default function Fornecedores() {
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="px-4 py-2 rounded hover:bg-red-700"
+                      className="px-4 py-2 rounded hover:bg-red-700 cursor-pointer"
                       style={{
                         backgroundColor: "#1a25359f",
                         color: "var(--cor-fonte)",
@@ -562,7 +562,7 @@ export default function Fornecedores() {
               ) : (
                 <button 
                   onClick={handleAdicionarFornecedor} 
-                  className="px-4 py-2 rounded hover:bg-[#00443f]" 
+                  className="px-4 py-2 rounded hover:bg-[#00443f] cursor-pointer" 
                   style={{ 
                     backgroundColor: "#1a25359f", 
                     color: "var(--cor-fonte)", 

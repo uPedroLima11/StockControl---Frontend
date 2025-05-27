@@ -30,8 +30,8 @@ import logsPt from '../public/locales/pt/logs.json';
 import logsEn from '../public/locales/en/logs.json';
 import esqueciEn from '../public/locales/en/esqueci.json';
 import esqueciPt from '../public/locales/pt/esqueci.json';
-
-
+import alteracaoPt from '../public/locales/pt/alteracao.json';
+import alteracaoEn from '../public/locales/en/alteracao.json';
 
 if (!i18n.isInitialized) {
   i18n
@@ -40,7 +40,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -58,6 +58,7 @@ if (!i18n.isInitialized) {
           suporte: suporteEn,
           logs: logsEn,
           esqueci: esqueciEn,
+          alteracao: alteracaoEn,
         },
         pt: {
           settings: settingsPt,
@@ -74,6 +75,7 @@ if (!i18n.isInitialized) {
           suporte: suportePt,
           logs: logsPt,
           esqueci: esqueciPt,
+          alteracao: alteracaoPt,
         },
       },
       detection: {
