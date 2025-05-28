@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
-import { FaCartShopping, FaClipboardUser } from "react-icons/fa6";
+import { FaCartShopping, FaClipboardUser, FaUsers} from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
@@ -151,7 +151,7 @@ export default function Sidebar() {
             <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
           </Link>
 
-          <nav className="flex flex-col items-start px-4 py-6 gap-4 text-white text-sm">
+          <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
             <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
               <span className="text-lg relative">
                 <FaBell />
@@ -169,6 +169,7 @@ export default function Sidebar() {
             <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
             <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
             <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} />
+            <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} />
             <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} />
             <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} />
             <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />

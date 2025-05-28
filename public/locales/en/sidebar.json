@@ -27,5 +27,6 @@
   "mostrarLidas": "Read",
   "semNotificacoesLidas": "You have no read notifications",
   "NenhumaNotificacao": "You have no unread notifications",
-  "empresa_nao_pode_ser_deletada": "Messages from \"{{nomeEmpresa}}\" cannot be deleted"
+  "empresa_nao_pode_ser_deletada": "Messages from \"{{nomeEmpresa}}\" cannot be deleted",
+  "clients": "Clients"
 }

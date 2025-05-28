@@ -26,5 +26,6 @@
   "mostrarLidas": "Lidas",
   "semNotificacoesLidas": "Você não possui notificações lidas",
   "NenhumaNotificacao": "Você não possui nenhuma Notificação não lida",
-  "empresa_nao_pode_ser_deletada": "As mensagens da \"{{nomeEmpresa}}\" não podem ser deletadas"
+  "empresa_nao_pode_ser_deletada": "As mensagens da \"{{nomeEmpresa}}\" não podem ser deletadas",
+  "clients": "Clientes"
 }
