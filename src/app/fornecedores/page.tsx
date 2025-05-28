@@ -279,7 +279,7 @@ export default function Fornecedores() {
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
   
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
@@ -301,7 +301,7 @@ export default function Fornecedores() {
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <div
-            className="flex items-center border rounded-full px-4 py-2 shadow-sm"
+            className="flex items-center border rounded-full px-4 py-2 shadow-sm w-full sm:w-auto"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               borderColor: modoDark ? "#FFFFFF" : "#000000",
@@ -310,7 +310,7 @@ export default function Fornecedores() {
             <input 
               type="text" 
               placeholder={t("buscar")} 
-              className="outline-none font-mono text-sm bg-transparent" 
+              className="outline-none font-mono text-sm bg-transparent w-full" 
               value={busca} 
               onChange={(e) => setBusca(e.target.value)} 
               style={{ color: "var(--cor-fonte)" }} 
@@ -321,7 +321,7 @@ export default function Fornecedores() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
+              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm w-full sm:w-auto"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
                 borderColor: modoDark ? "#FFFFFF" : "#00332C",
@@ -340,11 +340,11 @@ export default function Fornecedores() {
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          <table className="w-full text-sm font-mono">
+          <table className="w-full text-sm font-mono min-w-[700px]">
             <thead className="border-b">
               <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="flex items-center justify-center py-3 px-4">
-                  <div className="flex items-center gap-1">
+                <th className="py-3 px-4 text-center">
+                  <div className="flex items-center gap-1 justify-center">
                     <FaCog /> {t("foto")}
                   </div>
                 </th>
@@ -366,19 +366,19 @@ export default function Fornecedores() {
                     fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
                 )
                 .map((fornecedor) => (
-                  <tr key={fornecedor.id} className="cursor-pointer border-b">
+                  <tr key={fornecedor.id} className="cursor-pointer border-b hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                   <td
                     onClick={() => {
                     setModalVisualizar(fornecedor);
                     setForm(fornecedor);
                     }}
-                    className="py-3 px-4 text-center flex items-center justify-center"
+                    className="py-3 px-4 text-center"
                   >
                     {fornecedor.foto ? (
                     <img
                       src={fornecedor.foto || "/contadefault.png"}
                       alt={fornecedor.nome}
-                      className="text-center w-10 h-10 rounded-full"
+                      className="mx-auto w-10 h-10 rounded-full object-cover"
                     />
                     ) : (
                     <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
@@ -455,7 +455,7 @@ export default function Fornecedores() {
       {(modalAberto || modalVisualizar) && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg shadow-xl w-full max-w-lg"
+            className="p-6 rounded-lg shadow-xl w-full max-w-lg bg-opacity-90"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               color: "var(--cor-fonte)",
@@ -463,6 +463,7 @@ export default function Fornecedores() {
           >
             <h2 className="text-xl font-bold mb-4">{modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}</h2>
 
+            <label className="block mb-1 text-sm">{t("nome")}</label>
             <input 
               placeholder={t("nome")} 
               value={form.nome || ""} 
@@ -472,6 +473,7 @@ export default function Fornecedores() {
               style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
             />
 
+            <label className="block mb-1 text-sm">{t("email")}</label>
             <input 
               placeholder={t("email")} 
               value={form.email || ""} 
@@ -481,6 +483,7 @@ export default function Fornecedores() {
               style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
             />
 
+            <label className="block mb-1 text-sm">{t("cnpj")}</label>
             <input 
               placeholder={t("cnpj")} 
               value={form.cnpj || ""} 
@@ -490,6 +493,7 @@ export default function Fornecedores() {
               style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
             />
 
+            <label className="block mb-1 text-sm">{t("telefone")}</label>
             <input 
               placeholder={t("telefone")} 
               value={form.telefone || ""} 
@@ -499,6 +503,7 @@ export default function Fornecedores() {
               style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
             />
 
+            <label className="block mb-1 text-sm">{t("categoria")}</label>
             <input 
               placeholder={t("categoria")} 
               value={form.categoria || ""} 
@@ -509,23 +514,34 @@ export default function Fornecedores() {
             />
 
             <div className="mb-3">
-              <label className="block mb-1">{t("foto")}</label>
-              {fotoPreview || form.foto ? <img src={fotoPreview || form.foto || ""} alt="Preview" className="w-20 h-20 object-cover rounded-full mb-2" /> : null}
-              <input 
-                type="file" 
-                onChange={handleFileChange} 
-                accept="image/*" 
-                disabled={Boolean(!podeEditar && modalVisualizar)} 
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
-              />
+              <label className="block mb-1 text-sm">{t("foto")}</label>
+              {(fotoPreview || form.foto) && (
+                <img
+                  src={fotoPreview || form.foto || ""}
+                  alt="Preview"
+                  className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-full mb-2"
+                  onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
+                />
+              )}
+              {podeEditar && (
+                <input 
+                  type="file" 
+                  onChange={handleFileChange} 
+                  accept="image/*" 
+                  disabled={Boolean(!podeEditar && modalVisualizar)} 
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
+                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+                />
+              )}
             </div>
 
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-4 flex-wrap gap-2">
               <button
                 onClick={() => {
                   setModalAberto(false);
                   setModalVisualizar(null);
+                  setFotoFile(null);
+                  setFotoPreview(null);
                 }}
                 className="hover:underline cursor-pointer"
                 style={{ color: "var(--cor-fonte)" }}

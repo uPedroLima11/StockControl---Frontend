@@ -120,6 +120,7 @@ export default function Suporte() {
             style={{
               backgroundColor: modoDark ? "#4B5563" : "#2563EB",
               color: modoDark ? "#fffff2" : "#ffffff",
+              opacity: carregando ? 0.7 : 1,
             }}
           >  {carregando ? t("processando") : t("enviar_mensagem")}
 

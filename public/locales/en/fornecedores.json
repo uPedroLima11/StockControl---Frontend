@@ -4,7 +4,7 @@
       "novoFornecedor": "Add Supplier",
       "foto": "Photo",
       "nome": "Name",
-      "cnpj": "Tax ID",
+      "cnpj": "CNPJ",
       "email": "Email",
       "telefone": "Phone",
       "categoria": "Category",

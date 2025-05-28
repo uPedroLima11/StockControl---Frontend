@@ -55,9 +55,9 @@ export default function Produtos() {
         throw new Error("Erro ao buscar dados da empresa");
       }
       const empresaData = await response.json();
-      
+
       const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
-      
+
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
@@ -65,7 +65,7 @@ export default function Produtos() {
       return false;
     }
   };
-  
+
 
   const mostrarAlertaNaoAtivada = () => {
     Swal.fire({
@@ -242,13 +242,13 @@ export default function Produtos() {
           setFile(null);
           setPreview(null);
 
-            Swal.fire({
+          Swal.fire({
             position: "center",
             icon: "success",
             title: t("produtoCriadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-            });
+          });
 
           setTimeout(() => window.location.reload(), 1600);
         } else {
@@ -307,13 +307,13 @@ export default function Produtos() {
           setPreview(null);
 
           setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-            Swal.fire({
+          Swal.fire({
             position: "center",
             icon: "success",
             title: t("produtoAtualizadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-            });
+          });
           setTimeout(() => window.location.reload(), 1600);
         } else {
           const errorText = await response.text();
@@ -362,11 +362,11 @@ export default function Produtos() {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
             method: "DELETE",
           });
-            Swal.fire(
+          Swal.fire(
             t("produtoExcluidoSucesso.titulo"),
             t("produtoExcluidoSucesso.mensagem"),
             "success"
-            );
+          );
           setModalVisualizar(null);
           window.location.reload();
         } catch (err) {
@@ -515,6 +515,7 @@ export default function Produtos() {
                 {modalVisualizar ? t("editarProduto") : t("novoProduto")}
               </h2>
 
+              <label className="block mb-1 text-sm">{t("nome")}</label>
               <input
                 placeholder={t("nome")}
                 value={form.nome || ""}
@@ -524,6 +525,7 @@ export default function Produtos() {
                 style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
+              <label className="block mb-1 text-sm">{t("descricao")}</label>
               <input
                 placeholder={t("descricao")}
                 value={form.descricao || ""}
@@ -533,69 +535,78 @@ export default function Produtos() {
                 style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
               />
 
-              <input
-                placeholder={t("preco")}
-                type="number"
-                min={0}
-                value={form.preco || ""}
-                onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              />
+              <div className="flex gap-3"> <div>
+                <label className="block mb-1 text-sm">{t("preco")}</label>
+                <input
+                  placeholder={t("preco")}
+                  type="number"
+                  min={0}
+                  value={form.preco || ""}
+                  onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                /></div>
 
-              <input
-                placeholder={t("quantidade")}
-                type="number"
-                min={0}
-                value={form.quantidade || ""}
-                onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              />
-
-              <input
-                placeholder={t("quantidadeMinima")}
-                type="number"
-                min={0}
-                value={form.quantidadeMin || ""}
-                onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              />
-
-              {podeEditar && (
-                <div className="mb-3">
-                  <label className="block mb-1 text-sm">{t("foto")}</label>
+                <div>
+                  <label className="block mb-1 text-sm">{t("quantidade")}</label>
                   <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 rounded border text-sm"
-                    style={{
-                      backgroundColor: "#1a25359f",
-                      color: "var(--cor-fonte)",
-                      borderColor: modoDark ? "#FFFFFF" : "#000000",
-                    }}
-                  >
-                    {t("selecionarImagem")}
-                  </button>
-                </div>
-              )}
+                    placeholder={t("quantidade")}
+                    type="number"
+                    min={0}
+                    value={form.quantidade || ""}
+                    onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
+                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                  /> </div>
+              </div>
 
+              <div className="flex gap-3">
+                {podeEditar && (
+                  <div className="mb-3 ">
+                    <label className="block mb-1 text-sm">{t("foto")}</label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className=" px-6 py-3 md:px-16 md:py-[0.65rem] rounded border text-sm"
+                      style={{
+                        backgroundColor: "#1a25359f",
+                        color: "var(--cor-fonte)",
+                        borderColor: modoDark ? "#FFFFFF" : "#000000",
+                      }}
+                    >
+                      {t("selecionarImagem")}
+                    </button>
+                  </div>
+                )}
+                <div><label className="block mb-1 text-sm">{t("quantidadeMinima")}</label>
+                  <input
+                    placeholder={t("quantidadeMinima")}
+                    type="number"
+                    min={0}
+                    value={form.quantidadeMin || ""}
+                    onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                  />
+                </div>
+
+                
+              </div>
               {(preview || form.foto) && (
-                <div className="mb-4">
+                <div className="mb-4 ">
                   <img
                     src={preview || form.foto || ""}
                     alt="Preview"
-                    className="w-44 h-44 object-cover rounded"
+                    className=" w-20 h-20 md:w-44 md:h-44 object-cover rounded"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/out.jpg";
                     }}
@@ -603,35 +614,37 @@ export default function Produtos() {
                 </div>
               )}
 
-              <select
-                value={form.fornecedorId || ""}
-                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              >
-                <option value="">{t("selecionarFornecedor")}</option>
-                {fornecedores.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nome}
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={form.fornecedorId || ""}
+                  onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                >
+                  <option value="">{t("selecionarFornecedor")}</option>
+                  {fornecedores.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.nome}
+                    </option>
+                  ))}
+                </select>
 
-              <select
-                value={form.categoriaId || ""}
-                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-              >
-                <option value="">{t("selecionarCategoria")}</option>
-                {categorias.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={form.categoriaId || ""}
+                  onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                >
+                  <option value="">{t("selecionarCategoria")}</option>
+                  {categorias.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="flex justify-between mt-4">
                 <button
