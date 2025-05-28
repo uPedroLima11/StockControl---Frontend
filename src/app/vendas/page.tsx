@@ -309,7 +309,7 @@ export default function Vendas() {
 
               <div className="flex items-center gap-2">
                 <span className="font-mono" style={{ color: "var(--cor-fonte)" }}>
-                  Total em Vendas: R$ {totalVendas.toFixed(2).replace(".", ",")}
+                  {t("totalVendas")}: R$ {totalVendas.toFixed(2).replace(".", ",")}
                 </span>
               </div>
             </div>

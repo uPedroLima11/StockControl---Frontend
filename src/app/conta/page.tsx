@@ -46,10 +46,10 @@ export default function MinhaConta() {
       root.style.setProperty("--cor-fundo", "#ffffff");
       root.style.setProperty("--cor-texto", "#000000");
       root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      root.style.setProperty("--cor-borda", "#E5E7EB");
+      root.style.setProperty("--cor-borda", "#ffffff");
       root.style.setProperty("--cor-cinza", "#4B5563");
       root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#fffff2";
+      document.body.style.backgroundColor = "#fffff";
       document.body.style.color = "#000000";
     }
   };
@@ -164,7 +164,7 @@ export default function MinhaConta() {
       <div
         className="w-full max-w-md rounded p-6 shadow-md"
         style={{
-          backgroundColor: modoDark ? "#1F2937" : "#fffff2",
+          backgroundColor: modoDark ? "#1F2937" : "#ffffff",
           color: modoDark ? "#fffff2" : "#000000",
           border: modoDark ? "1px solid #374151" : "2px solid #000000",
         }}
@@ -193,7 +193,8 @@ export default function MinhaConta() {
           </Link>
         </div>
 
-        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
+        <div
+          className="border-b mb-4 pb-2">
           <h2 className="text-lg font-semibold">{t("informacoesConta")}</h2>
           <div className="mt-2 space-y-1 text-sm">
             <p>
@@ -218,7 +219,7 @@ export default function MinhaConta() {
               {t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}
             </p>
             <p>
-                {t("empresa.cep")}: {empresa?.cep ? `${empresa.cep.slice(0, 5)}-${empresa.cep.slice(5)}` : t("adicionar")}
+              {t("empresa.cep")}: {empresa?.cep ? `${empresa.cep.slice(0, 5)}-${empresa.cep.slice(5)}` : t("adicionar")}
             </p>
             <p>
               {t("empresa.telefone")}: {empresa?.telefone ? `(${empresa.telefone.slice(0, 2)}) ${empresa.telefone.slice(2)}` : t("adicionar")}

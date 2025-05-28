@@ -28,7 +28,7 @@ export default function Footer() {
                             Termos de Uso
                         </Link>
                         <Link
-                            href="https://wa.me/5599999999999"
+                            href="https://wa.me/5553981185633"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-green-500 hover:underline"

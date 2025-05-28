@@ -41,9 +41,9 @@ export default function Fornecedores() {
         throw new Error("Erro ao buscar dados da empresa");
       }
       const empresaData = await response.json();
-      
+
       const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
-      
+
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
@@ -131,8 +131,8 @@ export default function Fornecedores() {
 
   async function handleAdicionarFornecedor() {
     const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!empresaId) return alert("Empresa não identificada.");
 
@@ -179,8 +179,8 @@ export default function Fornecedores() {
 
   async function handleSalvarFornecedor() {
     const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
@@ -198,7 +198,7 @@ export default function Fornecedores() {
       formData.append("categoria", form.categoria);
       formData.append("empresaId", empresaId || "");
       formData.append("usuarioId", usuarioValor || "");
-      
+
       if (fotoFile) {
         formData.append("foto", fotoFile);
       }
@@ -277,7 +277,7 @@ export default function Fornecedores() {
   }
 
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
-  
+
   return (
     <div className="flex flex-col items-center justify-center px-2 py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
@@ -307,13 +307,13 @@ export default function Fornecedores() {
               borderColor: modoDark ? "#FFFFFF" : "#000000",
             }}
           >
-            <input 
-              type="text" 
-              placeholder={t("buscar")} 
-              className="outline-none font-mono text-sm bg-transparent w-full" 
-              value={busca} 
-              onChange={(e) => setBusca(e.target.value)} 
-              style={{ color: "var(--cor-fonte)" }} 
+            <input
+              type="text"
+              placeholder={t("buscar")}
+              className="outline-none font-mono text-sm bg-transparent w-full"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              style={{ color: "var(--cor-fonte)" }}
             />
             <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
           </div>
@@ -358,94 +358,98 @@ export default function Fornecedores() {
               </tr>
             </thead>
             <tbody>
-                {fornecedores
+              {fornecedores
                 .filter(
                   (fornecedor) =>
-                  fornecedor.empresaId === empresaId &&
-                  (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                    fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
+                    fornecedor.empresaId === empresaId &&
+                    (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                      fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
                 )
                 .map((fornecedor) => (
-                  <tr key={fornecedor.id} className="cursor-pointer border-b hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
+                  <tr
+                    key={fornecedor.id}
+                    className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                      }`}
                   >
-                    {fornecedor.foto ? (
-                    <img
-                      src={fornecedor.foto || "/contadefault.png"}
-                      alt={fornecedor.nome}
-                      className="mx-auto w-10 h-10 rounded-full object-cover"
-                    />
-                    ) : (
-                    <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
-                    )}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {fornecedor.nome}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {fornecedor.cnpj}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {fornecedor.email}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {fornecedor.categoria}
-                  </td>
-                  <td
-                    onClick={() => {
-                    setModalVisualizar(fornecedor);
-                    setForm(fornecedor);
-                    }}
-                    className="py-3 px-4 text-center"
-                  >
-                    {new Date(fornecedor.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <FaPhoneAlt
-                    onClick={() => handleEntrarContato(fornecedor)}
-                    color="#25D366"
-                    size={32}
-                    className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
-                    />
-                  </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {fornecedor.foto ? (
+                        <img
+                          src={fornecedor.foto || "/contadefault.png"}
+                          alt={fornecedor.nome}
+                          className="mx-auto w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
+                      )}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {fornecedor.nome}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {fornecedor.cnpj}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {fornecedor.email}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {fornecedor.categoria}
+                    </td>
+                    <td
+                      onClick={() => {
+                        setModalVisualizar(fornecedor);
+                        setForm(fornecedor);
+                      }}
+                      className="py-3 px-4 text-center"
+                    >
+                      {new Date(fornecedor.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <FaPhoneAlt
+                        onClick={() => handleEntrarContato(fornecedor)}
+                        color="#25D366"
+                        size={32}
+                        className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                      />
+                    </td>
                   </tr>
                 ))}
             </tbody>
@@ -464,53 +468,68 @@ export default function Fornecedores() {
             <h2 className="text-xl font-bold mb-4">{modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}</h2>
 
             <label className="block mb-1 text-sm">{t("nome")}</label>
-            <input 
-              placeholder={t("nome")} 
-              value={form.nome || ""} 
-              onChange={(e) => setForm({ ...form, nome: e.target.value })} 
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-              disabled={Boolean(!podeEditar && modalVisualizar)} 
-              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            <input
+              placeholder={t("nome")}
+              value={form.nome || ""}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              disabled={Boolean(!podeEditar && modalVisualizar)}
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             />
 
             <label className="block mb-1 text-sm">{t("email")}</label>
-            <input 
-              placeholder={t("email")} 
-              value={form.email || ""} 
-              onChange={(e) => setForm({ ...form, email: e.target.value })} 
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-              disabled={Boolean(!podeEditar && modalVisualizar)} 
-              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            <input
+              placeholder={t("email")}
+              value={form.email || ""}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              disabled={Boolean(!podeEditar && modalVisualizar)}
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             />
 
             <label className="block mb-1 text-sm">{t("cnpj")}</label>
-            <input 
-              placeholder={t("cnpj")} 
-              value={form.cnpj || ""} 
-              onChange={(e) => setForm({ ...form, cnpj: e.target.value })} 
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-              disabled={Boolean(!podeEditar && modalVisualizar)} 
-              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            <input
+              placeholder={t("cnpj")}
+              value={form.cnpj || ""}
+              onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              disabled={Boolean(!podeEditar && modalVisualizar)}
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             />
 
             <label className="block mb-1 text-sm">{t("telefone")}</label>
-            <input 
-              placeholder={t("telefone")} 
-              value={form.telefone || ""} 
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })} 
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-              disabled={Boolean(!podeEditar && modalVisualizar)} 
-              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            <input
+              placeholder={t("telefone")}
+              value={form.telefone || ""}
+              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              disabled={Boolean(!podeEditar && modalVisualizar)}
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             />
 
             <label className="block mb-1 text-sm">{t("categoria")}</label>
-            <input 
-              placeholder={t("categoria")} 
-              value={form.categoria || ""} 
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })} 
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-              disabled={Boolean(!podeEditar && modalVisualizar)} 
-              style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+            <input
+              placeholder={t("categoria")}
+              value={form.categoria || ""}
+              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              disabled={Boolean(!podeEditar && modalVisualizar)}
+              style={{
+                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                color: modoDark ? "#FFFFFF" : "#000000"
+              }}
             />
 
             <div className="mb-3">
@@ -524,13 +543,16 @@ export default function Fornecedores() {
                 />
               )}
               {podeEditar && (
-                <input 
-                  type="file" 
-                  onChange={handleFileChange} 
-                  accept="image/*" 
-                  disabled={Boolean(!podeEditar && modalVisualizar)} 
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`} 
-                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }} 
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
                 />
               )}
             </div>
@@ -555,8 +577,8 @@ export default function Fornecedores() {
                       onClick={handleSalvarFornecedor}
                       className="px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
                       style={{
-                        backgroundColor: "#1a25359f",
-                        color: "var(--cor-fonte)",
+                        backgroundColor: "green",
+                        color: "white",
                         border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
@@ -566,8 +588,8 @@ export default function Fornecedores() {
                       onClick={handleDelete}
                       className="px-4 py-2 rounded hover:bg-red-700 cursor-pointer"
                       style={{
-                        backgroundColor: "#1a25359f",
-                        color: "var(--cor-fonte)",
+                        backgroundColor: "red",
+                        color: "white",
                         border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
                       }}
                     >
@@ -576,13 +598,13 @@ export default function Fornecedores() {
                   </>
                 )
               ) : (
-                <button 
-                  onClick={handleAdicionarFornecedor} 
-                  className="px-4 py-2 rounded hover:bg-[#00443f] cursor-pointer" 
-                  style={{ 
-                    backgroundColor: "#1a25359f", 
-                    color: "var(--cor-fonte)", 
-                    border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}` 
+                <button
+                  onClick={handleAdicionarFornecedor}
+                  className="px-4 py-2 rounded hover:bg-[#00443f] cursor-pointer"
+                  style={{
+                    backgroundColor: "green",
+                    color: "white",
+                    border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
                   }}
                 >
                   {t("afiliarFornecedor")}

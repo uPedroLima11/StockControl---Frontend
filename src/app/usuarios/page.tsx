@@ -309,10 +309,10 @@ export default function Usuarios() {
         {usuarioLogado?.empresaId && (
           <div className="flex space-x-4">
             <button
-              className="px-4 py-2 rounded-sm font-bold text-sm transition"
+              className="px-4 py-2 rounded-sm  font-bold text-sm transition"
               style={{
-                backgroundColor: modoDark ? "#00332C" : "#55D6BE",
-                color: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: "#00332C",
+                color: "#FFFFFF",
                 border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
               }}
               onClick={() => setShowModalConvite(true)}

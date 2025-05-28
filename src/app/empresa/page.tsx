@@ -290,7 +290,7 @@ export default function Empresa() {
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="min-h-screen flex justify-center items-start pt-10">
       <div
         className="w-full max-w-md rounded p-6 shadow-md"
         style={{

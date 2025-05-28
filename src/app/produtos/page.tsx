@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { ProdutoI } from "@/utils/types/produtos";
@@ -522,7 +522,10 @@ export default function Produtos() {
                 onChange={(e) => setForm({ ...form, nome: e.target.value })}
                 className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
               />
 
               <label className="block mb-1 text-sm">{t("descricao")}</label>
@@ -532,23 +535,30 @@ export default function Produtos() {
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
                 className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
               />
 
-              <div className="flex gap-3"> <div>
-                <label className="block mb-1 text-sm">{t("preco")}</label>
-                <input
-                  placeholder={t("preco")}
-                  type="number"
-                  min={0}
-                  value={form.preco || ""}
-                  onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-                /></div>
-
-                <div>
+              <div className="flex gap-2 w-full">
+                <div className="flex-1">
+                  <label className="block mb-1 text-sm">{t("preco")}</label>
+                  <input
+                    placeholder={t("preco")}
+                    type="number"
+                    min={0}
+                    value={form.preco || ""}
+                    onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
+                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    style={{
+                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                      color: modoDark ? "#FFFFFF" : "#000000"
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
                   <label className="block mb-1 text-sm">{t("quantidade")}</label>
                   <input
                     placeholder={t("quantidade")}
@@ -556,15 +566,19 @@ export default function Produtos() {
                     min={0}
                     value={form.quantidade || ""}
                     onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
-                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                    className={`${inputClass} bg-transparent border  ${modoDark ? "border-white" : "border-gray-300"}`}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
-                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
-                  /> </div>
+                    style={{
+                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                      color: modoDark ? "#FFFFFF" : "#000000"
+                    }}
+                  />
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2 w-full">
                 {podeEditar && (
-                  <div className="mb-3 ">
+                  <div className="flex-1 flex flex-col justify-end mb-3">
                     <label className="block mb-1 text-sm">{t("foto")}</label>
                     <input
                       type="file"
@@ -575,18 +589,18 @@ export default function Produtos() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className=" px-6 py-3 md:px-16 md:py-[0.65rem] rounded border text-sm"
+                      className={`w-full px-6 py-3 md:px-18 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
                       style={{
-                        backgroundColor: "#1a25359f",
-                        color: "var(--cor-fonte)",
-                        borderColor: modoDark ? "#FFFFFF" : "#000000",
+                        backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                        color: modoDark ? "#FFFFFF" : "#000000",
                       }}
                     >
                       {t("selecionarImagem")}
                     </button>
                   </div>
                 )}
-                <div><label className="block mb-1 text-sm">{t("quantidadeMinima")}</label>
+                <div className="flex-1">
+                  <label className="block mb-1 text-sm">{t("quantidadeMinima")}</label>
                   <input
                     placeholder={t("quantidadeMinima")}
                     type="number"
@@ -595,11 +609,12 @@ export default function Produtos() {
                     onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
                     className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
-                    style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                    style={{
+                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                      color: modoDark ? "#FFFFFF" : "#000000"
+                    }}
                   />
                 </div>
-
-                
               </div>
               {(preview || form.foto) && (
                 <div className="mb-4 ">
@@ -614,13 +629,16 @@ export default function Produtos() {
                 </div>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-3">
                 <select
                   value={form.fornecedorId || ""}
                   onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  className={`${inputClass} bg-transparent px-6 py-3 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
-                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
                 >
                   <option value="">{t("selecionarFornecedor")}</option>
                   {fornecedores.map((f) => (
@@ -629,13 +647,15 @@ export default function Produtos() {
                     </option>
                   ))}
                 </select>
-
                 <select
                   value={form.categoriaId || ""}
                   onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  className={`${inputClass} bg-transparent px-6 py-3 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
-                  style={{ backgroundColor: "#1a25359f", color: "var(--cor-fonte)" }}
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
                 >
                   <option value="">{t("selecionarCategoria")}</option>
                   {categorias.map((c) => (
@@ -645,7 +665,6 @@ export default function Produtos() {
                   ))}
                 </select>
               </div>
-
               <div className="flex justify-between mt-4">
                 <button
                   onClick={() => {
@@ -666,9 +685,8 @@ export default function Produtos() {
                         onClick={handleUpdate}
                         className="px-4 cursor-pointer py-2 rounded hover:bg-blue-700"
                         style={{
-                          backgroundColor: "#1a25359f",
-                          color: "var(--cor-fonte)",
-                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                          backgroundColor: "green",
+                          color: "white",
                         }}
                       >
                         {t("salvar")}
@@ -677,9 +695,9 @@ export default function Produtos() {
                         onClick={handleDelete}
                         className="cursor-pointer px-4 py-2 rounded hover:bg-red-700"
                         style={{
-                          backgroundColor: "#1a25359f",
-                          color: "var(--cor-fonte)",
-                          border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                          backgroundColor: "red",
+                          color: "white",
+
                         }}
                       >
                         {t("excluir")}
@@ -691,9 +709,8 @@ export default function Produtos() {
                     onClick={handleSubmit}
                     className="cursor-pointer px-4 py-2 rounded hover:bg-[#00443f]"
                     style={{
-                      backgroundColor: "#1a25359f",
-                      color: "var(--cor-fonte)",
-                      border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                      backgroundColor: "green",
+                      color: "white",
                     }}
                   >
                     {t("criar")}
