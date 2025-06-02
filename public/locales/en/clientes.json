@@ -21,7 +21,7 @@
     "titulo": "Company not activated",
     "mensagem": "To access all features, activate your company.",
     "botao": "Activate Company",
-    "alertaTitulo": "Limited functionality",
+    "alertaTitulo": "Company not activated!",
     "alertaMensagem": "Some actions are disabled until your company is activated."
   },
   "sucesso": {

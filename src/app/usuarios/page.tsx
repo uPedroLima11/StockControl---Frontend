@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, } from "react-icons/fa";
+import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
@@ -24,6 +24,8 @@ export default function Usuarios() {
   const [modoDark, setModoDark] = useState(false);
   const [busca, setBusca] = useState("");
   const [usuarioExpandido, setUsuarioExpandido] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const usuariosPorPagina = 10;
   const { t } = useTranslation("usuarios");
 
   const translateRole = (role: string) => {
@@ -82,7 +84,9 @@ export default function Usuarios() {
         if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
-        const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
+        const usuariosDaEmpresa = todosUsuarios
+          .filter((usuario) => usuario.empresaId === empresaIdRecebido)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         setUsuarios(usuariosDaEmpresa);
       } catch (err: unknown) {
@@ -104,6 +108,21 @@ export default function Usuarios() {
       fetchDados(usuarioValor);
     }
   }, []);
+
+  const usuariosFiltrados = usuarios.filter((usuario) =>
+    usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    usuario.email.toLowerCase().includes(busca.toLowerCase())
+  );
+
+  const indexUltimoUsuario = paginaAtual * usuariosPorPagina;
+  const indexPrimeiroUsuario = indexUltimoUsuario - usuariosPorPagina;
+  const usuariosAtuais = usuariosFiltrados.slice(indexPrimeiroUsuario, indexUltimoUsuario);
+  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setUsuarioExpandido(null);
+  };
 
   async function enviarNotificacao() {
     setIsEnviando(true);
@@ -318,53 +337,83 @@ export default function Usuarios() {
         </h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div
-            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
-            }}
-          >
-            <input
-              type="text"
-              placeholder={t("buscarUsuario")}
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
-            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                borderColor: modoDark ? "#FFFFFF" : "#000000",
+              }}
+            >
+              <input
+                type="text"
+                placeholder={t("buscarUsuario")}
+                className="outline-none font-mono text-sm bg-transparent"
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
+                style={{ color: "var(--cor-fonte)" }}
+              />
+              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+            </div>
+            {totalPaginas > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
 
           {usuarioLogado?.empresaId && (
             <div className="flex gap-2 w-full sm:w-auto sm:flex-row items-center sm:items-stretch justify-center sm:justify-start">
               <button
-              className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm "
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                color: modoDark ? "#FFFFFF" : "#00332C",
-                border: "1px solid"
-              }}
-              onClick={() => setShowModalConvite(true)}
+                className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                  borderColor: modoDark ? "#FFFFFF" : "#00332C",
+                  color: modoDark ? "#FFFFFF" : "#00332C",
+                  border: "1px solid"
+                }}
+                onClick={() => setShowModalConvite(true)}
               >
-              <div className="flex items-center justify-center gap-1">
-                <FaUserPlus /> {t("convidarUsuario")}
-              </div>
+                <div className="flex items-center justify-center gap-1">
+                  <FaUserPlus /> {t("convidarUsuario")}
+                </div>
               </button>
               <button
-              className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                color: modoDark ? "#FFFFFF" : "#00332C",
-                border: "1px solid"
-              }}
-              onClick={() => setShowModalMensagem(true)}
+                className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                  borderColor: modoDark ? "#FFFFFF" : "#00332C",
+                  color: modoDark ? "#FFFFFF" : "#00332C",
+                  border: "1px solid"
+                }}
+                onClick={() => setShowModalMensagem(true)}
               >
-              <div className="flex items-center justify-center gap-1">
-                <FaEnvelope /> {t("enviarMensagem")}
-              </div>
+                <div className="flex items-center justify-center gap-1">
+                  <FaEnvelope /> {t("enviarMensagem")}
+                </div>
               </button>
             </div>
           )}
@@ -395,68 +444,13 @@ export default function Usuarios() {
                     </tr>
                   </thead>
                   <tbody>
-                    {usuarios
-                      .filter((usuario) =>
-                        usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                        usuario.email.toLowerCase().includes(busca.toLowerCase())
-                      )
-                      .map((usuario) => (
-                        <tr key={usuario.id} className="border-b">
-                          <td className="py-3 px-4">{usuario.nome}</td>
-                          <td className="py-3 px-4">{translateRole(usuario.tipo)}</td>
-                          <td className="py-3 px-4">{formatarData(usuario.createdAt)}</td>
-                          <td className="py-3 px-4">{formatarData(usuario.updatedAt)}</td>
-                          <td className="py-3 px-4">
-                            {podeEditar(usuario) && (
-                              <FaCog
-                                className="cursor-pointer"
-                                onClick={() => {
-                                  setModalEditarUsuario(usuario);
-                                  setNovoTipo(usuario.tipo);
-                                }}
-                              />
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="md:hidden space-y-2 p-2">
-                {usuarios
-                  .filter((usuario) =>
-                    usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                    usuario.email.toLowerCase().includes(busca.toLowerCase())
-                  )
-                  .map((usuario) => (
-                    <div
-                      key={usuario.id}
-                      className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                        }`}
-                    >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className="flex-shrink-0">
-                              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
-                                <span className="text-lg">
-                                  {usuario.nome.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                                {usuario.nome}
-                              </p>
-                              <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                                {translateRole(usuario.tipo)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
+                    {usuariosAtuais.map((usuario) => (
+                      <tr key={usuario.id} className="border-b">
+                        <td className="py-3 px-4">{usuario.nome}</td>
+                        <td className="py-3 px-4">{translateRole(usuario.tipo)}</td>
+                        <td className="py-3 px-4">{formatarData(usuario.createdAt)}</td>
+                        <td className="py-3 px-4">{formatarData(usuario.updatedAt)}</td>
+                        <td className="py-3 px-4">
                           {podeEditar(usuario) && (
                             <FaCog
                               className="cursor-pointer"
@@ -466,38 +460,83 @@ export default function Usuarios() {
                               }}
                             />
                           )}
-                          <button
-                            onClick={() => toggleExpandirUsuario(usuario.id)}
-                            className="text-gray-500 hover:text-gray-700 p-1"
-                            style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
-                          >
-                            {usuarioExpandido === usuario.id ? <FaChevronUp /> : <FaChevronDown />}
-                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-2 p-2">
+                {usuariosAtuais.map((usuario) => (
+                  <div
+                    key={usuario.id}
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
+                              <span className="text-lg">
+                                {usuario.nome.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                              {usuario.nome}
+                            </p>
+                            <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                              {translateRole(usuario.tipo)}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      <div
-                        className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"
-                          }`}
-                        style={{ color: "var(--cor-fonte)" }}
-                      >
-                        <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("email")}:</span>
-                            <span className="truncate">{usuario.email}</span>
-                          </div>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("criadoEm")}:</span>
-                            <span>{formatarData(usuario.createdAt)}</span>
-                          </div>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("ultimaAtualizacao")}:</span>
-                            <span>{formatarData(usuario.updatedAt)}</span>
-                          </div>
+                      <div className="flex items-center gap-2">
+                        {podeEditar(usuario) && (
+                          <FaCog
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setModalEditarUsuario(usuario);
+                              setNovoTipo(usuario.tipo);
+                            }}
+                          />
+                        )}
+                        <button
+                          onClick={() => toggleExpandirUsuario(usuario.id)}
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        >
+                          {usuarioExpandido === usuario.id ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"
+                        }`}
+                      style={{ color: "var(--cor-fonte)" }}
+                    >
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("email")}:</span>
+                          <span className="truncate">{usuario.email}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("criadoEm")}:</span>
+                          <span>{formatarData(usuario.createdAt)}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("ultimaAtualizacao")}:</span>
+                          <span>{formatarData(usuario.updatedAt)}</span>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </>
           )}

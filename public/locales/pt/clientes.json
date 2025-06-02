@@ -21,7 +21,7 @@
     "titulo": "Empresa não ativada",
     "mensagem": "Para acessar todas as funcionalidades, ative sua empresa.",
     "botao": "Ativar Empresa",
-    "alertaTitulo": "Funcionalidades limitadas",
+    "alertaTitulo": "Empresa não ativada!",
     "alertaMensagem": "Algumas ações estão desabilitadas até que sua empresa seja ativada."
   },
   "sucesso": {

@@ -1,7 +1,7 @@
 "use client";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaCog, FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -32,6 +32,8 @@ export default function Fornecedores() {
   });
   const [busca, setBusca] = useState("");
   const [fornecedorExpandido, setFornecedorExpandido] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const fornecedoresPorPagina = 10;
   const { t } = useTranslation("fornecedores");
   const router = useRouter();
 
@@ -111,7 +113,10 @@ export default function Fornecedores() {
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
       const fornecedoresData = await responseFornecedores.json();
-      setFornecedores(fornecedoresData);
+      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setFornecedores(fornecedoresOrdenados);
     };
 
     initialize();
@@ -188,14 +193,14 @@ export default function Fornecedores() {
           confirmButtonColor: "#013C3C",
         });
       }
-        });
-      }
+    });
+  }
 
-      async function handleSalvarFornecedor() {
-        const usuarioSalvo = localStorage.getItem("client_key");
-        if (!usuarioSalvo) return;
-        const usuarioValor = usuarioSalvo.replace(/"/g, "");
-        handleAcaoProtegida(async () => {
+  async function handleSalvarFornecedor() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
@@ -225,9 +230,9 @@ export default function Fornecedores() {
 
         if (response.ok) {
           Swal.fire({
-        text: t("mensagens.fornecedorAtualizado"),
-        icon: "success",
-        confirmButtonColor: "#013C3C",
+            text: t("mensagens.fornecedorAtualizado"),
+            icon: "success",
+            confirmButtonColor: "#013C3C",
           });
           setModalVisualizar(null);
           window.location.reload();
@@ -243,11 +248,11 @@ export default function Fornecedores() {
           confirmButtonColor: "#013C3C",
         });
       }
-        });
-      }
+    });
+  }
 
-      async function handleDelete() {
-        handleAcaoProtegida(async () => {
+  async function handleDelete() {
+    handleAcaoProtegida(async () => {
       if (!modalVisualizar) return;
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
@@ -270,7 +275,7 @@ export default function Fornecedores() {
       if (result.isConfirmed) {
         try {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-        method: "DELETE",
+            method: "DELETE",
           });
           Swal.fire(t("mensagens.deletado"), t("mensagens.produtoExcluido"), "success");
           setModalVisualizar(null);
@@ -280,8 +285,8 @@ export default function Fornecedores() {
           Swal.fire(t("mensagens.erro"), t("mensagens.erroDeletar"), "error");
         }
       }
-        });
-      }
+    });
+  }
 
   function handleEntrarContato(fornecedor: FornecedorI) {
     const telefoneFormatado = fornecedor.telefone.replace(/\D/g, "");
@@ -295,6 +300,24 @@ export default function Fornecedores() {
   };
 
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
+
+  // Filtra e pagina os fornecedores
+  const fornecedoresFiltrados = fornecedores.filter(
+    (fornecedor) =>
+      fornecedor.empresaId === empresaId &&
+      (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
+  );
+
+  const indexUltimoFornecedor = paginaAtual * fornecedoresPorPagina;
+  const indexPrimeiroFornecedor = indexUltimoFornecedor - fornecedoresPorPagina;
+  const fornecedoresAtuais = fornecedoresFiltrados.slice(indexPrimeiroFornecedor, indexUltimoFornecedor);
+  const totalPaginas = Math.ceil(fornecedoresFiltrados.length / fornecedoresPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setFornecedorExpandido(null);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -318,28 +341,58 @@ export default function Fornecedores() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div
-            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
-            }}
-          >
-            <input
-              type="text"
-              placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
-            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                borderColor: modoDark ? "#FFFFFF" : "#000000",
+              }}
+            >
+              <input
+                type="text"
+                placeholder={t("buscar")}
+                className="outline-none font-mono text-sm bg-transparent"
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
+                style={{ color: "var(--cor-fonte)" }}
+              />
+              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+            </div>
+            {totalPaginas > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
 
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm  sm:w-auto"
+              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm sm:w-auto"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
                 borderColor: modoDark ? "#FFFFFF" : "#00332C",
@@ -358,7 +411,7 @@ export default function Fornecedores() {
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          {fornecedores.filter(fornecedor => fornecedor.empresaId === empresaId).length === 0 ? (
+          {fornecedoresFiltrados.length === 0 ? (
             <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
               {t("nenhumFornecedorEncontrado")}
             </div>
@@ -383,199 +436,183 @@ export default function Fornecedores() {
                     </tr>
                   </thead>
                   <tbody>
-                    {fornecedores
-                      .filter(
-                        (fornecedor) =>
-                          fornecedor.empresaId === empresaId &&
-                          (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                            fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
-                      )
-                      .map((fornecedor) => (
-                        <tr
-                          key={fornecedor.id}
-                          className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                            }`}
+                    {fornecedoresAtuais.map((fornecedor) => (
+                      <tr
+                        key={fornecedor.id}
+                        className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                          }`}
+                      >
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
                         >
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {fornecedor.foto ? (
-                              <img
-                                src={fornecedor.foto || "/contadefault.png"}
-                                alt={fornecedor.nome}
-                                className="mx-auto w-10 h-10 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
-                            )}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {fornecedor.nome}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {fornecedor.cnpj}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {fornecedor.email}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {formatarTelefone(fornecedor.telefone)}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {fornecedor.categoria}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setModalVisualizar(fornecedor);
-                              setForm(fornecedor);
-                            }}
-                            className="py-3 px-4 text-center"
-                          >
-                            {formatarData(fornecedor.createdAt)}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <FaPhoneAlt
-                              onClick={() => handleEntrarContato(fornecedor)}
-                              color="#25D366"
-                              size={20}
-                              className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="md:hidden space-y-2 p-2">
-                {fornecedores
-                  .filter(
-                    (fornecedor) =>
-                      fornecedor.empresaId === empresaId &&
-                      (
-                        fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                        fornecedor.categoria.toLowerCase().includes(busca.toLowerCase())
-                      )
-                  )
-                  .map((fornecedor) => (
-                    <div
-                      key={fornecedor.id}
-                      className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                        }`}
-                    >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex items-center gap-3">
                           {fornecedor.foto ? (
                             <img
                               src={fornecedor.foto || "/contadefault.png"}
                               alt={fornecedor.nome}
-                              className="w-10 h-10 rounded-full object-cover"
+                              className="mx-auto w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
                             <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
                           )}
-                          <div>
-                            <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>{fornecedor.nome}</p>
-                            <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                              {fornecedor.categoria}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {fornecedor.nome}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {fornecedor.cnpj}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {fornecedor.email}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {formatarTelefone(fornecedor.telefone)}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {fornecedor.categoria}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {formatarData(fornecedor.createdAt)}
+                        </td>
+                        <td className="py-3 px-4 text-center">
                           <FaPhoneAlt
                             onClick={() => handleEntrarContato(fornecedor)}
                             color="#25D366"
-                            size={16}
-                            className="cursor-pointer border p-1 rounded-full"
+                            size={20}
+                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
                           />
-                          <button
-                            onClick={() => toggleExpandirFornecedor(fornecedor.id)}
-                            className="text-gray-500 hover:text-gray-700 p-1"
-                            style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
-                          >
-                            {fornecedorExpandido === fornecedor.id ? <FaChevronUp /> : <FaChevronDown />}
-                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="md:hidden space-y-2 p-2">
+                {fornecedoresAtuais.map((fornecedor) => (
+                  <div
+                    key={fornecedor.id}
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-center gap-3">
+                        {fornecedor.foto ? (
+                          <img
+                            src={fornecedor.foto || "/contadefault.png"}
+                            alt={fornecedor.nome}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
+                        )}
+                        <div>
+                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>{fornecedor.nome}</p>
+                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            {fornecedor.categoria}
+                          </p>
                         </div>
                       </div>
 
-                      <div
-                        className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
-                          }`}
-                        style={{ color: "var(--cor-fonte)" }}
-                      >
-                        <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("cnpj")}:</span>
-                            <span>{fornecedor.cnpj}</span>
-                          </div>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("email")}:</span>
-                            <span>{fornecedor.email}</span>
-                          </div>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
-                            <span>{formatarTelefone(fornecedor.telefone)}</span>
-                          </div>
-                          <div className="flex">
-                            <span className="font-semibold min-w-[80px]">{t("adicionadoEm")}:</span>
-                            <span>{formatarData(fornecedor.createdAt)}</span>
-                          </div>
-                          {podeEditar && (
-                            <div className="flex justify-end gap-2 pt-2">
-                              <button
-                                onClick={() => {
-                                  setModalVisualizar(fornecedor);
-                                  setForm(fornecedor);
-                                }}
-                                className="px-3 py-1 text-xs rounded border"
-                                style={{
-                                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                                  borderColor: modoDark ? "#FFFFFF" : "#000000",
-                                  color: modoDark ? "#FFFFFF" : "#000000"
-                                }}
-                              >
-                                {t("editar")}
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <FaPhoneAlt
+                          onClick={() => handleEntrarContato(fornecedor)}
+                          color="#25D366"
+                          size={16}
+                          className="cursor-pointer border p-1 rounded-full"
+                        />
+                        <button
+                          onClick={() => toggleExpandirFornecedor(fornecedor.id)}
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        >
+                          {fornecedorExpandido === fornecedor.id ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
                       </div>
                     </div>
-                  ))}
+
+                    <div
+                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
+                        }`}
+                      style={{ color: "var(--cor-fonte)" }}
+                    >
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("cnpj")}:</span>
+                          <span>{fornecedor.cnpj}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("email")}:</span>
+                          <span>{fornecedor.email}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
+                          <span>{formatarTelefone(fornecedor.telefone)}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("adicionadoEm")}:</span>
+                          <span>{formatarData(fornecedor.createdAt)}</span>
+                        </div>
+                        {podeEditar && (
+                          <div className="flex justify-end gap-2 pt-2">
+                            <button
+                              onClick={() => {
+                                setModalVisualizar(fornecedor);
+                                setForm(fornecedor);
+                              }}
+                              className="px-3 py-1 text-xs rounded border"
+                              style={{
+                                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                                color: modoDark ? "#FFFFFF" : "#000000"
+                              }}
+                            >
+                              {t("editar")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
@@ -702,7 +739,7 @@ export default function Fornecedores() {
                 podeEditar && (
                   <>
                     <button
-                      onClick={ handleSalvarFornecedor}
+                      onClick={handleSalvarFornecedor}
                       className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: "green",

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
 export default function Dashboard() {
   const [contagemProduto, setContagemProduto] = useState(0);
@@ -21,7 +21,10 @@ export default function Dashboard() {
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
   const { t } = useTranslation("dashboard");
+
+  const produtosPorPagina = 5;
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -174,11 +177,32 @@ export default function Dashboard() {
     setProdutoExpandido(produtoExpandido === id ? null : id);
   };
 
-  const produtosEstoqueBaixo = produtos.filter(
-    (produto) => produto.quantidade < produto.quantidadeMin + 5 && 
+
+ const produtosCriticos = produtos.filter(
+    (produto) => produto.quantidade < produto.quantidadeMin && 
     produto.quantidadeMin !== undefined && 
     produto.quantidadeMin > 0
   );
+
+  const produtosAtencao = produtos.filter(
+    (produto) => produto.quantidade >= produto.quantidadeMin && 
+    produto.quantidade < produto.quantidadeMin + 5 && 
+    produto.quantidadeMin !== undefined && 
+    produto.quantidadeMin > 0
+  );
+
+  const produtosEstoqueBaixo = [...produtosCriticos, ...produtosAtencao];
+
+  const indexUltimoProduto = paginaAtual * produtosPorPagina;
+  const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
+  const produtosAtuais = produtosEstoqueBaixo.slice(indexPrimeiroProduto, indexUltimoProduto);
+  const totalPaginas = Math.ceil(produtosEstoqueBaixo.length / produtosPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setProdutoExpandido(null);
+  };
+
 
   return (
     <div className="px-2 sm:px-4 pt-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -299,6 +323,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
               {t("estoqueBaixo.titulo")}
             </h2>
+
             <div className="hidden md:block">
               <table className="min-w-full text-sm text-left">
                 <thead className="border-b">
@@ -310,7 +335,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody style={{ color: "var(--cor-fonte)" }}>
-                  {produtosEstoqueBaixo.map((produto) => (
+                  {produtosAtuais.map((produto) => (
                     <tr key={produto.id} className="border-b">
                       <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
                       <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
@@ -332,13 +357,14 @@ export default function Dashboard() {
               </table>
             </div>
 
+
             <div className="md:hidden space-y-2">
-              {produtosEstoqueBaixo.length === 0 ? (
+              {produtosAtuais.length === 0 ? (
                 <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
                   {t("estoqueBaixo.nenhumProduto")}
                 </div>
               ) : (
-                produtosEstoqueBaixo.map((produto) => (
+                produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
                     className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
@@ -393,9 +419,35 @@ export default function Dashboard() {
                 ))
               )}
             </div>
+
+            {produtosEstoqueBaixo.length > produtosPorPagina && (
+              <div className="flex justify-center items-center gap-4 mt-4">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
   );
 }

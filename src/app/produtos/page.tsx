@@ -5,7 +5,7 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,8 @@ export default function Produtos() {
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const produtosPorPagina = 10;
   const { t } = useTranslation("produtos");
   const router = useRouter();
 
@@ -123,6 +125,7 @@ export default function Produtos() {
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
 
+
       if (usuario.empresaId) {
         const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
         setEmpresaAtivada(ativada);
@@ -131,7 +134,11 @@ export default function Produtos() {
           const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
           if (responseProdutos.ok) {
             const todosProdutos = await responseProdutos.json();
-            const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId);
+            const produtosDaEmpresa = todosProdutos
+              .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
+              .sort((a: ProdutoI, b: ProdutoI) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
             setProdutos(produtosDaEmpresa);
           }
         }
@@ -380,6 +387,11 @@ export default function Produtos() {
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const indexUltimoProduto = paginaAtual * produtosPorPagina;
+  const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
+  const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
+  const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
+
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
   const toggleExpandirProduto = (id: string) => {
@@ -388,6 +400,11 @@ export default function Produtos() {
 
   const formatarPreco = (preco: number) => {
     return preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setProdutoExpandido(null);
   };
 
   return (
@@ -412,22 +429,52 @@ export default function Produtos() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div
-            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
-            }}
-          >
-            <input
-              type="text"
-              placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
-            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                borderColor: modoDark ? "#FFFFFF" : "#000000",
+              }}
+            >
+              <input
+                type="text"
+                placeholder={t("buscar")}
+                className="outline-none font-mono text-sm bg-transparent"
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
+                style={{ color: "var(--cor-fonte)" }}
+              />
+              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+            </div>
+            {totalPaginas > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
 
           {podeEditar && (
@@ -474,7 +521,7 @@ export default function Produtos() {
                     </tr>
                   </thead>
                   <tbody>
-                    {produtosFiltrados.map((produto) => (
+                    {produtosAtuais.map((produto) => (
                       <tr
                         key={produto.id}
                         onClick={() => {
@@ -513,7 +560,7 @@ export default function Produtos() {
               </div>
 
               <div className="md:hidden space-y-2 p-2">
-                {produtosFiltrados.map((produto) => (
+                {produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
                     className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"

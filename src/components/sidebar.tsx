@@ -26,20 +26,36 @@ export default function Sidebar() {
   const ultimoTempoNotificacaoRef = useRef<number>(0);
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
 
-  const verificarEstoque = async () => {
-    try {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
-        method: 'POST'
-      });
-      console.log("Verificação de estoque:", await resposta.json());
-    } catch (erro) {
-      console.error("Erro ao verificar estoque:", erro);
+ const verificarEstoque = async () => {
+  try {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) {
+      console.log("Nenhum usuário logado encontrado");
+      return;
     }
-  };
 
+    const usuarioId = usuarioSalvo.replace(/"/g, "");
+    
+    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ usuarioId }), 
+      credentials: 'include'
+    });
+
+    if (!resposta.ok) {
+      const errorData = await resposta.json().catch(() => ({}));
+      throw new Error(`Erro HTTP ${resposta.status}: ${errorData.message || 'Erro desconhecido'}`);
+    }
+
+    const dados = await resposta.json();
+    console.log("Verificação de estoque concluída:", dados);
+  } catch (erro) {
+    console.error("Erro detalhado ao verificar estoque:", erro);
+  }
+};
   const inicializarAudio = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/notification-sound.mp3");

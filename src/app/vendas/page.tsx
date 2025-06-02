@@ -4,7 +4,7 @@ import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FaSearch, FaShoppingCart, FaRegTrashAlt, } from "react-icons/fa";
+import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { VendaI } from "@/utils/types/vendas";
@@ -21,6 +21,8 @@ export default function Vendas() {
   const [carregando, setCarregando] = useState(true);
   const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const produtosPorPagina = 7;
   const { t } = useTranslation("vendas");
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export default function Vendas() {
 
         const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
-        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
+        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId && p.quantidade > 0);
         setProdutos(produtosDaEmpresa);
 
         const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
@@ -306,17 +308,45 @@ export default function Vendas() {
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const indexUltimoProduto = paginaAtual * produtosPorPagina;
+  const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
+  const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
+  const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+  };
+
   const totalCarrinho = carrinho.reduce((total, item) =>
     total + (item.produto.preco * item.quantidade), 0
   );
 
-  if (carregando && !empresaId) {
-    return (
-      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
+
+if (carregando && !empresaId) {
+  return (
+    <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
+    </div>
+  );
+}
+
+if (!empresaId || produtos.length === 0) {
+  return (
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8 h-60" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div className="w-full max-w-6xl text-center">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+          {t("titulo")}
+        </h1>
+        <div className="border rounded-xl p-8 shadow" style={{
+          backgroundColor: "var(--cor-fundo-bloco)",
+          borderColor: modoDark ? "#FFFFFF" : "#000000",
+        }}>
+          <p className="text-lg" style={{ color: "var(--cor-fonte)" }}>Você Não Possui Produtos cadastrados</p>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
@@ -326,22 +356,52 @@ export default function Vendas() {
         </h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div
-            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
-            }}
-          >
-            <input
-              type="text"
-              placeholder={t("buscarProduto")}
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
-            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                borderColor: modoDark ? "#FFFFFF" : "#000000",
+              }}
+            >
+              <input
+                type="text"
+                placeholder={t("buscarProduto")}
+                className="outline-none font-mono text-sm bg-transparent"
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
+                style={{ color: "var(--cor-fonte)" }}
+              />
+              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+            </div>
+            {totalPaginas > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -373,7 +433,7 @@ export default function Vendas() {
                     </tr>
                   </thead>
                   <tbody>
-                    {produtosFiltrados.map((produto) => (
+                    {produtosAtuais.map((produto) => (
                       <tr
                         key={produto.id}
                         className="border-b hover:bg-opacity-50 transition"
@@ -426,7 +486,7 @@ export default function Vendas() {
               </div>
 
               <div className="md:hidden space-y-2 p-2">
-                {produtosFiltrados.map((produto) => (
+                {produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
                     className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"

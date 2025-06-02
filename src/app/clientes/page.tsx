@@ -1,7 +1,7 @@
 "use client";
 import { ClienteI } from "@/utils/types/clientes";
 import { useEffect, useState } from "react";
-import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronUp, FaEdit, FaEye } from "react-icons/fa";
+import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronUp, FaEdit, FaEye, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,8 @@ export default function Clientes() {
 
   const [busca, setBusca] = useState("");
   const [clienteExpandido, setClienteExpandido] = useState<string | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const clientesPorPagina = 10;
   const { t } = useTranslation("clientes");
   const router = useRouter();
 
@@ -109,7 +111,10 @@ export default function Clientes() {
 
       const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
       const clientesData = await responseClientes.json();
-      setClientes(clientesData.clientes || []);
+      const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setClientes(clientesOrdenados);
     };
 
     initialize();
@@ -125,6 +130,16 @@ export default function Clientes() {
       cliente.email?.toLowerCase().includes(busca.toLowerCase()) ||
       cliente.telefone?.includes(busca)
   );
+
+  const indexUltimoCliente = paginaAtual * clientesPorPagina;
+  const indexPrimeiroCliente = indexUltimoCliente - clientesPorPagina;
+  const clientesAtuais = clientesFiltrados.slice(indexPrimeiroCliente, indexUltimoCliente);
+  const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setClienteExpandido(null);
+  };
 
   async function handleAdicionarCliente() {
     handleAcaoProtegida(async () => {
@@ -285,6 +300,17 @@ export default function Clientes() {
     return `(${telefone.slice(0, 2)}) ${telefone.slice(2, 7)}-${telefone.slice(7)}`;
   }
 
+  function formatarData(dataString: string | Date) {
+    const data = new Date(dataString);
+    return data.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
   const toggleExpandirCliente = (id: string) => {
@@ -313,22 +339,52 @@ export default function Clientes() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div
-            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#FFFFFF" : "#000000",
-            }}
-          >
-            <input
-              type="text"
-              placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              style={{ color: "var(--cor-fonte)" }}
-            />
-            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              style={{
+                backgroundColor: "var(--cor-fundo-bloco)",
+                borderColor: modoDark ? "#FFFFFF" : "#000000",
+              }}
+            >
+              <input
+                type="text"
+                placeholder={t("buscar")}
+                className="outline-none font-mono text-sm bg-transparent"
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
+                style={{ color: "var(--cor-fonte)" }}
+              />
+              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+            </div>
+            {totalPaginas > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleLeft />
+                </button>
+
+                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                  style={{ color: "var(--cor-fonte)" }}
+                >
+                  <FaAngleRight />
+                </button>
+              </div>
+            )}
           </div>
 
           {podeEditar && (
@@ -376,7 +432,7 @@ export default function Clientes() {
                     </tr>
                   </thead>
                   <tbody>
-                    {clientesFiltrados.map((cliente: ClienteI) => (
+                    {clientesAtuais.map((cliente: ClienteI) => (
                       <tr
                         key={cliente.id}
                         className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
@@ -431,7 +487,7 @@ export default function Clientes() {
                           }}
                           className="py-3 px-4 text-center"
                         >
-                          {new Date(cliente.createdAt).toLocaleDateString()}
+                          {formatarData(cliente.createdAt)}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <FaPhoneAlt
@@ -448,7 +504,7 @@ export default function Clientes() {
               </div>
 
               <div className="md:hidden space-y-2 p-2">
-                {clientesFiltrados.map((cliente) => (
+                {clientesAtuais.map((cliente) => (
                   <div
                     key={cliente.id}
                     className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
@@ -463,7 +519,7 @@ export default function Clientes() {
                         </div>
 
                         <div className="flex items-center gap-2 text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                          <span>{new Date(cliente.createdAt).toLocaleDateString()}</span>
+                          <span>{formatarData(cliente.createdAt)}</span>
                         </div>
                       </div>
 
