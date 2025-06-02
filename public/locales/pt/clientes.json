@@ -10,6 +10,7 @@
   "nome": "Nome",
   "email": "E-mail",
   "telefone": "Telefone",
+  "nenhumClienteEncontrado": "Nenhum cliente encontrado.",
   "endereco": "Endereço",
   "cidade": "Cidade",
   "estado": "Estado",

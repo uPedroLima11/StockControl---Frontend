@@ -62,121 +62,121 @@ export default function Configuracoes() {
   };
 
   return (
-    <div className="flex min-h-screen px-4 py-10 bg-[var(--cor-fundo)]">
+    <div className="flex flex-col-reverse md:flex-row px-4 py-10 bg-[var(--cor-fundo)]">
       <aside
-        className="w-64 rounded-xl shadow-md p-6 h-fit"
-        style={{
-          backgroundColor: modoDark ? "#1F2937" : "#ffffff",
-          border: `1px solid ${modoDark ? "#374151" : "#E5E7EB"}`,
-        }}
+      className="w-full md:w-64 rounded-xl shadow-md p-6 h-fit mt-8 md:mt-0"
+      style={{
+        backgroundColor: modoDark ? "#1F2937" : "#ffffff",
+        border: `1px solid ${modoDark ? "#374151" : "#E5E7EB"}`,
+      }}
       >
-        <h2
-          className="text-lg font-bold mb-6"
-          style={{ color: modoDark ? "#fffff2" : "#111827" }}
+      <h2
+        className="text-lg font-bold mb-6"
+        style={{ color: modoDark ? "#fffff2" : "#111827" }}
+      >
+        {t("settings")}
+      </h2>
+
+      <ul className="space-y-4 text-sm font-medium">
+        {[
+        { label: t("faleconosco"), link: "/suporte" },
+        { label: t("change_password"), link: "/esqueci" },
+        ].map((item, i) => (
+        <li key={i}>
+          <a
+          href={item.link}
+          className="cursor-pointer hover:underline"
+          style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
+          >
+          {item.label}
+          </a>
+        </li>
+        ))}
+      </ul>
+
+      <div className="mt-6 space-y-4">
+        <button
+        onClick={alternarTema}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
+        style={{
+          backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
+          color: modoDark ? "#FBBF24" : "#374151",
+          borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+        }}
         >
-          {t("settings")}
-        </h2>
+        {modoDark ? <FaMoon size={16} /> : <FaSun size={16} />}
+        {modoDark ? t("dark_mode") : t("light_mode")}
+        </button>
 
-        <ul className="space-y-4 text-sm font-medium">
-          {[
-            { label: t("faleconosco"), link: "/suporte" },
-            { label: t("change_password"), link: "/esqueci" },
-          ].map((item, i) => (
-            <li key={i}>
-              <a
-                href={item.link}
-                className="cursor-pointer hover:underline"
-                style={{ color: modoDark ? "#E5E7EB" : "#374151" }}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <button
+        onClick={alternarSomNotificacao}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
+        style={{
+          backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
+          color: modoDark ? "#fffff2" : "#374151",
+          borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+        }}
+        >
+        {somNotificacao ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
+        {somNotificacao ? t("sound_on") : t("sound_off")}
+        </button>
 
-        <div className="mt-6 space-y-4">
+        <button
+        onClick={toggleIdiomas}
+        className="flex items-center justify-between px-4 py-2 rounded-lg border w-full transition duration-200 text-sm font-medium cursor-pointer"
+        style={{
+          backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
+          color: modoDark ? "#fffff2" : "#374151",
+          borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+        }}
+        >
+        <span>{t("change_language")}</span>
+        {mostrarIdiomas ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
+        </button>
+
+        <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${mostrarIdiomas ? "max-h-40" : "max-h-0"
+          }`}
+        >
+        <div className="flex flex-col gap-2 mt-2">
           <button
-            onClick={alternarTema}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
-            style={{
-              backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
-              color: modoDark ? "#FBBF24" : "#374151",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
+          onClick={() => mudarIdioma("pt")}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
+          style={{
+            backgroundColor: modoDark ? "#374151" : "#e3f6f5",
+            color: modoDark ? "#e3f6f5" : "#111827",
+          }}
           >
-            {modoDark ? <FaMoon size={16} /> : <FaSun size={16} />}
-            {modoDark ? t("dark_mode") : t("light_mode")}
+          <Image src="/brasil.png" alt="Português" width={25} height={20} quality={100} />
+          <span>Português</span>
           </button>
-
           <button
-            onClick={alternarSomNotificacao}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
-            style={{
-              backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
-              color: modoDark ? "#fffff2" : "#374151",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
+          onClick={() => mudarIdioma("en")}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
+          style={{
+            backgroundColor: modoDark ? "#374151" : "#e3f6f5",
+            color: modoDark ? "#e3f6f5" : "#111827",
+          }}
           >
-            {somNotificacao ? <FaVolumeUp size={16} /> : <FaVolumeMute size={16} />}
-            {somNotificacao ? t("sound_on") : t("sound_off")}
+          <Image src="/ingles.png" alt="English" width={25} height={20} quality={100} />
+          <span>English</span>
           </button>
-
-          <button
-            onClick={toggleIdiomas}
-            className="flex items-center justify-between px-4 py-2 rounded-lg border w-full transition duration-200 text-sm font-medium cursor-pointer"
-            style={{
-              backgroundColor: modoDark ? "#2C2C2C" : "#F3F4F6",
-              color: modoDark ? "#fffff2" : "#374151",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
-          >
-            <span>{t("change_language")}</span>
-            {mostrarIdiomas ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
-          </button>
-
-          <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${mostrarIdiomas ? "max-h-40" : "max-h-0"
-              }`}
-          >
-            <div className="flex flex-col gap-2 mt-2">
-              <button
-                onClick={() => mudarIdioma("pt")}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
-                style={{
-                  backgroundColor: modoDark ? "#374151" : "#e3f6f5",
-                  color: modoDark ? "#e3f6f5" : "#111827",
-                }}
-              >
-                <Image src="/brasil.png" alt="Português" width={25} height={20} quality={100} />
-                <span>Português</span>
-              </button>
-              <button
-                onClick={() => mudarIdioma("en")}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
-                style={{
-                  backgroundColor: modoDark ? "#374151" : "#e3f6f5",
-                  color: modoDark ? "#e3f6f5" : "#111827",
-                }}
-              >
-                <Image src="/ingles.png" alt="English" width={25} height={20} quality={100} />
-                <span>English</span>
-              </button>
-            </div>
-          </div>
         </div>
+        </div>
+      </div>
       </aside>
 
-      <main className="flex-1 ml-8">
-        <h1
-          className="text-2xl font-bold mb-4"
-          style={{ color: modoDark ? "#e3f6f5" : "#000000" }}
-        >
-          {t("preferences")}
-        </h1>
+      <main className="flex-1 mb-8 md:mb-0 md:ml-8">
+      <h1
+        className="text-2xl font-bold mb-4"
+        style={{ color: modoDark ? "#e3f6f5" : "#000000" }}
+      >
+        {t("preferences")}
+      </h1>
 
-        <p style={{ color: modoDark ? "#e3f6f5" : "#4B5563" }}>
-          {t("preferences_desc")}
-        </p>
+      <p style={{ color: modoDark ? "#e3f6f5" : "#4B5563" }}>
+        {t("preferences_desc")}
+      </p>
       </main>
     </div>
   );

@@ -1,25 +1,41 @@
-{
-    "titulo": "Fornecedores",
-    "buscar": "Buscar Fornecedor",
-    "novoFornecedor": "Adicionar Fornecedor",
-    "foto": "Foto",
-    "nome": "Nome",
-    "cnpj": "CNPJ",
-    "email": "Email",
-    "telefone": "Telefone",
-    "categoria": "Categoria",
-    "adicionadoEm": "Adicionado em",
-    "contato": "Contato",
-    "visualizarFornecedor": "Visualizar Fornecedor",
-    "salvar": "Salvar",
-    "excluir": "Excluir",
-    "fechar": "Fechar",
-    "afiliarFornecedor": "Afiliar Fornecedor",
-    "empresaNaoAtivada": {
-        "alertaTitulo": "Empresa não ativada",
-        "alertaMensagem": "Você precisa ativar sua empresa para gerenciar fornecedores.",
-        "titulo": "Ativação necessária",
-        "mensagem": "Sua empresa precisa ser ativada antes de poder gerenciar fornecedores.",
-        "botao": "Ativar agora"
-    }
-}
+ {
+        "titulo": "Fornecedores",
+        "buscar": "Buscar fornecedores",
+        "novoFornecedor": "Novo Fornecedor",
+        "nenhumFornecedorEncontrado": "Nenhum fornecedor encontrado.",
+        "foto": "Foto",
+        "nome": "Nome",
+        "cnpj": "CNPJ",
+        "email": "E-mail",
+        "telefone": "Telefone",
+        "categoria": "Categoria",
+        "adicionadoEm": "Adicionado em",
+        "contato": "Contato",
+        "visualizarFornecedor": "Visualizar Fornecedor",
+        "afiliarFornecedor": "Afiliar Fornecedor",
+        "editar": "Editar",
+        "fechar": "Fechar",
+        "salvar": "Salvar",
+        "excluir": "Excluir",
+        "empresaNaoAtivada": {
+          "titulo": "Empresa não ativada",
+          "mensagem": "Sua empresa ainda não foi ativada. Ative para continuar.",
+          "botao": "Ativar agora",
+          "alertaTitulo": "Empresa não ativada!",
+          "alertaMensagem": "Você precisa ativar sua empresa para acessar todas as funcionalidades."
+        },
+        "mensagens": {
+          "fornecedorAdicionado": "Fornecedor adicionado com sucesso!",
+          "fornecedorAtualizado": "Fornecedor atualizado com sucesso!",
+          "erro": "Erro",
+          "erroAdicionar": "Erro ao adicionar fornecedor.",
+          "erroAtualizar": "Erro ao atualizar fornecedor.",
+          "temCerteza": "Tem certeza?",
+          "naoReverter": "Esta ação não pode ser desfeita!",
+          "simDeletar": "Sim, deletar!",
+          "cancelar": "Cancelar",
+          "deletado": "Deletado!",
+          "produtoExcluido": "Fornecedor excluído com sucesso.",
+          "erroDeletar": "Erro ao excluir fornecedor."
+        }
+      }

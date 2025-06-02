@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaCog, } from "react-icons/fa";
+import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
@@ -22,7 +22,10 @@ export default function Usuarios() {
   const [showModalConvite, setShowModalConvite] = useState(false);
   const [showModalMensagem, setShowModalMensagem] = useState(false);
   const [modoDark, setModoDark] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [usuarioExpandido, setUsuarioExpandido] = useState<string | null>(null);
   const { t } = useTranslation("usuarios");
+
   const translateRole = (role: string) => {
     return t(`roles.${role}`, { defaultValue: role });
   };
@@ -37,23 +40,15 @@ export default function Usuarios() {
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
     if (ativado) {
-      root.classList.add("dark");
       root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
+      root.style.setProperty("--cor-fonte", "#FFFFFF");
+      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
       root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      root.style.setProperty("--cor-borda", "#374151");
-      root.style.setProperty("--cor-cinza", "#A3A3A3");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
     } else {
-      root.classList.remove("dark");
       root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
-      root.style.setProperty("--cor-borda", "#E5E7EB");
-      root.style.setProperty("--cor-cinza", "#4B5563");
-      document.body.style.backgroundColor = "#FFFFFF";
-      document.body.style.color = "#000000";
+      root.style.setProperty("--cor-fonte", "#000000");
+      root.style.setProperty("--cor-subtitulo", "#4B5563");
+      root.style.setProperty("--cor-fundo-bloco", "#ececec");
     }
   };
 
@@ -286,136 +281,255 @@ export default function Usuarios() {
     return false;
   };
 
+  const toggleExpandirUsuario = (id: string) => {
+    setUsuarioExpandido(usuarioExpandido === id ? null : id);
+  };
+
+  const formatarData = (dataString: string | Date) => {
+    const data = new Date(dataString);
+    return data.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>{t("carregando")}</h1>
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <h1 className="text-3xl font-mono text-red-400">{t("erro")}: {error}</h1>
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+        <p className="text-red-400" style={{ color: "var(--cor-fonte)" }}>{t("erro")}: {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-16" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-mono" style={{ color: "var(--cor-texto)" }}>{t("titulo")}</h1>
-        {usuarioLogado?.empresaId && (
-          <div className="flex space-x-4">
-            <button
-              className="px-4 py-2 rounded-sm  font-bold text-sm transition"
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div className="w-full max-w-6xl">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+          {t("titulo")}
+        </h1>
+
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
+          <div
+            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
+            style={{
+              backgroundColor: "var(--cor-fundo-bloco)",
+              borderColor: modoDark ? "#FFFFFF" : "#000000",
+            }}
+          >
+            <input
+              type="text"
+              placeholder={t("buscarUsuario")}
+              className="outline-none font-mono text-sm bg-transparent"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              style={{ color: "var(--cor-fonte)" }}
+            />
+            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          </div>
+
+          {usuarioLogado?.empresaId && (
+            <div className="flex gap-2 w-full sm:w-auto sm:flex-row items-center sm:items-stretch justify-center sm:justify-start">
+              <button
+              className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm "
               style={{
-                backgroundColor: "#00332C",
-                color: "#FFFFFF",
-                border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                borderColor: modoDark ? "#FFFFFF" : "#00332C",
+                color: modoDark ? "#FFFFFF" : "#00332C",
+                border: "1px solid"
               }}
               onClick={() => setShowModalConvite(true)}
-            >
-              {t("convidarUsuario")}
-            </button>
-            <button
-              className="px-4 py-2 rounded-sm font-bold text-sm transition"
+              >
+              <div className="flex items-center justify-center gap-1">
+                <FaUserPlus /> {t("convidarUsuario")}
+              </div>
+              </button>
+              <button
+              className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
               style={{
-                backgroundColor: modoDark ? "#ee1010" : "#ff6b6b",
-                color: "#FFFFFF",
-                border: modoDark ? "1px solid #374151" : "1px solid #D1D5DB"
+                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                borderColor: modoDark ? "#FFFFFF" : "#00332C",
+                color: modoDark ? "#FFFFFF" : "#00332C",
+                border: "1px solid"
               }}
               onClick={() => setShowModalMensagem(true)}
-            >
-              {t("enviarMensagem")}
-            </button>
-          </div>
-        )}
-      </div>
+              >
+              <div className="flex items-center justify-center gap-1">
+                <FaEnvelope /> {t("enviarMensagem")}
+              </div>
+              </button>
+            </div>
+          )}
+        </div>
 
-      <div className="overflow-x-auto rounded-lg">
-        <table className="w-full text-left text-sm font-light border-separate border-spacing-y-2">
-          <thead className="border" style={{ backgroundColor: modoDark ? "#1a25359f" : "#ececec" }}>
-            <tr>
-              <th className="px-6 py-4">{t("nomeUsuario")}</th>
-              <th className="px-6 py-4">{t("funcao")}</th>
-              <th className="px-6 py-4">{t("criadoEm")}</th>
-              <th className="px-6 py-4 font-bold">{t("ultimaAtualizacao")}</th>
-              <th className="px-6 py-4">{t("acao")}</th>
-            </tr>
-          </thead>
-          <tbody style={{ color: "var(--cor-texto)" }}>
-            {usuarios.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-4 text-center">
-                  {usuarioLogado?.empresaId ? t("nenhumUsuario") : t("nenhumaEmpresa")}
-                </td>
-              </tr>
-            ) : (
-              usuarios.map((usuario) => (
-                <tr
-                  key={usuario.id}
-                  className="rounded-md shadow-sm"
-                  style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#ececec",
+        <div
+          className="border rounded-xl shadow"
+          style={{
+            backgroundColor: "var(--cor-fundo-bloco)",
+            borderColor: modoDark ? "#FFFFFF" : "#000000",
+          }}
+        >
+          {usuarios.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {usuarioLogado?.empresaId ? t("nenhumUsuario") : t("nenhumaEmpresa")}
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b">
+                    <tr style={{ color: "var(--cor-fonte)" }}>
+                      <th className="py-3 px-4 text-left">{t("nomeUsuario")}</th>
+                      <th className="py-3 px-4 text-left">{t("funcao")}</th>
+                      <th className="py-3 px-4 text-left">{t("criadoEm")}</th>
+                      <th className="py-3 px-4 text-left">{t("ultimaAtualizacao")}</th>
+                      <th className="py-3 px-4 text-left">{t("acao")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuarios
+                      .filter((usuario) =>
+                        usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                        usuario.email.toLowerCase().includes(busca.toLowerCase())
+                      )
+                      .map((usuario) => (
+                        <tr key={usuario.id} className="border-b">
+                          <td className="py-3 px-4">{usuario.nome}</td>
+                          <td className="py-3 px-4">{translateRole(usuario.tipo)}</td>
+                          <td className="py-3 px-4">{formatarData(usuario.createdAt)}</td>
+                          <td className="py-3 px-4">{formatarData(usuario.updatedAt)}</td>
+                          <td className="py-3 px-4">
+                            {podeEditar(usuario) && (
+                              <FaCog
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  setModalEditarUsuario(usuario);
+                                  setNovoTipo(usuario.tipo);
+                                }}
+                              />
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
 
-                    border: modoDark ? "1px solid #374151" : "1px solid #E5E7EB"
-                  }}
-                >
-                  <td className="px-6 py-4">{usuario.nome}</td>
-                  <td className="px-6 py-4">{translateRole(usuario.tipo)}</td>
-                  <td className="px-6 py-4">{new Date(usuario.createdAt).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 font-semibold">{new Date(usuario.updatedAt).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">
-                    {podeEditar(usuario) && (
-                      <FaCog
-                        className="cursor-pointer hover:text-gray-400"
-                        onClick={() => {
-                          setModalEditarUsuario(usuario);
-                          setNovoTipo(usuario.tipo);
-                        }}
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              <div className="md:hidden space-y-2 p-2">
+                {usuarios
+                  .filter((usuario) =>
+                    usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                    usuario.email.toLowerCase().includes(busca.toLowerCase())
+                  )
+                  .map((usuario) => (
+                    <div
+                      key={usuario.id}
+                      className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                        }`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
+                                <span className="text-lg">
+                                  {usuario.nome.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                                {usuario.nome}
+                              </p>
+                              <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                                {translateRole(usuario.tipo)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {podeEditar(usuario) && (
+                            <FaCog
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setModalEditarUsuario(usuario);
+                                setNovoTipo(usuario.tipo);
+                              }}
+                            />
+                          )}
+                          <button
+                            onClick={() => toggleExpandirUsuario(usuario.id)}
+                            className="text-gray-500 hover:text-gray-700 p-1"
+                            style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          >
+                            {usuarioExpandido === usuario.id ? <FaChevronUp /> : <FaChevronDown />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"
+                          }`}
+                        style={{ color: "var(--cor-fonte)" }}
+                      >
+                        <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("email")}:</span>
+                            <span className="truncate">{usuario.email}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("criadoEm")}:</span>
+                            <span>{formatarData(usuario.createdAt)}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("ultimaAtualizacao")}:</span>
+                            <span>{formatarData(usuario.updatedAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {showModalConvite && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg w-full max-w-md"
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
             style={{
-              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              backgroundColor: "var(--cor-fundo-bloco)",
+              color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl mb-4">{t("modal.convidarUsuario")}</h2>
-            <div>
-              <div className="mb-2">
-                <label htmlFor="email" className="text-sm font-semibold">
-                  {t("modal.emailUsuario")}
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border p-3 rounded-md mt-2"
-                  style={{
-                    backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
-                  }}
-                />
-              </div>
+            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.convidarUsuario")}</h2>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.emailUsuario")}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 rounded"
+                className="px-3 md:px-4 py-1 md:py-2 rounded text-sm"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000"
@@ -425,7 +539,7 @@ export default function Usuarios() {
                 {t("modal.cancelar")}
               </button>
               <button
-                className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`px-3 md:px-4 py-1 md:py-2 rounded text-sm ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
                 style={{
                   backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
                   color: modoDark ? "#000000" : "#FFFFFF"
@@ -443,41 +557,35 @@ export default function Usuarios() {
       {showModalMensagem && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg w-full max-w-md"
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
             style={{
-              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              backgroundColor: "var(--cor-fundo-bloco)",
+              color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl mb-4">{t("modal.enviarMensagem")}</h2>
-            <div>
-              <div className="mb-2">
-                <label htmlFor="nome" className="text-sm font-semibold">
-                  {t("modal.de")}
-                </label>
-                <input
-                  id="nome"
-                  type="text"
-                  value={usuarioLogado?.nome || ""}
-                  readOnly
-                  className="w-full p-3 rounded-md mt-2"
-                  style={{
-                    backgroundColor: modoDark ? "#444b52" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
-                  }}
-                />
-              </div>
-              <label htmlFor="nome" className="text-sm font-semibold">
-                {t("modal.para")}
-              </label>
-              <select
-                className="w-full p-2 mb-4 rounded border"
+            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.enviarMensagem")}</h2>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.de")}</label>
+              <input
+                type="text"
+                value={usuarioLogado?.nome || ""}
+                readOnly
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 style={{
-                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
-                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.para")}</label>
+              <select
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
               >
                 <option value="">{t("modal.selecioneUsuario")}</option>
                 {usuarios.map((usuario) => (
@@ -486,35 +594,37 @@ export default function Usuarios() {
                   </option>
                 ))}
               </select>
-
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.tituloMensagem")}</label>
               <input
                 type="text"
                 placeholder={t("modal.tituloMensagem")}
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
-                className="w-full p-2 mb-4 rounded border"
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 style={{
-                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
-                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
               />
-
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.descricaoMensagem")}</label>
               <textarea
                 placeholder={t("modal.descricaoMensagem")}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                className="w-full p-2 mb-4 rounded border"
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
                 style={{
-                  backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
-                  borderColor: modoDark ? "#374151" : "#D1D5DB",
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
                   color: modoDark ? "#FFFFFF" : "#000000"
                 }}
-              ></textarea>
+              />
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-4 py-2 rounded"
+                className="px-3 md:px-4 py-1 md:py-2 rounded text-sm"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000"
@@ -524,7 +634,7 @@ export default function Usuarios() {
                 {t("modal.cancelar")}
               </button>
               <button
-                className={`px-4 py-2 rounded ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`px-3 md:px-4 py-1 md:py-2 rounded text-sm ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
                 style={{
                   backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
                   color: modoDark ? "#000000" : "#FFFFFF"
@@ -542,30 +652,31 @@ export default function Usuarios() {
       {modalEditarUsuario && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg w-full max-w-md"
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
             style={{
-              backgroundColor: modoDark ? "#2A2F36" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000"
+              backgroundColor: "var(--cor-fundo-bloco)",
+              color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl mb-4">{t("modal.editarUsuario")}</h2>
-            <p className="mb-4">{t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong></p>
+            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.editarUsuario")}</h2>
+            <p className="mb-3">{t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong></p>
 
-            <label className="block mb-2 font-semibold">{t("modal.alterarCargo")}:</label>
-            <select
-              value={novoTipo}
-              onChange={(e) => setNovoTipo(e.target.value)}
-              className="w-full p-2 mb-4 rounded border"
-              style={{
-                backgroundColor: modoDark ? "#1B1F24" : "#F3F4F6",
-                borderColor: modoDark ? "#374151" : "#D1D5DB",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            >
-              <option value="FUNCIONARIO">{t("modal.funcionario")}</option>
-              <option value="ADMIN">{t("modal.admin")}</option>
-              <option value="PROPRIETARIO">{t("modal.proprietario")}</option>
-            </select>
+            <div className="mb-3">
+              <label className="block mb-1 text-sm">{t("modal.alterarCargo")}</label>
+              <select
+                value={novoTipo}
+                onChange={(e) => setNovoTipo(e.target.value)}
+                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                style={{
+                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                  color: modoDark ? "#FFFFFF" : "#000000"
+                }}
+              >
+                <option value="FUNCIONARIO">{t("modal.funcionario")}</option>
+                <option value="ADMIN">{t("modal.admin")}</option>
+                <option value="PROPRIETARIO">{t("modal.proprietario")}</option>
+              </select>
+            </div>
 
             <div className="flex justify-between">
               <button
@@ -635,3 +746,5 @@ export default function Usuarios() {
     </div>
   );
 }
+
+const inputClass = "w-full rounded p-2 mb-3 text-sm md:text-base";

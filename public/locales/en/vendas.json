@@ -19,11 +19,14 @@
     "erroFinalizarVenda": "Error completing sale",
     "processando": "Processing...",
     "cliente": "Client",
+    "data": "Date",
+    "valorTotal": "Total Value",
     "naoInformarCliente": "Do not specify client",
     "clienteNaoInformado": "Client not specified",
     "avisoEstoque": "Stock Warning",
     "estoqueDisponivel": "Available stock",
     "semEstoqueAdicional": "no additional stock",
     "quantidadeMaiorQueEstoque": "The requested quantity is greater than available stock. It has been adjusted to the maximum available.",
-    "produtoSemEstoque": "This product is currently out of stock"
+    "produtoSemEstoque": "This product is currently out of stock",
+    "quantidadeZeroErro": "Please add at least one item with a quantity greater than zero"
 }

@@ -21,9 +21,12 @@
     "cliente": "Cliente",
     "naoInformarCliente": "Não informar cliente",
     "clienteNaoInformado": "Cliente não informado",
+    "data": "Data",
+    "valorTotal": "Valor Total",
     "estoqueDisponivel": "Estoque disponível",
     "semEstoqueAdicional": "sem estoque adicional",
     "avisoEstoque": "Aviso de Estoque",
     "quantidadeMaiorQueEstoque": "A quantidade solicitada é maior que o estoque disponível. Foi ajustada para o máximo disponível.",
-    "produtoSemEstoque": "Este produto está sem estoque no momento"
+    "produtoSemEstoque": "Este produto está sem estoque no momento",
+    "quantidadeZeroErro": "Por favor, adicione pelo menos um item com quantidade maior que zero"
 }

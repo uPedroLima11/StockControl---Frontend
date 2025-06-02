@@ -4,7 +4,7 @@ import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FaSearch, FaShoppingCart, FaRegTrashAlt } from "react-icons/fa";
+import { FaSearch, FaShoppingCart, FaRegTrashAlt, } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { VendaI } from "@/utils/types/vendas";
@@ -20,6 +20,7 @@ export default function Vendas() {
   const [totalVendas, setTotalVendas] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const { t } = useTranslation("vendas");
 
   useEffect(() => {
@@ -74,6 +75,7 @@ export default function Vendas() {
         }
 
         setEmpresaId(usuario.empresaId);
+        setUserRole(usuario.tipo);
 
         const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
@@ -140,6 +142,8 @@ export default function Vendas() {
   }, [carrinho]);
 
   const adicionarAoCarrinho = (produto: ProdutoI) => {
+    if (userRole !== "ADMIN" && userRole !== "PROPRIETARIO") return;
+
     const itemExistente = carrinho.find(item => item.produto.id === produto.id);
 
     if (itemExistente) {
@@ -199,7 +203,7 @@ export default function Vendas() {
           }
           return item;
         })
-        .filter(item => item.quantidade > 0);
+        .filter(item => item.quantidade >= 0);
     });
   };
 
@@ -212,12 +216,23 @@ export default function Vendas() {
     if (!usuarioSalvo) return;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-    if (!empresaId || carrinho.length === 0) return;
+    const hasValidItems = carrinho.some(item => item.quantidade > 0);
+
+    if (!empresaId || !hasValidItems) {
+      Swal.fire({
+        icon: "error",
+        title: t("erro"),
+        text: carrinho.length === 0 ? t("carrinhoVazio") : t("quantidadeZeroErro"),
+      });
+      return;
+    }
 
     try {
       setCarregando(true);
 
-      const promises = carrinho.map(item => {
+      const itemsToSell = carrinho.filter(item => item.quantidade > 0);
+
+      const promises = itemsToSell.map(item => {
         return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
           method: "POST",
           headers: {
@@ -304,127 +319,185 @@ export default function Vendas() {
   }
 
   return (
-    <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
+          <div
+            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
+            style={{
+              backgroundColor: "var(--cor-fundo-bloco)",
+              borderColor: modoDark ? "#FFFFFF" : "#000000",
+            }}
+          >
+            <input
+              type="text"
+              placeholder={t("buscarProduto")}
+              className="outline-none font-mono text-sm bg-transparent"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              style={{ color: "var(--cor-fonte)" }}
+            />
+            <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+              {t("totalVendas")}: R$ {totalVendas.toFixed(2).replace(".", ",")}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="lg:col-span-2">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-              <div
-                className="flex items-center border rounded-full px-4 py-2 shadow-sm"
-                style={{
-                  backgroundColor: "var(--cor-fundo-bloco)",
-                  borderColor: modoDark ? "#FFFFFF" : "#000000",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder={t("buscarProduto")}
-                  className="outline-none font-mono text-sm bg-transparent"
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                  style={{ color: "var(--cor-fonte)" }}
-                />
-                <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-mono" style={{ color: "var(--cor-fonte)" }}>
-                  {t("totalVendas")}: R$ {totalVendas.toFixed(2).replace(".", ",")}
-                </span>
-              </div>
-            </div>
-
             <div
-              className="border rounded-xl overflow-x-auto shadow mb-6"
+              className="border rounded-xl shadow"
               style={{
                 backgroundColor: "var(--cor-fundo-bloco)",
                 borderColor: modoDark ? "#FFFFFF" : "#000000",
               }}
             >
-              <table className="w-full text-sm font-mono">
-                <thead className="border-b">
-                  <tr style={{ color: "var(--cor-fonte)" }}>
-                    <th className="py-3 px-4 text-left">{t("produto")}</th>
-                    <th className="text-center">{t("estoque")}</th>
-                    <th className="text-center">{t("preco")}</th>
-                    <th className="text-center">{t("acoes")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {produtosFiltrados.map((produto) => (
-                    <tr
-                      key={produto.id}
-                      className="border-b hover:bg-opacity-50 transition"
-                      style={{
-                        color: "var(--cor-fonte)",
-                        borderColor: modoDark ? "#FFFFFF" : "#000000",
-                      }}
-                    >
-                      <td className="py-3 px-4 flex items-center gap-2">
+              <div className="hidden md:block">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b">
+                    <tr style={{ color: "var(--cor-fonte)" }}>
+                      <th className="py-3 px-4 text-left">{t("produto")}</th>
+                      <th className="text-center">{t("estoque")}</th>
+                      <th className="text-center">{t("preco")}</th>
+                      {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
+                        <th className="text-center">{t("acoes")}</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {produtosFiltrados.map((produto) => (
+                      <tr
+                        key={produto.id}
+                        className="border-b hover:bg-opacity-50 transition"
+                        style={{
+                          color: "var(--cor-fonte)",
+                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                        }}
+                      >
+                        <td className="py-3 px-4 flex items-center gap-2">
+                          <Image
+                            src={produto.foto || "/out.jpg"}
+                            width={30}
+                            height={30}
+                            className="rounded"
+                            alt={produto.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/out.jpg";
+                            }}
+                          />
+                          <span>{produto.nome}</span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {produto.quantidade}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          R$ {produto.preco.toFixed(2).replace(".", ",")}
+                        </td>
+                        {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              onClick={() => adicionarAoCarrinho(produto)}
+                              disabled={produto.quantidade < 1}
+                              className="px-3 py-1 rounded flex items-center gap-1"
+                              style={{
+                                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
+                                color: modoDark ? "#FFFFFF" : "#00332C",
+                                border: `1px solid ${modoDark ? "#FFFFFF" : "#00332C"}`,
+                                opacity: produto.quantidade < 1 ? 0.5 : 1,
+                              }}
+                            >
+                              <FaShoppingCart size={12} />
+                              {t("adicionar")}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-2 p-2">
+                {produtosFiltrados.map((produto) => (
+                  <div
+                    key={produto.id}
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-center gap-2">
                         <Image
                           src={produto.foto || "/out.jpg"}
-                          width={30}
-                          height={30}
+                          width={40}
+                          height={40}
                           className="rounded"
                           alt={produto.nome}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/out.jpg";
                           }}
                         />
-                        <span>{produto.nome}</span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {produto.quantidade}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        R$ {produto.preco.toFixed(2).replace(".", ",")}
-                      </td>
-                      <td className="py-3 px-4 text-center">
+                        <div>
+                          <p className="font-medium" style={{ color: "var(--cor-fonte)" }}>
+                            {produto.nome}
+                          </p>
+                          <div className="flex gap-4 mt-1">
+                            <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                              {t("estoque")}: {produto.quantidade}
+                            </span>
+                            <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                              {t("preco")}: R$ {produto.preco.toFixed(2).replace(".", ",")}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
                         <button
                           onClick={() => adicionarAoCarrinho(produto)}
                           disabled={produto.quantidade < 1}
-                          className="px-3 py-1 rounded flex items-center gap-1"
+                          className="p-2 rounded-full"
                           style={{
-                            backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                            color: modoDark ? "#FFFFFF" : "#00332C",
-                            border: `1px solid ${modoDark ? "#FFFFFF" : "#00332C"}`,
+                            color: modoDark ? "#FBBF24" : "#00332C",
                             opacity: produto.quantidade < 1 ? 0.5 : 1,
                           }}
                         >
-                          <FaShoppingCart size={12} />
-                          {t("adicionar")}
+                          <FaShoppingCart size={16} />
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div>
+          <div className="space-y-4 md:space-y-6">
             <div
-              className="border rounded-xl p-4 shadow sticky top-4"
+              className="border rounded-xl p-3 md:p-4 shadow"
               style={{
                 backgroundColor: "var(--cor-fundo-bloco)",
                 borderColor: modoDark ? "#FFFFFF" : "#000000",
               }}
             >
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: "var(--cor-fonte)" }}>
+              <h2 className="text-lg font-bold mb-3 md:mb-4 flex items-center gap-2" style={{ color: "var(--cor-fonte)" }}>
                 <FaShoppingCart /> {t("carrinho")}
               </h2>
 
               {carrinho.length === 0 ? (
-                <p className="text-center py-4" style={{ color: "var(--cor-subtitulo)" }}>
+                <p className="text-center py-4 text-sm md:text-base" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("carrinhoVazio")}
                 </p>
               ) : (
                 <>
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-64 md:max-h-96 overflow-y-auto">
                     {carrinho.map((item) => (
                       <div
                         key={item.produto.id}
@@ -445,10 +518,10 @@ export default function Vendas() {
                             }}
                           />
                           <div>
-                            <span style={{ color: "var(--cor-fonte)" }}>
+                            <span className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
                               {item.produto.nome}
                             </span>
-                            <div className="text-xs" style={{ 
+                            <div className="text-xs" style={{
                               color: item.quantidade >= item.produto.quantidade ? "#EF4444" : "var(--cor-subtitulo)"
                             }}>
                               {t("estoqueDisponivel")}: {item.produto.quantidade}
@@ -485,7 +558,7 @@ export default function Vendas() {
                                 atualizarQuantidade(item.produto.id, 0);
                               }
                             }}
-                            className="w-16 p-1 rounded text-center"
+                            className="w-12 md:w-16 p-1 rounded text-center"
                             style={{
                               backgroundColor: "transparent",
                               color: "var(--cor-fonte)",
@@ -493,7 +566,7 @@ export default function Vendas() {
                             }}
                           />
 
-                          <span style={{ color: "var(--cor-fonte)" }}>
+                          <span className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
                             R$ {(item.produto.preco * item.quantidade).toFixed(2).replace(".", ",")}
                           </span>
 
@@ -511,15 +584,15 @@ export default function Vendas() {
                     ))}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
-                    <div className="mb-4">
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
+                    <div className="mb-3 md:mb-4">
                       <label className="block mb-1 text-sm" style={{ color: "var(--cor-fonte)" }}>
                         {t("cliente")}
                       </label>
                       <select
                         value={clienteSelecionado || ""}
                         onChange={(e) => setClienteSelecionado(e.target.value || null)}
-                        className="w-full p-2 rounded border"
+                        className="w-full p-2 rounded border text-sm md:text-base"
                         style={{
                           backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
                           color: modoDark ? "#FFFFFF" : "#000000",
@@ -543,7 +616,7 @@ export default function Vendas() {
                     <button
                       onClick={finalizarVenda}
                       disabled={carregando}
-                      className="w-full border-2 py-2 rounded-lg font-medium mt-4 cursor-pointer"
+                      className="w-full border-2 py-2 rounded-lg font-medium mt-2 md:mt-4 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: modoDark ? "#1a25359f" : "#00332C",
                         color: "#FFFFFF",
@@ -558,43 +631,41 @@ export default function Vendas() {
             </div>
 
             <div
-              className="border rounded-xl p-4 shadow mt-6"
+              className="border rounded-xl p-3 md:p-4 shadow"
               style={{
                 backgroundColor: "var(--cor-fundo-bloco)",
                 borderColor: modoDark ? "#FFFFFF" : "#000000",
               }}
             >
-              <h2 className="text-lg font-bold mb-4" style={{ color: "var(--cor-fonte)" }}>
+              <h2 className="text-lg font-bold mb-3 md:mb-4" style={{ color: "var(--cor-fonte)" }}>
                 {t("vendasRecentes")}
               </h2>
 
               {vendas.length === 0 ? (
-                <p className="text-center py-4" style={{ color: "var(--cor-subtitulo)" }}>
+                <p className="text-center py-4 text-sm md:text-base" style={{ color: "var(--cor-subtitulo)" }}>
                   {t("semVendas")}
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {vendas.slice(0, 5).map((venda) => (
-                    <div
-                      key={venda.id}
-                      className="flex justify-between items-center py-2 border-b"
-                      style={{
-                        borderColor: modoDark ? "#FFFFFF" : "#000000",
-                      }}
-                    >
-                      <div>
-                        <p style={{ color: "var(--cor-fonte)" }}>{venda.produto?.nome || "Produto desconhecido"}</p>
-                        <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                          {venda.cliente?.nome || t("clienteNaoInformado")} • {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p style={{ color: "var(--cor-fonte)" }}>
-                          {venda.quantidade} x R$ {(venda.produto?.preco || 0).toFixed(2).replace(".", ",")}
-                        </p>
-                        <p className="font-medium" style={{ color: modoDark ? "#FBBF24" : "#00332C" }}>
-                          R$ {(venda.valorVenda || 0).toFixed(2).replace(".", ",")}
-                        </p>
+                    <div key={venda.id} className="border-b pb-2" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
+                      <div className="flex justify-between items-center py-2">
+                        <div>
+                          <p className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                            {venda.produto?.nome || "Produto desconhecido"}
+                          </p>
+                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            {venda.cliente?.nome || t("clienteNaoInformado")} • {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                            {venda.quantidade} x R$ {(venda.produto?.preco || 0).toFixed(2).replace(".", ",")}
+                          </p>
+                          <p className="font-medium text-sm md:text-base" style={{ color: modoDark ? "#FBBF24" : "#00332C" }}>
+                            R$ {(venda.valorVenda || 0).toFixed(2).replace(".", ",")}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -1,4 +1,5 @@
 {
+  "estoqueBaixo.nenhumProduto": "No products with low stock",
   "Estado": "State",
   "intro": {
     "linha1": "Manage your inventory",

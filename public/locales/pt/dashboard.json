@@ -1,5 +1,6 @@
 {
   "Estado": "Estado",
+  "estoqueBaixo.nenhumProduto": "Nenhum produto com estoque baixo",
   "intro": {
     "linha1": "Controle seu estoque de",
     "linha2": "forma simples e inteligente"

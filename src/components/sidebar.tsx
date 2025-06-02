@@ -22,6 +22,9 @@ export default function Sidebar() {
   const { logar } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioInicializado, setAudioInicializado] = useState(false);
+  const ultimaNotificacaoRef = useRef<string | null>(null);
+  const ultimoTempoNotificacaoRef = useRef<number>(0);
+  const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
 
   const verificarEstoque = async () => {
     try {
@@ -44,6 +47,62 @@ export default function Sidebar() {
       setAudioInicializado(true);
     }
   };
+
+  const tocarSomNotificacao = useCallback(async () => {
+    if (!audioInicializado || !audioRef.current) return;
+
+    const somAtivado = localStorage.getItem("somNotificacao") !== "false";
+    if (!somAtivado) return;
+
+    try {
+      await audioRef.current.play();
+    } catch (erro) {
+      console.error("Erro ao reproduzir som:", erro);
+    }
+  }, [audioInicializado]);
+
+  const verificarNotificacoes = useCallback(async (idUsuario: string, tocarSomImediato = false) => {
+    try {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+      const notificacoes: NotificacaoI[] = await resposta.json();
+
+      const notificacoesNaoLidas = notificacoes.filter((n: NotificacaoI) => {
+        if (n.empresaId) {
+          return n.NotificacaoLida?.length === 0;
+        }
+        return !n.lida;
+      });
+
+      notificacoesNaoLidasRef.current = notificacoesNaoLidas;
+      setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
+
+      if (notificacoesNaoLidas.length > 0) {
+        const agora = Date.now();
+        const dezMinutosEmMs = 7 * 60 * 1000;
+
+        const notificacaoMaisRecente = notificacoesNaoLidas.reduce((maisRecente, atual) => {
+          const dataAtual = new Date(atual.createdAt).getTime();
+          const dataMaisRecente = maisRecente ? new Date(maisRecente.createdAt).getTime() : 0;
+          return dataAtual > dataMaisRecente ? atual : maisRecente;
+        }, notificacoesNaoLidas[0]);
+
+        const idNotificacaoAtual = notificacaoMaisRecente.id;
+
+        if (idNotificacaoAtual !== ultimaNotificacaoRef.current || 
+            agora - ultimoTempoNotificacaoRef.current > dezMinutosEmMs) {
+          
+          ultimaNotificacaoRef.current = idNotificacaoAtual;
+          ultimoTempoNotificacaoRef.current = agora;
+          
+          if (tocarSomImediato || !mostrarNotificacoes) {
+            await tocarSomNotificacao();
+          }
+        }
+      }
+    } catch (erro) {
+      console.error("Erro ao verificar notificações:", erro);
+    }
+  }, [mostrarNotificacoes, tocarSomNotificacao]);
 
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -78,37 +137,6 @@ export default function Sidebar() {
       }
     }
 
-    async function verificarNotificacoes(idUsuario: string, tocarSomImediato = false) {
-      try {
-        const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-        const notificacoes = await resposta.json();
-
-        const temNaoLidas = notificacoes.some((n: NotificacaoI) => {
-          if (n.empresaId) {
-            return n.NotificacaoLida?.length === 0;
-          }
-          return !n.lida;
-        });
-
-        setTemNotificacaoNaoLida(temNaoLidas);
-
-        if (temNaoLidas && audioInicializado) {
-          const somAtivado = localStorage.getItem("somNotificacao") !== "false";
-          if (somAtivado && audioRef.current) {
-            try {
-              if (tocarSomImediato || true) {
-                await audioRef.current.play();
-              }
-            } catch (erro) {
-              console.error("Erro ao reproduzir som:", erro);
-            }
-          }
-        }
-      } catch (erro) {
-        console.error("Erro ao verificar notificações:", erro);
-      }
-    }
-
     carregarDados();
 
     const intervaloNotificacoes = setInterval(() => {
@@ -119,7 +147,7 @@ export default function Sidebar() {
       clearInterval(intervaloEstoque);
       clearInterval(intervaloNotificacoes);
     };
-  }, [logar, audioInicializado]);
+  }, [logar, verificarNotificacoes]);
 
   const alternarSidebar = () => {
     inicializarAudio();
@@ -129,6 +157,10 @@ export default function Sidebar() {
   const alternarNotificacoes = async () => {
     inicializarAudio();
     setMostrarNotificacoes(!mostrarNotificacoes);
+    
+    if (!mostrarNotificacoes && notificacoesNaoLidasRef.current.length > 0) {
+      await tocarSomNotificacao();
+    }
   };
 
   return (
@@ -428,52 +460,52 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
   return (
     <div
-    ref={panelRef}
-    className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
-    style={{
-      borderTop: "2px solid #015959",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
-    }}
-  >
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-lg font-bold">{t("notifications")}</h2>
-      <div className="flex gap-2">
-        {!mostrarLidas && (
+      ref={panelRef}
+      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
+      style={{
+        borderTop: "2px solid #015959",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
+      }}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold">{t("notifications")}</h2>
+        <div className="flex gap-2">
+          {!mostrarLidas && (
+            <button
+              onClick={marcarTodasComoLidas}
+              className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+            >
+              {t("marcarLidas")}
+            </button>
+          )}
           <button
-            onClick={marcarTodasComoLidas}
+            onClick={alternarMostrarLidas}
             className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
           >
-            {t("marcarLidas")}
+            {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
           </button>
+          <button
+            onClick={aoFechar}
+            className="text-white hover:text-gray-300 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+      <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+        {mostrarLidas && (
+          <div className="text-center py-2 text-gray-300 italic text-xs">
+          {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
+        </div>
         )}
-        <button
-          onClick={alternarMostrarLidas}
-          className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
-        >
-          {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
-        </button>
-        <button
-          onClick={aoFechar}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          ✕
-        </button>
+        {notificacoes.length > 0 ? (
+          tabelaNotificacoes
+        ) : (
+          <p className="text-center py-4 text-gray-300">
+            {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
+          </p>
+        )}
       </div>
     </div>
-    <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
-      {mostrarLidas && (
-        <div className="text-center py-2 text-gray-300 italic text-xs">
-        {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
-      </div>
-      )}
-      {notificacoes.length > 0 ? (
-        tabelaNotificacoes
-      ) : (
-        <p className="text-center py-4 text-gray-300">
-          {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
-        </p>
-      )}
-    </div>
-  </div>
   );
 }

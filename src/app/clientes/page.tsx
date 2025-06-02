@@ -1,7 +1,7 @@
 "use client";
 import { ClienteI } from "@/utils/types/clientes";
 import { useEffect, useState } from "react";
-import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt } from "react-icons/fa";
+import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronUp, FaEdit, FaEye } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,7 @@ export default function Clientes() {
   });
 
   const [busca, setBusca] = useState("");
+  const [clienteExpandido, setClienteExpandido] = useState<string | null>(null);
   const { t } = useTranslation("clientes");
   const router = useRouter();
 
@@ -113,6 +114,17 @@ export default function Clientes() {
 
     initialize();
   }, []);
+
+  const clientesDaEmpresa = empresaId 
+    ? clientes.filter(cliente => cliente.empresaId === empresaId)
+    : [];
+
+  const clientesFiltrados = clientesDaEmpresa.filter(
+    (cliente) =>
+      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      cliente.email?.toLowerCase().includes(busca.toLowerCase()) ||
+      cliente.telefone?.includes(busca)
+  );
 
   async function handleAdicionarCliente() {
     handleAcaoProtegida(async () => {
@@ -268,32 +280,41 @@ export default function Clientes() {
     return partes.join(", ");
   }
 
+  function formatarTelefone(telefone: string) {
+    if (!telefone) return "-";
+    return `(${telefone.slice(0, 2)}) ${telefone.slice(2, 7)}-${telefone.slice(7)}`;
+  }
+
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
+  const toggleExpandirCliente = (id: string) => {
+    setClienteExpandido(clienteExpandido === id ? null : id);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center px-2 py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3"
+          <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-3"
             style={{
               backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
               color: modoDark ? "#FFFFFF" : "#1E3A8A"
             }}>
-            <FaLock className="text-xl" />
+            <FaLock className="text-lg md:text-xl" />
             <div>
-              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <p className="font-bold text-sm md:text-base">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p className="text-xs md:text-sm">{t("empresaNaoAtivada.alertaMensagem")}</p>
             </div>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
           <div
-            className="flex items-center border rounded-full px-4 py-2 shadow-sm w-full sm:w-auto"
+            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               borderColor: modoDark ? "#FFFFFF" : "#000000",
@@ -302,7 +323,7 @@ export default function Clientes() {
             <input
               type="text"
               placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent w-full"
+              className="outline-none font-mono text-sm bg-transparent"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               style={{ color: "var(--cor-fonte)" }}
@@ -313,7 +334,7 @@ export default function Clientes() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm w-full sm:w-auto"
+              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm sm:w-auto"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
                 borderColor: modoDark ? "#FFFFFF" : "#00332C",
@@ -326,113 +347,217 @@ export default function Clientes() {
         </div>
 
         <div
-          className="border rounded-xl overflow-x-auto shadow"
+          className="border rounded-xl shadow"
           style={{
             backgroundColor: "var(--cor-fundo-bloco)",
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          <table className="w-full text-sm font-mono min-w-[700px]">
-            <thead className="border-b">
-              <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4 text-center">{t("nome")}</th>
-                <th className="py-3 px-4 text-center">{t("email")}</th>
-                <th className="py-3 px-4 text-center">{t("telefone")}</th>
-                <th className="py-3 px-4 text-center">{t("endereco")}</th>
-                <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
-                <th className="py-3 px-4 text-center">{t("contato")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientes
-                .filter(
-                  (cliente) =>
-                    cliente.empresaId === empresaId &&
-                    (cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                      cliente.email?.toLowerCase().includes(busca.toLowerCase()) ||
-                      cliente.telefone?.includes(busca))
-                )
-                .map((cliente: ClienteI) => (
-                  <tr
+          {!empresaId || clientesDaEmpresa.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {t("nenhumClienteEncontrado")}
+            </div>
+          ) : clientesFiltrados.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {t("nenhumClienteEncontradoBusca")}
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b">
+                    <tr style={{ color: "var(--cor-fonte)" }}>
+                      <th className="py-3 px-4 text-center">{t("nome")}</th>
+                      <th className="py-3 px-4 text-center">{t("email")}</th>
+                      <th className="py-3 px-4 text-center">{t("telefone")}</th>
+                      <th className="py-3 px-4 text-center">{t("endereco")}</th>
+                      <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
+                      <th className="py-3 px-4 text-center">{t("contato")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clientesFiltrados.map((cliente: ClienteI) => (
+                      <tr
+                        key={cliente.id}
+                        className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                          }`}
+                      >
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(cliente);
+                            setForm(cliente);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {cliente.nome}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(cliente);
+                            setForm(cliente);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {cliente.email || "-"}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(cliente);
+                            setForm(cliente);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {formatarTelefone(cliente.telefone || "")}
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(cliente);
+                            setForm(cliente);
+                          }}
+                          className="py-3 px-4 text-center max-w-[200px] truncate"
+                          title={formatarEndereco(cliente) || "-"}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <FaMapMarkerAlt />
+                            <span className="truncate">
+                              {formatarEndereco(cliente) || "-"}
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          onClick={() => {
+                            setModalVisualizar(cliente);
+                            setForm(cliente);
+                          }}
+                          className="py-3 px-4 text-center"
+                        >
+                          {new Date(cliente.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <FaPhoneAlt
+                            onClick={() => handleEntrarContato(cliente)}
+                            color="#25D366"
+                            size={32}
+                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-2 p-2">
+                {clientesFiltrados.map((cliente) => (
+                  <div
                     key={cliente.id}
-                    className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
                       }`}
                   >
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(cliente);
-                        setForm(cliente);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {cliente.nome}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(cliente);
-                        setForm(cliente);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {cliente.email || "-"}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(cliente);
-                        setForm(cliente);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {cliente.telefone ? `(${cliente.telefone.slice(0, 2)}) ${cliente.telefone.slice(2, 7)}-${cliente.telefone.slice(7)}` : "-"}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(cliente);
-                        setForm(cliente);
-                      }}
-                      className="py-3 px-4 text-center max-w-[200px] truncate"
-                      title={formatarEndereco(cliente) || "-"}
-                    >
-                      <div className="flex items-center justify-center gap-1">
-                        <FaMapMarkerAlt />
-                        <span className="truncate">
-                          {formatarEndereco(cliente) || "-"}
-                        </span>
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold truncate" style={{ color: "var(--cor-fonte)" }}>
+                            {cliente.nome}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                          <span>{new Date(cliente.createdAt).toLocaleDateString()}</span>
+                        </div>
                       </div>
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(cliente);
-                        setForm(cliente);
-                      }}
-                      className="py-3 px-4 text-center"
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEntrarContato(cliente)}
+                          className="text-green-500 hover:text-green-700 p-1"
+                        >
+                          <FaPhoneAlt />
+                        </button>
+
+                        <button
+                          onClick={() => toggleExpandirCliente(cliente.id)}
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        >
+                          {clienteExpandido === cliente.id ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${clienteExpandido === cliente.id ? "max-h-96" : "max-h-0"
+                        }`}
+                      style={{ color: "var(--cor-fonte)" }}
                     >
-                      {new Date(cliente.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <FaPhoneAlt
-                        onClick={() => handleEntrarContato(cliente)}
-                        color="#25D366"
-                        size={32}
-                        className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
-                      />
-                    </td>
-                  </tr>
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("email")}:</span>
+                          <span>{cliente.email || "-"}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
+                          <span>{formatarTelefone(cliente.telefone || "")}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="font-semibold min-w-[80px]">{t("endereco")}:</span>
+                          <span className="flex items-center gap-1">
+                            <FaMapMarkerAlt />
+                            {formatarEndereco(cliente) || "-"}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          {podeEditar ? (
+                            <button
+                              onClick={() => {
+                                setModalVisualizar(cliente);
+                                setForm(cliente);
+                              }}
+                              className="flex items-center gap-1 px-3 py-1 rounded text-sm"
+                              style={{
+                                backgroundColor: modoDark ? "#1a25359f" : "#ececec",
+                                color: modoDark ? "#FFFFFF" : "#000000",
+                              }}
+                            >
+                              <FaEdit /> {t("editar")}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setModalVisualizar(cliente);
+                                setForm(cliente);
+                              }}
+                              className="flex items-center gap-1 px-3 py-1 rounded text-sm"
+                              style={{
+                                backgroundColor: modoDark ? "#1a25359f" : "#ececec",
+                                color: modoDark ? "#FFFFFF" : "#000000",
+                              }}
+                            >
+                              <FaEye /> {t("visualizar")}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-            </tbody>
-          </table>
+              </div>
+            </>
+          )}
         </div>
       </div>
+
       {(modalAberto || modalVisualizar) && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg shadow-xl w-full max-w-lg bg-opacity-90"
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-4 bg-opacity-90"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
+            <h2 className="text-lg md:text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
 
             <label className="block mb-1 text-sm">{t("nome")}</label>
             <input
@@ -531,7 +656,7 @@ export default function Clientes() {
                   setModalAberto(false);
                   setModalVisualizar(null);
                 }}
-                className="hover:underline cursor-pointer"
+                className="hover:underline cursor-pointer text-sm md:text-base"
                 style={{ color: "var(--cor-fonte)" }}
               >
                 {t("fechar")}
@@ -541,7 +666,7 @@ export default function Clientes() {
                   <>
                     <button
                       onClick={handleSalvarCliente}
-                      className="px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: "green",
                         color: "white",
@@ -552,7 +677,7 @@ export default function Clientes() {
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="px-4 py-2 rounded hover:bg-red-700 cursor-pointer"
+                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-red-700 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: "red",
                         color: "white",
@@ -566,7 +691,7 @@ export default function Clientes() {
               ) : (
                 <button
                   onClick={handleAdicionarCliente}
-                  className="px-4 py-2 rounded hover:bg-[#00443f] cursor-pointer"
+                  className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-[#00443f] cursor-pointer text-sm md:text-base"
                   style={{
                     backgroundColor: "green",
                     color: "white",
@@ -584,4 +709,4 @@ export default function Clientes() {
   );
 }
 
-const inputClass = "w-full rounded p-2 mb-3";
+const inputClass = "w-full rounded p-2 mb-3 text-sm md:text-base";

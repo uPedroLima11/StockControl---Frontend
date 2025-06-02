@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 export default function Dashboard() {
   const [contagemProduto, setContagemProduto] = useState(0);
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [todasVendas, setTodasVendas] = useState<VendaI[]>([]);
   const [modoDark, setModoDark] = useState(false);
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
+  const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const { t } = useTranslation("dashboard");
 
   useEffect(() => {
@@ -146,8 +148,8 @@ export default function Dashboard() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
       if (response.ok) {
         const data = await response.json();
-        setTodasVendas(data.vendas ||  []);
-        calcularVendas30Dias(data.vendas ||  []);
+        setTodasVendas(data.vendas || []);
+        calcularVendas30Dias(data.vendas || []);
       }
     } catch (error) {
       console.error("Erro ao buscar vendas:", error);
@@ -168,8 +170,18 @@ export default function Dashboard() {
     setVendas30Dias(total);
   }
 
+  const toggleExpandirProduto = (id: string) => {
+    setProdutoExpandido(produtoExpandido === id ? null : id);
+  };
+
+  const produtosEstoqueBaixo = produtos.filter(
+    (produto) => produto.quantidade < produto.quantidadeMin + 5 && 
+    produto.quantidadeMin !== undefined && 
+    produto.quantidadeMin > 0
+  );
+
   return (
-    <div className="px-2 sm:px-4 pt-8">
+    <div className="px-2 sm:px-4 pt-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="justify-center w-full max-w-6xl rounded-[2rem] px-4 sm:px-8 md:px-12 py-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 mx-auto shadow-[...]" style={{ backgroundColor: "var(--cor-caixa-destaque)" }}>
         <Image alt="icone" src="/icone.png" width={100} height={100} quality={100} priority className="object-contain" />
         <div className="text-white text-center md:text-left">
@@ -186,7 +198,6 @@ export default function Dashboard() {
           <h1 className="text-center text-2xl font-mono" style={{ color: "var(--cor-fonte)" }}>
             {t("dashboardTitulo")}
           </h1>
-
           <div
             className="border-2 rounded-xl p-6 shadow-md"
             style={{
@@ -224,7 +235,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
           <div
             className="border-2 rounded-xl p-6 shadow-md"
             style={{
@@ -279,9 +289,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
           <div
-            className="border-2 rounded-xl p-6 shadow-md overflow-x-auto"
+            className="border-2 rounded-xl p-6 shadow-md"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               borderColor: modoDark ? "#fffff2" : "#000000",
@@ -290,19 +299,18 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
               {t("estoqueBaixo.titulo")}
             </h2>
-            <table className="min-w-full text-sm text-left">
-              <thead className="border-b">
-                <tr style={{ color: "var(--cor-fonte)" }} className="font-semibold">
-                  <th className="py-2 pr-4 text-start whitespace-nowrap">{t("estoqueBaixo.colunas.produto")}</th>
-                  <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
-                  <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
-                  <th className="py-2 pr-4 text-center whitespace-nowrap">{t("Estado")}</th>
-                </tr>
-              </thead>
-              <tbody style={{ color: "var(--cor-fonte)" }}>
-                {produtos
-                  .filter((produto) => produto.quantidade < produto.quantidadeMin + 5 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0)
-                  .map((produto) => (
+            <div className="hidden md:block">
+              <table className="min-w-full text-sm text-left">
+                <thead className="border-b">
+                  <tr style={{ color: "var(--cor-fonte)" }} className="font-semibold">
+                    <th className="py-2 pr-4 text-start whitespace-nowrap">{t("estoqueBaixo.colunas.produto")}</th>
+                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
+                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
+                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("Estado")}</th>
+                  </tr>
+                </thead>
+                <tbody style={{ color: "var(--cor-fonte)" }}>
+                  {produtosEstoqueBaixo.map((produto) => (
                     <tr key={produto.id} className="border-b">
                       <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
                       <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
@@ -320,8 +328,71 @@ export default function Dashboard() {
                       </td>
                     </tr>
                   ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="md:hidden space-y-2">
+              {produtosEstoqueBaixo.length === 0 ? (
+                <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+                  {t("estoqueBaixo.nenhumProduto")}
+                </div>
+              ) : (
+                produtosEstoqueBaixo.map((produto) => (
+                  <div
+                    key={produto.id}
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                            {produto.nome}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                            {t("estoqueBaixo.colunas.estoqueAtual")}: {produto.quantidade}
+                          </p>
+                          <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                            {t("estoqueBaixo.colunas.estoqueIdeal")}: {produto.quantidadeMin}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => toggleExpandirProduto(produto.id)}
+                        className="text-gray-500 hover:text-gray-700 p-1"
+                        style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                      >
+                        {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
+                      </button>
+                    </div>
+
+                    <div
+                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`}
+                      style={{ color: "var(--cor-fonte)" }}
+                    >
+                      <div className="pt-2 border-t" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                        <div className="flex items-center gap-1">
+                          {produto.quantidade < produto.quantidadeMin ? (
+                            <>
+                              <LuShieldAlert size={18} color="#dc143c" />
+                              <span>{t("estoqueBaixo.estadoCritico")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <LuTriangleAlert size={18} color="#eead2d" />
+                              <span>{t("estoqueBaixo.estadoAtencao")}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

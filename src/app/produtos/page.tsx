@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ProdutoI } from "@/utils/types/produtos";
@@ -6,7 +5,7 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -22,6 +21,7 @@ export default function Produtos() {
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
+  const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const { t } = useTranslation("produtos");
   const router = useRouter();
 
@@ -65,7 +65,6 @@ export default function Produtos() {
       return false;
     }
   };
-
 
   const mostrarAlertaNaoAtivada = () => {
     Swal.fire({
@@ -383,10 +382,18 @@ export default function Produtos() {
 
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
+  const toggleExpandirProduto = (id: string) => {
+    setProdutoExpandido(produtoExpandido === id ? null : id);
+  };
+
+  const formatarPreco = (preco: number) => {
+    return preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   return (
-    <div className="flex justify-center px-4 py-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
         </h1>
 
@@ -404,9 +411,9 @@ export default function Produtos() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
           <div
-            className="flex items-center border rounded-full px-4 py-2 shadow-sm"
+            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               borderColor: modoDark ? "#FFFFFF" : "#000000",
@@ -439,67 +446,162 @@ export default function Produtos() {
         </div>
 
         <div
-          className="border rounded-xl overflow-x-auto shadow"
+          className="border rounded-xl shadow"
           style={{
             backgroundColor: "var(--cor-fundo-bloco)",
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          <table className="w-full text-sm font-mono">
-            <thead className="border-b">
-              <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4">
-                  <div className="flex items-center gap-1">
-                    <FaCog /> {t("nome")}
+          {produtosFiltrados.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {t("nenhumProdutoEncontrado")}
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b">
+                    <tr style={{ color: "var(--cor-fonte)" }}>
+                      <th className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <FaCog /> {t("nome")}
+                        </div>
+                      </th>
+                      <th>{t("fornecedor")}</th>
+                      <th>{t("categoria")}</th>
+                      <th className="text-center">{t("estoque")}</th>
+                      <th>{t("preco")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {produtosFiltrados.map((produto) => (
+                      <tr
+                        key={produto.id}
+                        onClick={() => {
+                          setModalVisualizar(produto);
+                          setForm(produto);
+                        }}
+                        className="border-b hover:bg-opacity-50 transition cursor-pointer"
+                        style={{
+                          color: "var(--cor-fonte)",
+                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                        }}
+                      >
+                        <td className="py-3 px-4 flex items-center gap-2">
+                          <Image
+                            src={produto.foto || "/out.jpg"}
+                            width={30}
+                            height={30}
+                            className="rounded"
+                            alt={produto.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/out.jpg";
+                            }}
+                          />
+                          <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
+                        </td>
+                        <td className="py-3 px-3 text-center">{produto.fornecedor?.nome || "-"}</td>
+                        <td className="py-3 px-3 text-center">{produto.categoria?.nome || "-"}</td>
+                        <td className="py-3 px-4 text-center">{produto.quantidade || "-"}</td>
+                        <td className="py-3 px-3 text-center">
+                          R$ {formatarPreco(produto.preco)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden space-y-2 p-2">
+                {produtosFiltrados.map((produto) => (
+                  <div
+                    key={produto.id}
+                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      }`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Image
+                          src={produto.foto || "/out.jpg"}
+                          width={40}
+                          height={40}
+                          className="rounded"
+                          alt={produto.nome}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/out.jpg";
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                            {produto.nome}
+                          </p>
+                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            R$ {formatarPreco(produto.preco)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => toggleExpandirProduto(produto.id)}
+                        className="text-gray-500 hover:text-gray-700 p-1"
+                        style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                      >
+                        {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
+                      </button>
+                    </div>
+
+                    <div
+                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"
+                        }`}
+                      style={{ color: "var(--cor-fonte)" }}
+                    >
+                      <div className="pt-2 border-t" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <p className="font-semibold">{t("fornecedor")}:</p>
+                            <p>{produto.fornecedor?.nome || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">{t("categoria")}:</p>
+                            <p>{produto.categoria?.nome || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">{t("estoque")}:</p>
+                            <p>{produto.quantidade || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold">{t("quantidadeMinima")}:</p>
+                            <p>{produto.quantidadeMin || "-"}</p>
+                          </div>
+                        </div>
+                        {produto.descricao && (
+                          <div className="mt-2">
+                            <p className="font-semibold">{t("descricao")}:</p>
+                            <p>{produto.descricao}</p>
+                          </div>
+                        )}
+                        <div className="mt-3 flex justify-end">
+                          <button
+                            onClick={() => {
+                              setModalVisualizar(produto);
+                              setForm(produto);
+                            }}
+                            className="px-3 py-1 text-sm rounded border"
+                            style={{
+                              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                              color: modoDark ? "#FFFFFF" : "#000000",
+                            }}
+                          >
+                            {t("editar")}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </th>
-                <th>{t("fornecedor")}</th>
-                <th>{t("categoria")}</th>
-                <th className="text-center">{t("estoque")}</th>
-                <th>{t("preco")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {produtosFiltrados.map((produto) => (
-                <tr
-                  key={produto.id}
-                  onClick={() => {
-                    setModalVisualizar(produto);
-                    setForm(produto);
-                  }}
-                  className="border-b hover:bg-opacity-50 transition cursor-pointer"
-                  style={{
-                    color: "var(--cor-fonte)",
-                    borderColor: modoDark ? "#FFFFFF" : "#000000",
-                  }}
-                >
-                  <td className="py-3 px-4 flex items-center gap-2">
-                    <Image
-                      src={produto.foto || "/out.jpg"}
-                      width={30}
-                      height={30}
-                      className="rounded"
-                      alt={produto.nome}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/out.jpg";
-                      }}
-                    />
-                    <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
-                  </td>
-                  <td className="py-3 px-3 text-center">{produto.fornecedor?.nome || "-"}</td>
-                  <td className="py-3 px-3 text-center">{produto.categoria?.nome || "-"}</td>
-                  <td className="py-3 px-4 text-center">{produto.quantidade || "-"}</td>
-                  <td className="py-3 px-3 text-center">
-                    R$
-                    {produto.preco
-                      .toFixed(2)
-                      .replace(".", ",")
-                      .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {(modalAberto || modalVisualizar) && (

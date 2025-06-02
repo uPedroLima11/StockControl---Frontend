@@ -16,6 +16,8 @@
   "fechar": "Close",
   "salvar": "Save",
   "excluir": "Delete",
+  "editar": "Edit",
+  "nenhumProdutoEncontrado": "No products found",
   "criar": "Create",
   "buscar": "Search Product",
   "editarProduto": "Edit Product",

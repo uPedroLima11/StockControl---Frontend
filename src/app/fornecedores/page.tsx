@@ -1,7 +1,7 @@
 "use client";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaPhoneAlt, FaLock } from "react-icons/fa";
+import { FaCog, FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,7 @@ export default function Fornecedores() {
     Produto: [],
   });
   const [busca, setBusca] = useState("");
+  const [fornecedorExpandido, setFornecedorExpandido] = useState<string | null>(null);
   const { t } = useTranslation("fornecedores");
   const router = useRouter();
 
@@ -116,6 +117,19 @@ export default function Fornecedores() {
     initialize();
   }, []);
 
+  const formatarData = (dataString: string | Date) => {
+    const data = new Date(dataString);
+    return data.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const formatarTelefone = (telefone: string) => {
+    return `(${telefone.slice(2, 4)}) ${telefone.slice(4, 9)}-${telefone.slice(9)}`;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -160,7 +174,7 @@ export default function Fornecedores() {
 
       if (response.status === 201) {
         Swal.fire({
-          text: "Fornecedor adicionado com sucesso!",
+          text: t("mensagens.fornecedorAdicionado"),
           icon: "success",
           confirmButtonColor: "#013C3C",
         });
@@ -169,19 +183,19 @@ export default function Fornecedores() {
       } else {
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Algo deu errado, tente novamente.",
+          title: t("mensagens.erro"),
+          text: t("mensagens.erroAdicionar"),
           confirmButtonColor: "#013C3C",
         });
       }
-    });
-  }
+        });
+      }
 
-  async function handleSalvarFornecedor() {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-    handleAcaoProtegida(async () => {
+      async function handleSalvarFornecedor() {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (!usuarioSalvo) return;
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+        handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
@@ -211,9 +225,9 @@ export default function Fornecedores() {
 
         if (response.ok) {
           Swal.fire({
-            text: "Fornecedor atualizado com sucesso!",
-            icon: "success",
-            confirmButtonColor: "#013C3C",
+        text: t("mensagens.fornecedorAtualizado"),
+        icon: "success",
+        confirmButtonColor: "#013C3C",
           });
           setModalVisualizar(null);
           window.location.reload();
@@ -224,16 +238,16 @@ export default function Fornecedores() {
         console.error("Erro ao atualizar fornecedor:", error);
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Algo deu errado ao atualizar o fornecedor.",
+          title: t("mensagens.erro"),
+          text: t("mensagens.erroAtualizar"),
           confirmButtonColor: "#013C3C",
         });
       }
-    });
-  }
+        });
+      }
 
-  async function handleDelete() {
-    handleAcaoProtegida(async () => {
+      async function handleDelete() {
+        handleAcaoProtegida(async () => {
       if (!modalVisualizar) return;
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
@@ -243,31 +257,31 @@ export default function Fornecedores() {
       }
 
       const result = await Swal.fire({
-        title: "Tem certeza?",
-        text: "Você não poderá reverter isso!",
+        title: t("mensagens.temCerteza"),
+        text: t("mensagens.naoReverter"),
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, deletar!",
-        cancelButtonText: "Cancelar",
+        confirmButtonText: t("mensagens.simDeletar"),
+        cancelButtonText: t("mensagens.cancelar"),
       });
 
       if (result.isConfirmed) {
         try {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-            method: "DELETE",
+        method: "DELETE",
           });
-          Swal.fire("Deletado!", "O produto foi excluído com sucesso.", "success");
+          Swal.fire(t("mensagens.deletado"), t("mensagens.produtoExcluido"), "success");
           setModalVisualizar(null);
           window.location.reload();
         } catch (err) {
           console.error("Erro ao excluir produto:", err);
-          Swal.fire("Erro!", "Não foi possível deletar o produto.", "error");
+          Swal.fire(t("mensagens.erro"), t("mensagens.erroDeletar"), "error");
         }
       }
-    });
-  }
+        });
+      }
 
   function handleEntrarContato(fornecedor: FornecedorI) {
     const telefoneFormatado = fornecedor.telefone.replace(/\D/g, "");
@@ -276,32 +290,36 @@ export default function Fornecedores() {
     window.open(urlWhatsApp, "_blank");
   }
 
+  const toggleExpandirFornecedor = (id: string) => {
+    setFornecedorExpandido(fornecedorExpandido === id ? null : id);
+  };
+
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
           {t("titulo")}
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3"
+          <div className="mb-3 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-3"
             style={{
               backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
               color: modoDark ? "#FFFFFF" : "#1E3A8A"
             }}>
-            <FaLock className="text-xl" />
+            <FaLock className="text-lg md:text-xl" />
             <div>
-              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <p className="font-bold text-sm md:text-base">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p className="text-xs md:text-sm">{t("empresaNaoAtivada.alertaMensagem")}</p>
             </div>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
           <div
-            className="flex items-center border rounded-full px-4 py-2 shadow-sm w-full sm:w-auto"
+            className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               borderColor: modoDark ? "#FFFFFF" : "#000000",
@@ -310,7 +328,7 @@ export default function Fornecedores() {
             <input
               type="text"
               placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent w-full"
+              className="outline-none font-mono text-sm bg-transparent"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               style={{ color: "var(--cor-fonte)" }}
@@ -321,7 +339,7 @@ export default function Fornecedores() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm w-full sm:w-auto"
+              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm  sm:w-auto"
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
                 borderColor: modoDark ? "#FFFFFF" : "#00332C",
@@ -334,138 +352,248 @@ export default function Fornecedores() {
         </div>
 
         <div
-          className="border rounded-xl overflow-x-auto shadow"
+          className="border rounded-xl shadow"
           style={{
             backgroundColor: "var(--cor-fundo-bloco)",
             borderColor: modoDark ? "#FFFFFF" : "#000000",
           }}
         >
-          <table className="w-full text-sm font-mono min-w-[700px]">
-            <thead className="border-b">
-              <tr style={{ color: "var(--cor-fonte)" }}>
-                <th className="py-3 px-4 text-center">
-                  <div className="flex items-center gap-1 justify-center">
-                    <FaCog /> {t("foto")}
-                  </div>
-                </th>
-                <th className="py-3 px-4 text-center">{t("nome")}</th>
-                <th className="py-3 px-4 text-center">{t("cnpj")}</th>
-                <th className="py-3 px-4 text-center">{t("email")}</th>
-                <th className="py-3 px-4 text-center">{t("telefone")}</th>
-                <th className="py-3 px-4 text-center">{t("categoria")}</th>
-                <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
-                <th className="py-3 px-4 text-center">{t("contato")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fornecedores
-                .filter(
-                  (fornecedor) =>
-                    fornecedor.empresaId === empresaId &&
-                    (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                      fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
-                )
-                .map((fornecedor) => (
-                  <tr
-                    key={fornecedor.id}
-                    className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                      }`}
-                  >
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
+          {fornecedores.filter(fornecedor => fornecedor.empresaId === empresaId).length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+              {t("nenhumFornecedorEncontrado")}
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b">
+                    <tr style={{ color: "var(--cor-fonte)" }}>
+                      <th className="py-3 px-4 text-center">
+                        <div className="flex items-center gap-1 justify-center">
+                          <FaCog /> {t("foto")}
+                        </div>
+                      </th>
+                      <th className="py-3 px-4 text-center">{t("nome")}</th>
+                      <th className="py-3 px-4 text-center">{t("cnpj")}</th>
+                      <th className="py-3 px-4 text-center">{t("email")}</th>
+                      <th className="py-3 px-4 text-center">{t("telefone")}</th>
+                      <th className="py-3 px-4 text-center">{t("categoria")}</th>
+                      <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
+                      <th className="py-3 px-4 text-center">{t("contato")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fornecedores
+                      .filter(
+                        (fornecedor) =>
+                          fornecedor.empresaId === empresaId &&
+                          (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                            fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
+                      )
+                      .map((fornecedor) => (
+                        <tr
+                          key={fornecedor.id}
+                          className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                            }`}
+                        >
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {fornecedor.foto ? (
+                              <img
+                                src={fornecedor.foto || "/contadefault.png"}
+                                alt={fornecedor.nome}
+                                className="mx-auto w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
+                            )}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {fornecedor.nome}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {fornecedor.cnpj}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {fornecedor.email}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {formatarTelefone(fornecedor.telefone)}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {fornecedor.categoria}
+                          </td>
+                          <td
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                            className="py-3 px-4 text-center"
+                          >
+                            {formatarData(fornecedor.createdAt)}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <FaPhoneAlt
+                              onClick={() => handleEntrarContato(fornecedor)}
+                              color="#25D366"
+                              size={20}
+                              className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="md:hidden space-y-2 p-2">
+                {fornecedores
+                  .filter(
+                    (fornecedor) =>
+                      fornecedor.empresaId === empresaId &&
+                      (
+                        fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                        fornecedor.categoria.toLowerCase().includes(busca.toLowerCase())
+                      )
+                  )
+                  .map((fornecedor) => (
+                    <div
+                      key={fornecedor.id}
+                      className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                        }`}
                     >
-                      {fornecedor.foto ? (
-                        <img
-                          src={fornecedor.foto || "/contadefault.png"}
-                          alt={fornecedor.nome}
-                          className="mx-auto w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
-                      )}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.nome}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.cnpj}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.email}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {`(${fornecedor.telefone.slice(2, 4)}) ${fornecedor.telefone.slice(4, 9)}-${fornecedor.telefone.slice(9)}`}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {fornecedor.categoria}
-                    </td>
-                    <td
-                      onClick={() => {
-                        setModalVisualizar(fornecedor);
-                        setForm(fornecedor);
-                      }}
-                      className="py-3 px-4 text-center"
-                    >
-                      {new Date(fornecedor.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <FaPhoneAlt
-                        onClick={() => handleEntrarContato(fornecedor)}
-                        color="#25D366"
-                        size={32}
-                        className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
-                      />
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-3">
+                          {fornecedor.foto ? (
+                            <img
+                              src={fornecedor.foto || "/contadefault.png"}
+                              alt={fornecedor.nome}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
+                          )}
+                          <div>
+                            <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>{fornecedor.nome}</p>
+                            <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                              {fornecedor.categoria}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <FaPhoneAlt
+                            onClick={() => handleEntrarContato(fornecedor)}
+                            color="#25D366"
+                            size={16}
+                            className="cursor-pointer border p-1 rounded-full"
+                          />
+                          <button
+                            onClick={() => toggleExpandirFornecedor(fornecedor.id)}
+                            className="text-gray-500 hover:text-gray-700 p-1"
+                            style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          >
+                            {fornecedorExpandido === fornecedor.id ? <FaChevronUp /> : <FaChevronDown />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
+                          }`}
+                        style={{ color: "var(--cor-fonte)" }}
+                      >
+                        <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("cnpj")}:</span>
+                            <span>{fornecedor.cnpj}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("email")}:</span>
+                            <span>{fornecedor.email}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
+                            <span>{formatarTelefone(fornecedor.telefone)}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="font-semibold min-w-[80px]">{t("adicionadoEm")}:</span>
+                            <span>{formatarData(fornecedor.createdAt)}</span>
+                          </div>
+                          {podeEditar && (
+                            <div className="flex justify-end gap-2 pt-2">
+                              <button
+                                onClick={() => {
+                                  setModalVisualizar(fornecedor);
+                                  setForm(fornecedor);
+                                }}
+                                className="px-3 py-1 text-xs rounded border"
+                                style={{
+                                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                                  borderColor: modoDark ? "#FFFFFF" : "#000000",
+                                  color: modoDark ? "#FFFFFF" : "#000000"
+                                }}
+                              >
+                                {t("editar")}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
+
       {(modalAberto || modalVisualizar) && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg shadow-xl w-full max-w-lg bg-opacity-90"
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2 bg-opacity-90"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
               color: "var(--cor-fonte)",
             }}
           >
-            <h2 className="text-xl font-bold mb-4">{modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}</h2>
+            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">
+              {modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}
+            </h2>
 
             <label className="block mb-1 text-sm">{t("nome")}</label>
             <input
@@ -538,7 +666,7 @@ export default function Fornecedores() {
                 <img
                   src={fotoPreview || form.foto || ""}
                   alt="Preview"
-                  className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-full mb-2"
+                  className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-full mb-2 mx-auto"
                   onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
                 />
               )}
@@ -565,7 +693,7 @@ export default function Fornecedores() {
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="hover:underline cursor-pointer"
+                className="hover:underline cursor-pointer text-sm md:text-base"
                 style={{ color: "var(--cor-fonte)" }}
               >
                 {t("fechar")}
@@ -574,8 +702,8 @@ export default function Fornecedores() {
                 podeEditar && (
                   <>
                     <button
-                      onClick={handleSalvarFornecedor}
-                      className="px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+                      onClick={ handleSalvarFornecedor}
+                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: "green",
                         color: "white",
@@ -586,7 +714,7 @@ export default function Fornecedores() {
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="px-4 py-2 rounded hover:bg-red-700 cursor-pointer"
+                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-red-700 cursor-pointer text-sm md:text-base"
                       style={{
                         backgroundColor: "red",
                         color: "white",
@@ -600,7 +728,7 @@ export default function Fornecedores() {
               ) : (
                 <button
                   onClick={handleAdicionarFornecedor}
-                  className="px-4 py-2 rounded hover:bg-[#00443f] cursor-pointer"
+                  className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-[#00443f] cursor-pointer text-sm md:text-base"
                   style={{
                     backgroundColor: "green",
                     color: "white",
@@ -618,4 +746,4 @@ export default function Fornecedores() {
   );
 }
 
-const inputClass = "w-full rounded p-2 mb-3";
+const inputClass = "w-full rounded p-2 mb-3 text-sm md:text-base";
