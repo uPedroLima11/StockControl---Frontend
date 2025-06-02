@@ -1,0 +1,55 @@
+{
+  "titulo": "Clientes",
+  "buscar": "Buscar clientes...",
+  "novoCliente": "Novo Cliente",
+  "visualizarCliente": "Visualizar Cliente",
+  "adicionarCliente": "Adicionar Cliente",
+  "fechar": "Fechar",
+  "salvar": "Salvar",
+  "excluir": "Excluir",
+  "nome": "Nome",
+  "email": "E-mail",
+  "telefone": "Telefone",
+  "endereco": "Endereço",
+  "cidade": "Cidade",
+  "estado": "Estado",
+  "cep": "CEP",
+  "adicionadoEm": "Adicionado em",
+  "contato": "Contato",
+  "empresaNaoAtivada": {
+    "titulo": "Empresa não ativada",
+    "mensagem": "Para acessar todas as funcionalidades, ative sua empresa.",
+    "botao": "Ativar Empresa",
+    "alertaTitulo": "Funcionalidades limitadas",
+    "alertaMensagem": "Algumas ações estão desabilitadas até que sua empresa seja ativada."
+  },
+  "sucesso": {
+    "adicionarCliente": "Cliente adicionado com sucesso!",
+    "excluir": {
+      "titulo": "Deletado!",
+      "mensagem": "O cliente foi excluído com sucesso."
+    }
+  },
+  "erro": {
+    "titulo": "Oops...",
+    "mensagem": "Algo deu errado, tente novamente.",
+    "excluir": {
+      "titulo": "Erro!",
+      "mensagem": "Não foi possível deletar o cliente."
+    }
+  },
+  "confirmacao": {
+    "excluir": {
+      "titulo": "Tem certeza?",
+      "mensagem": "Você não poderá reverter isso!",
+      "confirmar": "Sim, deletar!",
+      "cancelar": "Cancelar"
+    }
+  },
+  "info": {
+    "semTelefone": {
+      "titulo": "Sem telefone",
+      "mensagem": "Este cliente não possui um número de telefone cadastrado."
+    }
+  }
+}

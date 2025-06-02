@@ -1,0 +1,55 @@
+{
+  "titulo": "Clients",
+  "buscar": "Search clients...",
+  "novoCliente": "New Client",
+  "visualizarCliente": "View Client",
+  "adicionarCliente": "Add Client",
+  "fechar": "Close",
+  "salvar": "Save",
+  "excluir": "Delete",
+  "nome": "Name",
+  "email": "Email",
+  "telefone": "Phone",
+  "endereco": "Address",
+  "cidade": "City",
+  "estado": "State",
+  "cep": "ZIP Code",
+  "adicionadoEm": "Added on",
+  "contato": "Contact",
+  "empresaNaoAtivada": {
+    "titulo": "Company not activated",
+    "mensagem": "To access all features, activate your company.",
+    "botao": "Activate Company",
+    "alertaTitulo": "Limited functionality",
+    "alertaMensagem": "Some actions are disabled until your company is activated."
+  },
+  "sucesso": {
+    "adicionarCliente": "Client added successfully!",
+    "excluir": {
+      "titulo": "Deleted!",
+      "mensagem": "The client has been deleted successfully."
+    }
+  },
+  "erro": {
+    "titulo": "Oops...",
+    "mensagem": "Something went wrong, please try again.",
+    "excluir": {
+      "titulo": "Error!",
+      "mensagem": "Could not delete the client."
+    }
+  },
+  "confirmacao": {
+    "excluir": {
+      "titulo": "Are you sure?",
+      "mensagem": "You won't be able to revert this!",
+      "confirmar": "Yes, delete it!",
+      "cancelar": "Cancel"
+    }
+  },
+  "info": {
+    "semTelefone": {
+      "titulo": "No phone number",
+      "mensagem": "This client doesn't have a registered phone number."
+    }
+  }
+}

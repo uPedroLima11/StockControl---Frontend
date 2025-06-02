@@ -1,5 +1,9 @@
 {
     "logs": {
+        "produto": "Product",
+        "quantidade": "Quantity",
+        "cliente": "Client",
+        "cliente_nao_informado": "Not Informed",
         "titulo": "Logs",
         "placeholder_busca": "Search Logs",
         "usuario": "User",

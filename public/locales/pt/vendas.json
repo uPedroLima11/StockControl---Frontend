@@ -17,6 +17,13 @@
     "totalVendas": "Total em Vendas",
     "vendaSucesso": "Venda realizada com sucesso",
     "erroFinalizarVenda": "Erro ao finalizar venda",
-    "processando": "Processando..."
-
+    "processando": "Processando...",
+    "cliente": "Cliente",
+    "naoInformarCliente": "Não informar cliente",
+    "clienteNaoInformado": "Cliente não informado",
+    "estoqueDisponivel": "Estoque disponível",
+    "semEstoqueAdicional": "sem estoque adicional",
+    "avisoEstoque": "Aviso de Estoque",
+    "quantidadeMaiorQueEstoque": "A quantidade solicitada é maior que o estoque disponível. Foi ajustada para o máximo disponível.",
+    "produtoSemEstoque": "Este produto está sem estoque no momento"
 }

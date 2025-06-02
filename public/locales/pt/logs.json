@@ -1,8 +1,12 @@
 {
   "logs": {
+    "cliente":"Cliente",
+    "produto": "Produto",
+    "quantidade": "QTD",
     "titulo": "Logs",
     "placeholder_busca": "Buscar Logs",
     "usuario": "Usuário",
+    "cliente_nao_informado": "Não Informado",
     "tipo": "Tipo",
     "descricao": "Descrição",
     "datacriacao": "Data de Criação",

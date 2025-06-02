@@ -1,6 +1,7 @@
 "use client";
 
 import { ProdutoI } from "@/utils/types/produtos";
+import { ClienteI } from "@/utils/types/clientes";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaSearch, FaShoppingCart, FaRegTrashAlt } from "react-icons/fa";
@@ -11,12 +12,14 @@ import { VendaI } from "@/utils/types/vendas";
 export default function Vendas() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
   const [vendas, setVendas] = useState<VendaI[]>([]);
+  const [clientes, setClientes] = useState<ClienteI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [carrinho, setCarrinho] = useState<{ produto: ProdutoI, quantidade: number }[]>([]);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const [totalVendas, setTotalVendas] = useState(0);
   const [carregando, setCarregando] = useState(true);
+  const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
   const { t } = useTranslation("vendas");
 
   useEffect(() => {
@@ -77,13 +80,17 @@ export default function Vendas() {
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
         setProdutos(produtosDaEmpresa);
 
+        const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
+        const clientesData = await responseClientes.json();
+        const clientesDaEmpresa = clientesData.clientes?.filter((c: ClienteI) => c.empresaId === usuario.empresaId) || [];
+        setClientes(clientesDaEmpresa);
+
         const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
         if (!responseVendas.ok) {
           throw new Error('Erro ao carregar vendas');
         }
 
         const vendasData = await responseVendas.json();
-
         const vendasDaEmpresa = vendasData.vendas || [];
 
         const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) =>
@@ -132,7 +139,6 @@ export default function Vendas() {
     }
   }, [carrinho]);
 
-
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     const itemExistente = carrinho.find(item => item.produto.id === produto.id);
 
@@ -144,10 +150,22 @@ export default function Vendas() {
             : item
         ));
       } else {
-        Swal.fire("Aviso", "Quantidade em estoque insuficiente", "warning");
+        Swal.fire({
+          icon: "warning",
+          title: t("avisoEstoque"),
+          text: t("quantidadeMaiorQueEstoque"),
+        });
       }
     } else {
-      setCarrinho([...carrinho, { produto, quantidade: 1 }]);
+      if (produto.quantidade > 0) {
+        setCarrinho([...carrinho, { produto, quantidade: 1 }]);
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: t("avisoEstoque"),
+          text: t("produtoSemEstoque"),
+        });
+      }
     }
   };
 
@@ -165,8 +183,12 @@ export default function Vendas() {
             const quantidadeNum = Number(novaQuantidade);
 
             if (produto && quantidadeNum > produto.quantidade) {
-              Swal.fire("Aviso", "Quantidade em estoque insuficiente", "warning");
-              return item;
+              Swal.fire({
+                icon: "warning",
+                title: t("avisoEstoque"),
+                text: t("quantidadeMaiorQueEstoque"),
+              });
+              return { ...item, quantidade: produto.quantidade };
             }
 
             if (quantidadeNum < 0) {
@@ -177,13 +199,13 @@ export default function Vendas() {
           }
           return item;
         })
-        .filter(item => item.quantidade >= 0);
+        .filter(item => item.quantidade > 0);
     });
   };
+
   const removerDoCarrinho = (produtoId: string) => {
     setCarrinho(carrinho.filter(item => item.produto.id !== produtoId));
   };
-
 
   const finalizarVenda = async () => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -206,7 +228,8 @@ export default function Vendas() {
             produtoId: Number(item.produto.id),
             quantidade: item.quantidade,
             valorCompra: item.produto.preco * 0.8,
-            UsuarioId: usuarioValor,
+            usuarioId: usuarioValor,
+            clienteId: clienteSelecionado,
           }),
         });
       });
@@ -227,6 +250,7 @@ export default function Vendas() {
       });
 
       setCarrinho([]);
+      setClienteSelecionado(null);
       localStorage.removeItem('carrinhoVendas');
 
       try {
@@ -420,9 +444,19 @@ export default function Vendas() {
                               (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
                           />
-                          <span style={{ color: "var(--cor-fonte)" }}>
-                            {item.produto.nome}
-                          </span>
+                          <div>
+                            <span style={{ color: "var(--cor-fonte)" }}>
+                              {item.produto.nome}
+                            </span>
+                            <div className="text-xs" style={{ 
+                              color: item.quantidade >= item.produto.quantidade ? "#EF4444" : "var(--cor-subtitulo)"
+                            }}>
+                              {t("estoqueDisponivel")}: {item.produto.quantidade}
+                              {item.quantidade >= item.produto.quantidade && (
+                                <span className="ml-1">({t("semEstoqueAdicional")})</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -478,6 +512,29 @@ export default function Vendas() {
                   </div>
 
                   <div className="mt-4 pt-4 border-t" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
+                    <div className="mb-4">
+                      <label className="block mb-1 text-sm" style={{ color: "var(--cor-fonte)" }}>
+                        {t("cliente")}
+                      </label>
+                      <select
+                        value={clienteSelecionado || ""}
+                        onChange={(e) => setClienteSelecionado(e.target.value || null)}
+                        className="w-full p-2 rounded border"
+                        style={{
+                          backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                          color: modoDark ? "#FFFFFF" : "#000000",
+                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                        }}
+                      >
+                        <option value="">{t("naoInformarCliente")}</option>
+                        {clientes.map((cliente) => (
+                          <option key={cliente.id} value={cliente.id}>
+                            {cliente.nome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="flex justify-between mb-2">
                       <span style={{ color: "var(--cor-fonte)" }}>{t("subtotal")}:</span>
                       <span style={{ color: "var(--cor-fonte)" }}>R$ {totalCarrinho.toFixed(2).replace(".", ",")}</span>
@@ -528,7 +585,7 @@ export default function Vendas() {
                       <div>
                         <p style={{ color: "var(--cor-fonte)" }}>{venda.produto?.nome || "Produto desconhecido"}</p>
                         <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                          {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
+                          {venda.cliente?.nome || t("clienteNaoInformado")} • {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
                         </p>
                       </div>
                       <div className="text-right">
