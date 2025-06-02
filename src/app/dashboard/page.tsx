@@ -159,6 +159,7 @@ export default function Dashboard() {
     data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
 
     const vendasFiltradas = vendas.filter(venda => {
+      if (!venda.createdAt) return false;
       const dataVenda = new Date(venda.createdAt);
       return dataVenda >= data30DiasAtras;
     });

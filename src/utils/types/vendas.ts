@@ -14,4 +14,5 @@ export interface VendaI {
   updatedAt?: string;
   produto?: ProdutoI;
   cliente?: ClienteI;
+  
 }
