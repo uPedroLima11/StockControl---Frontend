@@ -27,6 +27,7 @@ export default function Clientes() {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
+
   const [busca, setBusca] = useState("");
   const { t } = useTranslation("clientes");
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function Clientes() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
       if (!response.ok) {
-        throw new Error("Erro ao buscar dados da empresa");
+        throw new Error("Erro ao buscar os dados da empresa");
       }
       const empresaData = await response.json();
 
