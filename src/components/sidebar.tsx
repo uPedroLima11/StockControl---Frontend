@@ -328,13 +328,19 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
           : n.lida
       }));
   
-      return notificacoesComStatus.filter(n => {
+      notificacoesComStatus.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+  
+      const notificacoesFiltradas = notificacoesComStatus.filter(n => {
         if (mostrarLidas) {
           return n.lida;
         } else {
           return !n.lida;
         }
       });
+  
+      return mostrarLidas ? notificacoesFiltradas.slice(0, 15) : notificacoesFiltradas;
   
     } catch (erro) {
       console.error("Erro ao buscar notificações:", erro);
