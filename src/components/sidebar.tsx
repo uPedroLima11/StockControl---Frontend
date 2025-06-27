@@ -343,7 +343,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
       return mostrarLidas ? notificacoesFiltradas.slice(0, 15) : notificacoesFiltradas;
   
     } catch (erro) {
-      console.error("Erro ao buscar notificações:", erro);
+      console.error("Erro ao buscar as notificações:", erro);
       return [];
     }
   }, [usuario?.id, mostrarLidas]);
