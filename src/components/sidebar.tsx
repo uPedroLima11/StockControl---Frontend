@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
-import { FaCartShopping, FaClipboardUser, FaUsers} from "react-icons/fa6";
+import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
@@ -26,36 +26,36 @@ export default function Sidebar() {
   const ultimoTempoNotificacaoRef = useRef<number>(0);
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
 
- const verificarEstoque = async () => {
-  try {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) {
-      console.log("Nenhum usuário logado encontrado");
-      return;
+  const verificarEstoque = async () => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) {
+        console.log("Nenhum usuário logado encontrado");
+        return;
+      }
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ usuarioId }),
+        credentials: 'include'
+      });
+
+      if (!resposta.ok) {
+        const errorData = await resposta.json().catch(() => ({}));
+        throw new Error(`Erro HTTP ${resposta.status}: ${errorData.message || 'Erro desconhecido'}`);
+      }
+
+      const dados = await resposta.json();
+      console.log("Verificação de estoque concluída:", dados);
+    } catch (erro) {
+      console.error("Erro detalhado ao verificar estoque:", erro);
     }
-
-    const usuarioId = usuarioSalvo.replace(/"/g, "");
-    
-    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ usuarioId }), 
-      credentials: 'include'
-    });
-
-    if (!resposta.ok) {
-      const errorData = await resposta.json().catch(() => ({}));
-      throw new Error(`Erro HTTP ${resposta.status}: ${errorData.message || 'Erro desconhecido'}`);
-    }
-
-    const dados = await resposta.json();
-    console.log("Verificação de estoque concluída:", dados);
-  } catch (erro) {
-    console.error("Erro detalhado ao verificar estoque:", erro);
-  }
-};
+  };
   const inicializarAudio = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/notification-sound.mp3");
@@ -82,7 +82,16 @@ export default function Sidebar() {
       const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
       const notificacoes: NotificacaoI[] = await resposta.json();
 
-      const notificacoesNaoLidas = notificacoes.filter((n: NotificacaoI) => {
+      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
+
+      const notificacoesFiltradas = notificacoes.filter(n => {
+        if (!n.empresaId) {
+          return n.usuarioId === idUsuario;
+        }
+        return true;
+      });
+
+      const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
         if (n.empresaId) {
           return n.NotificacaoLida?.length === 0;
         }
@@ -104,12 +113,12 @@ export default function Sidebar() {
 
         const idNotificacaoAtual = notificacaoMaisRecente.id;
 
-        if (idNotificacaoAtual !== ultimaNotificacaoRef.current || 
-            agora - ultimoTempoNotificacaoRef.current > dezMinutosEmMs) {
-          
+        if (idNotificacaoAtual !== ultimaNotificacaoRef.current ||
+          agora - ultimoTempoNotificacaoRef.current > dezMinutosEmMs) {
+
           ultimaNotificacaoRef.current = idNotificacaoAtual;
           ultimoTempoNotificacaoRef.current = agora;
-          
+
           if (tocarSomImediato || !mostrarNotificacoes) {
             await tocarSomNotificacao();
           }
@@ -173,7 +182,7 @@ export default function Sidebar() {
   const alternarNotificacoes = async () => {
     inicializarAudio();
     setMostrarNotificacoes(!mostrarNotificacoes);
-    
+
     if (!mostrarNotificacoes && notificacoesNaoLidasRef.current.length > 0) {
       await tocarSomNotificacao();
     }
@@ -181,8 +190,8 @@ export default function Sidebar() {
 
   return (
     <>
-      <button 
-        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-3 rounded-full" 
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-3 rounded-full"
         onClick={alternarSidebar}
       >
         <FaBars />
@@ -252,10 +261,10 @@ export default function Sidebar() {
       </aside>
 
       {mostrarNotificacoes && (
-        <PainelNotificacoes 
-          estaVisivel={mostrarNotificacoes} 
-          aoFechar={() => setMostrarNotificacoes(false)} 
-          nomeEmpresa={nomeEmpresa} 
+        <PainelNotificacoes
+          estaVisivel={mostrarNotificacoes}
+          aoFechar={() => setMostrarNotificacoes(false)}
+          nomeEmpresa={nomeEmpresa}
         />
       )}
     </>
@@ -271,10 +280,10 @@ function LinkSidebar({ href, icon, label }: { href: string; icon: React.ReactNod
   );
 }
 
-function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: { 
-  estaVisivel: boolean; 
-  aoFechar: () => void; 
-  nomeEmpresa: string | null 
+function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
+  estaVisivel: boolean;
+  aoFechar: () => void;
+  nomeEmpresa: string | null
 }) {
   const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
@@ -316,32 +325,39 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
   const buscarNotificacoes = useCallback(async (): Promise<NotificacaoI[]> => {
     if (!usuario?.id) return [];
-  
+
     try {
       const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
       const todasNotificacoes: NotificacaoI[] = await resposta.json();
-  
-      const notificacoesComStatus = todasNotificacoes.map(n => ({
+
+      const notificacoesFiltradas = todasNotificacoes.filter(n => {
+        if (!n.empresaId) {
+          return n.usuarioId === usuario.id;
+        }
+        return true;
+      });
+
+      const notificacoesComStatus = notificacoesFiltradas.map(n => ({
         ...n,
-        lida: n.empresaId 
+        lida: n.empresaId
           ? n.NotificacaoLida?.some(nl => nl.usuarioId === usuario.id) || false
           : n.lida
       }));
-  
-      notificacoesComStatus.sort((a, b) => 
+
+      notificacoesComStatus.sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-  
-      const notificacoesFiltradas = notificacoesComStatus.filter(n => {
+
+      const notificacoesResultado = notificacoesComStatus.filter(n => {
         if (mostrarLidas) {
           return n.lida;
         } else {
           return !n.lida;
         }
       });
-  
-      return mostrarLidas ? notificacoesFiltradas.slice(0, 15) : notificacoesFiltradas;
-  
+
+      return mostrarLidas ? notificacoesResultado.slice(0, 15) : notificacoesResultado;
+
     } catch (erro) {
       console.error("Erro ao buscar as notificações:", erro);
       return [];
@@ -384,12 +400,12 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
   const deletarNotificacao = useCallback(async (id: string) => {
     if (!usuario?.id) return;
-  
+
     try {
       await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}?usuarioId=${usuario.id}`, {
         method: "DELETE"
       });
-  
+
       setNotificacoes(prev => prev.filter(n => n.id !== id));
     } catch (erro) {
       console.error("Erro ao deletar notificação:", erro);
@@ -411,7 +427,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     const estaLida = notificacao.empresaId
       ? notificacao.NotificacaoLida?.some(nl => nl.usuarioId === usuario?.id)
       : notificacao.lida;
-      
+
     if (notificacao.convite) {
       return (
         <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
@@ -433,8 +449,8 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
             <span>{formatarData(notificacao.createdAt)}</span>
           </div>
 
-          <button 
-            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2" 
+          <button
+            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2"
             onClick={() => notificacao.convite && responderConvite(usuario?.id || "", notificacao.convite)}
           >
             {t("accept")}
@@ -517,8 +533,8 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
       <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
         {mostrarLidas && (
           <div className="text-center py-2 text-gray-300 italic text-xs">
-          {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
-        </div>
+            {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
+          </div>
         )}
         {notificacoes.length > 0 ? (
           tabelaNotificacoes
