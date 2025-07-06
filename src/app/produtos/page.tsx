@@ -63,7 +63,7 @@ export default function Produtos() {
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
-      console.error("Erro ao verificar a ativação da empresa:", error);
+      console.error("Erro ao verificar ativação da empresa:", error);
       return false;
     }
   };
@@ -118,7 +118,7 @@ export default function Produtos() {
 
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
       if (!responseUsuario.ok) {
-        console.error("Erro ao buscar dados do usuário");
+        console.error("Erro ao buscar os dados do usuário");
         return;
       }
       const usuario = await responseUsuario.json();
