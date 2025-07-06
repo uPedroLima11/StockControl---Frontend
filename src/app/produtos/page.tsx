@@ -63,7 +63,7 @@ export default function Produtos() {
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
-      console.error("Erro ao verificar ativação da empresa:", error);
+      console.error("Erro ao verificar a ativação da empresa:", error);
       return false;
     }
   };
