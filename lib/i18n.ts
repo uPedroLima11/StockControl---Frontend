@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 import settingsEn from '../public/locales/en/settings.json';
 import sidebarEn from '../public/locales/en/sidebar.json';
@@ -36,8 +37,11 @@ import clientesEn from '../public/locales/en/clientes.json';
 
 if (!i18n.isInitialized) {
   i18n
+    .use(LanguageDetector)
     .use(initReactI18next)
     .init({
+      fallbackLng: 'pt',
+      supportedLngs: ['pt', 'en'],
       ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes'],
       defaultNS: 'settings',
       resources: {
