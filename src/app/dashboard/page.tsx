@@ -42,11 +42,10 @@ export default function Dashboard() {
 
     if (ativado) {
       root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#fffff2");
+      root.style.setProperty("--cor-fonte", "#ffffff");
       root.style.setProperty("--cor-subtitulo", "#A3A3A3");
       root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
     } else {
-      root.style.setProperty("--cor-fundo", "#fffff2");
       root.style.setProperty("--cor-fonte", "#000000");
       root.style.setProperty("--cor-subtitulo", "#4B5563");
       root.style.setProperty("--cor-fundo-bloco", "#ececec");

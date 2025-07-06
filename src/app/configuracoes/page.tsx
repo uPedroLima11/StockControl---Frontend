@@ -44,6 +44,8 @@ export default function Configuracoes() {
     setModoDark(novoTema);
     localStorage.setItem("modoDark", String(novoTema));
     aplicarTema(novoTema);
+    window.location.reload();
+
   };
 
   const alternarSomNotificacao = () => {

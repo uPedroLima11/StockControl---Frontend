@@ -4,8 +4,10 @@ import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import Footer from "./footer";
 import Sidebar from "./sidebar";
+import { useEffect, useState } from "react";
 
 export default function LayoutWrapper({
+  
   children,
 }: {
   children: React.ReactNode;
@@ -13,7 +15,26 @@ export default function LayoutWrapper({
   const pathname = usePathname();
 
   const isHome = pathname === "/";
+  const [modoDark, setModoDark] = useState(false);
 
+  useEffect(() => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+      aplicarTema(ativado);
+    }, []);
+
+    const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement;
+    if (ativado) {
+      root.classList.add("dark");
+      root.style.setProperty("--cor-fundo", "#20252B");
+    } else {
+      root.classList.remove("dark");
+      root.style.setProperty("--cor-fundo", "#ffffff");
+    }
+  };
+  
   const isPublicPage =
     pathname === "/login" ||
     pathname === "/registro" ||
@@ -38,7 +59,12 @@ export default function LayoutWrapper({
   return (
     <div className="flex  ">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto max-h-screen">{children}</main>
+      <main
+        className="flex-1 overflow-y-auto max-h-screen bg-white"
+        style={{ backgroundColor: modoDark ? "#20252B" : "##ffffff" }}
+      >
+        {children}
+      </main>
     </div>
   );
 }
