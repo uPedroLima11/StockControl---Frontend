@@ -18,7 +18,8 @@ export default function LayoutWrapper({
     pathname === "/login" ||
     pathname === "/registro" ||
     pathname === "/esqueci" || 
-    pathname === "/alteracao"; 
+    pathname === "/alteracao" ||
+    pathname === "/pt";  
 
   if (isHome) {
     return (

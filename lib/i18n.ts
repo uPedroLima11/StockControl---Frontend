@@ -40,8 +40,6 @@ if (!i18n.isInitialized) {
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
-      fallbackLng: 'pt',
-      supportedLngs: ['pt', 'en'],
       ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes'],
       defaultNS: 'settings',
       resources: {
