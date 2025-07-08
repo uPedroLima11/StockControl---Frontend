@@ -191,7 +191,7 @@ export default function Sidebar() {
   return (
     <>
       <button
-        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#013C3C] p-3 rounded-full"
+        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#052727] p-3 rounded-full"
         onClick={alternarSidebar}
       >
         <FaBars />
