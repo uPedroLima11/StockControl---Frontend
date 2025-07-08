@@ -25,8 +25,8 @@ export default function Home() {
             </div>
             <div className="flex flex-col items-center">
               <div className="bg-blue-600 text-white w-20 h-20 flex items-center justify-center rounded-full text-2xl font-bold mb-4">3</div>
-              <h3 className="font-semibold text-xl mb-2">Relatórios Inteligentes</h3>
-              <p className="text-gray-600">Geração de gráficos e relatórios completos com apenas um clique.</p>
+              <h3 className="font-semibold text-xl mb-2">Gestão Completa e Inteligente</h3>
+              <p className="text-gray-600">Gerencie produtos, fornecedores, vendas e muito mais com agilidade e precisão.</p>
             </div>
           </div>
         </div>
