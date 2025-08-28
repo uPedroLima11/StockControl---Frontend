@@ -30,7 +30,6 @@ export default function CriarEmpresa() {
   const { t } = useTranslation("criarempresa");
   const [loading, setLoading] = useState(true);
 
-  const formValues = watch();
   const [charCounts, setCharCounts] = useState({
     nome: 0,
     email: 0,
@@ -65,6 +64,12 @@ export default function CriarEmpresa() {
     setModoDark(ativo);
     aplicarTema(ativo);
   }, []);
+
+  useEffect(() => {
+    if (usuarioLogado) {
+      console.log("Usuário logado:", usuarioLogado);
+    }
+  }, [usuarioLogado]);
 
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
