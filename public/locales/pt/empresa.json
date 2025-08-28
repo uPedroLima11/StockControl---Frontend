@@ -2,7 +2,17 @@
     "empresa": {
         "escolherArquivo": "Escolher arquivo",
         "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
-        "preVisualizacao": "Pré visualização"
+        "preVisualizacao": "Pré visualização",
+        "catalogoPublico": "Catálogo Público",
+        "catalogoAtivado": "Catálogo ativado!",
+        "catalogoDesativado": "Catálogo desativado!",
+        "catalogoAgoraPublico": "Seu catálogo agora está público e acessível pelo link.",
+        "catalogoNaoPublico": "Seu catálogo não está mais público.",
+        "erroAlterarCatalogo": "Não foi possível alterar o estado do catálogo.",
+        "ativar": "Ativar",
+        "desativar": "Desativar",
+        "statusAtivado": "ATIVADO",
+        "statusDesativado": "DESATIVADO"
     },
     "titulo": "Minha Empresa",
     "carregando": "Carregando dados da empresa...",

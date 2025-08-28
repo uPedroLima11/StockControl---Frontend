@@ -3,7 +3,8 @@
   "buscar": "Buscar...",
   "novo": "Novo Produto",
   "nenhumProdutoEncontrado": "Nenhum produto encontrado.",
-
+  "novoProduto": "Novo Produto",
+  
   "nome": "Nome",
   "fornecedor": "Fornecedor",
   "categoria": "Categoria",

@@ -14,7 +14,17 @@
   "empresa": {
     "escolherArquivo": "Choose file",
     "nenhumArquivoEscolhido": "No file chosen",
-    "preVisualizacao": "Preview"
+    "preVisualizacao": "Preview",
+    "catalogoPublico": "Public Catalog",
+    "catalogoAtivado": "Catalog activated!",
+    "catalogoDesativado": "Catalog deactivated!",
+    "catalogoAgoraPublico": "Your catalog is now public and accessible via the link.",
+    "catalogoNaoPublico": "Your catalog is no longer public.",
+    "erroAlterarCatalogo": "It was not possible to change the catalog state.",
+    "ativar": "Activate",
+    "desativar": "Deactivate",
+    "statusAtivado": "ACTIVE",
+    "statusDesativado": "INACTIVE"
   },
   "titulo": "My Company",
   "Pré-visualização:": "Preview",

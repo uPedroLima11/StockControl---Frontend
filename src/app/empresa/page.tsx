@@ -187,25 +187,24 @@ export default function Empresa() {
       setEmpresa(empresaAtualizada);
 
       Swal.fire({
-        icon: "success",
-        title: novoEstado ? "Catálogo ativado!" : "Catálogo desativado!",
-        text: novoEstado
-          ? "Seu catálogo agora está público e acessível pelo link."
-          : "Seu catálogo não está mais público.",
-        timer: 2000,
-        showConfirmButton: false
-      });
-
-    } catch (error) {
-      console.error("Erro ao alterar estado do catálogo:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erro",
-        text: "Não foi possível alterar o estado do catálogo.",
-      });
-    } finally {
-      setAtualizandoCatalogo(false);
-    }
+    icon: "success",
+    title: novoEstado ? t("empresa.catalogoAtivado") : t("empresa.catalogoDesativado"),
+    text: novoEstado
+      ? t("empresa.catalogoAgoraPublico")
+      : t("empresa.catalogoNaoPublico"),
+    timer: 2000,
+    showConfirmButton: false
+  });
+} catch (error) {
+  console.error("Erro ao alterar estado do catálogo:", error);
+  Swal.fire({
+    icon: "error",
+    title: t("empresa.erro"),
+    text: t("empresa.erroAlterarCatalogo"),
+  });
+} finally {
+  setAtualizandoCatalogo(false);
+}
   };
 
   const editarDadosEmpresa = async () => {
