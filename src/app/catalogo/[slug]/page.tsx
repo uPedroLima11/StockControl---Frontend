@@ -39,7 +39,7 @@ export default function CatalogoPublico({ params }: PageProps) {
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [termoBusca, setTermoBusca] = useState('');
-  const produtosPorPagina = 3;
+  const produtosPorPagina = 15; // Aumentado para 15 para 3 linhas de 5 produtos
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -276,45 +276,47 @@ export default function CatalogoPublico({ params }: PageProps) {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {produtosAtuais.map((produto) => (
                 <div
                   key={produto.id}
                   onClick={() => setProdutoSelecionado(produto)}
                   className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
                 >
-                  <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl overflow-hidden border border-gray-700/30 shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-400/30 transition-all duration-300 h-full">
-                    <div className="relative h-56 w-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden">
+                  <div className="bg-gray-800/60 backdrop-blur-md rounded-xl overflow-hidden border border-gray-700/30 shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-400/30 transition-all duration-300 h-full flex flex-col">
+                    <div className="relative h-40 w-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden p-2">
                       {produto.foto ? (
-                        <Image
-                          src={produto.foto}
-                          alt={produto.nome}
-                          width={300}
-                          height={225}
-                          className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500"
-                          style={{
-                            width: 'auto',
-                            height: 'auto',
-                            maxWidth: '100%',
-                            maxHeight: '100%'
-                          }}
-                        />
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <Image
+                            src={produto.foto}
+                            alt={produto.nome}
+                            width={200}
+                            height={150}
+                            className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500"
+                            style={{
+                              width: 'auto',
+                              height: 'auto',
+                              maxWidth: '100%',
+                              maxHeight: '100%'
+                            }}
+                          />
+                        </div>
                       ) : (
                         <div className="text-center">
-                          <span className="text-4xl text-gray-500">📦</span>
-                          <p className="text-sm text-gray-400 mt-2">Sem imagem</p>
+                          <span className="text-3xl text-gray-500">📦</span>
+                          <p className="text-xs text-gray-400 mt-1">Sem imagem</p>
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
 
-                    <div className="p-5">
-                      <h3 className="font-semibold text-lg mb-2 text-white line-clamp-2 group-hover:text-emerald-300 transition-colors">
+                    <div className="p-3 flex-grow flex flex-col">
+                      <h3 className="font-semibold text-sm mb-2 text-white line-clamp-2 group-hover:text-emerald-300 transition-colors">
                         {produto.nome}
                       </h3>
 
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-2xl font-bold text-emerald-400">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-lg font-bold text-emerald-400">
                           {formatarPreco(produto.preco)}
                         </span>
                         {produto.quantidade > 0 ? (
@@ -328,7 +330,7 @@ export default function CatalogoPublico({ params }: PageProps) {
                         )}
                       </div>
 
-                      <div className="flex justify-between text-sm text-gray-400">
+                      <div className="flex justify-between text-xs text-gray-400 mt-auto">
                         <span>Estoque: {produto.quantidade}</span>
                         <span className="flex items-center gap-1">
                           <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
@@ -337,11 +339,11 @@ export default function CatalogoPublico({ params }: PageProps) {
                       </div>
 
                       {produto.descricao && (
-                        <div className="mt-3 pt-3 border-t border-gray-700/50">
-                          <p className="text-sm text-gray-300 line-clamp-2">
+                        <div className="mt-2 pt-2 border-t border-gray-700/50">
+                          <p className="text-xs text-gray-300 line-clamp-2">
                             {produto.descricao}
                           </p>
-                          <button className="text-emerald-400 text-sm mt-2 hover:text-emerald-300 transition-colors">
+                          <button className="text-emerald-400 text-xs mt-1 hover:text-emerald-300 transition-colors">
                             Ver detalhes →
                           </button>
                         </div>
@@ -506,6 +508,11 @@ export default function CatalogoPublico({ params }: PageProps) {
                 </div>
               </div>
 
+              <div className="flex justify-center pt-4">
+                <button className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-semibold transition-colors duration-200 transform hover:scale-105">
+                  Entrar em contato
+                </button>
+              </div>
             </div>
           </div>
         </div>
