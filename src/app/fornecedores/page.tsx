@@ -37,6 +37,12 @@ export default function Fornecedores() {
   const { t } = useTranslation("fornecedores");
   const router = useRouter();
 
+  const [nomeCaracteres, setNomeCaracteres] = useState(0);
+  const [categoriaCaracteres, setCategoriaCaracteres] = useState(0);
+  const [emailCaracteres, setEmailCaracteres] = useState(0);
+  const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
+  const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
+
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -113,7 +119,7 @@ export default function Fornecedores() {
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
       const fornecedoresData = await responseFornecedores.json();
-      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) => 
+      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setFornecedores(fornecedoresOrdenados);
@@ -121,6 +127,41 @@ export default function Fornecedores() {
 
     initialize();
   }, []);
+
+  useEffect(() => {
+    if (modalVisualizar) {
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setCategoriaCaracteres(modalVisualizar.categoria?.length || 0);
+      setEmailCaracteres(modalVisualizar.email?.length || 0);
+      setCnpjCaracteres(modalVisualizar.cnpj?.length || 0);
+      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
+    }
+  }, [modalVisualizar]);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 45) {
+      setForm({ ...form, email: value });
+      setEmailCaracteres(value.length);
+    }
+  };
+
+  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 18) {
+      setForm({ ...form, cnpj: value });
+      setCnpjCaracteres(value.length);
+    }
+  };
+
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 14) {
+      setForm({ ...form, telefone: value });
+      setTelefoneCaracteres(value.length);
+    }
+  };
+
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
@@ -145,6 +186,22 @@ export default function Fornecedores() {
         setFotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 60) {
+      setForm({ ...form, nome: value });
+      setNomeCaracteres(value.length);
+    }
+  };
+
+  const handleCategoriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 20) {
+      setForm({ ...form, categoria: value });
+      setCategoriaCaracteres(value.length);
     }
   };
 
@@ -619,109 +676,176 @@ export default function Fornecedores() {
       </div>
 
       {(modalAberto || modalVisualizar) && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2 bg-opacity-90"
+            className="p-4 rounded-lg shadow-lg w-full max-w-md"
             style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              color: "var(--cor-fonte)",
+              backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              maxHeight: "95vh",
+              overflowY: "auto"
             }}
           >
-            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">
+            <h2 className="text-xl font-semibold mb-3">
               {modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}
             </h2>
 
-            <label className="block mb-1 text-sm">{t("nome")}</label>
-            <input
-              placeholder={t("nome")}
-              value={form.nome || ""}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <label className="block mb-1 text-sm">{t("email")}</label>
-            <input
-              placeholder={t("email")}
-              value={form.email || ""}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <label className="block mb-1 text-sm">{t("cnpj")}</label>
-            <input
-              placeholder={t("cnpj")}
-              value={form.cnpj || ""}
-              onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <label className="block mb-1 text-sm">{t("telefone")}</label>
-            <input
-              placeholder={t("telefone")}
-              value={form.telefone || ""}
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <label className="block mb-1 text-sm">{t("categoria")}</label>
-            <input
-              placeholder={t("categoria")}
-              value={form.categoria || ""}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <div className="mb-3">
-              <label className="block mb-1 text-sm">{t("foto")}</label>
-              {(fotoPreview || form.foto) && (
-                <img
-                  src={fotoPreview || form.foto || ""}
-                  alt="Preview"
-                  className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-full mb-2 mx-auto"
-                  onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
-                />
-              )}
-              {podeEditar && (
+            <div className="space-y-2">
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("nome")}</label>
                 <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  placeholder={t("nome")}
+                  value={form.nome || ""}
+                  onChange={handleNomeChange}
+                  className="w-full rounded p-2 text-sm"
                   style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
                   }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={60}
                 />
-              )}
+                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 60 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("email")}</label>
+                <input
+                  placeholder={t("email")}
+                  value={form.email || ""}
+                  onChange={handleEmailChange}
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={45}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 45 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("cnpj")}</label>
+                <input
+                  placeholder={t("cnpj")}
+                  value={form.cnpj || ""}
+                  onChange={handleCnpjChange}
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={18}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: cnpjCaracteres === 18 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {cnpjCaracteres}/18 {cnpjCaracteres === 18 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("telefone")}</label>
+                <input
+                  placeholder={t("telefone")}
+                  value={form.telefone || ""}
+                  onChange={handleTelefoneChange}
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={14}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 14 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {telefoneCaracteres}/14 {telefoneCaracteres === 14 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("categoria")}</label>
+                <input
+                  placeholder={t("categoria")}
+                  value={form.categoria || ""}
+                  onChange={handleCategoriaChange}
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={20}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: categoriaCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {categoriaCaracteres}/20 {categoriaCaracteres === 20 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <label className="block text-xs font-medium mb-1">{t("foto")}</label>
+                {(fotoPreview || form.foto) && (
+                  <img
+                    src={fotoPreview || form.foto || ""}
+                    alt="Preview"
+                    className="w-16 h-16 object-cover rounded-full mb-2 mx-auto"
+                    onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
+                  />
+                )}
+                {podeEditar && (
+                  <div className="flex flex-col justify-end">
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      disabled={Boolean(!podeEditar && modalVisualizar)}
+                      className="hidden"
+                      id="fileInputFornecedor"
+                    />
+                    <button
+                      onClick={() => document.getElementById('fileInputFornecedor')?.click()}
+                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 ${modoDark
+                        ? "border-blue-400"
+                        : "border-gray-400"
+                        }`}
+                      style={{
+                        backgroundColor: modoDark ? "#183366" : "#e5e7eb",
+                        color: modoDark ? "#60a5fa" : "#374151",
+                        fontWeight: 600,
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke={modoDark ? "#60a5fa" : "#374151"}
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                        />
+                      </svg>
+                      {t("selecionarImagem")}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="flex justify-between mt-4 flex-wrap gap-2">
+            <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => {
                   setModalAberto(false);
@@ -729,32 +853,32 @@ export default function Fornecedores() {
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="hover:underline cursor-pointer text-sm md:text-base"
-                style={{ color: "var(--cor-fonte)" }}
+                className="px-3 py-1.5 rounded cursor-pointer text-sm"
+                style={{
+                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
+                  color: modoDark ? "#FFFFFF" : "#000000",
+                }}
               >
                 {t("fechar")}
               </button>
+
               {modalVisualizar ? (
                 podeEditar && (
                   <>
                     <button
                       onClick={handleSalvarFornecedor}
-                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700 cursor-pointer text-sm md:text-base"
+                      className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
                       style={{
-                        backgroundColor: "green",
-                        color: "white",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
+                        backgroundColor: "#10b981",
                       }}
                     >
                       {t("salvar")}
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-red-700 cursor-pointer text-sm md:text-base"
+                      className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
                       style={{
-                        backgroundColor: "red",
-                        color: "white",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
+                        backgroundColor: "#ef4444",
                       }}
                     >
                       {t("excluir")}
@@ -764,11 +888,9 @@ export default function Fornecedores() {
               ) : (
                 <button
                   onClick={handleAdicionarFornecedor}
-                  className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-[#00443f] cursor-pointer text-sm md:text-base"
+                  className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
                   style={{
-                    backgroundColor: "green",
-                    color: "white",
-                    border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+                    backgroundColor: "#10b981",
                   }}
                 >
                   {t("afiliarFornecedor")}

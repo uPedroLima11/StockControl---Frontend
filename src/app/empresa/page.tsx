@@ -39,6 +39,34 @@ export default function Empresa() {
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("empresa");
+  const [nomeCaracteres, setNomeCaracteres] = useState(0);
+  const [emailCaracteres, setEmailCaracteres] = useState(0);
+  const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
+  const [paisCaracteres, setPaisCaracteres] = useState(0);
+  const [enderecoCaracteres, setEnderecoCaracteres] = useState(0);
+  const [estadoCaracteres, setEstadoCaracteres] = useState(0);
+  const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
+  const [cepCaracteres, setCepCaracteres] = useState(0);
+
+  useEffect(() => {
+    if (modalEdicaoAberto && empresaEditada) {
+      setNomeCaracteres(empresaEditada.nome?.length || 0);
+      setEmailCaracteres(empresaEditada.email?.length || 0);
+      setTelefoneCaracteres(empresaEditada.telefone?.length || 0);
+      setPaisCaracteres(empresaEditada.pais?.length || 0);
+      setEnderecoCaracteres(empresaEditada.endereco?.length || 0);
+      setEstadoCaracteres(empresaEditada.estado?.length || 0);
+      setCidadeCaracteres(empresaEditada.cidade?.length || 0);
+      setCepCaracteres(empresaEditada.cep?.length || 0);
+    }
+  }, [modalEdicaoAberto, empresaEditada]);
+
+  const handleInputChange = (field: keyof Empresa, value: string, maxLength: number, setCaracteres: React.Dispatch<React.SetStateAction<number>>) => {
+    if (value.length <= maxLength) {
+      setEmpresaEditada(prev => prev ? { ...prev, [field]: value } : null);
+      setCaracteres(value.length);
+    }
+  };
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -187,24 +215,24 @@ export default function Empresa() {
       setEmpresa(empresaAtualizada);
 
       Swal.fire({
-    icon: "success",
-    title: novoEstado ? t("empresa.catalogoAtivado") : t("empresa.catalogoDesativado"),
-    text: novoEstado
-      ? t("empresa.catalogoAgoraPublico")
-      : t("empresa.catalogoNaoPublico"),
-    timer: 2000,
-    showConfirmButton: false
-  });
-} catch (error) {
-  console.error("Erro ao alterar estado do catálogo:", error);
-  Swal.fire({
-    icon: "error",
-    title: t("empresa.erro"),
-    text: t("empresa.erroAlterarCatalogo"),
-  });
-} finally {
-  setAtualizandoCatalogo(false);
-}
+        icon: "success",
+        title: novoEstado ? t("empresa.catalogoAtivado") : t("empresa.catalogoDesativado"),
+        text: novoEstado
+          ? t("empresa.catalogoAgoraPublico")
+          : t("empresa.catalogoNaoPublico"),
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error("Erro ao alterar estado do catálogo:", error);
+      Swal.fire({
+        icon: "error",
+        title: t("empresa.erro"),
+        text: t("empresa.erroAlterarCatalogo"),
+      });
+    } finally {
+      setAtualizandoCatalogo(false);
+    }
   };
 
   const editarDadosEmpresa = async () => {
@@ -337,9 +365,9 @@ export default function Empresa() {
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-10">
+    <div className="min-h-screen flex justify-center items-start pt-10 px-4">
       <div
-        className="w-full max-w-md rounded p-6 shadow-md"
+        className="w-auto min-w-[300px] max-w-3xl rounded p-6 shadow-md mx-auto"
         style={{
           backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
           color: modoDark ? "#FFFFFF" : "#000000",
@@ -406,8 +434,8 @@ export default function Empresa() {
                 onClick={toggleCatalogoPublico}
                 disabled={atualizandoCatalogo}
                 className={`px-3 py-1 rounded text-sm font-medium transition ${empresa.catalogoPublico
-                    ? "bg-red-100 text-red-800 hover:bg-red-200"
-                    : "bg-green-100 text-green-800 hover:bg-green-200"
+                  ? "bg-red-100 text-red-800 hover:bg-red-200"
+                  : "bg-green-100 text-green-800 hover:bg-green-200"
                   } disabled:opacity-50`}
               >
                 {atualizandoCatalogo
@@ -427,7 +455,12 @@ export default function Empresa() {
                 }/catalogo/${empresa.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline text-sm break-all"
+              className="block p-2 rounded bg-opacity-20 text-sm break-all font-mono transition hover:bg-opacity-30"
+              style={{
+                backgroundColor: modoDark ? "rgba(34, 197, 94, 0.2)" : "rgba(34, 197, 94, 0.1)",
+                color: modoDark ? "#22c55e" : "#15803d",
+                border: modoDark ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(34, 197, 94, 0.2)",
+              }}
             >
               {`${process.env.NEXT_PUBLIC_APP_URL ||
                 (typeof window !== "undefined"
@@ -504,129 +537,228 @@ export default function Empresa() {
           )}
         </div>
       </div>
-
       {modalEdicaoAberto && empresaEditada && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded-lg shadow-lg w-full max-w-md"
+            className="p-4 rounded-lg shadow-lg w-full max-w-md"
             style={{
               backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
               color: modoDark ? "#FFFFFF" : "#000000",
+              maxHeight: "95vh",
+              overflowY: "auto"
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">{t("modal.editarEmpresa.titulo")}</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("modal.editarEmpresa.titulo")}</h2>
 
-            {["nome", "email"].map((key) => (
-              <div key={key} className="mb-3">
-                <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
+            <div className="space-y-2">
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("campos.nome")}</label>
                 <input
                   type="text"
-                  className="w-full rounded p-2"
+                  className="w-full rounded p-2 text-sm"
                   style={{
                     backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                     borderColor: modoDark ? "#4B5563" : "#D1D5DB",
                     color: modoDark ? "#FFFFFF" : "#000000",
                   }}
-                  value={empresaEditada[key as EmpresaChave] || ""}
-                  onChange={(e) => setEmpresaEditada({
-                    ...empresaEditada,
-                    [key as EmpresaChave]: e.target.value
-                  })}
+                  value={empresaEditada.nome || ""}
+                  onChange={(e) => handleInputChange("nome", e.target.value, 20, setNomeCaracteres)}
+                  maxLength={20}
                 />
+                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {nomeCaracteres}/20
+                </div>
               </div>
-            ))}
 
-            {["telefone", "endereco", "pais", "estado", "cidade", "cep"].reduce((acc, key, index, array) => {
-              if (index % 2 === 0) {
-                acc.push(array.slice(index, index + 2));
-              }
-              return acc;
-            }, [] as string[][]).map((pair, index) => (
-              <div key={index} className="flex gap-2 mb-3">
-                {pair.map((key) => (
-                  <div key={key} className="flex-1">
-                    <label className="block text-sm font-medium mb-1">{t(`campos.${key}`)}</label>
-                    <input
-                      type="text"
-                      className="w-full rounded p-2"
-                      style={{
-                        backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                        borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                        color: modoDark ? "#FFFFFF" : "#000000",
-                      }}
-                      value={empresaEditada[key as EmpresaChave] || ""}
-                      onChange={(e) => setEmpresaEditada({
-                        ...empresaEditada,
-                        [key as EmpresaChave]: e.target.value
-                      })}
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("campos.email")}</label>
+                <input
+                  type="email"
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  value={empresaEditada.email || ""}
+                  onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
+                  maxLength={60}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 60 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {emailCaracteres}/60
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-medium mb-1">{t("campos.telefone")}</label>
+                  <input
+                    type="text"
+                    className="w-full rounded p-2 text-sm"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      color: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                    value={empresaEditada.telefone || ""}
+                    onChange={(e) => handleInputChange("telefone", e.target.value, 15, setTelefoneCaracteres)}
+                    maxLength={15}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 15 ? "#ef4444" : "var(--cor-cinza)" }}>
+                    {telefoneCaracteres}/15
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1">{t("campos.pais")}</label>
+                  <input
+                    type="text"
+                    className="w-full rounded p-2 text-sm"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      color: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                    value={empresaEditada.pais || ""}
+                    onChange={(e) => handleInputChange("pais", e.target.value, 20, setPaisCaracteres)}
+                    maxLength={20}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: paisCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
+                    {paisCaracteres}/20
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("campos.endereco")}</label>
+                <input
+                  type="text"
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  value={empresaEditada.endereco || ""}
+                  onChange={(e) => handleInputChange("endereco", e.target.value, 50, setEnderecoCaracteres)}
+                  maxLength={50}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: enderecoCaracteres === 50 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {enderecoCaracteres}/50
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium mb-1">{t("campos.cidade")}</label>
+                  <input
+                    type="text"
+                    className="w-full rounded p-2 text-sm"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      color: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                    value={empresaEditada.cidade || ""}
+                    onChange={(e) => handleInputChange("cidade", e.target.value, 20, setCidadeCaracteres)}
+                    maxLength={20}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: cidadeCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
+                    {cidadeCaracteres}/20
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1">{t("campos.estado")}</label>
+                  <input
+                    type="text"
+                    className="w-full rounded p-2 text-sm"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      color: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                    value={empresaEditada.estado || ""}
+                    onChange={(e) => handleInputChange("estado", e.target.value, 2, setEstadoCaracteres)}
+                    maxLength={2}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: estadoCaracteres === 2 ? "#ef4444" : "var(--cor-cinza)" }}>
+                    {estadoCaracteres}/2
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1">{t("campos.cep")}</label>
+                <input
+                  type="text"
+                  className="w-full rounded p-2 text-sm"
+                  style={{
+                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    color: modoDark ? "#FFFFFF" : "#000000",
+                  }}
+                  value={empresaEditada.cep || ""}
+                  onChange={(e) => handleInputChange("cep", e.target.value, 10, setCepCaracteres)}
+                  maxLength={10}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: cepCaracteres === 10 ? "#ef4444" : "var(--cor-cinza)" }}>
+                  {cepCaracteres}/10
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <label className="block text-xs font-medium mb-1">{t("logoEmpresa")}</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer text-sm"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      color: modoDark ? "#FFFFFF" : "#000000",
+                    }}
+                    id="fileInput"
+                  />
+                  <div className="flex items-center justify-between p-2 rounded border text-xs"
+                    style={{
+                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
+                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                    }}>
+                    <span>{t("empresa.escolherArquivo")}</span>
+                    <span className="text-gray-500">
+                      {t("empresa.nenhumArquivoEscolhido")}
+                    </span>
+                  </div>
+                </div>
+
+                {fotoPreview && (
+                  <div className="mt-2">
+                    <p className="text-xs mb-1">{t("empresa.preVisualizacao")}:</p>
+                    <Image
+                      src={fotoPreview}
+                      alt="Preview"
+                      width={80}
+                      height={80}
+                      className="rounded"
                     />
                   </div>
-                ))}
+                )}
+                {empresa.foto && !fotoPreview && (
+                  <div className="mt-2">
+                    <p className="text-xs mb-1">Foto atual:</p>
+                    <Image
+                      src={empresa.foto}
+                      alt="Foto atual"
+                      width={80}
+                      height={80}
+                      className="rounded"
+                    />
+                  </div>
+                )}
               </div>
-            ))}
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">{t("logoEmpresa")}</label>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer"
-                  style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
-                  }}
-                  id="fileInput"
-                />
-                <div className="flex items-center justify-between p-2 rounded border"
-                  style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  }}>
-                  <span className="text-sm">
-                    {t("empresa.escolherArquivo")}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {t("empresa.nenhumArquivoEscolhido")}
-                  </span>
-                </div>
-              </div>
-
-              {fotoPreview && (
-                <div className="mt-2">
-                  <p className="text-sm mb-1">{t("empresa.preVisualizacao")}:</p>
-                  <Image
-                    src={fotoPreview}
-                    alt="Preview"
-                    width={128}
-                    height={128}
-                    className="rounded"
-                  />
-                </div>
-              )}
-              {empresa.foto && !fotoPreview && (
-                <div className="mt-2">
-                  <p className="text-sm mb-1">Foto atual:</p>
-                  <Image
-                    src={empresa.foto}
-                    alt="Foto atual"
-                    width={128}
-                    height={128}
-                    className="rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmpresaEditada({ ...empresaEditada, foto: null });
-                      setFotoPreview(null);
-                    }}
-                    className="mt-2 text-sm text-red-500"
-                  >
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
@@ -636,7 +768,7 @@ export default function Empresa() {
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="px-4 py-2 rounded cursor-pointer"
+                className="px-3 py-1.5 rounded cursor-pointer text-sm"
                 style={{
                   backgroundColor: modoDark ? "#374151" : "#D1D5DB",
                   color: modoDark ? "#FFFFFF" : "#000000",
@@ -646,7 +778,7 @@ export default function Empresa() {
               </button>
               <button
                 onClick={editarDadosEmpresa}
-                className="px-4 py-2 text-white rounded cursor-pointer"
+                className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
                 style={{
                   backgroundColor: "#10b981",
                 }}

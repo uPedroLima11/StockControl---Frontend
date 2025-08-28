@@ -47,6 +47,9 @@ export default function Produtos() {
     updatedAt: new Date(),
   });
 
+  const [nomeCaracteres, setNomeCaracteres] = useState(0);
+  const [descricaoCaracteres, setDescricaoCaracteres] = useState(0);
+
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,9 +173,26 @@ export default function Produtos() {
         quantidadeMin: modalVisualizar.quantidadeMin || 0,
       });
       setPreview(modalVisualizar.foto || null);
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setDescricaoCaracteres(modalVisualizar.descricao?.length || 0);
     }
   }, [modalVisualizar]);
 
+  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 60) {
+      setForm({ ...form, nome: value });
+      setNomeCaracteres(value.length);
+    }
+  };
+
+  const handleDescricaoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 255) {
+      setForm({ ...form, descricao: value });
+      setDescricaoCaracteres(value.length);
+    }
+  };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -199,11 +219,11 @@ export default function Produtos() {
 
         if (response.ok) {
           const produtoAtualizado = await response.json();
-          
-          setProdutos(produtos.map(p => 
+
+          setProdutos(produtos.map(p =>
             p.id === produtoId ? { ...p, noCatalogo: produtoAtualizado.noCatalogo } : p
           ));
-          
+
           if (modalVisualizar && modalVisualizar.id === produtoId) {
             setModalVisualizar({ ...modalVisualizar, noCatalogo: produtoAtualizado.noCatalogo });
             setForm({ ...form, noCatalogo: produtoAtualizado.noCatalogo });
@@ -212,7 +232,7 @@ export default function Produtos() {
           Swal.fire({
             position: "center",
             icon: "success",
-            title: produtoAtualizado.noCatalogo 
+            title: produtoAtualizado.noCatalogo
               ? t("produtoAdicionadoCatalogo.titulo")
               : t("produtoRemovidoCatalogo.titulo"),
             showConfirmButton: false,
@@ -577,7 +597,7 @@ export default function Produtos() {
                           borderColor: modoDark ? "#FFFFFF" : "#000000",
                         }}
                       >
-                        <td 
+                        <td
                           className="py-3 px-4 flex items-center gap-2 cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(produto);
@@ -609,7 +629,7 @@ export default function Produtos() {
                               toggleCatalogo(produto.id, produto.noCatalogo);
                             }}
                             className="p-1 text-yellow-500 hover:text-yellow-600 transition"
-                                                        title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
+                            title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
                           >
                             {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
                           </button>
@@ -729,7 +749,7 @@ export default function Produtos() {
         {(modalAberto || modalVisualizar) && (
           <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
             <div
-              className="p-6 rounded-lg shadow-xl w-full max-w-lg"
+              className="p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
               style={{
                 backgroundColor: "var(--cor-fundo-bloco)",
                 color: "var(--cor-fonte)",
@@ -739,31 +759,43 @@ export default function Produtos() {
                 {modalVisualizar ? t("editarProduto") : t("novoProduto")}
               </h2>
 
-              <label className="block mb-1 text-sm">{t("nome")}</label>
-              <input
-                placeholder={t("nome")}
-                value={form.nome || ""}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
-                }}
-              />
+              <div className="mb-3">
+                <label className="block mb-1 text-sm">{t("nome")}</label>
+                <input
+                  placeholder={t("nome")}
+                  value={form.nome || ""}
+                  onChange={handleNomeChange}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
+                  maxLength={60}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 60 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+                  {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
+                </div>
+              </div>
 
-              <label className="block mb-1 text-sm">{t("descricao")}</label>
-              <input
-                placeholder={t("descricao")}
-                value={form.descricao || ""}
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-                style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
-                }}
-              />
+              <div className="mb-3">
+                <label className="block mb-1 text-sm">{t("descricao")}</label>
+                <input
+                  placeholder={t("descricao")}
+                  value={form.descricao || ""}
+                  onChange={handleDescricaoChange}
+                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  style={{
+                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+                    color: modoDark ? "#FFFFFF" : "#000000"
+                  }}
+                  maxLength={255}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: descricaoCaracteres === 255 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+                  {descricaoCaracteres}/255 {descricaoCaracteres === 255 && " - Limite atingido"}
+                </div>
+              </div>
 
               <div className="flex gap-2 w-full">
                 <div className="flex-1">
@@ -813,13 +845,12 @@ export default function Produtos() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3 ${
-                        modoDark
-                          ? "border-blue-400"
-                          : "border-gray-400"
-                      }`}
+                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3 ${modoDark
+                        ? "border-blue-400"
+                        : "border-gray-400"
+                        }`}
                       style={{
-                        backgroundColor: modoDark ? "#183366" : "#e5e7eb", 
+                        backgroundColor: modoDark ? "#183366" : "#e5e7eb",
                         color: modoDark ? "#60a5fa" : "#374151",
                         fontWeight: 600,
                         transition: "background 0.2s",

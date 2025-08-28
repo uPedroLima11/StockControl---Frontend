@@ -341,7 +341,7 @@ if (!empresaId || produtos.length === 0) {
           backgroundColor: "var(--cor-fundo-bloco)",
           borderColor: modoDark ? "#FFFFFF" : "#000000",
         }}>
-          <p className="text-lg" style={{ color: "var(--cor-fonte)" }}>Você Não Possui Produtos cadastrados</p>
+            <p className="text-lg" style={{ color: "var(--cor-fonte)" }}>{t("naoPossuiProdutos")}</p>
         </div>
       </div>
     </div>

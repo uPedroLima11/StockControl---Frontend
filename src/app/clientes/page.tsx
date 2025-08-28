@@ -34,6 +34,13 @@ export default function Clientes() {
   const clientesPorPagina = 10;
   const { t } = useTranslation("clientes");
   const router = useRouter();
+  const [nomeCaracteres, setNomeCaracteres] = useState(0);
+  const [emailCaracteres, setEmailCaracteres] = useState(0);
+  const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
+  const [enderecoCaracteres, setEnderecoCaracteres] = useState(0);
+  const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
+  const [estadoCaracteres, setEstadoCaracteres] = useState(0);
+  const [cepCaracteres, setCepCaracteres] = useState(0);
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -76,6 +83,74 @@ export default function Clientes() {
   };
 
   useEffect(() => {
+    if (modalVisualizar) {
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setEmailCaracteres(modalVisualizar.email?.length || 0);
+      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
+      setEnderecoCaracteres(modalVisualizar.endereco?.length || 0);
+      setCidadeCaracteres(modalVisualizar.cidade?.length || 0);
+      setEstadoCaracteres(modalVisualizar.estado?.length || 0);
+      setCepCaracteres(modalVisualizar.cep?.length || 0);
+    }
+  }, [modalVisualizar]);
+
+  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 20) {
+      setForm({ ...form, nome: value });
+      setNomeCaracteres(value.length);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 45) {
+      setForm({ ...form, email: value });
+      setEmailCaracteres(value.length);
+    }
+  };
+
+  const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 17) {
+      setForm({ ...form, telefone: value });
+      setTelefoneCaracteres(value.length);
+    }
+  };
+
+  const handleEnderecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 50) {
+      setForm({ ...form, endereco: value });
+      setEnderecoCaracteres(value.length);
+    }
+  };
+
+  const handleCidadeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 20) {
+      setForm({ ...form, cidade: value });
+      setCidadeCaracteres(value.length);
+    }
+  };
+
+  const handleEstadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 2) {
+      setForm({ ...form, estado: value });
+      setEstadoCaracteres(value.length);
+    }
+  };
+
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 10) {
+      setForm({ ...form, cep: value });
+      setCepCaracteres(value.length);
+    }
+  };
+
+  useEffect(() => {
     const initialize = async () => {
       const temaSalvo = localStorage.getItem("modoDark");
       const ativado = temaSalvo === "true";
@@ -111,7 +186,7 @@ export default function Clientes() {
 
       const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
       const clientesData = await responseClientes.json();
-      const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) => 
+      const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setClientes(clientesOrdenados);
@@ -120,7 +195,7 @@ export default function Clientes() {
     initialize();
   }, []);
 
-  const clientesDaEmpresa = empresaId 
+  const clientesDaEmpresa = empresaId
     ? clientes.filter(cliente => cliente.empresaId === empresaId)
     : [];
 
@@ -605,162 +680,215 @@ export default function Clientes() {
       </div>
 
       {(modalAberto || modalVisualizar) && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-4 bg-opacity-90"
+  <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+    <div
+      className="p-3 md:p-4 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto bg-opacity-90"
+      style={{
+        backgroundColor: "var(--cor-fundo-bloco)",
+        color: "var(--cor-fonte)",
+      }}
+    >
+      <h2 className="text-lg md:text-xl font-bold mb-3">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
+
+      <div className="space-y-2">
+        <div>
+          <label className="block mb-1 text-xs md:text-sm">{t("nome")}</label>
+          <input
+            placeholder={t("nome")}
+            value={form.nome || ""}
+            onChange={handleNomeChange}
+            className="w-full rounded p-2 text-sm bg-transparent border"
+            disabled={Boolean(!podeEditar && modalVisualizar)}
             style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              color: "var(--cor-fonte)",
+              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
             }}
-          >
-            <h2 className="text-lg md:text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
+            maxLength={20}
+          />
+          <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 20 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+            {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite"}
+          </div>
+        </div>
 
-            <label className="block mb-1 text-sm">{t("nome")}</label>
-            <input
-              placeholder={t("nome")}
-              value={form.nome || ""}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
+        <div>
+          <label className="block mb-1 text-xs md:text-sm">{t("email")}</label>
+          <input
+            placeholder={t("email")}
+            value={form.email || ""}
+            onChange={handleEmailChange}
+            className="w-full rounded p-2 text-sm bg-transparent border"
+            disabled={Boolean(!podeEditar && modalVisualizar)}
+            style={{
+              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
+            }}
+            maxLength={45}
+          />
+          <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 45 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+            {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite"}
+          </div>
+        </div>
 
-            <label className="block mb-1 text-sm">{t("email")}</label>
-            <input
-              placeholder={t("email")}
-              value={form.email || ""}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
+        <div>
+          <label className="block mb-1 text-xs md:text-sm">{t("telefone")}</label>
+          <input
+            placeholder={t("telefone")}
+            value={form.telefone || ""}
+            onChange={handleTelefoneChange}
+            className="w-full rounded p-2 text-sm bg-transparent border"
+            disabled={Boolean(!podeEditar && modalVisualizar)}
+            style={{
+              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
+            }}
+            maxLength={17}
+          />
+          <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 17 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+            {telefoneCaracteres}/17 {telefoneCaracteres === 17 && " - Limite"}
+          </div>
+        </div>
 
-            <label className="block mb-1 text-sm">{t("telefone")}</label>
-            <input
-              placeholder={t("telefone")}
-              value={form.telefone || ""}
-              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
+        <div>
+          <label className="block mb-1 text-xs md:text-sm">{t("endereco")}</label>
+          <input
+            placeholder={t("endereco")}
+            value={form.endereco || ""}
+            onChange={handleEnderecoChange}
+            className="w-full rounded p-2 text-sm bg-transparent border"
+            disabled={Boolean(!podeEditar && modalVisualizar)}
+            style={{
+              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
+            }}
+            maxLength={50}
+          />
+          <div className="text-xs text-right mt-1" style={{ color: enderecoCaracteres === 50 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+            {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite"}
+          </div>
+        </div>
 
-            <label className="block mb-1 text-sm">{t("endereco")}</label>
-            <input
-              placeholder={t("endereco")}
-              value={form.endereco || ""}
-              onChange={(e) => setForm({ ...form, endereco: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <label className="block mb-1 text-sm">{t("cidade")}</label>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block mb-1 text-xs md:text-sm">{t("cidade")}</label>
             <input
               placeholder={t("cidade")}
               value={form.cidade || ""}
-              onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              onChange={handleCidadeChange}
+              className="w-full rounded p-2 text-sm bg-transparent border"
               disabled={Boolean(!podeEditar && modalVisualizar)}
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
+                color: modoDark ? "#FFFFFF" : "#000000",
+                borderColor: modoDark ? "#FFFFFF" : "#000000"
               }}
+              maxLength={20}
             />
+            <div className="text-xs text-right mt-1" style={{ color: cidadeCaracteres === 20 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+              {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite"}
+            </div>
+          </div>
 
-            <label className="block mb-1 text-sm">{t("estado")}</label>
+          <div>
+            <label className="block mb-1 text-xs md:text-sm">{t("estado")}</label>
             <input
               placeholder={t("estado")}
               value={form.estado || ""}
-              onChange={(e) => setForm({ ...form, estado: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+              onChange={handleEstadoChange}
+              className="w-full rounded p-2 text-sm bg-transparent border"
               disabled={Boolean(!podeEditar && modalVisualizar)}
               style={{
                 backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
+                color: modoDark ? "#FFFFFF" : "#000000",
+                borderColor: modoDark ? "#FFFFFF" : "#000000"
               }}
+              maxLength={2}
             />
-
-            <label className="block mb-1 text-sm">{t("cep")}</label>
-            <input
-              placeholder={t("cep")}
-              value={form.cep || ""}
-              onChange={(e) => setForm({ ...form, cep: e.target.value })}
-              className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000"
-              }}
-            />
-
-            <div className="flex justify-between mt-4 flex-wrap gap-2">
-              <button
-                onClick={() => {
-                  setModalAberto(false);
-                  setModalVisualizar(null);
-                }}
-                className="hover:underline cursor-pointer text-sm md:text-base"
-                style={{ color: "var(--cor-fonte)" }}
-              >
-                {t("fechar")}
-              </button>
-              {modalVisualizar ? (
-                podeEditar && (
-                  <>
-                    <button
-                      onClick={handleSalvarCliente}
-                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700 cursor-pointer text-sm md:text-base"
-                      style={{
-                        backgroundColor: "green",
-                        color: "white",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
-                      }}
-                    >
-                      {t("salvar")}
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-red-700 cursor-pointer text-sm md:text-base"
-                      style={{
-                        backgroundColor: "red",
-                        color: "white",
-                        border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
-                      }}
-                    >
-                      {t("excluir")}
-                    </button>
-                  </>
-                )
-              ) : (
-                <button
-                  onClick={handleAdicionarCliente}
-                  className="px-3 md:px-4 py-1 md:py-2 rounded hover:bg-[#00443f] cursor-pointer text-sm md:text-base"
-                  style={{
-                    backgroundColor: "green",
-                    color: "white",
-                    border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
-                  }}
-                >
-                  {t("adicionarCliente")}
-                </button>
-              )}
+            <div className="text-xs text-right mt-1" style={{ color: estadoCaracteres === 2 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+              {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite"}
             </div>
           </div>
         </div>
-      )}
+
+        <div>
+          <label className="block mb-1 text-xs md:text-sm">{t("cep")}</label>
+          <input
+            placeholder={t("cep")}
+            value={form.cep || ""}
+            onChange={handleCepChange}
+            className="w-full rounded p-2 text-sm bg-transparent border"
+            disabled={Boolean(!podeEditar && modalVisualizar)}
+            style={{
+              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
+              color: modoDark ? "#FFFFFF" : "#000000",
+              borderColor: modoDark ? "#FFFFFF" : "#000000"
+            }}
+            maxLength={10}
+          />
+          <div className="text-xs text-right mt-1" style={{ color: cepCaracteres === 10 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+            {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite"}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between mt-4 flex-wrap gap-2">
+        <button
+          onClick={() => {
+            setModalAberto(false);
+            setModalVisualizar(null);
+          }}
+          className="hover:underline cursor-pointer text-sm"
+          style={{ color: "var(--cor-fonte)" }}
+        >
+          {t("fechar")}
+        </button>
+        {modalVisualizar ? (
+          podeEditar && (
+            <>
+              <button
+                onClick={handleSalvarCliente}
+                className="px-3 py-1 rounded hover:bg-blue-700 cursor-pointer text-sm"
+                style={{
+                  backgroundColor: "green",
+                  color: "white",
+                  border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
+                }}
+              >
+                {t("salvar")}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 rounded hover:bg-red-700 cursor-pointer text-sm"
+                style={{
+                  backgroundColor: "red",
+                  color: "white",
+                  border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
+                }}
+              >
+                {t("excluir")}
+              </button>
+            </>
+          )
+        ) : (
+          <button
+            onClick={handleAdicionarCliente}
+            className="px-3 py-1 rounded hover:bg-[#00443f] cursor-pointer text-sm"
+            style={{
+              backgroundColor: "green",
+              color: "white",
+              border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+            }}
+          >
+            {t("adicionarCliente")}
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
