@@ -39,7 +39,7 @@ export default function CatalogoPublico({ params }: PageProps) {
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [termoBusca, setTermoBusca] = useState('');
-  const produtosPorPagina = 15; // Aumentado para 15 para 3 linhas de 5 produtos
+  const produtosPorPagina = 15; 
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -506,12 +506,6 @@ export default function CatalogoPublico({ params }: PageProps) {
                   </div>
                   <div className="text-sm text-gray-400">Total vendido</div>
                 </div>
-              </div>
-
-              <div className="flex justify-center pt-4">
-                <button className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-semibold transition-colors duration-200 transform hover:scale-105">
-                  Entrar em contato
-                </button>
               </div>
             </div>
           </div>
