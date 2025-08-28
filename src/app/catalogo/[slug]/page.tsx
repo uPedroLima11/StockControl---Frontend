@@ -11,7 +11,7 @@ interface ProdutoCatalogo {
   preco: number;
   foto?: string;
   quantidade: number;
-  vendas: number;
+  vendas: number; 
 }
 
 interface CatalogoProps {
@@ -334,7 +334,7 @@ export default function CatalogoPublico({ params }: PageProps) {
                         <span>Estoque: {produto.quantidade}</span>
                         <span className="flex items-center gap-1">
                           <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
-                          {produto.vendas} vendas
+                          {produto.vendas} vendidos
                         </span>
                       </div>
 
