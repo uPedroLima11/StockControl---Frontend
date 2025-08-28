@@ -813,12 +813,32 @@ export default function Produtos() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className={`w-full px-6 py-3 md:px-18 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
+                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3 ${
+                        modoDark
+                          ? "border-blue-400"
+                          : "border-gray-400"
+                      }`}
                       style={{
-                        backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                        color: modoDark ? "#FFFFFF" : "#000000",
+                        backgroundColor: modoDark ? "#183366" : "#e5e7eb", 
+                        color: modoDark ? "#60a5fa" : "#374151",
+                        fontWeight: 600,
+                        transition: "background 0.2s",
                       }}
                     >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke={modoDark ? "#60a5fa" : "#374151"}
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                        />
+                      </svg>
                       {t("selecionarImagem")}
                     </button>
                   </div>

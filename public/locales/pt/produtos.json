@@ -6,7 +6,12 @@
   "novoProduto": "Novo Produto",
   "editarProduto": "Editar Produto",
   "quantidade": "Quantidade",
-
+  "selecionarImagem": "Selecionar Foto",
+  "foto": "Foto",
+  "selecionarFornecedor": "Selecionar Fornecedor",
+  "selecionarCategoria": "Selecionar Categoria",
+  "fechar": "Fechar",
+  "criar": "Criar",
   "nome": "Nome",
   "fornecedor": "Fornecedor",
   "categoria": "Categoria",

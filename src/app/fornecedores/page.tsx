@@ -301,7 +301,6 @@ export default function Fornecedores() {
 
   const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
-  // Filtra e pagina os fornecedores
   const fornecedoresFiltrados = fornecedores.filter(
     (fornecedor) =>
       fornecedor.empresaId === empresaId &&

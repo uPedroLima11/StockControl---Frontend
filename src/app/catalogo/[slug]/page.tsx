@@ -37,6 +37,10 @@ export default function CatalogoPublico({ params }: PageProps) {
   const [catalogoDesativado, setCatalogoDesativado] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
 
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [termoBusca, setTermoBusca] = useState('');
+  const produtosPorPagina = 3;
+
   useEffect(() => {
     document.documentElement.classList.add('dark');
     document.body.style.backgroundColor = '#111827';
@@ -92,6 +96,21 @@ export default function CatalogoPublico({ params }: PageProps) {
       style: 'currency',
       currency: 'BRL'
     });
+  };
+
+  const produtosFiltrados = data?.produtos.filter(produto =>
+    produto.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+    produto.descricao.toLowerCase().includes(termoBusca.toLowerCase())
+  ) || [];
+
+  const indexUltimoProduto = paginaAtual * produtosPorPagina;
+  const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
+  const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
+  const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -205,25 +224,80 @@ export default function CatalogoPublico({ params }: PageProps) {
                 Nossos Produtos
               </h2>
               <p className="text-gray-400">
-                {produtos.length} produto{produtos.length !== 1 ? 's' : ''} disponível{produtos.length !== 1 ? 's' : ''}
+                {produtosFiltrados.length} produto{produtosFiltrados.length !== 1 ? 's' : ''} encontrado{produtosFiltrados.length !== 1 ? 's' : ''}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {produtos.map((produto) => (
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+              <div className="relative w-full md:w-1/3">
+                <input
+                  type="text"
+                  placeholder="Buscar produtos..."
+                  value={termoBusca}
+                  onChange={(e) => {
+                    setTermoBusca(e.target.value);
+                    setPaginaAtual(1);
+                  }}
+                  className="w-full px-4 py-2 pl-10 bg-gray-800/60 border border-gray-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+
+              {totalPaginas > 1 && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => mudarPagina(paginaAtual - 1)}
+                    disabled={paginaAtual === 1}
+                    className={`p-2 rounded-full ${paginaAtual === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <span className="text-sm text-gray-300">
+                    Página {paginaAtual} de {totalPaginas}
+                  </span>
+
+                  <button
+                    onClick={() => mudarPagina(paginaAtual + 1)}
+                    disabled={paginaAtual === totalPaginas}
+                    className={`p-2 rounded-full ${paginaAtual === totalPaginas ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {produtosAtuais.map((produto) => (
                 <div
                   key={produto.id}
                   onClick={() => setProdutoSelecionado(produto)}
                   className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
                 >
-                  <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl overflow-hidden border border-gray-700/30 shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-400/30 transition-all duration-300">
-                    <div className="relative h-48 w-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden">
+                  <div className="bg-gray-800/60 backdrop-blur-md rounded-2xl overflow-hidden border border-gray-700/30 shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-400/30 transition-all duration-300 h-full">
+                    <div className="relative h-56 w-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center overflow-hidden">
                       {produto.foto ? (
                         <Image
                           src={produto.foto}
                           alt={produto.nome}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          width={300}
+                          height={225}
+                          className="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500"
+                          style={{
+                            width: 'auto',
+                            height: 'auto',
+                            maxWidth: '100%',
+                            maxHeight: '100%'
+                          }}
                         />
                       ) : (
                         <div className="text-center">
@@ -277,6 +351,76 @@ export default function CatalogoPublico({ params }: PageProps) {
                 </div>
               ))}
             </div>
+
+            {totalPaginas > 1 && (
+              <div className="flex justify-center mt-8">
+                <div className="flex items-center space-x-2 bg-gray-800/60 backdrop-blur-md rounded-lg p-2 border border-gray-700/30">
+                  <button
+                    onClick={() => mudarPagina(1)}
+                    disabled={paginaAtual === 1}
+                    className={`px-3 py-1 rounded ${paginaAtual === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => mudarPagina(paginaAtual - 1)}
+                    disabled={paginaAtual === 1}
+                    className={`px-3 py-1 rounded ${paginaAtual === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPaginas ||
+                      (page >= paginaAtual - 1 && page <= paginaAtual + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => mudarPagina(page)}
+                          className={`px-3 py-1 rounded ${paginaAtual === page ? 'bg-emerald-500 text-white' : 'hover:bg-gray-700'}`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === paginaAtual - 2 ||
+                      page === paginaAtual + 2
+                    ) {
+                      return <span key={page} className="px-1 text-gray-400">...</span>;
+                    }
+                    return null;
+                  })}
+
+                  <button
+                    onClick={() => mudarPagina(paginaAtual + 1)}
+                    disabled={paginaAtual === totalPaginas}
+                    className={`px-3 py-1 rounded ${paginaAtual === totalPaginas ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => mudarPagina(totalPaginas)}
+                    disabled={paginaAtual === totalPaginas}
+                    className={`px-3 py-1 rounded ${paginaAtual === totalPaginas ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -362,11 +506,6 @@ export default function CatalogoPublico({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className="flex justify-center pt-4">
-                <button className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-semibold transition-colors duration-200 transform hover:scale-105">
-                  Entrar em contato
-                </button>
-              </div>
             </div>
           </div>
         </div>
