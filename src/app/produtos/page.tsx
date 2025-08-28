@@ -200,12 +200,10 @@ export default function Produtos() {
         if (response.ok) {
           const produtoAtualizado = await response.json();
           
-          // Atualizar a lista de produtos
           setProdutos(produtos.map(p => 
             p.id === produtoId ? { ...p, noCatalogo: produtoAtualizado.noCatalogo } : p
           ));
           
-          // Se estiver visualizando o produto, atualizar também
           if (modalVisualizar && modalVisualizar.id === produtoId) {
             setModalVisualizar({ ...modalVisualizar, noCatalogo: produtoAtualizado.noCatalogo });
             setForm({ ...form, noCatalogo: produtoAtualizado.noCatalogo });
