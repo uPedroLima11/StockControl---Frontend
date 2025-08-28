@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCloudUploadAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
 interface Empresa {
+  slug: any;
   id: string;
   nome: string;
   email: string;
@@ -19,6 +20,7 @@ interface Empresa {
   cidade?: string;
   cep?: string;
   foto?: string | null;
+  catalogoPublico?: boolean;
 }
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
@@ -32,6 +34,7 @@ export default function Empresa() {
   const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [atualizandoCatalogo, setAtualizandoCatalogo] = useState(false);
   const router = useRouter();
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
@@ -68,7 +71,6 @@ export default function Empresa() {
       document.body.style.color = "#000000";
     }
   };
-
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -157,6 +159,52 @@ export default function Empresa() {
         setFotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleCatalogoPublico = async () => {
+    if (!empresa || atualizandoCatalogo) return;
+
+    setAtualizandoCatalogo(true);
+    try {
+      const novoEstado = !empresa.catalogoPublico;
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresa.id}/catalogo`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          catalogoPublico: novoEstado
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar catálogo");
+      }
+
+      const empresaAtualizada = await response.json();
+      setEmpresa(empresaAtualizada);
+
+      Swal.fire({
+        icon: "success",
+        title: novoEstado ? "Catálogo ativado!" : "Catálogo desativado!",
+        text: novoEstado 
+          ? "Seu catálogo agora está público e acessível pelo link."
+          : "Seu catálogo não está mais público.",
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+    } catch (error) {
+      console.error("Erro ao alterar estado do catálogo:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Erro",
+        text: "Não foi possível alterar o estado do catálogo.",
+      });
+    } finally {
+      setAtualizandoCatalogo(false);
     }
   };
 
@@ -334,6 +382,56 @@ export default function Empresa() {
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
+          <div className="mt-4 p-4 rounded-lg" style={{ 
+            backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
+            color: modoDark ? "#FFFFFF" : "#1E3A8A"
+          }}>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              {empresa.catalogoPublico ? <FaEye /> : <FaEyeSlash />}
+              Catálogo Público
+            </h3>
+            
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm">
+                Status: <strong>{empresa.catalogoPublico ? "ATIVADO" : "DESATIVADO"}</strong>
+              </span>
+              <button
+                onClick={toggleCatalogoPublico}
+                disabled={atualizandoCatalogo}
+                className={`px-3 py-1 rounded text-sm font-medium transition ${
+                  empresa.catalogoPublico 
+                    ? "bg-red-100 text-red-800 hover:bg-red-200" 
+                    : "bg-green-100 text-green-800 hover:bg-green-200"
+                } disabled:opacity-50`}
+              >
+                {atualizandoCatalogo ? "Processando..." : 
+                 empresa.catalogoPublico ? "Desativar" : "Ativar"}
+              </button>
+            </div>
+
+            <p className="text-sm mb-2">
+              Seu catálogo está disponível em:
+            </p>
+            <a
+              href={`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')}/catalogo/${empresa.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline text-sm break-all"
+            >
+              {process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')}/catalogo/{empresa.slug}
+            </a>
+
+            <p className="text-sm mt-2">
+              📢 Os clientes verão apenas os produtos marcados como "Adicionar ao Catálogo"
+            </p>
+            
+            {!empresa.catalogoPublico && (
+              <p className="text-sm mt-2 text-yellow-600">
+                ⚠️ Seu catálogo está desativado. Ative para torná-lo público.
+              </p>
+            )}
+          </div>
+
           <div>
             <h2 className="text-lg font-semibold mb-2">{t("logoEmpresa")}</h2>
             {empresa.foto && (
@@ -486,7 +584,7 @@ export default function Empresa() {
 
               {fotoPreview && (
                 <div className="mt-2">
-                    <p className="text-sm mb-1">{t("empresa.preVisualizacao")}:</p>
+                  <p className="text-sm mb-1">{t("empresa.preVisualizacao")}:</p>
                   <Image
                     src={fotoPreview}
                     alt="Preview"

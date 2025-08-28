@@ -9,6 +9,7 @@ export interface ProdutoI {
     quantidade: number;
     quantidadeMin: number;
     foto?: string;
+    noCatalogo: boolean;
     fornecedorId?: string;
     categoriaId?: string;
     empresaId?: string;

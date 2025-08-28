@@ -19,8 +19,8 @@ export default function LayoutWrapper({
     pathname === "/login" ||
     pathname === "/registro" ||
     pathname === "/esqueci" ||
-    pathname === "/alteracao";
-
+    pathname === "/alteracao" ||
+    pathname.startsWith("/catalogo/");
   const [modoDark, setModoDark] = useState(false);
 
   useEffect(() => {

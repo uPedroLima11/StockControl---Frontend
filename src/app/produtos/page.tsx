@@ -5,7 +5,7 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -35,6 +35,7 @@ export default function Produtos() {
     quantidade: 0,
     quantidadeMin: 0,
     foto: "",
+    noCatalogo: false,
     fornecedorId: "",
     categoriaId: "",
     empresaId: "",
@@ -185,6 +186,50 @@ export default function Produtos() {
     }
   };
 
+  const toggleCatalogo = async (produtoId: string, noCatalogo: boolean) => {
+    handleAcaoProtegida(async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produtoId}/catalogo`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ noCatalogo: !noCatalogo }),
+        });
+
+        if (response.ok) {
+          const produtoAtualizado = await response.json();
+          
+          // Atualizar a lista de produtos
+          setProdutos(produtos.map(p => 
+            p.id === produtoId ? { ...p, noCatalogo: produtoAtualizado.noCatalogo } : p
+          ));
+          
+          // Se estiver visualizando o produto, atualizar também
+          if (modalVisualizar && modalVisualizar.id === produtoId) {
+            setModalVisualizar({ ...modalVisualizar, noCatalogo: produtoAtualizado.noCatalogo });
+            setForm({ ...form, noCatalogo: produtoAtualizado.noCatalogo });
+          }
+
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: produtoAtualizado.noCatalogo 
+              ? t("produtoAdicionadoCatalogo.titulo")
+              : t("produtoRemovidoCatalogo.titulo"),
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        } else {
+          Swal.fire("Erro!", "Não foi possível alterar o catálogo", "error");
+        }
+      } catch (err) {
+        console.error("Erro ao alterar catálogo:", err);
+        Swal.fire("Erro!", "Erro de conexão com o servidor", "error");
+      }
+    });
+  };
+
   const handleSubmit = async () => {
     handleAcaoProtegida(async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -215,6 +260,7 @@ export default function Produtos() {
         formData.append("preco", form.preco.toString());
         formData.append("quantidade", form.quantidade.toString());
         formData.append("quantidadeMin", form.quantidadeMin.toString());
+        formData.append("noCatalogo", form.noCatalogo.toString());
         if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
         if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
         formData.append("empresaId", empresaId);
@@ -231,6 +277,7 @@ export default function Produtos() {
             id: "",
             nome: "",
             descricao: "",
+            noCatalogo: false,
             preco: 0,
             quantidade: 0,
             quantidadeMin: 0,
@@ -295,6 +342,7 @@ export default function Produtos() {
         formData.append("preco", form.preco.toString());
         formData.append("quantidade", form.quantidade.toString());
         formData.append("quantidadeMin", form.quantidadeMin.toString());
+        formData.append("noCatalogo", form.noCatalogo.toString());
         formData.append("usuarioId", usuarioValor);
 
         if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
@@ -518,23 +566,26 @@ export default function Produtos() {
                       <th>{t("categoria")}</th>
                       <th className="text-center">{t("estoque")}</th>
                       <th>{t("preco")}</th>
+                      <th className="text-center">{t("catalogo")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {produtosAtuais.map((produto) => (
                       <tr
                         key={produto.id}
-                        onClick={() => {
-                          setModalVisualizar(produto);
-                          setForm(produto);
-                        }}
-                        className="border-b hover:bg-opacity-50 transition cursor-pointer"
+                        className="border-b hover:bg-opacity-50 transition"
                         style={{
                           color: "var(--cor-fonte)",
                           borderColor: modoDark ? "#FFFFFF" : "#000000",
                         }}
                       >
-                        <td className="py-3 px-4 flex items-center gap-2">
+                        <td 
+                          className="py-3 px-4 flex items-center gap-2 cursor-pointer"
+                          onClick={() => {
+                            setModalVisualizar(produto);
+                            setForm(produto);
+                          }}
+                        >
                           <Image
                             src={produto.foto || "/out.jpg"}
                             width={30}
@@ -552,6 +603,18 @@ export default function Produtos() {
                         <td className="py-3 px-4 text-center">{produto.quantidade || "-"}</td>
                         <td className="py-3 px-3 text-center">
                           R$ {formatarPreco(produto.preco)}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCatalogo(produto.id, produto.noCatalogo);
+                            }}
+                            className="p-1 text-yellow-500 hover:text-yellow-600 transition"
+                                                        title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
+                          >
+                            {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -588,13 +651,23 @@ export default function Produtos() {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => toggleExpandirProduto(produto.id)}
-                        className="text-gray-500 hover:text-gray-700 p-1"
-                        style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
-                      >
-                        {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleCatalogo(produto.id, produto.noCatalogo)}
+                          className="text-yellow-500 hover:text-yellow-600 p-1"
+                          title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
+                        >
+                          {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
+                        </button>
+
+                        <button
+                          onClick={() => toggleExpandirProduto(produto.id)}
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        >
+                          {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                      </div>
                     </div>
 
                     <div
@@ -620,6 +693,10 @@ export default function Produtos() {
                             <p className="font-semibold">{t("quantidadeMinima")}:</p>
                             <p>{produto.quantidadeMin || "-"}</p>
                           </div>
+                          <div>
+                            <p className="font-semibold">{t("catalogo")}:</p>
+                            <p>{produto.noCatalogo ? t("sim") : t("nao")}</p>
+                          </div>
                         </div>
                         {produto.descricao && (
                           <div className="mt-2">
@@ -627,7 +704,7 @@ export default function Produtos() {
                             <p>{produto.descricao}</p>
                           </div>
                         )}
-                        <div className="mt-3 flex justify-end">
+                        <div className="mt-3 flex justify-end gap-2">
                           <button
                             onClick={() => {
                               setModalVisualizar(produto);
@@ -814,6 +891,21 @@ export default function Produtos() {
                   ))}
                 </select>
               </div>
+
+              {podeEditar && (
+                <div className="flex items-center mb-3">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.noCatalogo || false}
+                      onChange={(e) => setForm({ ...form, noCatalogo: e.target.checked })}
+                      className="mr-2"
+                    />
+                    <span className="text-sm">{t("adicionarAoCata")}</span>
+                  </label>
+                </div>
+              )}
+
               <div className="flex justify-between mt-4">
                 <button
                   onClick={() => {
