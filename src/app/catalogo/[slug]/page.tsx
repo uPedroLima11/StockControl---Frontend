@@ -52,7 +52,7 @@ export default function CatalogoPublico({ params }: PageProps) {
   useEffect(() => {
     const fetchCatalogo = async () => {
       try {
-        const apiUrl = 'http://localhost:3001';
+        const apiUrl = process.env.NEXT_PUBLIC_URL_API || 'http://localhost:3001';
         const url = `${apiUrl}/catalogo/${slug}`;
         console.log('Buscando catálogo:', url);
 
