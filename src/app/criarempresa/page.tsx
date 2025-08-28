@@ -28,6 +28,7 @@ export default function CriarEmpresa() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const { logar } = useUsuarioStore();
   const { t } = useTranslation("criarempresa");
+  const [loading, setLoading] = useState(true);
 
   const formValues = watch();
   const [charCounts, setCharCounts] = useState({
@@ -38,21 +39,25 @@ export default function CriarEmpresa() {
     pais: 0,
     estado: 0,
     cidade: 0,
-    cep: 0
+    cep: 0,
   });
 
+
   useEffect(() => {
-    setCharCounts({
-      nome: formValues.nome?.length || 0,
-      email: formValues.email?.length || 0,
-      telefone: formValues.telefone?.length || 0,
-      endereco: formValues.endereco?.length || 0,
-      pais: formValues.pais?.length || 0,
-      estado: formValues.estado?.length || 0,
-      cidade: formValues.cidade?.length || 0,
-      cep: formValues.cep?.length || 0
+    const subscription = watch((value) => {
+      setCharCounts({
+        nome: value.nome?.length || 0,
+        email: value.email?.length || 0,
+        telefone: value.telefone?.length || 0,
+        endereco: value.endereco?.length || 0,
+        pais: value.pais?.length || 0,
+        estado: value.estado?.length || 0,
+        cidade: value.cidade?.length || 0,
+        cep: value.cep?.length || 0,
+      });
     });
-  }, [formValues]);
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -89,56 +94,49 @@ export default function CriarEmpresa() {
   };
 
   useEffect(() => {
-    if (usuarioLogado?.empresaId) {
-      router.push("/dashboard");
-    }
-  }, [usuarioLogado, router]);
-
-  useEffect(() => {
-    async function buscaUsuarios(idUsuario: string) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if (response.status === 200) {
-        const dados = await response.json();
-        logar(dados);
-      }
-    }
-
-    const buscarDados = async (idUsuario: string) => {
-      const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
-      if (responseUser.status === 200) {
-        const dados = await responseUser.json();
-        setUsuarioLogado(dados);
-      }
-    };
-
-    if (localStorage.getItem("client_key")) {
-      const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      buscaUsuarios(usuarioValor);
-      buscarDados(usuarioValor);
-      fetchEmpresa(usuarioValor);
-    }
-
-    const id = localStorage.getItem("client_key");
-
-    if (!id) {
-      router.push("/login");
-    }
-  }, [router, logar]);
-
-  const fetchEmpresa = async (idUsuario: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${idUsuario}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.empresa) {
-          router.push("/empresa");
+    async function init() {
+      try {
+        const clientKey = localStorage.getItem("client_key");
+        if (!clientKey) {
+          router.push("/login");
+          return;
         }
+
+        const usuarioId = clientKey.replace(/"/g, "");
+
+        const responseUser = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`
+        );
+        if (responseUser.ok) {
+          const dados: UsuarioI = await responseUser.json();
+          logar(dados);
+          setUsuarioLogado(dados);
+
+          if (dados.empresaId) {
+            router.push("/dashboard");
+            return;
+          }
+        }
+
+        const responseEmpresa = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`
+        );
+        if (responseEmpresa.ok) {
+          const data = await responseEmpresa.json();
+          if (data.empresa) {
+            router.push("/empresa");
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao buscar dados:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      // Sem lógica de erro
     }
-  };
+
+    init();
+  }, [router, logar]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -159,29 +157,31 @@ export default function CriarEmpresa() {
 
     try {
       const formData = new FormData();
-      formData.append('nome', data.nome);
-      formData.append('email', data.email);
-      if (data.telefone) formData.append('telefone', data.telefone);
-      if (data.endereco) formData.append('endereco', data.endereco);
-      if (data.pais) formData.append('pais', data.pais);
-      if (data.estado) formData.append('estado', data.estado);
-      if (data.cidade) formData.append('cidade', data.cidade);
-      if (data.cep) formData.append('cep', data.cep);
+      formData.append("nome", data.nome);
+      formData.append("email", data.email);
+      if (data.telefone) formData.append("telefone", data.telefone);
+      if (data.endereco) formData.append("endereco", data.endereco);
+      if (data.pais) formData.append("pais", data.pais);
+      if (data.estado) formData.append("estado", data.estado);
+      if (data.cidade) formData.append("cidade", data.cidade);
+      if (data.cep) formData.append("cep", data.cep);
       if (data.foto && data.foto[0]) {
-        formData.append('foto', data.foto[0]);
+        formData.append("foto", data.foto[0]);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa`, {
-        method: "POST",
-        headers: {
-          "user-id": usuarioValor || "",
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/empresa`,
+        {
+          method: "POST",
+          headers: {
+            "user-id": usuarioValor || "",
+          },
+          body: formData,
+        }
+      );
 
       if (response.ok) {
-        window.location.reload();
-        router.push("/dashboard");
+        router.push("/empresa");
       } else {
         Swal.fire({
           icon: "error",
@@ -195,13 +195,30 @@ export default function CriarEmpresa() {
     }
   }
 
-  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${modoDark ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]" : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"}`;
+  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${modoDark
+    ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+    : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+    }`;
 
   const CharCounter = ({ current, max }: { current: number; max: number }) => (
-    <div className={`text-xs text-right mt-1 ${current > max ? 'text-red-500' : 'text-gray-500'}`}>
-      {current}/{max} {current > max && ' - Limite excedido'}
+    <div
+      className={`text-xs text-right mt-1 ${current > max ? "text-red-500" : "text-gray-500"
+        }`}
+    >
+      {current}/{max} {current > max && " - Limite excedido"}
     </div>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ backgroundColor: "var(--cor-fundo)" }}
+      >
+        <div className="text-[var(--cor-texto)]">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -211,14 +228,19 @@ export default function CriarEmpresa() {
         color: "var(--cor-texto)",
       }}
     >
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">{t("titulo")}</h1>
-      
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md md:max-w-xl space-y-3 md:space-y-4">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">
+        {t("titulo")}
+      </h1>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md md:max-w-xl space-y-3 md:space-y-4"
+      >
         <div>
-          <input 
-            {...register("nome", { maxLength: 20 })} 
-            placeholder={t("campos.nome")} 
-            required 
+          <input
+            {...register("nome", { maxLength: 20 })}
+            placeholder={t("campos.nome")}
+            required
             className={inputClass}
             maxLength={20}
           />
@@ -226,11 +248,11 @@ export default function CriarEmpresa() {
         </div>
 
         <div>
-          <input 
-            {...register("email", { maxLength: 60 })} 
-            placeholder={t("campos.email")} 
-            type="email" 
-            required 
+          <input
+            {...register("email", { maxLength: 60 })}
+            placeholder={t("campos.email")}
+            type="email"
+            required
             className={inputClass}
             maxLength={60}
           />
@@ -238,9 +260,9 @@ export default function CriarEmpresa() {
         </div>
 
         <div>
-          <input 
-            {...register("telefone", { maxLength: 15 })} 
-            placeholder={t("campos.telefone")} 
+          <input
+            {...register("telefone", { maxLength: 15 })}
+            placeholder={t("campos.telefone")}
             className={inputClass}
             maxLength={15}
           />
@@ -248,9 +270,9 @@ export default function CriarEmpresa() {
         </div>
 
         <div>
-          <input 
-            {...register("pais", { maxLength: 20 })} 
-            placeholder={t("campos.pais")} 
+          <input
+            {...register("pais", { maxLength: 20 })}
+            placeholder={t("campos.pais")}
             className={inputClass}
             maxLength={20}
           />
@@ -258,9 +280,9 @@ export default function CriarEmpresa() {
         </div>
 
         <div>
-          <input 
-            {...register("endereco", { maxLength: 50 })} 
-            placeholder={t("campos.endereco")} 
+          <input
+            {...register("endereco", { maxLength: 50 })}
+            placeholder={t("campos.endereco")}
             className={inputClass}
             maxLength={50}
           />
@@ -269,9 +291,9 @@ export default function CriarEmpresa() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <div>
-            <input 
-              {...register("cidade", { maxLength: 20 })} 
-              placeholder={t("campos.cidade")} 
+            <input
+              {...register("cidade", { maxLength: 20 })}
+              placeholder={t("campos.cidade")}
               className={inputClass}
               maxLength={20}
             />
@@ -279,9 +301,9 @@ export default function CriarEmpresa() {
           </div>
 
           <div>
-            <input 
-              {...register("estado", { maxLength: 2 })} 
-              placeholder={t("campos.estado")} 
+            <input
+              {...register("estado", { maxLength: 2 })}
+              placeholder={t("campos.estado")}
               className={inputClass}
               maxLength={2}
             />
@@ -290,9 +312,9 @@ export default function CriarEmpresa() {
         </div>
 
         <div>
-          <input 
-            {...register("cep", { maxLength: 10 })} 
-            placeholder={t("campos.cep")} 
+          <input
+            {...register("cep", { maxLength: 10 })}
+            placeholder={t("campos.cep")}
             className={inputClass}
             maxLength={10}
           />
@@ -312,7 +334,10 @@ export default function CriarEmpresa() {
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className={`w-full p-2 rounded border ${modoDark ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]" : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"}`}
+            className={`w-full p-2 rounded border ${modoDark
+              ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+              : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
+              }`}
           />
         </div>
 
