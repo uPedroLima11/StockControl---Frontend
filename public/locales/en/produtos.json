@@ -22,6 +22,9 @@
   "sim": "Yes",
   "nao": "No",
   "editar": "Edit",
+  "quantidade": "Quantity",
+  "editarProduto": "Edit Product",
+  "salvar": "Save",
 
   "removerDoCatalogo": "Remove from Catalog",
   "adicionarAoCata": "Add to Catalog",

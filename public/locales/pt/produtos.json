@@ -4,7 +4,9 @@
   "novo": "Novo Produto",
   "nenhumProdutoEncontrado": "Nenhum produto encontrado.",
   "novoProduto": "Novo Produto",
-  
+  "editarProduto": "Editar Produto",
+  "quantidade": "Quantidade",
+
   "nome": "Nome",
   "fornecedor": "Fornecedor",
   "categoria": "Categoria",
@@ -16,6 +18,7 @@
   "sim": "Sim",
   "nao": "Não",
   "editar": "Editar",
+  "salvar": "Salvar",
 
   "removerDoCatalogo": "Remover do Catálogo",
   "adicionarAoCata": "Adicionar ao Catálogo",
