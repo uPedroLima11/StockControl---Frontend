@@ -892,5 +892,3 @@ export default function Clientes() {
     </div>
   );
 }
-
-const inputClass = "w-full rounded p-2 mb-3 text-sm md:text-base";

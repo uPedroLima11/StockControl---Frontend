@@ -24,7 +24,6 @@ interface Empresa {
 }
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
-type EmpresaChave = keyof Pick<Empresa, "nome" | "email" | "telefone" | "endereco" | "pais" | "estado" | "cidade" | "cep">;
 
 export default function Empresa() {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
