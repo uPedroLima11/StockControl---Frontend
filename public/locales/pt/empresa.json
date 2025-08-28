@@ -1,8 +1,8 @@
-{   
-    "empresa":{
-    "escolherArquivo": "Escolher arquivo",
-    "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
-    "preVisualizacao": "Pré visualização"
+{
+    "empresa": {
+        "escolherArquivo": "Escolher arquivo",
+        "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
+        "preVisualizacao": "Pré visualização"
     },
     "titulo": "Minha Empresa",
     "carregando": "Carregando dados da empresa...",
@@ -15,6 +15,18 @@
     "deletarEmpresa": "Deletar Empresa",
     "sairEmpresa": "Sair da Empresa",
     "naoInformado": "Não informado",
+    "catalogo": {
+        "publico": "Catálogo Público",
+        "status": "Status",
+        "ativado": "ATIVADO",
+        "desativado": "DESATIVADO",
+        "processando": "Processando...",
+        "ativar": "Ativar",
+        "desativar": "Desativar",
+        "disponivelEm": "Seu catálogo está disponível em:",
+        "avisoClientes": "📢 Os clientes verão apenas os produtos marcados como \"Adicionar ao Catálogo\"",
+        "desativadoAviso": "⚠️ Seu catálogo está desativado. Ative para torná-lo público."
+    },
     "campos": {
         "nome": "Nome da Empresa",
         "endereco": "Endereço",

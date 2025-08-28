@@ -1,49 +1,53 @@
 {
-  "novoProduto": "Novo Produto",
-  "titulo": "Produtos",
+  "titulo": "Gerenciar Produtos",
+  "buscar": "Buscar...",
+  "novo": "Novo Produto",
+  "nenhumProdutoEncontrado": "Nenhum produto encontrado.",
+
   "nome": "Nome",
-  "descricao": "Descrição",
-  "preco": "Preço",
-  "quantidade": "Quantidade",
-  "quantidadeMinima": "Quantidade Mínima",
-  "foto": "URL da Foto",
   "fornecedor": "Fornecedor",
-  "nenhumFornecedorEncontrado": "Nenhum fornecedor encontrado",
   "categoria": "Categoria",
   "estoque": "Estoque",
-  "novo": "Novo Produto",
+  "preco": "Preço",
+  "catalogo": "Catálogo",
+  "quantidadeMinima": "Quantidade mínima",
+  "descricao": "Descrição",
+  "sim": "Sim",
+  "nao": "Não",
   "editar": "Editar",
-  "nenhumProdutoEncontrado": "Nenhum produto encontrado",
-  "selecionarFornecedor": "Fornecedor",
-  "selecionarCategoria": "Categoria",
-  "fechar": "Fechar",
-  "salvar": "Salvar",
-  "excluir": "Excluir",
-  "criar": "Criar",
-  "buscar": "Buscar Produto",
-  "editarProduto": "Editar Produto",
-  "selecionarImagem": "Selecionar Imagem",
+
+  "removerDoCatalogo": "Remover do Catálogo",
+  "adicionarAoCata": "Adicionar ao Catálogo",
+
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",
-    "mensagem": "Sua empresa ainda não foi ativada. Você precisa completar o processo de ativação para continuar.",
+    "mensagem": "Você precisa ativar sua empresa antes de acessar esta funcionalidade.",
     "botao": "Ativar agora",
-    "alertaTitulo": "Atenção!",
-    "alertaMensagem": "Sua empresa ainda não foi ativada. Por favor, complete a ativação."
+    "alertaTitulo": "Empresa não ativada",
+    "alertaMensagem": "Ative sua empresa para liberar todos os recursos."
+  },
+
+  "produtoAdicionadoCatalogo": {
+    "titulo": "Produto adicionado ao catálogo!"
+  },
+  "produtoRemovidoCatalogo": {
+    "titulo": "Produto removido do catálogo!"
   },
   "produtoCriadoSucesso": {
-    "titulo": "Produto criado com sucesso!"
-  },
-  "produtoExcluidoSucesso": {
-    "titulo": "Produto excluído com sucesso!",
-    "mensagem": "O produto foi deletado com sucesso do sistema."
+    "titulo": "Produto cadastrado com sucesso!"
   },
   "produtoAtualizadoSucesso": {
     "titulo": "Produto atualizado com sucesso!"
   },
+  "produtoExcluidoSucesso": {
+    "titulo": "Produto excluído com sucesso!",
+    "mensagem": "O produto foi removido do sistema."
+  },
+
   "confirmacaoExclusao": {
-    "titulo": "Tem certeza?",
-    "mensagem": "Você não poderá reverter esta ação!",
-    "botaoConfirmar": "Sim, excluir!",
+    "titulo": "Deseja excluir este produto?",
+    "mensagem": "Essa ação não poderá ser desfeita.",
+    "botaoConfirmar": "Sim, excluir",
     "botaoCancelar": "Cancelar"
   }
 }

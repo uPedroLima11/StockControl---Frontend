@@ -9,7 +9,7 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
 interface Empresa {
-  slug: any;
+  slug: string;
   id: string;
   nome: string;
   email: string;
@@ -168,7 +168,7 @@ export default function Empresa() {
     setAtualizandoCatalogo(true);
     try {
       const novoEstado = !empresa.catalogoPublico;
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresa.id}/catalogo`, {
         method: "PUT",
         headers: {
@@ -189,7 +189,7 @@ export default function Empresa() {
       Swal.fire({
         icon: "success",
         title: novoEstado ? "Catálogo ativado!" : "Catálogo desativado!",
-        text: novoEstado 
+        text: novoEstado
           ? "Seu catálogo agora está público e acessível pelo link."
           : "Seu catálogo não está mais público.",
         timer: 2000,
@@ -382,7 +382,7 @@ export default function Empresa() {
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
-          <div className="mt-4 p-4 rounded-lg" style={{ 
+          <div className="mt-4 p-4 rounded-lg" style={{
             backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
             color: modoDark ? "#FFFFFF" : "#1E3A8A"
           }}>
@@ -390,7 +390,7 @@ export default function Empresa() {
               {empresa.catalogoPublico ? <FaEye /> : <FaEyeSlash />}
               Catálogo Público
             </h3>
-            
+
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm">
                 Status: <strong>{empresa.catalogoPublico ? "ATIVADO" : "DESATIVADO"}</strong>
@@ -398,33 +398,24 @@ export default function Empresa() {
               <button
                 onClick={toggleCatalogoPublico}
                 disabled={atualizandoCatalogo}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  empresa.catalogoPublico 
-                    ? "bg-red-100 text-red-800 hover:bg-red-200" 
+                className={`px-3 py-1 rounded text-sm font-medium transition ${empresa.catalogoPublico
+                    ? "bg-red-100 text-red-800 hover:bg-red-200"
                     : "bg-green-100 text-green-800 hover:bg-green-200"
-                } disabled:opacity-50`}
+                  } disabled:opacity-50`}
               >
-                {atualizandoCatalogo ? "Processando..." : 
-                 empresa.catalogoPublico ? "Desativar" : "Ativar"}
+                {atualizandoCatalogo ? "Processando..." :
+                  empresa.catalogoPublico ? "Desativar" : "Ativar"}
               </button>
             </div>
 
             <p className="text-sm mb-2">
               Seu catálogo está disponível em:
             </p>
-            <a
-              href={`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')}/catalogo/${empresa.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline text-sm break-all"
-            >
-              {process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')}/catalogo/{empresa.slug}
-            </a>
 
             <p className="text-sm mt-2">
-              📢 Os clientes verão apenas os produtos marcados como "Adicionar ao Catálogo"
+              📢 Os clientes verão apenas os produtos marcados como &quot;Adicionar ao Catálogo&quot;
             </p>
-            
+
             {!empresa.catalogoPublico && (
               <p className="text-sm mt-2 text-yellow-600">
                 ⚠️ Seu catálogo está desativado. Ative para torná-lo público.

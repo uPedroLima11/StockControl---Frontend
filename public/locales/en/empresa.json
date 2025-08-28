@@ -1,9 +1,21 @@
 {
-  "empresa":{
+  "catalogo": {
+    "publico": "Public Catalog",
+    "status": "Status",
+    "ativado": "ENABLED",
+    "desativado": "DISABLED",
+    "processando": "Processing...",
+    "ativar": "Enable",
+    "desativar": "Disable",
+    "disponivelEm": "Your catalog is available at:",
+    "avisoClientes": "📢 Customers will only see products marked as \"Add to Catalog\"",
+    "desativadoAviso": "⚠️ Your catalog is disabled. Enable it to make it public."
+  },
+  "empresa": {
     "escolherArquivo": "Choose file",
     "nenhumArquivoEscolhido": "No file chosen",
     "preVisualizacao": "Preview"
-    },
+  },
   "titulo": "My Company",
   "Pré-visualização:": "Preview",
   "carregando": "Loading company data...",

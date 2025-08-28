@@ -1,48 +1,53 @@
 {
-  "novoProduto": "New Product",
-  "titulo": "Products",
+  "titulo": "Manage Products",
+  "buscar": "Search...",
+  "novo": "New Product",
+  "nenhumProdutoEncontrado": "No products found.",
+
   "nome": "Name",
-  "descricao": "Description",
-  "preco": "Price",
-  "quantidade": "Quantity",
-  "quantidadeMinima": "Minimum Quantity",
-  "foto": "Image URL",
   "fornecedor": "Supplier",
   "categoria": "Category",
   "estoque": "Stock",
-  "novo": "New Product",
-  "selecionarFornecedor": "Supplier",
-  "selecionarCategoria": "Category",
-  "fechar": "Close",
-  "salvar": "Save",
-  "excluir": "Delete",
+  "preco": "Price",
+  "catalogo": "Catalog",
+  "quantidadeMinima": "Minimum quantity",
+  "descricao": "Description",
+  "sim": "Yes",
+  "nao": "No",
   "editar": "Edit",
-  "nenhumProdutoEncontrado": "No products found",
-  "criar": "Create",
-  "buscar": "Search Product",
-  "editarProduto": "Edit Product",
-  "selecionarImagem": "Select Image",
+
+  "removerDoCatalogo": "Remove from Catalog",
+  "adicionarAoCata": "Add to Catalog",
+
   "empresaNaoAtivada": {
-    "titulo": "Company Not Activated",
-    "mensagem": "Your company has not been activated yet. You need to complete the activation process to continue.",
+    "titulo": "Company not activated",
+    "mensagem": "You must activate your company before accessing this feature.",
     "botao": "Activate now",
-    "alertaTitulo": "Attention!",
-    "alertaMensagem": "Your company has not been activated. Please complete the activation."
+    "alertaTitulo": "Company not activated",
+    "alertaMensagem": "Activate your company to unlock all features."
+  },
+
+  "produtoAdicionadoCatalogo": {
+    "titulo": "Product added to catalog!"
+  },
+  "produtoRemovidoCatalogo": {
+    "titulo": "Product removed from catalog!"
   },
   "produtoCriadoSucesso": {
     "titulo": "Product created successfully!"
   },
-  "produtoExcluidoSucesso": {
-    "titulo": "Product deleted successfully!",
-    "mensagem": "The product has been successfully removed from the system."
-  },
   "produtoAtualizadoSucesso": {
     "titulo": "Product updated successfully!"
   },
+  "produtoExcluidoSucesso": {
+    "titulo": "Product deleted successfully!",
+    "mensagem": "The product has been removed from the system."
+  },
+
   "confirmacaoExclusao": {
-    "titulo": "Are you sure?",
-    "mensagem": "You will not be able to undo this action!",
-    "botaoConfirmar": "Yes, delete!",
+    "titulo": "Do you want to delete this product?",
+    "mensagem": "This action cannot be undone.",
+    "botaoConfirmar": "Yes, delete",
     "botaoCancelar": "Cancel"
   }
 }
