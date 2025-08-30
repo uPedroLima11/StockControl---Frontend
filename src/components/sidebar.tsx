@@ -313,8 +313,16 @@ function LinkSidebar({ href, icon, label, cores }: {
   href: string;
   icon: React.ReactNode;
   label: string;
-  cores: any;
+  cores: {
+    azulEscuro: string;
+    azulMedio: string;
+    azulClaro: string;
+    azulBrilhante: string;
+    azulNeon: string;
+    cinzaEscuro: string;
+  };
 }) {
+
   return (
     <Link
       href={href}
@@ -330,8 +338,16 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa, cores }: {
   estaVisivel: boolean;
   aoFechar: () => void;
   nomeEmpresa: string | null;
-  cores: any;
+  cores: {
+    azulEscuro: string;
+    azulMedio: string;
+    azulClaro: string;
+    azulBrilhante: string;
+    azulNeon: string;
+    cinzaEscuro: string;
+  };
 }) {
+
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);

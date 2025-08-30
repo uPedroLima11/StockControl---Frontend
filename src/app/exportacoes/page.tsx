@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import { FaFileExcel, FaDownload, FaHistory, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
+import { FaFileExcel, FaDownload, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 
 interface ExportHistory {
