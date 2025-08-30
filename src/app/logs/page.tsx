@@ -17,6 +17,17 @@ export default function Logs() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const logsPorPagina = 14;
 
+  const temaAtual = {
+    fundo: modoDark ? "#0A1929" : "#F8FAFC",
+    texto: modoDark ? "#FFFFFF" : "#0F172A",
+    card: modoDark ? "#132F4C" : "#FFFFFF",
+    borda: modoDark ? "#1E4976" : "#E2E8F0",
+    primario: modoDark ? "#1976D2" : "#1976D2",
+    secundario: modoDark ? "#00B4D8" : "#0284C7",
+    placeholder: modoDark ? "#9CA3AF" : "#6B7280",
+    hover: modoDark ? "#1E4976" : "#EFF6FF"
+  };
+
   useEffect(() => {
     const initialize = async () => {
       setCarregando(true);
@@ -24,18 +35,7 @@ export default function Logs() {
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
 
-      const root = document.documentElement;
-      if (ativado) {
-        root.style.setProperty("--cor-fundo", "#20252B");
-        root.style.setProperty("--cor-fonte", "#FFFFFF");
-        root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-        root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      } else {
-        root.style.setProperty("--cor-fundo", "#FFFFFF");
-        root.style.setProperty("--cor-fonte", "#000000");
-        root.style.setProperty("--cor-subtitulo", "#4B5563");
-        root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      }
+      document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
 
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
@@ -230,16 +230,16 @@ export default function Logs() {
 
   if (carregando) {
     return (
-      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p style={{ color: "var(--cor-fonte)" }}>{t("logs.carregando")}</p>
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: temaAtual.texto }}>{t("logs.carregando")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("logs.titulo")}
         </h1>
 
@@ -248,43 +248,45 @@ export default function Logs() {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("logs.placeholder_busca")}
-                className="outline-none font-mono text-sm bg-transparent "
+                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
+                style={{ 
+                  color: temaAtual.texto,
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -292,23 +294,24 @@ export default function Logs() {
             )}
           </div>
         </div>
+
         <div
           className="border rounded-xl shadow"
           style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000",
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
           }}
         >
           {logs.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {t("logs.nenhum_log_encontrado")}
             </div>
           ) : (
             <>
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4 text-center">{t("logs.usuario")}</th>
                       <th className="py-3 px-4 text-center">{t("logs.tipo")}</th>
                       <th className="py-3 px-4 text-center min-w-[300px]">{t("logs.descricao")}</th>
@@ -317,7 +320,22 @@ export default function Logs() {
                   </thead>
                   <tbody>
                     {logsAtuais.map((log) => (
-                      <tr key={log.id} className="border-b hover:bg-opacity-50 transition">
+                      <tr
+                        key={log.id}
+                        className="border-b transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = modoDark 
+                            ? "#1E4976"  
+                            : "#EFF6FF"; 
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
                         <td className="py-3 px-4 text-center">
                           {log.usuarioId
                             ? (nomesUsuarios[log.usuarioId] || t("logs.carregando"))
@@ -348,8 +366,20 @@ export default function Logs() {
                 {logsAtuais.map((log) => (
                   <div
                     key={log.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all duration-200 cursor-pointer"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = modoDark 
+                        ? "#1E4976"  
+                        : "#EFF6FF"; 
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.card;
+                    }}
+                    onClick={() => toggleExpandirLog(log.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
@@ -361,12 +391,12 @@ export default function Logs() {
                             }`}>
                             {traduzirTipoLog(log.tipo)}
                           </span>
-                          <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                          <span className="text-xs" style={{ color: temaAtual.placeholder }}>
                             {formatarData(log.createdAt)}
                           </span>
                         </div>
 
-                        <p className="text-sm mb-1" style={{ color: "var(--cor-fonte)" }}>
+                        <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
                           <span className="font-semibold">{t("logs.usuario")}:</span> {log.usuarioId
                             ? (nomesUsuarios[log.usuarioId] || t("logs.carregando"))
                             : t("logs.usuario_nao_informado")}
@@ -374,9 +404,12 @@ export default function Logs() {
                       </div>
 
                       <button
-                        onClick={() => toggleExpandirLog(log.id)}
-                        className="text-gray-500 hover:text-gray-700 p-1"
-                        style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpandirLog(log.id);
+                        }}
+                        className="p-1"
+                        style={{ color: temaAtual.primario }}
                       >
                         {logExpandido === log.id ? <FaChevronUp /> : <FaChevronDown />}
                       </button>
@@ -385,9 +418,9 @@ export default function Logs() {
                     <div
                       className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${logExpandido === log.id ? "max-h-96" : "max-h-0"
                         }`}
-                      style={{ color: "var(--cor-fonte)" }}
+                      style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                      <div className="pt-2 border-t" style={{ borderColor: temaAtual.borda }}>
                         {formatarDescricaoMobile(log.descricao)}
                       </div>
                     </div>

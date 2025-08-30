@@ -1,10 +1,11 @@
 "use client";
 import { FornecedorI } from "@/utils/types/fornecedor";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaCog, FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Fornecedores() {
   const [modoDark, setModoDark] = useState(false);
@@ -36,12 +37,38 @@ export default function Fornecedores() {
   const fornecedoresPorPagina = 10;
   const { t } = useTranslation("fornecedores");
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [nomeCaracteres, setNomeCaracteres] = useState(0);
   const [categoriaCaracteres, setCategoriaCaracteres] = useState(0);
   const [emailCaracteres, setEmailCaracteres] = useState(0);
   const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
+
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -88,20 +115,6 @@ export default function Fornecedores() {
       const temaSalvo = localStorage.getItem("modoDark");
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
-
-      const root = document.documentElement;
-
-      if (ativado) {
-        root.style.setProperty("--cor-fundo", "#20252B");
-        root.style.setProperty("--cor-fonte", "#FFFFFF");
-        root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-        root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      } else {
-        root.style.setProperty("--cor-fundo", "#FFFFFF");
-        root.style.setProperty("--cor-fonte", "#000000");
-        root.style.setProperty("--cor-subtitulo", "#4B5563");
-        root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      }
 
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
@@ -161,7 +174,6 @@ export default function Fornecedores() {
       setTelefoneCaracteres(value.length);
     }
   };
-
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
@@ -376,22 +388,22 @@ export default function Fornecedores() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-3 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-3"
-            style={{
-              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
-              color: modoDark ? "#FFFFFF" : "#1E3A8A"
-            }}>
-            <FaLock className="text-lg md:text-xl" />
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+            backgroundColor: temaAtual.primario + "20",
+            color: temaAtual.texto,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <FaLock className="text-xl" />
             <div>
-              <p className="font-bold text-sm md:text-base">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p className="text-xs md:text-sm">{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
             </div>
           </div>
         )}
@@ -401,43 +413,45 @@ export default function Fornecedores() {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("buscar")}
-                className="outline-none font-mono text-sm bg-transparent"
+                className="outline-none placeholder-gray-400 font-mono text-sm bg-transparent"
+                style={{
+                  color: temaAtual.texto
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -448,11 +462,11 @@ export default function Fornecedores() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm sm:w-auto"
+              className="px-6 py-2 border-2 cursor-pointer rounded-lg transition font-mono text-sm"
               style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                color: modoDark ? "#FFFFFF" : "#00332C",
+                backgroundColor: temaAtual.primario,
+                borderColor: temaAtual.primario,
+                color: "#FFFFFF",
               }}
             >
               {t("novoFornecedor")}
@@ -463,20 +477,20 @@ export default function Fornecedores() {
         <div
           className="border rounded-xl shadow"
           style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000",
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
           }}
         >
           {fornecedoresFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {t("nenhumFornecedorEncontrado")}
             </div>
           ) : (
             <>
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4 text-center">
                         <div className="flex items-center gap-1 justify-center">
                           <FaCog /> {t("foto")}
@@ -495,8 +509,24 @@ export default function Fornecedores() {
                     {fornecedoresAtuais.map((fornecedor) => (
                       <tr
                         key={fornecedor.id}
-                        className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                          }`}
+                        className="border-b transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.hover;
+                          e.currentTarget.style.transform = "translateY(-2px)";
+                          e.currentTarget.style.boxShadow = modoDark
+                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.card;
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
                       >
                         <td
                           onClick={() => {
@@ -505,15 +535,16 @@ export default function Fornecedores() {
                           }}
                           className="py-3 px-4 text-center"
                         >
-                          {fornecedor.foto ? (
-                            <img
-                              src={fornecedor.foto || "/contadefault.png"}
-                              alt={fornecedor.nome}
-                              className="mx-auto w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
-                          )}
+                          <Image
+                            src={fornecedor.foto || "/contadefault.png"}
+                            width={40}
+                            height={40}
+                            className="mx-auto rounded-full object-cover"
+                            alt={fornecedor.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/contadefault.png";
+                            }}
+                          />
                         </td>
                         <td
                           onClick={() => {
@@ -574,7 +605,7 @@ export default function Fornecedores() {
                             onClick={() => handleEntrarContato(fornecedor)}
                             color="#25D366"
                             size={20}
-                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl hover:bg-green-100 transition"
                           />
                         </td>
                       </tr>
@@ -586,23 +617,40 @@ export default function Fornecedores() {
                 {fornecedoresAtuais.map((fornecedor) => (
                   <div
                     key={fornecedor.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all cursor-pointer"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.hover;
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = modoDark
+                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.card;
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                    onClick={() => toggleExpandirFornecedor(fornecedor.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-3">
-                        {fornecedor.foto ? (
-                          <img
-                            src={fornecedor.foto || "/contadefault.png"}
-                            alt={fornecedor.nome}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full"></div>
-                        )}
+                        <Image
+                          src={fornecedor.foto || "/contadefault.png"}
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
+                          alt={fornecedor.nome}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/contadefault.png";
+                          }}
+                        />
                         <div>
-                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>{fornecedor.nome}</p>
-                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                          <p className="font-semibold" style={{ color: temaAtual.texto }}>{fornecedor.nome}</p>
+                          <p className="text-xs" style={{ color: temaAtual.primario }}>
                             {fornecedor.categoria}
                           </p>
                         </div>
@@ -610,15 +658,21 @@ export default function Fornecedores() {
 
                       <div className="flex items-center gap-2">
                         <FaPhoneAlt
-                          onClick={() => handleEntrarContato(fornecedor)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEntrarContato(fornecedor);
+                          }}
                           color="#25D366"
                           size={16}
-                          className="cursor-pointer border p-1 rounded-full"
+                          className="cursor-pointer border p-1 rounded-full hover:bg-green-100 transition"
                         />
                         <button
-                          onClick={() => toggleExpandirFornecedor(fornecedor.id)}
-                          className="text-gray-500 hover:text-gray-700 p-1"
-                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpandirFornecedor(fornecedor.id);
+                          }}
+                          className="p-1"
+                          style={{ color: temaAtual.primario }}
                         >
                           {fornecedorExpandido === fornecedor.id ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
@@ -628,9 +682,9 @@ export default function Fornecedores() {
                     <div
                       className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
                         }`}
-                      style={{ color: "var(--cor-fonte)" }}
+                      style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex">
                           <span className="font-semibold min-w-[80px]">{t("cnpj")}:</span>
                           <span>{fornecedor.cnpj}</span>
@@ -656,9 +710,9 @@ export default function Fornecedores() {
                               }}
                               className="px-3 py-1 text-xs rounded border"
                               style={{
-                                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                                borderColor: modoDark ? "#FFFFFF" : "#000000",
-                                color: modoDark ? "#FFFFFF" : "#000000"
+                                backgroundColor: temaAtual.primario,
+                                borderColor: temaAtual.primario,
+                                color: "#FFFFFF",
                               }}
                             >
                               {t("editar")}
@@ -678,126 +732,127 @@ export default function Fornecedores() {
       {(modalAberto || modalVisualizar) && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 rounded-lg shadow-lg w-full max-w-md"
+            className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              maxHeight: "95vh",
-              overflowY: "auto"
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-xl font-semibold mb-3">
+            <h2 className="text-xl font-semibold mb-4">
               {modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}
             </h2>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium mb-1">{t("nome")}</label>
+                <label className="block mb-1 text-sm">{t("nome")}</label>
                 <input
                   placeholder={t("nome")}
                   value={form.nome || ""}
                   onChange={handleNomeChange}
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={60}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 60 ? "#ef4444" : "var(--cor-cinza)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("email")}</label>
+                <label className="block mb-1 text-sm">{t("email")}</label>
                 <input
                   placeholder={t("email")}
                   value={form.email || ""}
                   onChange={handleEmailChange}
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={45}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 45 ? "#ef4444" : "var(--cor-cinza)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite atingido"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("cnpj")}</label>
+                <label className="block mb-1 text-sm">{t("cnpj")}</label>
                 <input
                   placeholder={t("cnpj")}
                   value={form.cnpj || ""}
                   onChange={handleCnpjChange}
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={18}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: cnpjCaracteres === 18 ? "#ef4444" : "var(--cor-cinza)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {cnpjCaracteres}/18 {cnpjCaracteres === 18 && " - Limite atingido"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("telefone")}</label>
+                <label className="block mb-1 text-sm">{t("telefone")}</label>
                 <input
                   placeholder={t("telefone")}
                   value={form.telefone || ""}
                   onChange={handleTelefoneChange}
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={14}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 14 ? "#ef4444" : "var(--cor-cinza)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {telefoneCaracteres}/14 {telefoneCaracteres === 14 && " - Limite atingido"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("categoria")}</label>
+                <label className="block mb-1 text-sm">{t("categoria")}</label>
                 <input
                   placeholder={t("categoria")}
                   value={form.categoria || ""}
                   onChange={handleCategoriaChange}
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={20}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: categoriaCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {categoriaCaracteres}/20 {categoriaCaracteres === 20 && " - Limite atingido"}
                 </div>
               </div>
 
               <div className="mt-2">
-                <label className="block text-xs font-medium mb-1">{t("foto")}</label>
+                <label className="block mb-1 text-sm">{t("foto")}</label>
                 {(fotoPreview || form.foto) && (
-                  <img
+                  <Image
                     src={fotoPreview || form.foto || ""}
+                    width={80}
+                    height={80}
+                    className="object-cover rounded-full mb-2 mx-auto"
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded-full mb-2 mx-auto"
                     onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
                   />
                 )}
@@ -805,23 +860,19 @@ export default function Fornecedores() {
                   <div className="flex flex-col justify-end">
                     <input
                       type="file"
+                      ref={fileInputRef}
                       onChange={handleFileChange}
                       accept="image/*"
                       disabled={Boolean(!podeEditar && modalVisualizar)}
                       className="hidden"
-                      id="fileInputFornecedor"
                     />
                     <button
-                      onClick={() => document.getElementById('fileInputFornecedor')?.click()}
-                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 ${modoDark
-                        ? "border-blue-400"
-                        : "border-gray-400"
-                        }`}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2"
                       style={{
-                        backgroundColor: modoDark ? "#183366" : "#e5e7eb",
-                        color: modoDark ? "#60a5fa" : "#374151",
-                        fontWeight: 600,
-                        transition: "background 0.2s",
+                        backgroundColor: temaAtual.primario,
+                        color: "#FFFFFF",
+                        borderColor: temaAtual.primario,
                       }}
                     >
                       <svg
@@ -829,7 +880,7 @@ export default function Fornecedores() {
                         className="h-5 w-5"
                         fill="none"
                         viewBox="0 0 24 24"
-                        stroke={modoDark ? "#60a5fa" : "#374151"}
+                        stroke="#FFFFFF"
                         strokeWidth={2}
                       >
                         <path
@@ -845,7 +896,7 @@ export default function Fornecedores() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-between mt-4">
               <button
                 onClick={() => {
                   setModalAberto(false);
@@ -853,11 +904,8 @@ export default function Fornecedores() {
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="px-3 py-1.5 rounded cursor-pointer text-sm"
-                style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000",
-                }}
+                className="cursor-pointer hover:underline"
+                style={{ color: temaAtual.texto }}
               >
                 {t("fechar")}
               </button>
@@ -867,18 +915,20 @@ export default function Fornecedores() {
                   <>
                     <button
                       onClick={handleSalvarFornecedor}
-                      className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
+                      className="px-4 cursor-pointer py-2 rounded"
                       style={{
-                        backgroundColor: "#10b981",
+                        backgroundColor: "#10B981",
+                        color: "#FFFFFF",
                       }}
                     >
                       {t("salvar")}
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
+                      className="cursor-pointer px-4 py-2 rounded"
                       style={{
-                        backgroundColor: "#ef4444",
+                        backgroundColor: "#EF4444",
+                        color: "#FFFFFF",
                       }}
                     >
                       {t("excluir")}
@@ -888,9 +938,10 @@ export default function Fornecedores() {
               ) : (
                 <button
                   onClick={handleAdicionarFornecedor}
-                  className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
+                  className="cursor-pointer px-4 py-2 rounded"
                   style={{
-                    backgroundColor: "#10b981",
+                    backgroundColor: "#10B981",
+                    color: "#FFFFFF",
                   }}
                 >
                   {t("afiliarFornecedor")}
@@ -903,4 +954,3 @@ export default function Fornecedores() {
     </div>
   );
 }
-

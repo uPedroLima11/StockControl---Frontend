@@ -7,6 +7,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { useTranslation } from "react-i18next";
+import { FaCloudUploadAlt } from "react-icons/fa";
 
 type Inputs = {
   nome: string;
@@ -30,6 +31,31 @@ export default function CriarEmpresa() {
   const { t } = useTranslation("criarempresa");
   const [loading, setLoading] = useState(true);
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const [charCounts, setCharCounts] = useState({
     nome: 0,
     email: 0,
@@ -40,7 +66,6 @@ export default function CriarEmpresa() {
     cidade: 0,
     cep: 0,
   });
-
 
   useEffect(() => {
     const subscription = watch((value) => {
@@ -62,7 +87,6 @@ export default function CriarEmpresa() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-    aplicarTema(ativo);
   }, []);
 
   useEffect(() => {
@@ -70,33 +94,6 @@ export default function CriarEmpresa() {
       console.log("Usuário logado:", usuarioLogado);
     }
   }, [usuarioLogado]);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
-      root.style.setProperty("--cor-input", "#374151");
-      root.style.setProperty("--cor-borda", "#4B5563");
-      root.style.setProperty("--cor-placeholder", "#9CA3AF");
-      root.style.setProperty("--cor-botao", "#00332C");
-      root.style.setProperty("--cor-botao-hover", "#004d41");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-input", "#F3F4F6");
-      root.style.setProperty("--cor-borda", "#D1D5DB");
-      root.style.setProperty("--cor-placeholder", "#9CA3AF");
-      root.style.setProperty("--cor-botao", "#00332C");
-      root.style.setProperty("--cor-botao-hover", "#004d41");
-      document.body.style.backgroundColor = "#FFFFFF";
-      document.body.style.color = "#000000";
-    }
-  };
 
   useEffect(() => {
     async function init() {
@@ -186,29 +183,42 @@ export default function CriarEmpresa() {
       );
 
       if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: t("sucesso.titulo"),
+          text: t("sucesso.mensagem"),
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
+        });
         router.push("/empresa");
       } else {
         Swal.fire({
           icon: "error",
           title: t("erro.titulo"),
           text: t("erro.mensagem"),
-          confirmButtonColor: "#013C3C",
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
         });
       }
     } catch (err) {
       console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: t("erro.titulo"),
+        text: t("erro.mensagem"),
+        confirmButtonColor: temaAtual.primario,
+        background: temaAtual.card,
+        color: temaAtual.texto
+      });
     }
   }
 
-  const inputClass = `w-full p-2 rounded border placeholder-[var(--cor-placeholder)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${modoDark
-    ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-    : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-    }`;
-
   const CharCounter = ({ current, max }: { current: number; max: number }) => (
     <div
-      className={`text-xs text-right mt-1 ${current > max ? "text-red-500" : "text-gray-500"
-        }`}
+      className={`text-xs text-right mt-1 ${current > max ? "text-red-500" : ""}`}
+      style={{ color: current > max ? "#EF4444" : temaAtual.placeholder }}
     >
       {current}/{max} {current > max && " - Limite excedido"}
     </div>
@@ -216,146 +226,279 @@ export default function CriarEmpresa() {
 
   if (loading) {
     return (
-      <div
-        className="flex items-center justify-center min-h-screen"
-        style={{ backgroundColor: "var(--cor-fundo)" }}
-      >
-        <div className="text-[var(--cor-texto)]">Carregando...</div>
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+        <div className="font-mono" style={{ color: temaAtual.texto }}>Carregando...</div>
       </div>
     );
   }
 
   return (
-    <div
-      className="flex flex-col items-center justify-center p-4 md:p-6 min-h-screen"
-      style={{
-        backgroundColor: "var(--cor-fundo)",
-        color: "var(--cor-texto)",
-      }}
-    >
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">
-        {t("titulo")}
-      </h1>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-6" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+      <div className="w-full max-w-md">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-4" style={{ color: temaAtual.texto }}>
+          {t("titulo")}
+        </h1>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md md:max-w-xl space-y-3 md:space-y-4"
-      >
-        <div>
-          <input
-            {...register("nome", { maxLength: 20 })}
-            placeholder={t("campos.nome")}
-            required
-            className={inputClass}
-            maxLength={20}
-          />
-          <CharCounter current={charCounts.nome} max={20} />
+        <div className="p-4 md:p-5 rounded-lg" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`
+        }}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <div>
+              <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.nome")}
+              </label>
+              <input
+                {...register("nome", { maxLength: 20 })}
+                placeholder={t("campos.nome")}
+                required
+                className="w-full px-3 py-1.5 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={20}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.nome} max={20} />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.email")}
+              </label>
+              <input
+                {...register("email", { maxLength: 60 })}
+                placeholder={t("campos.email")}
+                type="email"
+                required
+                className="w-full px-3 py-2 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={60}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.email} max={60} />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.telefone")}
+              </label>
+              <input
+                {...register("telefone", { maxLength: 15 })}
+                placeholder={t("campos.telefone")}
+                className="w-full px-3 py-2 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={15}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.telefone} max={15} />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.pais")}
+              </label>
+              <input
+                {...register("pais", { maxLength: 20 })}
+                placeholder={t("campos.pais")}
+                className="w-full px-3 py-2 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={20}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.pais} max={20} />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.endereco")}
+              </label>
+              <input
+                {...register("endereco", { maxLength: 50 })}
+                placeholder={t("campos.endereco")}
+                className="w-full px-3 py-2 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={50}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.endereco} max={50} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.cidade")}
+                </label>
+                <input
+                  {...register("cidade", { maxLength: 20 })}
+                  placeholder={t("campos.cidade")}
+                  className="w-full px-3 py-2 rounded border text-sm"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  maxLength={20}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = temaAtual.primario;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = temaAtual.borda;
+                  }}
+                />
+                <CharCounter current={charCounts.cidade} max={20} />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.estado")}
+                </label>
+                <input
+                  {...register("estado", { maxLength: 2 })}
+                  placeholder={t("campos.estado")}
+                  className="w-full px-3 py-2 rounded border text-sm"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  maxLength={2}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = temaAtual.primario;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = temaAtual.borda;
+                  }}
+                />
+                <CharCounter current={charCounts.estado} max={2} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.cep")}
+              </label>
+              <input
+                {...register("cep", { maxLength: 10 })}
+                placeholder={t("campos.cep")}
+                className="w-full px-3 py-2 rounded border text-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                maxLength={10}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+              <CharCounter current={charCounts.cep} max={10} />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("campos.foto")}
+              </label>
+              {fotoPreview && (
+                <img
+                  src={fotoPreview}
+                  alt="Preview"
+                  className="w-16 h-16 object-cover rounded-full mb-2 mx-auto border"
+                  style={{ borderColor: temaAtual.borda }}
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="fileInput"
+              />
+              <label
+                htmlFor="fileInput"
+                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded border text-sm cursor-pointer transition"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  border: `1px solid ${temaAtual.borda}`,
+                  color: temaAtual.texto
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.hover;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.card;
+                }}
+              >
+                <FaCloudUploadAlt className="text-sm" />
+                {t("selecionarImagem")}
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full px-4 py-2 rounded-lg transition font-medium text-sm cursor-pointer"
+              style={{
+                backgroundColor: temaAtual.primario,
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+            >
+              {t("botaoCriar")}
+            </button>
+          </form>
         </div>
-
-        <div>
-          <input
-            {...register("email", { maxLength: 60 })}
-            placeholder={t("campos.email")}
-            type="email"
-            required
-            className={inputClass}
-            maxLength={60}
-          />
-          <CharCounter current={charCounts.email} max={60} />
-        </div>
-
-        <div>
-          <input
-            {...register("telefone", { maxLength: 15 })}
-            placeholder={t("campos.telefone")}
-            className={inputClass}
-            maxLength={15}
-          />
-          <CharCounter current={charCounts.telefone} max={15} />
-        </div>
-
-        <div>
-          <input
-            {...register("pais", { maxLength: 20 })}
-            placeholder={t("campos.pais")}
-            className={inputClass}
-            maxLength={20}
-          />
-          <CharCounter current={charCounts.pais} max={20} />
-        </div>
-
-        <div>
-          <input
-            {...register("endereco", { maxLength: 50 })}
-            placeholder={t("campos.endereco")}
-            className={inputClass}
-            maxLength={50}
-          />
-          <CharCounter current={charCounts.endereco} max={50} />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          <div>
-            <input
-              {...register("cidade", { maxLength: 20 })}
-              placeholder={t("campos.cidade")}
-              className={inputClass}
-              maxLength={20}
-            />
-            <CharCounter current={charCounts.cidade} max={20} />
-          </div>
-
-          <div>
-            <input
-              {...register("estado", { maxLength: 2 })}
-              placeholder={t("campos.estado")}
-              className={inputClass}
-              maxLength={2}
-            />
-            <CharCounter current={charCounts.estado} max={2} />
-          </div>
-        </div>
-
-        <div>
-          <input
-            {...register("cep", { maxLength: 10 })}
-            placeholder={t("campos.cep")}
-            className={inputClass}
-            maxLength={10}
-          />
-          <CharCounter current={charCounts.cep} max={10} />
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-2">{t("campos.foto")}</label>
-          {fotoPreview && (
-            <img
-              src={fotoPreview}
-              alt="Preview"
-              className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-full mb-2 mx-auto"
-            />
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className={`w-full p-2 rounded border ${modoDark
-              ? "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-              : "bg-[var(--cor-input)] text-[var(--cor-texto)] border-[var(--cor-borda)]"
-              }`}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full cursor-pointer text-white font-bold py-2 px-4 rounded transition hover:bg-[var(--cor-botao-hover)]"
-          style={{
-            backgroundColor: "var(--cor-botao)",
-          }}
-        >
-          {t("botaoCriar")}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

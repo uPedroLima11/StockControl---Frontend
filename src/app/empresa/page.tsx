@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCloudUploadAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaCloudUploadAlt, FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
@@ -38,6 +38,32 @@ export default function Empresa() {
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("empresa");
+
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const [nomeCaracteres, setNomeCaracteres] = useState(0);
   const [emailCaracteres, setEmailCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
@@ -71,33 +97,7 @@ export default function Empresa() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-    aplicarTema(ativo);
   }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      root.style.setProperty("--cor-borda", "#374151");
-      root.style.setProperty("--cor-cinza", "#A3A3A3");
-      root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      root.style.setProperty("--cor-borda", "#E5E7EB");
-      root.style.setProperty("--cor-cinza", "#4B5563");
-      root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#FFFFFF";
-      document.body.style.color = "#000000";
-    }
-  };
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -220,7 +220,9 @@ export default function Empresa() {
           ? t("empresa.catalogoAgoraPublico")
           : t("empresa.catalogoNaoPublico"),
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
+        background: temaAtual.card,
+        color: temaAtual.texto
       });
     } catch (error) {
       console.error("Erro ao alterar estado do catálogo:", error);
@@ -228,6 +230,9 @@ export default function Empresa() {
         icon: "error",
         title: t("empresa.erro"),
         text: t("empresa.erroAlterarCatalogo"),
+        background: temaAtual.card,
+        color: temaAtual.texto,
+        confirmButtonColor: temaAtual.primario
       });
     } finally {
       setAtualizandoCatalogo(false);
@@ -275,7 +280,9 @@ export default function Empresa() {
         icon: "error",
         title: t("erros.erro"),
         text: t("erros.erroEditarEmpresa"),
-        confirmButtonColor: "#013C3C",
+        background: temaAtual.card,
+        color: temaAtual.texto,
+        confirmButtonColor: temaAtual.primario
       });
     }
   };
@@ -294,6 +301,10 @@ export default function Empresa() {
           showCancelButton: true,
           confirmButtonText: t("modal.excluir.confirmar"),
           cancelButtonText: t("modal.excluir.cancelar"),
+          background: temaAtual.card,
+          color: temaAtual.texto,
+          confirmButtonColor: temaAtual.primario,
+          cancelButtonColor: temaAtual.placeholder
         });
 
         if (confirm.isConfirmed) {
@@ -314,6 +325,10 @@ export default function Empresa() {
           showCancelButton: true,
           confirmButtonText: t("modal.sair.confirmar"),
           cancelButtonText: t("modal.sair.cancelar"),
+          background: temaAtual.card,
+          color: temaAtual.texto,
+          confirmButtonColor: temaAtual.primario,
+          cancelButtonColor: temaAtual.placeholder
         });
 
         if (confirm.isConfirmed) {
@@ -340,15 +355,17 @@ export default function Empresa() {
         icon: "error",
         title: t("erros.erro"),
         text: t("erros.erroProcessarExclusao"),
-        confirmButtonColor: "#013C3C",
+        background: temaAtual.card,
+        color: temaAtual.texto,
+        confirmButtonColor: temaAtual.primario
       });
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p className="font-mono" style={{ color: "var(--cor-texto)" }}>
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+        <p className="font-mono" style={{ color: temaAtual.texto }}>
           {t("carregando")}
         </p>
       </div>
@@ -357,71 +374,75 @@ export default function Empresa() {
 
   if (!empresa) {
     return (
-      <div className="min-h-screen flex justify-center items-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
         <p className="text-red-600 font-mono">{t("empresaNaoEncontrada")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-10 px-4">
-      <div
-        className="w-auto min-w-[300px] max-w-3xl rounded p-6 shadow-md mx-auto"
-        style={{
-          backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-          color: modoDark ? "#FFFFFF" : "#000000",
-          border: modoDark ? "1px solid #374151" : "2px solid #000000",
-        }}
-      >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+      <div className="w-full max-w-3xl">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
-        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
-          <h2 className="text-lg font-semibold underline">{t("dadosEmpresa")}</h2>
-          <div className="mt-2 space-y-1 text-sm">
-            <p>
-              {t("campos.nome")}: <strong>{empresa.nome}</strong>
-            </p>
-            <p>
-              {t("campos.endereco")}: {empresa.endereco || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.pais")}: {empresa.pais || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.estado")}: {empresa.estado || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.cidade")}: {empresa.cidade || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.cep")}: {empresa.cep || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.telefone")}: {empresa.telefone || t("naoInformado")}
-            </p>
-            <p>
-              {t("campos.email")}: {empresa.email}
-            </p>
+        <div className="p-6 rounded-lg mb-6" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`
+        }}>
+          <div className="border-b mb-4 pb-4" style={{ borderColor: temaAtual.borda }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("dadosEmpresa")}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.nome")}</p>
+                <p style={{ color: temaAtual.texto }}><strong>{empresa.nome}</strong></p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.email")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.email}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.telefone")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.telefone || t("naoInformado")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.endereco")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.endereco || t("naoInformado")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.pais")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.pais || t("naoInformado")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.estado")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.estado || t("naoInformado")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.cidade")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.cidade || t("naoInformado")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("campos.cep")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa.cep || t("naoInformado")}</p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-6 flex flex-col gap-4">
-          <div
-            className="mt-4 p-4 rounded-lg"
-            style={{
-              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
-              color: modoDark ? "#FFFFFF" : "#1E3A8A",
-            }}
-          >
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              {empresa.catalogoPublico ? <FaEye /> : <FaEyeSlash />}
+          <div className="mb-6 p-4 rounded-lg" style={{
+            backgroundColor: temaAtual.hover,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: temaAtual.texto }}>
+              {empresa.catalogoPublico ?
+                <FaEye style={{ color: temaAtual.texto }} /> :
+                <FaEyeSlash style={{ color: temaAtual.texto }} />
+              }
               {t("catalogo.publico")}
             </h3>
 
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+              <span className="text-sm" style={{ color: temaAtual.texto }}>
                 {t("catalogo.status")}:{" "}
                 <strong>
                   {empresa.catalogoPublico
@@ -432,10 +453,10 @@ export default function Empresa() {
               <button
                 onClick={toggleCatalogoPublico}
                 disabled={atualizandoCatalogo}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${empresa.catalogoPublico
+                className={`px-3 py-1 cursor-pointer rounded text-sm font-medium transition ${empresa.catalogoPublico
                   ? "bg-red-100 text-red-800 hover:bg-red-200"
                   : "bg-green-100 text-green-800 hover:bg-green-200"
-                  } disabled:opacity-50`}
+                  } disabled:opacity-50 w-fit`}
               >
                 {atualizandoCatalogo
                   ? t("catalogo.processando")
@@ -445,46 +466,48 @@ export default function Empresa() {
               </button>
             </div>
 
-            <p className="text-sm mb-2">{t("catalogo.disponivelEm")}</p>
+            <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>{t("catalogo.disponivelEm")}</p>
             <a
               href={`${process.env.NEXT_PUBLIC_APP_URL ||
-                (typeof window !== "undefined"
-                  ? window.location.origin
-                  : "https://stockcontrol-six.vercel.app")
-                }/catalogo/${empresa.slug}`}
+              (typeof window !== "undefined"
+                ? window.location.origin
+                : "https://stockcontrol-six.vercel.app")
+              }/catalogo/${empresa.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="block p-2 rounded bg-opacity-20 text-sm break-all font-mono transition hover:bg-opacity-30"
+              className="block p-2 rounded text-sm break-all font-mono transition hover:opacity-80"
               style={{
-                backgroundColor: modoDark ? "rgba(34, 197, 94, 0.2)" : "rgba(34, 197, 94, 0.1)",
-                color: modoDark ? "#22c55e" : "#15803d",
-                border: modoDark ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(34, 197, 94, 0.2)",
+              backgroundColor: temaAtual.primario + "20",
+              color: "#22c55e", 
+              border: `1px solid #22c55e40`,
               }}
             >
               {`${process.env.NEXT_PUBLIC_APP_URL ||
-                (typeof window !== "undefined"
-                  ? window.location.origin
-                  : "https://stockcontrol-six.vercel.app")
-                }/catalogo/${empresa.slug}`}
+              (typeof window !== "undefined"
+                ? window.location.origin
+                : "https://stockcontrol-six.vercel.app")
+              }/catalogo/${empresa.slug}`}
             </a>
 
-            <p className="text-sm mt-2">{t("catalogo.avisoClientes")}</p>
+            <p className="text-sm mt-2" style={{ color: temaAtual.texto }}>{t("catalogo.avisoClientes")}</p>
 
             {!empresa.catalogoPublico && (
-              <p className="text-sm mt-2 text-yellow-600">
+              <p className="text-sm mt-2" style={{ color: "#F59E0B" }}>
                 {t("catalogo.desativadoAviso")}
               </p>
             )}
           </div>
-          <div>
-            <h2 className="text-lg font-semibold mb-2">{t("logoEmpresa")}</h2>
+
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("logoEmpresa")}</h2>
             {empresa.foto && (
               <Image
                 src={empresa.foto}
                 alt={t("altLogoEmpresa")}
                 width={128}
                 height={128}
-                className="rounded mb-4"
+                className="rounded mb-4 border"
+                style={{ borderColor: temaAtual.borda }}
               />
             )}
             {tipoUsuario !== "FUNCIONARIO" && (
@@ -493,241 +516,266 @@ export default function Empresa() {
                   setEmpresaEditada(empresa);
                   setModalEdicaoAberto(true);
                 }}
-                className="flex items-center gap-2 px-6 py-2 rounded-lg transition font-mono text-sm font-bold"
+                className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg transition font-medium"
                 style={{
-                  border: "2px solid var(--cor-destaque)",
-                  color: "var(--cor-texto)",
-                  backgroundColor: "transparent",
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
                 }}
               >
-                <FaCloudUploadAlt />
+                <FaCloudUploadAlt className="text-sm" style={{ color: "#FFFFFF" }} />
                 {t("alterarLogo")}
               </button>
             )}
           </div>
 
-          {(tipoUsuario === "PROPRIETARIO" || tipoUsuario === "ADMIN") && (
-            <button
-              onClick={() => {
-                setEmpresaEditada(empresa);
-                setModalEdicaoAberto(true);
-              }}
-              className="w-full px-6 py-2 rounded-lg transition font-mono text-sm"
-              style={{
-                backgroundColor: "#2563eb",
-                color: "#FFFFFF",
-              }}
-            >
-              {t("editarDados")}
-            </button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {(tipoUsuario === "PROPRIETARIO" || tipoUsuario === "ADMIN") && (
+              <button
+                onClick={() => {
+                  setEmpresaEditada(empresa);
+                  setModalEdicaoAberto(true);
+                }}
+                className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
+                style={{
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+              >
+                <FaEdit className="text-sm" style={{ color: "#FFFFFF" }} />
+                {t("editarDados")}
+              </button>
+            )}
 
-          {tipoUsuario && (
-            <button
-              onClick={excluirOuSairDaEmpresa}
-              className="w-full px-6 py-2 rounded-lg transition font-mono text-sm"
-              style={{
-                backgroundColor: "#ee1010",
-                color: "#FFFFFF",
-              }}
-            >
-              {tipoUsuario === "PROPRIETARIO" ? t("deletarEmpresa") : t("sairEmpresa")}
-            </button>
-          )}
+            {tipoUsuario && (
+              <button
+                onClick={excluirOuSairDaEmpresa}
+                className="flex items-center justify-center cursor-pointer gap-2 px-4 py-2 rounded-lg transition font-medium"
+                style={{
+                  backgroundColor: tipoUsuario === "PROPRIETARIO" ? "#EF4444" : "#6B7280",
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+              >
+                {tipoUsuario === "PROPRIETARIO" ? (
+                  <FaTrash className="text-sm" style={{ color: "#FFFFFF" }} />
+                ) : (
+                  <FaSignOutAlt className="text-sm" style={{ color: "#FFFFFF" }} />
+                )}
+                {tipoUsuario === "PROPRIETARIO" ? t("deletarEmpresa") : t("sairEmpresa")}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
       {modalEdicaoAberto && empresaEditada && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 rounded-lg shadow-lg w-full max-w-md"
+            className="p-4 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              maxHeight: "95vh",
-              overflowY: "auto"
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-xl font-semibold mb-3">{t("modal.editarEmpresa.titulo")}</h2>
+            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("modal.editarEmpresa.titulo")}</h2>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium mb-1">{t("campos.nome")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.nome")}</label>
                 <input
                   type="text"
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full px-3 py-2 rounded border"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   value={empresaEditada.nome || ""}
                   onChange={(e) => handleInputChange("nome", e.target.value, 20, setNomeCaracteres)}
                   maxLength={20}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
-                  {nomeCaracteres}/20
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite atingido"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("campos.email")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.email")}</label>
                 <input
                   type="email"
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full px-3 py-2 rounded border"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   value={empresaEditada.email || ""}
                   onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
                   maxLength={60}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 60 ? "#ef4444" : "var(--cor-cinza)" }}>
-                  {emailCaracteres}/60
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {emailCaracteres}/60 {emailCaracteres === 60 && " - Limite atingido"}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium mb-1">{t("campos.telefone")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.telefone")}</label>
                   <input
                     type="text"
-                    className="w-full rounded p-2 text-sm"
+                    className="w-full px-3 py-2 rounded border"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                      color: modoDark ? "#FFFFFF" : "#000000",
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                     value={empresaEditada.telefone || ""}
                     onChange={(e) => handleInputChange("telefone", e.target.value, 15, setTelefoneCaracteres)}
                     maxLength={15}
                   />
-                  <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 15 ? "#ef4444" : "var(--cor-cinza)" }}>
-                    {telefoneCaracteres}/15
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {telefoneCaracteres}/15 {telefoneCaracteres === 15 && " - Limite atingido"}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1">{t("campos.pais")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.pais")}</label>
                   <input
                     type="text"
-                    className="w-full rounded p-2 text-sm"
+                    className="w-full px-3 py-2 rounded border"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                      color: modoDark ? "#FFFFFF" : "#000000",
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                     value={empresaEditada.pais || ""}
                     onChange={(e) => handleInputChange("pais", e.target.value, 20, setPaisCaracteres)}
                     maxLength={20}
                   />
-                  <div className="text-xs text-right mt-1" style={{ color: paisCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
-                    {paisCaracteres}/20
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {paisCaracteres}/20 {paisCaracteres === 20 && " - Limite atingido"}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("campos.endereco")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.endereco")}</label>
                 <input
                   type="text"
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full px-3 py-2 rounded border"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   value={empresaEditada.endereco || ""}
                   onChange={(e) => handleInputChange("endereco", e.target.value, 50, setEnderecoCaracteres)}
                   maxLength={50}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: enderecoCaracteres === 50 ? "#ef4444" : "var(--cor-cinza)" }}>
-                  {enderecoCaracteres}/50
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite atingido"}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium mb-1">{t("campos.cidade")}</label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.cidade")}</label>
                   <input
                     type="text"
-                    className="w-full rounded p-2 text-sm"
+                    className="w-full px-3 py-2 rounded border"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                      color: modoDark ? "#FFFFFF" : "#000000",
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                     value={empresaEditada.cidade || ""}
                     onChange={(e) => handleInputChange("cidade", e.target.value, 20, setCidadeCaracteres)}
                     maxLength={20}
                   />
-                  <div className="text-xs text-right mt-1" style={{ color: cidadeCaracteres === 20 ? "#ef4444" : "var(--cor-cinza)" }}>
-                    {cidadeCaracteres}/20
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite atingido"}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium mb-1">{t("campos.estado")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.estado")}</label>
                   <input
                     type="text"
-                    className="w-full rounded p-2 text-sm"
+                    className="w-full px-3 py-2 rounded border"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                      color: modoDark ? "#FFFFFF" : "#000000",
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                     value={empresaEditada.estado || ""}
                     onChange={(e) => handleInputChange("estado", e.target.value, 2, setEstadoCaracteres)}
                     maxLength={2}
                   />
-                  <div className="text-xs text-right mt-1" style={{ color: estadoCaracteres === 2 ? "#ef4444" : "var(--cor-cinza)" }}>
-                    {estadoCaracteres}/2
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite atingido"}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1">{t("campos.cep")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.cep")}</label>
                 <input
                   type="text"
-                  className="w-full rounded p-2 text-sm"
+                  className="w-full px-3 py-2 rounded border"
                   style={{
-                    backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                    borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                    color: modoDark ? "#FFFFFF" : "#000000",
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
                   value={empresaEditada.cep || ""}
                   onChange={(e) => handleInputChange("cep", e.target.value, 10, setCepCaracteres)}
                   maxLength={10}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: cepCaracteres === 10 ? "#ef4444" : "var(--cor-cinza)" }}>
-                  {cepCaracteres}/10
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite atingido"}
                 </div>
               </div>
 
-              <div className="mt-2">
-                <label className="block text-xs font-medium mb-1">{t("logoEmpresa")}</label>
+              <div>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("logoEmpresa")}</label>
                 <div className="relative">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer text-sm"
+                    className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                      color: modoDark ? "#FFFFFF" : "#000000",
+                      backgroundColor: temaAtual.card,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                     id="fileInput"
                   />
-                  <div className="flex items-center justify-between p-2 rounded border text-xs"
+                  <div className="flex items-center justify-between p-2 rounded border text-sm"
                     style={{
-                      backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                      borderColor: modoDark ? "#4B5563" : "#D1D5DB",
+                      backgroundColor: temaAtual.card,
+                      border: `1px solid ${temaAtual.borda}`,
+                      color: temaAtual.placeholder
                     }}>
                     <span>{t("empresa.escolherArquivo")}</span>
-                    <span className="text-gray-500">
+                    <span>
                       {t("empresa.nenhumArquivoEscolhido")}
                     </span>
                   </div>
@@ -735,51 +783,67 @@ export default function Empresa() {
 
                 {fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-xs mb-1">{t("empresa.preVisualizacao")}:</p>
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("empresa.preVisualizacao")}:</p>
                     <Image
                       src={fotoPreview}
                       alt="Preview"
                       width={80}
                       height={80}
-                      className="rounded"
+                      className="rounded border"
+                      style={{ borderColor: temaAtual.borda }}
                     />
                   </div>
                 )}
                 {empresa.foto && !fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-xs mb-1">Foto atual:</p>
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("empresa.fotoAtual")}:</p>
                     <Image
                       src={empresa.foto}
                       alt="Foto atual"
                       width={80}
                       height={80}
-                      className="rounded"
+                      className="rounded border"
+                      style={{ borderColor: temaAtual.borda }}
                     />
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => {
                   setModalEdicaoAberto(false);
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="px-3 py-1.5 rounded cursor-pointer text-sm"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000",
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.hover;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.card;
                 }}
               >
                 {t("modal.cancelar")}
               </button>
               <button
                 onClick={editarDadosEmpresa}
-                className="px-3 py-1.5 text-white rounded cursor-pointer text-sm"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
-                  backgroundColor: "#10b981",
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
                 }}
               >
                 {t("modal.salvar")}

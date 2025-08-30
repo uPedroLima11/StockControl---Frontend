@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
+import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
@@ -25,6 +25,15 @@ export default function Sidebar() {
   const ultimaNotificacaoRef = useRef<string | null>(null);
   const ultimoTempoNotificacaoRef = useRef<number>(0);
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
+
+  const cores = {
+    azulEscuro: "#0A1929",
+    azulMedio: "#132F4C",
+    azulClaro: "#1E4976",
+    azulBrilhante: "#1976D2",
+    azulNeon: "#00B4D8",
+    cinzaEscuro: "#1A2027",
+  };
 
   const verificarEstoque = async () => {
     try {
@@ -56,6 +65,7 @@ export default function Sidebar() {
       console.error("Erro detalhado ao verificar estoque:", erro);
     }
   };
+
   const inicializarAudio = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/notification-sound.mp3");
@@ -191,17 +201,29 @@ export default function Sidebar() {
   return (
     <>
       <button
-        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#052727] p-3 rounded-full"
+        className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#1976D2] p-3 rounded-full shadow-lg hover:bg-[#1565C0] transition-colors"
         onClick={alternarSidebar}
       >
         <FaBars />
       </button>
 
-      <aside className={`fixed top-0 h-screen w-64 bg-[#013C3C] flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside
+        className={`fixed top-0 h-screen w-64 flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}
+        style={{
+          backgroundColor: cores.azulEscuro,
+          borderRight: `2px solid ${cores.azulBrilhante}`,
+          boxShadow: "4px 0 12px rgba(0, 0, 0, 0.3)"
+        }}
+      >
         <div>
           <Link
             href="/"
-            className="bg-[#1C1C1C] py-4 flex justify-center items-center gap-2"
+            className="py-4 flex justify-center items-center gap-2 border-b"
+            style={{
+              backgroundColor: cores.azulEscuro,
+              borderColor: cores.azulBrilhante,
+              borderBottomWidth: "2px"
+            }}
             onClick={() => setTimeout(() => window.location.reload(), 500)}
           >
             <Image src="/icone.png" alt="Logo" width={28} height={28} />
@@ -209,32 +231,47 @@ export default function Sidebar() {
           </Link>
 
           <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
-            <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm">
+            <button
+              onClick={alternarNotificacoes}
+              className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
+              style={{ backgroundColor: temNotificacaoNaoLida ? cores.azulBrilhante + "20" : "transparent" }}
+            >
               <span className="text-lg relative">
                 <FaBell />
                 {temNotificacaoNaoLida && (
                   <>
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 animate-ping" />
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
                   </>
                 )}
               </span>
-              <span className="text-sm md:inline">{t("notifications")}</span>
+              <span className="text-sm md:inline cursor-pointer">{t("notifications")}</span>
             </button>
 
-            <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} />
-            <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} />
-            <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} />
-            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} />
-            <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} />
-            <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} />
-            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} />
-            <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} />
-            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} />
-            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} />
+            <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} />
+            <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />
+            <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />
+            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+            <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />
+            <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />
+            <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />
+            <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exportacoes")} cores={cores} />
+            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
+            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
+            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
 
-            <Link href="/empresa" className="flex items-center gap-2">
-              <Image src={fotoEmpresa || "/contadefault.png"} alt="Foto da Empresa" width={40} height={40} className="rounded-full object-cover border border-gray-300" />
+            <Link
+              href="/empresa"
+              className="flex items-center gap-2 p-3 rounded-lg transition hover:bg-[#132F4C]"
+            >
+              <Image
+                src={fotoEmpresa || "/contadefault.png"}
+                alt="Foto da Empresa"
+                width={40}
+                height={40}
+                className="rounded-full object-cover border"
+                style={{ borderColor: cores.azulClaro }}
+              />
               <h1 className="text-sm font-medium">{nomeEmpresa || t("create_company")}</h1>
             </Link>
           </nav>
@@ -242,7 +279,7 @@ export default function Sidebar() {
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
           {possuiEmpresa && (
-            <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} />
+            <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} />
           )}
 
           <button
@@ -250,12 +287,12 @@ export default function Sidebar() {
               localStorage.removeItem("client_key");
               window.location.href = "/";
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f] text-white text-sm"
+            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
           >
             <span className="text-lg">
               <FaSignOutAlt />
             </span>
-            <span className="text-sm md:inline">{t("logout")}</span>
+            <span className="text-sm md:inline cursor-pointer">{t("logout")}</span>
           </button>
         </div>
       </aside>
@@ -265,31 +302,48 @@ export default function Sidebar() {
           estaVisivel={mostrarNotificacoes}
           aoFechar={() => setMostrarNotificacoes(false)}
           nomeEmpresa={nomeEmpresa}
+          cores={cores}
         />
       )}
     </>
   );
 }
 
-function LinkSidebar({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+function LinkSidebar({ href, icon, label, cores }: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  cores: any;
+}) {
   return (
-    <Link href={href} className="flex items-center w-full gap-3 px-3 py-2 rounded-full transition hover:bg-[#00322f]">
-      <span className="text-lg">{icon}</span>
+    <Link
+      href={href}
+      className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
+    >
+      <span className="text-lg" style={{ color: cores.azulNeon }}>{icon}</span>
       <span className="text-sm md:inline">{label}</span>
     </Link>
   );
 }
 
-function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
+function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa, cores }: {
   estaVisivel: boolean;
   aoFechar: () => void;
-  nomeEmpresa: string | null
+  nomeEmpresa: string | null;
+  cores: any;
 }) {
+  const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const [mostrarLidas, setMostrarLidas] = useState(false);
   const { usuario } = useUsuarioStore();
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativo = temaSalvo === "true";
+    setModoDark(ativo);
+  }, []);
 
   const marcarTodasComoLidas = useCallback(async () => {
     if (!usuario?.id) return;
@@ -423,6 +477,11 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     });
   };
 
+  const bgColor = modoDark ? "#0F1E35" : "#FFFFFF";
+  const textColor = modoDark ? "#FFFFFF" : "#000000";
+  const closeButtonColor = modoDark ? "#FFFFFF" : "#6B7280";
+  const borderColor = modoDark ? "#1E4976" : cores.azulBrilhante;
+
   const tabelaNotificacoes = notificacoes.map((notificacao) => {
     const estaLida = notificacao.empresaId
       ? notificacao.NotificacaoLida?.some(nl => nl.usuarioId === usuario?.id)
@@ -430,10 +489,18 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
     if (notificacao.convite) {
       return (
-        <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
+        <div
+          key={notificacao.id}
+          className="flex flex-col gap-2 p-4 rounded-lg mb-2"
+          style={{
+            backgroundColor: bgColor,
+            border: `1px solid ${borderColor}`,
+            color: textColor
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold">{t("invite_title")}</h3>
-            <button onClick={() => deletarNotificacao(notificacao.id)} className="text-white">
+            <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
               ✕
             </button>
           </div>
@@ -442,7 +509,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
             {t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.
           </p>
 
-          <div className="flex justify-between items-center text-xs text-gray-400">
+          <div className="flex justify-between items-center text-xs" style={{ color: cores.azulBrilhante }}>
             <span>
               {t("from")}: {notificacao.convite?.empresa?.nome || t("unknown_company")}
             </span>
@@ -450,7 +517,13 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
           </div>
 
           <button
-            className="py-2 px-4 bg-[#013C3C] text-white rounded-lg mt-2"
+            className="py-2 px-4 rounded-lg mt-2 transition-colors"
+            style={{
+              backgroundColor: cores.azulBrilhante,
+              color: "white"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = cores.azulNeon}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = cores.azulBrilhante}
             onClick={() => notificacao.convite && responderConvite(usuario?.id || "", notificacao.convite)}
           >
             {t("accept")}
@@ -465,11 +538,19 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
     const mensagem = partesDescricao.slice(1).join(": ").trim();
 
     return (
-      <div key={notificacao.id} className="flex flex-col gap-2 p-4 bg-[#1C1C1C] rounded-lg mb-2">
+      <div
+        key={notificacao.id}
+        className="flex flex-col gap-2 p-4 rounded-lg mb-2"
+        style={{
+          backgroundColor: bgColor,
+          border: `1px solid ${borderColor}`,
+          color: textColor
+        }}
+      >
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold">{notificacao.titulo}</h3>
           {!notificacao.empresaId && (
-            <button onClick={() => deletarNotificacao(notificacao.id)} className="text-white">
+            <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
               ✕
             </button>
           )}
@@ -477,7 +558,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
         <p>{mensagem}</p>
 
-        <div className="flex flex-col text-xs mt-2 text-gray-400 gap-1">
+        <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: cores.azulBrilhante }}>
           <span>
             {t("from")}: {nomeRemetente}
           </span>
@@ -488,7 +569,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
 
         <div className="flex justify-between items-center">
           <span className="text-xs flex items-center gap-1">
-            {estaLida ? <FaCheck color="#82C8E5" /> : <FaCheckDouble />}
+            {estaLida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
             {estaLida ? t("read") : t("unread")}
           </span>
         </div>
@@ -499,10 +580,12 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
   return (
     <div
       ref={panelRef}
-      className={`fixed w-80 bg-[#013C3C] text-white p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
+      className={`fixed w-80 p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
       style={{
-        borderTop: "2px solid #015959",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.3)"
+        backgroundColor: bgColor,
+        borderTop: `2px solid ${cores.azulBrilhante}`,
+        boxShadow: modoDark ? "0 4px 25px rgba(25, 118, 210, 0.25)" : "0 4px 20px rgba(0, 0, 0, 0.2)",
+        color: textColor
       }}
     >
       <div className="flex justify-between items-center mb-4">
@@ -511,20 +594,33 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
           {!mostrarLidas && (
             <button
               onClick={marcarTodasComoLidas}
-              className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+              className="text-xs px-2 py-1 rounded transition-colors"
+              style={{
+                backgroundColor: cores.azulBrilhante,
+                color: "white"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = cores.azulNeon}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = cores.azulBrilhante}
             >
               {t("marcarLidas")}
             </button>
           )}
           <button
             onClick={alternarMostrarLidas}
-            className="text-xs bg-[#015959] hover:bg-[#014747] px-2 py-1 rounded"
+            className="text-xs px-2 py-1 rounded transition-colors"
+            style={{
+              backgroundColor: cores.azulBrilhante,
+              color: "white"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = cores.azulNeon}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = cores.azulBrilhante}
           >
             {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
           </button>
           <button
             onClick={aoFechar}
-            className="text-white hover:text-gray-300 transition-colors"
+            className={`hover:text-[#00B4D8] transition-colors`}
+            style={{ color: closeButtonColor }}
           >
             ✕
           </button>
@@ -532,14 +628,14 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa }: {
       </div>
       <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
         {mostrarLidas && (
-          <div className="text-center py-2 text-gray-300 italic text-xs">
+          <div className="text-center py-2 italic text-xs" style={{ color: cores.azulBrilhante }}>
             {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
           </div>
         )}
         {notificacoes.length > 0 ? (
           tabelaNotificacoes
         ) : (
-          <p className="text-center py-4 text-gray-300">
+          <p className="text-center py-4" style={{ color: cores.azulBrilhante }}>
             {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
           </p>
         )}

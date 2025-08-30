@@ -54,6 +54,31 @@ export default function Produtos() {
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -100,22 +125,6 @@ export default function Produtos() {
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
 
-      const root = document.documentElement;
-
-      if (ativado) {
-        root.style.setProperty("--cor-fundo", "#20252B");
-        root.style.setProperty("--cor-fonte", "#FFFFFF");
-        root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-        root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-        root.style.setProperty("--cor-teste", "#000000");
-      } else {
-        root.style.setProperty("--cor-fundo", "#FFFFFF");
-        root.style.setProperty("--cor-fonte", "#000000");
-        root.style.setProperty("--cor-subtitulo", "#4B5563");
-        root.style.setProperty("--cor-fundo-bloco", "#ececec");
-        root.style.setProperty("--cor-teste", "#000000");
-      }
-
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
@@ -128,7 +137,6 @@ export default function Produtos() {
       const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
-
 
       if (usuario.empresaId) {
         const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
@@ -193,6 +201,7 @@ export default function Produtos() {
       setDescricaoCaracteres(value.length);
     }
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -474,18 +483,18 @@ export default function Produtos() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3"
-            style={{
-              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
-              color: modoDark ? "#FFFFFF" : "#1E3A8A"
-            }}>
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+            backgroundColor: temaAtual.primario + "20",
+            color: temaAtual.texto,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
             <FaLock className="text-xl" />
             <div>
               <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
@@ -499,43 +508,45 @@ export default function Produtos() {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("buscar")}
-                className="outline-none font-mono text-sm bg-transparent"
+                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
+                style={{
+                  color: temaAtual.texto,
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -546,11 +557,11 @@ export default function Produtos() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm"
+              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm cursor-pointer"
               style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                color: modoDark ? "#FFFFFF" : "#00332C",
+                backgroundColor: temaAtual.primario,
+                borderColor: temaAtual.primario,
+                color: "#FFFFFF",
               }}
             >
               {t("novo")}
@@ -561,20 +572,20 @@ export default function Produtos() {
         <div
           className="border rounded-xl shadow"
           style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000",
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
           }}
         >
           {produtosFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {t("nenhumProdutoEncontrado")}
             </div>
           ) : (
             <>
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4">
                         <div className="flex items-center gap-1">
                           <FaCog /> {t("nome")}
@@ -591,19 +602,32 @@ export default function Produtos() {
                     {produtosAtuais.map((produto) => (
                       <tr
                         key={produto.id}
-                        className="border-b hover:bg-opacity-50 transition"
+                        className="border-b transition-all duration-200 cursor-pointer"
                         style={{
-                          color: "var(--cor-fonte)",
-                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = modoDark
+                            ? "#1E4976"
+                            : "#EFF6FF";
+                          e.currentTarget.style.transform = "translateY(-2px)";
+                          e.currentTarget.style.boxShadow = modoDark
+                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.card;
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                        onClick={() => {
+                          setModalVisualizar(produto);
+                          setForm(produto);
                         }}
                       >
-                        <td
-                          className="py-3 px-4 flex items-center gap-2 cursor-pointer"
-                          onClick={() => {
-                            setModalVisualizar(produto);
-                            setForm(produto);
-                          }}
-                        >
+                        <td className="py-3 px-4 flex items-center gap-2">
                           <Image
                             src={produto.foto || "/out.jpg"}
                             width={30}
@@ -614,7 +638,9 @@ export default function Produtos() {
                               (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
                           />
-                          <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">{produto.nome}</span>
+                          <span className="max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap block">
+                            {produto.nome}
+                          </span>
                         </td>
                         <td className="py-3 px-3 text-center">{produto.fornecedor?.nome || "-"}</td>
                         <td className="py-3 px-3 text-center">{produto.categoria?.nome || "-"}</td>
@@ -628,7 +654,7 @@ export default function Produtos() {
                               e.stopPropagation();
                               toggleCatalogo(produto.id, produto.noCatalogo);
                             }}
-                            className="p-1 text-yellow-500 hover:text-yellow-600 transition"
+                            className="p-1 text-yellow-500 hover:text-yellow-300 transition"
                             title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
                           >
                             {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
@@ -644,8 +670,26 @@ export default function Produtos() {
                 {produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all cursor-pointer"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = modoDark
+                        ? "#1E4976"
+                        : "#EFF6FF";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = modoDark
+                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.card;
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                    onClick={() => toggleExpandirProduto(produto.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-2 flex-1">
@@ -660,10 +704,10 @@ export default function Produtos() {
                           }}
                         />
                         <div className="flex-1">
-                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                          <p className="font-semibold" style={{ color: temaAtual.texto }}>
                             {produto.nome}
                           </p>
-                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                          <p className="text-xs" style={{ color: temaAtual.primario }}>
                             R$ {formatarPreco(produto.preco)}
                           </p>
                         </div>
@@ -672,7 +716,7 @@ export default function Produtos() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => toggleCatalogo(produto.id, produto.noCatalogo)}
-                          className="text-yellow-500 hover:text-yellow-600 p-1"
+                          className="text-yellow-500 hover:text-yellow-300 p-1"
                           title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
                         >
                           {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
@@ -680,8 +724,8 @@ export default function Produtos() {
 
                         <button
                           onClick={() => toggleExpandirProduto(produto.id)}
-                          className="text-gray-500 hover:text-gray-700 p-1"
-                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          className="p-1"
+                          style={{ color: temaAtual.primario }}
                         >
                           {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
@@ -691,9 +735,9 @@ export default function Produtos() {
                     <div
                       className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"
                         }`}
-                      style={{ color: "var(--cor-fonte)" }}
+                      style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                      <div className="pt-2 border-t" style={{ borderColor: temaAtual.borda }}>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <p className="font-semibold">{t("fornecedor")}:</p>
@@ -730,8 +774,9 @@ export default function Produtos() {
                             }}
                             className="px-3 py-1 text-sm rounded border"
                             style={{
-                              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                              color: modoDark ? "#FFFFFF" : "#000000",
+                              backgroundColor: temaAtual.primario,
+                              borderColor: temaAtual.primario,
+                              color: "#FFFFFF",
                             }}
                           >
                             {t("editar")}
@@ -751,8 +796,9 @@ export default function Produtos() {
             <div
               className="p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                color: "var(--cor-fonte)",
+                backgroundColor: temaAtual.card,
+                color: temaAtual.texto,
+                border: `1px solid ${temaAtual.borda}`
               }}
             >
               <h2 className="text-xl font-bold mb-4">
@@ -765,15 +811,16 @@ export default function Produtos() {
                   placeholder={t("nome")}
                   value={form.nome || ""}
                   onChange={handleNomeChange}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  className="w-full rounded p-2 mb-3"
                   style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={60}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 60 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
                 </div>
               </div>
@@ -784,15 +831,16 @@ export default function Produtos() {
                   placeholder={t("descricao")}
                   value={form.descricao || ""}
                   onChange={handleDescricaoChange}
-                  className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  className="w-full rounded p-2 mb-3"
                   style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={255}
                 />
-                <div className="text-xs text-right mt-1" style={{ color: descricaoCaracteres === 255 ? "#ef4444" : "var(--cor-subtitulo)" }}>
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {descricaoCaracteres}/255 {descricaoCaracteres === 255 && " - Limite atingido"}
                 </div>
               </div>
@@ -806,12 +854,13 @@ export default function Produtos() {
                     min={0}
                     value={form.preco || ""}
                     onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    className="w-full rounded p-2 mb-3"
                     style={{
-                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                      color: modoDark ? "#FFFFFF" : "#000000"
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
                   />
                 </div>
                 <div className="flex-1">
@@ -822,12 +871,13 @@ export default function Produtos() {
                     min={0}
                     value={form.quantidade || ""}
                     onChange={(e) => setForm({ ...form, quantidade: Number(e.target.value) })}
-                    className={`${inputClass} bg-transparent border  ${modoDark ? "border-white" : "border-gray-300"}`}
-                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    className="w-full rounded p-2 mb-3"
                     style={{
-                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                      color: modoDark ? "#FFFFFF" : "#000000"
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
                   />
                 </div>
               </div>
@@ -845,15 +895,11 @@ export default function Produtos() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className={`w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3 ${modoDark
-                        ? "border-blue-400"
-                        : "border-gray-400"
-                        }`}
+                      className="w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3"
                       style={{
-                        backgroundColor: modoDark ? "#183366" : "#e5e7eb",
-                        color: modoDark ? "#60a5fa" : "#374151",
-                        fontWeight: 600,
-                        transition: "background 0.2s",
+                        backgroundColor: temaAtual.primario,
+                        color: "#FFFFFF",
+                        borderColor: temaAtual.primario,
                       }}
                     >
                       <svg
@@ -861,7 +907,7 @@ export default function Produtos() {
                         className="h-5 w-5"
                         fill="none"
                         viewBox="0 0 24 24"
-                        stroke={modoDark ? "#60a5fa" : "#374151"}
+                        stroke="#FFFFFF"
                         strokeWidth={2}
                       >
                         <path
@@ -882,21 +928,22 @@ export default function Produtos() {
                     min={0}
                     value={form.quantidadeMin || ""}
                     onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                    className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
-                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    className="w-full rounded p-2 mb-3"
                     style={{
-                      backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                      color: modoDark ? "#FFFFFF" : "#000000"
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
                   />
                 </div>
               </div>
               {(preview || form.foto) && (
-                <div className="mb-4 ">
+                <div className="mb-4">
                   <img
                     src={preview || form.foto || ""}
                     alt="Preview"
-                    className=" w-20 h-20 md:w-44 md:h-44 object-cover rounded"
+                    className="w-20 h-20 md:w-44 md:h-44 object-cover rounded"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/out.jpg";
                     }}
@@ -908,12 +955,13 @@ export default function Produtos() {
                 <select
                   value={form.fornecedorId || ""}
                   onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                  className={`${inputClass} bg-transparent px-6 py-3 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  className="w-full rounded cursor-pointer p-2"
                   style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
                 >
                   <option value="">{t("selecionarFornecedor")}</option>
                   {fornecedores.map((f) => (
@@ -925,12 +973,13 @@ export default function Produtos() {
                 <select
                   value={form.categoriaId || ""}
                   onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                  className={`${inputClass} bg-transparent px-6 py-3 md:py-[0.65rem] rounded border text-sm ${modoDark ? "border-white" : "border-gray-300"}`}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  className="w-full cursor-pointer rounded p-2"
                   style={{
-                    backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                    color: modoDark ? "#FFFFFF" : "#000000"
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
                   }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
                 >
                   <option value="">{t("selecionarCategoria")}</option>
                   {categorias.map((c) => (
@@ -964,7 +1013,7 @@ export default function Produtos() {
                     setPreview(null);
                   }}
                   className="cursor-pointer hover:underline"
-                  style={{ color: "var(--cor-fonte)" }}
+                  style={{ color: temaAtual.texto }}
                 >
                   {t("fechar")}
                 </button>
@@ -973,21 +1022,20 @@ export default function Produtos() {
                     <>
                       <button
                         onClick={handleUpdate}
-                        className="px-4 cursor-pointer py-2 rounded hover:bg-blue-700"
+                        className="px-4 cursor-pointer py-2 rounded"
                         style={{
-                          backgroundColor: "green",
-                          color: "white",
+                          backgroundColor: "#10B981",
+                          color: "#FFFFFF",
                         }}
                       >
                         {t("salvar")}
                       </button>
                       <button
                         onClick={handleDelete}
-                        className="cursor-pointer px-4 py-2 rounded hover:bg-red-700"
+                        className="cursor-pointer px-4 py-2 rounded"
                         style={{
-                          backgroundColor: "red",
-                          color: "white",
-
+                          backgroundColor: "#EF4444",
+                          color: "#FFFFFF",
                         }}
                       >
                         {t("excluir")}
@@ -997,10 +1045,10 @@ export default function Produtos() {
                 ) : (
                   <button
                     onClick={handleSubmit}
-                    className="cursor-pointer px-4 py-2 rounded hover:bg-[#00443f]"
+                    className="cursor-pointer px-4 py-2 rounded"
                     style={{
-                      backgroundColor: "green",
-                      color: "white",
+                      backgroundColor: "#10B981",
+                      color: "#FFFFFF",
                     }}
                   >
                     {t("criar")}
@@ -1014,5 +1062,3 @@ export default function Produtos() {
     </div>
   );
 }
-
-const inputClass = "w-full rounded p-2 mb-3";

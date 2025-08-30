@@ -4,6 +4,7 @@
         "convite.Enviado.texto": "Invitation successfully sent to the provided email."
     },
     "titulo": "Create Company",
+    "selecionarImagem": "Select Image",
     "botaoCriar": "Create Company",
     "erro": {
         "titulo": "Oops... something went wrong! Try again",

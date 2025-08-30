@@ -229,7 +229,7 @@ export default function Alteracao() {
 
         <button 
           type="submit" 
-          className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center"
+          className="text-white cursor-pointer bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center"
         >
           {t("alterarSenha")}
         </button>

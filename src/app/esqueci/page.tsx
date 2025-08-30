@@ -70,7 +70,7 @@ export default function Esqueci() {
           </div>
           <input type="email" {...register("email")} className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder={t("digiteEmail")} required />
         </div>
-        <button type="submit" disabled={carregando} className="text-white bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
+        <button type="submit" disabled={carregando} className="text-white cursor-pointer bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center">
           {t("enviarEmail")}
         </button>
         {carregando ? <span className="text-green-500">{t("processando")}</span> : null}

@@ -1,6 +1,7 @@
 {
     "titulo": "Criar Empresa",
     "botaoCriar": "Criar Empresa",
+    "selecionarImagem": "Selecionar Imagem",
     "erro": {
         "titulo": "Oops... algo deu errado! tente novamente",
         "mensagem": "Email já existente ou erro ao criar empresa."

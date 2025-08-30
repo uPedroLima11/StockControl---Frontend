@@ -22,7 +22,7 @@ export default function Vendas() {
   const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const produtosPorPagina = 7;
+  const produtosPorPagina = 10;
   const { t } = useTranslation("vendas");
 
   useEffect(() => {
@@ -40,19 +40,6 @@ export default function Vendas() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
-
-    const root = document.documentElement;
-    if (ativado) {
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#FFFFFF");
-      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-    } else {
-      root.style.setProperty("--cor-fundo", "#ffffff");
-      root.style.setProperty("--cor-fonte", "#000000");
-      root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-    }
 
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) {
@@ -142,6 +129,17 @@ export default function Vendas() {
       localStorage.removeItem('carrinhoVendas');
     }
   }, [carrinho]);
+
+  const temaAtual = {
+    fundo: modoDark ? "#0A1929" : "#F8FAFC",
+    texto: modoDark ? "#FFFFFF" : "#0F172A",
+    card: modoDark ? "#132F4C" : "#FFFFFF",
+    borda: modoDark ? "#1E4976" : "#E2E8F0",
+    primario: modoDark ? "#1976D2" : "#1976D2",
+    secundario: modoDark ? "#00B4D8" : "#0284C7",
+    placeholder: modoDark ? "#9CA3AF" : "#6B7280",
+    hover: modoDark ? "#1E4976" : "#EFF6FF"
+  };
 
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     if (userRole !== "ADMIN" && userRole !== "PROPRIETARIO") return;
@@ -321,37 +319,36 @@ export default function Vendas() {
     total + (item.produto.preco * item.quantidade), 0
   );
 
+  if (carregando && !empresaId) {
+    return (
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: temaAtual.texto }}>{t("carregando")}</p>
+      </div>
+    );
+  }
 
-if (carregando && !empresaId) {
-  return (
-    <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
-    </div>
-  );
-}
-
-if (!empresaId || produtos.length === 0) {
-  return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8 h-60" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div className="w-full max-w-6xl text-center">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-          {t("titulo")}
-        </h1>
-        <div className="border rounded-xl p-8 shadow" style={{
-          backgroundColor: "var(--cor-fundo-bloco)",
-          borderColor: modoDark ? "#FFFFFF" : "#000000",
-        }}>
-            <p className="text-lg" style={{ color: "var(--cor-fonte)" }}>{t("naoPossuiProdutos")}</p>
+  if (!empresaId || produtos.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8 h-60" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl text-center">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="border rounded-xl p-8 shadow" style={{
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
+          }}>
+            <p className="text-lg" style={{ color: temaAtual.texto }}>{t("naoPossuiProdutos")}</p>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
@@ -360,43 +357,45 @@ if (!empresaId || produtos.length === 0) {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("buscarProduto")}
-                className="outline-none font-mono text-sm bg-transparent"
+                className="outline-none placeholder-gray-400 font-mono text-sm bg-transparent"
+                style={{ 
+                  color: temaAtual.texto,
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -405,7 +404,7 @@ if (!empresaId || produtos.length === 0) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-mono text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+            <span className="font-mono text-sm md:text-base" style={{ color: temaAtual.texto }}>
               {t("totalVendas")}: R$ {totalVendas.toFixed(2).replace(".", ",")}
             </span>
           </div>
@@ -416,14 +415,14 @@ if (!empresaId || produtos.length === 0) {
             <div
               className="border rounded-xl shadow"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4 text-left">{t("produto")}</th>
                       <th className="text-center">{t("estoque")}</th>
                       <th className="text-center">{t("preco")}</th>
@@ -438,8 +437,9 @@ if (!empresaId || produtos.length === 0) {
                         key={produto.id}
                         className="border-b hover:bg-opacity-50 transition"
                         style={{
-                          color: "var(--cor-fonte)",
-                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.hover + "20"
                         }}
                       >
                         <td className="py-3 px-4 flex items-center gap-2">
@@ -466,11 +466,11 @@ if (!empresaId || produtos.length === 0) {
                             <button
                               onClick={() => adicionarAoCarrinho(produto)}
                               disabled={produto.quantidade < 1}
-                              className="px-3 py-1 rounded flex items-center gap-1"
+                              className="px-3 py-1 cursor-pointer rounded flex items-center gap-1 transition"
                               style={{
-                                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                                color: modoDark ? "#FFFFFF" : "#00332C",
-                                border: `1px solid ${modoDark ? "#FFFFFF" : "#00332C"}`,
+                                backgroundColor: temaAtual.primario,
+                                color: "#FFFFFF",
+                                border: `1px solid ${temaAtual.primario}`,
                                 opacity: produto.quantidade < 1 ? 0.5 : 1,
                               }}
                             >
@@ -489,8 +489,11 @@ if (!empresaId || produtos.length === 0) {
                 {produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-2">
@@ -505,14 +508,14 @@ if (!empresaId || produtos.length === 0) {
                           }}
                         />
                         <div>
-                          <p className="font-medium" style={{ color: "var(--cor-fonte)" }}>
+                          <p className="font-medium" style={{ color: temaAtual.texto }}>
                             {produto.nome}
                           </p>
                           <div className="flex gap-4 mt-1">
-                            <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            <span className="text-xs" style={{ color: temaAtual.placeholder }}>
                               {t("estoque")}: {produto.quantidade}
                             </span>
-                            <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            <span className="text-xs" style={{ color: temaAtual.placeholder }}>
                               {t("preco")}: R$ {produto.preco.toFixed(2).replace(".", ",")}
                             </span>
                           </div>
@@ -523,9 +526,9 @@ if (!empresaId || produtos.length === 0) {
                         <button
                           onClick={() => adicionarAoCarrinho(produto)}
                           disabled={produto.quantidade < 1}
-                          className="p-2 rounded-full"
+                          className="p-2  rounded-full"
                           style={{
-                            color: modoDark ? "#FBBF24" : "#00332C",
+                            color: temaAtual.primario,
                             opacity: produto.quantidade < 1 ? 0.5 : 1,
                           }}
                         >
@@ -543,16 +546,16 @@ if (!empresaId || produtos.length === 0) {
             <div
               className="border rounded-xl p-3 md:p-4 shadow"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
-              <h2 className="text-lg font-bold mb-3 md:mb-4 flex items-center gap-2" style={{ color: "var(--cor-fonte)" }}>
+              <h2 className="text-lg font-bold mb-3 md:mb-4 flex items-center gap-2" style={{ color: temaAtual.texto }}>
                 <FaShoppingCart /> {t("carrinho")}
               </h2>
 
               {carrinho.length === 0 ? (
-                <p className="text-center py-4 text-sm md:text-base" style={{ color: "var(--cor-subtitulo)" }}>
+                <p className="text-center py-4 text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
                   {t("carrinhoVazio")}
                 </p>
               ) : (
@@ -563,7 +566,7 @@ if (!empresaId || produtos.length === 0) {
                         key={item.produto.id}
                         className="flex justify-between items-center py-2 border-b"
                         style={{
-                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                          borderColor: temaAtual.borda,
                         }}
                       >
                         <div className="flex items-center gap-2">
@@ -578,11 +581,11 @@ if (!empresaId || produtos.length === 0) {
                             }}
                           />
                           <div>
-                            <span className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                            <span className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                               {item.produto.nome}
                             </span>
                             <div className="text-xs" style={{
-                              color: item.quantidade >= item.produto.quantidade ? "#EF4444" : "var(--cor-subtitulo)"
+                              color: item.quantidade >= item.produto.quantidade ? "#EF4444" : temaAtual.placeholder
                             }}>
                               {t("estoqueDisponivel")}: {item.produto.quantidade}
                               {item.quantidade >= item.produto.quantidade && (
@@ -620,22 +623,19 @@ if (!empresaId || produtos.length === 0) {
                             }}
                             className="w-12 md:w-16 p-1 rounded text-center"
                             style={{
-                              backgroundColor: "transparent",
-                              color: "var(--cor-fonte)",
-                              border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
+                              backgroundColor: temaAtual.card,
+                              color: temaAtual.texto,
+                              border: `1px solid ${temaAtual.borda}`,
                             }}
                           />
 
-                          <span className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                          <span className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                             R$ {(item.produto.preco * item.quantidade).toFixed(2).replace(".", ",")}
                           </span>
 
                           <button
                             onClick={() => removerDoCarrinho(item.produto.id)}
-                            className="p-1 rounded-full"
-                            style={{
-                              color: modoDark ? "#F87171" : "#DC2626",
-                            }}
+                            className="p-1 cursor-pointer rounded-full text-red-500 hover:text-red-700"
                           >
                             <FaRegTrashAlt size={14} />
                           </button>
@@ -644,19 +644,19 @@ if (!empresaId || produtos.length === 0) {
                     ))}
                   </div>
 
-                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t" style={{ borderColor: temaAtual.borda }}>
                     <div className="mb-3 md:mb-4">
-                      <label className="block mb-1 text-sm" style={{ color: "var(--cor-fonte)" }}>
+                      <label className="block mb-1 text-sm" style={{ color: temaAtual.texto }}>
                         {t("cliente")}
                       </label>
                       <select
                         value={clienteSelecionado || ""}
                         onChange={(e) => setClienteSelecionado(e.target.value || null)}
-                        className="w-full p-2 rounded border text-sm md:text-base"
+                        className="w-full cursor-pointer p-2 rounded border text-sm md:text-base"
                         style={{
-                          backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                          color: modoDark ? "#FFFFFF" : "#000000",
-                          borderColor: modoDark ? "#FFFFFF" : "#000000",
+                          backgroundColor: temaAtual.card,
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
                         }}
                       >
                         <option value="">{t("naoInformarCliente")}</option>
@@ -668,17 +668,17 @@ if (!empresaId || produtos.length === 0) {
                       </select>
                     </div>
 
-                    <div className="flex justify-between mb-2">
-                      <span style={{ color: "var(--cor-fonte)" }}>{t("subtotal")}:</span>
-                      <span style={{ color: "var(--cor-fonte)" }}>R$ {totalCarrinho.toFixed(2).replace(".", ",")}</span>
+                    <div className="flex justify-between mb-2" style={{ color: temaAtual.texto }}>
+                      <span>{t("subtotal")}:</span>
+                      <span>R$ {totalCarrinho.toFixed(2).replace(".", ",")}</span>
                     </div>
 
                     <button
                       onClick={finalizarVenda}
                       disabled={carregando}
-                      className="w-full border-2 py-2 rounded-lg font-medium mt-2 md:mt-4 cursor-pointer text-sm md:text-base"
+                      className="w-full py-2 rounded-lg font-medium mt-2 md:mt-4 cursor-pointer text-sm md:text-base transition"
                       style={{
-                        backgroundColor: modoDark ? "#1a25359f" : "#00332C",
+                        backgroundColor: temaAtual.primario,
                         color: "#FFFFFF",
                         opacity: carregando ? 0.7 : 1,
                       }}
@@ -693,36 +693,36 @@ if (!empresaId || produtos.length === 0) {
             <div
               className="border rounded-xl p-3 md:p-4 shadow"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
-              <h2 className="text-lg font-bold mb-3 md:mb-4" style={{ color: "var(--cor-fonte)" }}>
+              <h2 className="text-lg font-bold mb-3 md:mb-4" style={{ color: temaAtual.texto }}>
                 {t("vendasRecentes")}
               </h2>
 
               {vendas.length === 0 ? (
-                <p className="text-center py-4 text-sm md:text-base" style={{ color: "var(--cor-subtitulo)" }}>
+                <p className="text-center py-4 text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
                   {t("semVendas")}
                 </p>
               ) : (
                 <div className="space-y-2 md:space-y-3">
                   {vendas.slice(0, 5).map((venda) => (
-                    <div key={venda.id} className="border-b pb-2" style={{ borderColor: modoDark ? "#FFFFFF" : "#000000" }}>
+                    <div key={venda.id} className="border-b pb-2" style={{ borderColor: temaAtual.borda }}>
                       <div className="flex justify-between items-center py-2">
                         <div>
-                          <p className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                          <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                             {venda.produto?.nome || "Produto desconhecido"}
                           </p>
-                          <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                          <p className="text-xs" style={{ color: temaAtual.placeholder }}>
                             {venda.cliente?.nome || t("clienteNaoInformado")} • {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm md:text-base" style={{ color: "var(--cor-fonte)" }}>
+                          <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                             {venda.quantidade} x R$ {(venda.produto?.preco || 0).toFixed(2).replace(".", ",")}
                           </p>
-                          <p className="font-medium text-sm md:text-base" style={{ color: modoDark ? "#FBBF24" : "#00332C" }}>
+                          <p className="font-medium text-sm md:text-base" style={{ color: temaAtual.primario }}>
                             R$ {(venda.valorVenda || 0).toFixed(2).replace(".", ",")}
                           </p>
                         </div>

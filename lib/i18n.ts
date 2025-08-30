@@ -34,6 +34,9 @@ import alteracaoPt from '../public/locales/pt/alteracao.json';
 import alteracaoEn from '../public/locales/en/alteracao.json';
 import clientesPt from '../public/locales/pt/clientes.json';
 import clientesEn from '../public/locales/en/clientes.json';
+import exportacoesEn from '../public/locales/en/exportacoes.json';
+import exportacoesPt from '../public/locales/pt/exportacoes.json';
+
 
 if (!i18n.isInitialized) {
   i18n
@@ -42,7 +45,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes', 'exportacoes'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -52,6 +55,7 @@ if (!i18n.isInitialized) {
           produtos: produtosEn,
           usuarios: usuariosEn,
           conta: contaEn,
+          exportacoes: exportacoesEn,
           empresa: empresaEn,
           criarempresa: criarempresaEn,
           vendas: vendasEn,
@@ -65,6 +69,7 @@ if (!i18n.isInitialized) {
         },
         pt: {
           settings: settingsPt,
+          exportacoes: exportacoesPt,
           sidebar: sidebarPt,
           dashboard: dashboardPt,
           produtos: produtosPt,

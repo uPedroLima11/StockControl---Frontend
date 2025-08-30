@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { FaPaperPlane, FaCheckCircle } from "react-icons/fa";
 
 export default function Suporte() {
   const [modoDark, setModoDark] = useState(false);
@@ -12,29 +13,36 @@ export default function Suporte() {
   const [mensagem, setMensagem] = useState("");
   const [enviado, setEnviado] = useState(false);
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
-    aplicarTema(ativado);
   }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#fffff2");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#fffff2";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#ffffff");
-      root.style.setProperty("--cor-texto", "#000000");
-      document.body.style.backgroundColor = "#fffff2";
-      document.body.style.color = "#000000";
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,86 +59,181 @@ export default function Suporte() {
       setNome("");
       setEmail("");
       setMensagem("");
+      
+      setTimeout(() => {
+        setEnviado(false);
+      }, 3000);
     } finally {
       setCarregando(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen px-6 py-10 bg-[var(--cor-fundo)]">
-      <main className="flex-1 mx-auto max-w-3xl">
-        <h1
-          className="text-3xl font-bold mb-6"
-          style={{ color: modoDark ? "#e3f6f5" : "#000000" }}
-        >
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+      <div className="w-full max-w-3xl">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("contato_suporte")}
         </h1>
 
-        <p className="mb-8 text-lg" style={{ color: modoDark ? "#e3f6f5" : "#4B5563" }}>
+        <p className="text-center mb-6 md:mb-8 text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
           {t("suporte_descricao")}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input
-            type="text"
-            placeholder={t("nome")}
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            className="w-full px-5 py-3 rounded-lg border text-base outline-none"
-            style={{
-              backgroundColor: modoDark ? "#374151" : "#F9FAFB",
-              color: modoDark ? "#e3f6f5" : "#111827",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
-          />
+        <div className="p-6 rounded-lg" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`
+        }}>
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("nome")}
+              </label>
+              <input
+                type="text"
+                placeholder={t("nome")}
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg border text-sm md:text-base outline-none transition-colors"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+            </div>
 
-          <input
-            type="email"
-            placeholder={t("email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-5 py-3 rounded-lg border text-base outline-none"
-            style={{
-              backgroundColor: modoDark ? "#374151" : "#F9FAFB",
-              color: modoDark ? "#e3f6f5" : "#111827",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
-          />
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("email")}
+              </label>
+              <input
+                type="email"
+                placeholder={t("email")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg border text-sm md:text-base outline-none transition-colors"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              />
+            </div>
 
-          <textarea
-            placeholder={t("mensagem")}
-            value={mensagem}
-            onChange={(e) => setMensagem(e.target.value)}
-            required
-            rows={6}
-            className="w-full px-5 py-3 rounded-lg border text-base text-white outline-none resize-none"
-            style={{
-              backgroundColor: modoDark ? "#374151" : "#F9FAFB",
-              color: modoDark ? "#e3f6f5" : "#111827",
-              borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-            }}
-          ></textarea>
+            <div>
+              <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                {t("mensagem")}
+              </label>
+              <textarea
+                placeholder={t("mensagem")}
+                value={mensagem}
+                onChange={(e) => setMensagem(e.target.value)}
+                required
+                rows={6}
+                className="w-full placeholder-gray-400 px-4 py-2 rounded-lg border text-sm md:text-base outline-none resize-none transition-colors"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = temaAtual.primario;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = temaAtual.borda;
+                }}
+              ></textarea>
+            </div>
 
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full cursor-pointer py-3 rounded-lg font-medium text-base transition"
-            style={{
-              backgroundColor: modoDark ? "#4B5563" : "#2563EB",
-              color: modoDark ? "#fffff2" : "#ffffff",
-              opacity: carregando ? 0.7 : 1,
-            }}
-          >  {carregando ? t("processando") : t("enviar_mensagem")}
+            <button
+              type="submit"
+              disabled={carregando}
+              className="w-full flex items-center justify-center cursor-pointer gap-2 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: temaAtual.primario,
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                if (!carregando) {
+                  e.currentTarget.style.opacity = "0.9";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!carregando) {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }
+              }}
+            >
+              {carregando ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  {t("processando")}
+                </div>
+              ) : (
+                <>
+                  <FaPaperPlane className="text-sm " />
+                  {t("enviar_mensagem")}
+                </>
+              )}
+            </button>
 
-          </button>
+            {enviado && (
+              <div className="flex items-center gap-2 p-3 rounded-lg mt-4" style={{
+                backgroundColor: "#10B98120",
+                border: "1px solid #10B981"
+              }}>
+                <FaCheckCircle className="text-green-500" />
+                <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
+                  {t("mensagemEnviada")}
+                </p>
+              </div>
+            )}
+          </form>
+        </div>
 
-          {enviado && (
-            <p className="text-green-500 text-base">{t("mensagemEnviada")}</p>
-          )}
-        </form>
-      </main>
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-lg text-center" style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Email</h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>stockcontroldev@gmail.com
+</p>
+          </div>
+          
+          <div className="p-4 rounded-lg text-center" style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Telefone</h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>(53) 98118-5633</p>
+          </div>
+          
+          <div className="p-4 rounded-lg text-center" style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Horário</h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>Seg-Sex: 9h-18h</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

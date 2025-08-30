@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { EmpresaI } from "@/utils/types/empresa";
 import { useTranslation } from "react-i18next";
+import { FaEdit, FaTrash, FaLock } from "react-icons/fa";
 
 export default function MinhaConta() {
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -19,40 +20,41 @@ export default function MinhaConta() {
   });
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("conta");
+  
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const translateRole = (role: string) => {
     return t(`roles.${role}`, { defaultValue: role });
   };
+
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-    aplicarTema(ativo);
   }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#fffff2");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      root.style.setProperty("--cor-borda", "#374151");
-      root.style.setProperty("--cor-cinza", "#A3A3A3");
-      root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#fffff2";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#ffffff");
-      root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      root.style.setProperty("--cor-borda", "#ffffff");
-      root.style.setProperty("--cor-cinza", "#4B5563");
-      root.style.setProperty("--cor-destaque", "#00332C");
-      document.body.style.backgroundColor = "#fffff";
-      document.body.style.color = "#000000";
-    }
-  };
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -110,13 +112,13 @@ export default function MinhaConta() {
         title: t("modal.erro.titulo"),
         text: t("modal.erro.emailExistente"),
         confirmButtonText: t("modal.botaoOk"),
-        confirmButtonColor: "#013C3C",
+        confirmButtonColor: temaAtual.primario,
       });
     } else {
       Swal.fire({
         title: t("modal.sucesso.titulo"),
         icon: "success",
-        confirmButtonColor: "#013C3C",
+        confirmButtonColor: temaAtual.primario,
       });
     }
     setModalAberto(false);
@@ -133,6 +135,8 @@ export default function MinhaConta() {
       showCancelButton: true,
       confirmButtonText: t("modal.excluir.confirmar"),
       cancelButtonText: t("modal.excluir.cancelar"),
+      confirmButtonColor: temaAtual.primario,
+      cancelButtonColor: "#6B7280",
     }).then(async (result) => {
       if (result.isConfirmed) {
         const excluirDados = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuario.id}`, {
@@ -142,7 +146,7 @@ export default function MinhaConta() {
           Swal.fire({
             title: t("modal.excluir.sucesso"),
             icon: "success",
-            confirmButtonColor: "#013C3C",
+            confirmButtonColor: temaAtual.primario,
           });
           localStorage.removeItem("client_key");
           window.location.href = "/";
@@ -152,165 +156,211 @@ export default function MinhaConta() {
             title: t("modal.erro.titulo"),
             text: t("modal.erro.excluirConta"),
             confirmButtonText: t("modal.botaoOk"),
-            confirmButtonColor: "#013C3C",
+            confirmButtonColor: temaAtual.primario,
           });
         }
       }
     });
   };
 
-  return (
-    <div className="min-h-screen flex justify-center items-start pt-10" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div
-        className="w-full max-w-md rounded p-6 shadow-md"
-        style={{
-          backgroundColor: modoDark ? "#1F2937" : "#ffffff",
-          color: modoDark ? "#fffff2" : "#000000",
-          border: modoDark ? "1px solid #374151" : "2px solid #000000",
-        }}
-      >
-        <h1 className="text-2xl font-mono text-center mb-6" style={{ color: "var(--cor-texto)" }}>
+ return (
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+      <div className="w-full max-w-2xl">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
-        <div className="border-b mb-4 pb-2" style={{ borderColor: "var(--cor-borda)" }}>
-          <h2 className="text-lg font-semibold underline">{t("email")}</h2>
-          <p className="mt-1">{usuarioLogado?.email || "..."}</p>
-        </div>
-
-        <div className="border-b mb-6 pb-6" style={{ borderColor: "var(--cor-borda)" }}>
-          <h2 className="text-lg font-semibold mb-4">{t("senha")}</h2>
-          <Link
-            href="/esqueci"
-            className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm hover:bg-[var(--cor-destaque)] hover:text-white"
-            style={{
-              borderColor: "var(--cor-destaque)",
-              color: "var(--cor-texto)",
-              backgroundColor: modoDark ? "transparent" : "transparent",
-            }}
-          >
-            {t("trocarSenha")}
-          </Link>
-        </div>
-
-        <div
-          className="border-b mb-4 pb-2">
-          <h2 className="text-lg font-semibold">{t("informacoesConta")}</h2>
-          <div className="mt-2 space-y-1 text-sm">
-            <p>
-              {t("empresa.nome")}: <strong>{empresa?.nome || t("adicionar")}</strong>
-            </p>
-            <p>
-              {t("empresa.cargo")}: <strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong>
-            </p>
-            <p>
-              {t("nome")}: {usuarioLogado?.nome || t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.endereco")}: {empresa?.endereco || t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.pais")}: {empresa?.pais || t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.estado")}: {empresa?.estado || t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.cidade")}: {empresa?.cidade || t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.cep")}: {empresa?.cep ? `${empresa.cep.slice(0, 5)}-${empresa.cep.slice(5)}` : t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.telefone")}: {empresa?.telefone ? `(${empresa.telefone.slice(0, 2)}) ${empresa.telefone.slice(2)}` : t("adicionar")}
-            </p>
-            <p>
-              {t("empresa.email")}: {empresa?.email || t("adicionar")}
-            </p>
+        <div className="p-6 rounded-lg mb-6" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`
+        }}>
+          <div className="border-b mb-4 pb-4" style={{ borderColor: temaAtual.borda }}>
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2" style={{ color: temaAtual.texto }}>
+              <FaLock style={{ color: temaAtual.texto }} />
+              {t("email")}
+            </h2>
+            <p className="mt-1" style={{ color: temaAtual.texto }}>{usuarioLogado?.email || "..."}</p>
           </div>
-        </div>
 
-        <div className="flex items-center mt-6 gap-1">
-          <button
-            onClick={abrirModal}
-            className="mt-4 px-5 py-2 rounded transition w-full cursor-pointer"
-            style={{
-              backgroundColor: "var(--cor-destaque)",
-              color: "#fffff2",
-            }}
-          >
-            {t("editarPerfil")}
-          </button>
-          <button
-            onClick={handleExcluir}
-            className="mt-4 px-6 py-2 rounded transition w-full cursor-pointer"
-            style={{
-              backgroundColor: "#ee1010",
-              color: "#fffff2",
-            }}
-          >
-            {t("excluirConta")}
-          </button>
+          <div className="mb-6 pb-4" style={{ borderColor: temaAtual.borda }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("senha")}</h2>
+            <Link
+              href="/esqueci"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition font-mono text-sm w-fit"
+              style={{
+                backgroundColor: temaAtual.primario,
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+            >
+              {t("trocarSenha")}
+            </Link>
+          </div>
+
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("informacoesConta")}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.nome")}</p>
+                <p style={{ color: temaAtual.texto }}><strong>{empresa?.nome || t("adicionar")}</strong></p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.cargo")}</p>
+                <p style={{ color: temaAtual.texto }}><strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong></p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("nome")}</p>
+                <p style={{ color: temaAtual.texto }}>{usuarioLogado?.nome || t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.endereco")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.endereco || t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.pais")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.pais || t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.estado")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.estado || t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.cidade")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.cidade || t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.cep")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.cep ? `${empresa.cep.slice(0, 5)}-${empresa.cep.slice(5)}` : t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.telefone")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.telefone ? `(${empresa.telefone.slice(0, 2)}) ${empresa.telefone.slice(2)}` : t("adicionar")}</p>
+              </div>
+              <div>
+                <p style={{ color: temaAtual.placeholder }}>{t("empresa.email")}</p>
+                <p style={{ color: temaAtual.texto }}>{empresa?.email || t("adicionar")}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <button
+              onClick={abrirModal}
+              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
+              style={{
+                backgroundColor: temaAtual.primario,
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+            >
+              <FaEdit className="text-sm" style={{ color: "#FFFFFF" }} />
+              {t("editarPerfil")}
+            </button>
+            <button
+              onClick={handleExcluir}
+              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
+              style={{
+                backgroundColor: "#EF4444",
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.9";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
+            >
+              <FaTrash className="text-sm" style={{ color: "#FFFFFF" }} />
+              {t("excluirConta")}
+            </button>
+          </div>
         </div>
       </div>
 
       {modalAberto && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-6 rounded shadow-lg w-full max-w-md"
+            className="p-4 rounded-lg shadow-xl w-full max-w-md"
             style={{
-              backgroundColor: modoDark ? "#1F2937" : "#fffff2",
-              color: modoDark ? "#fffff2" : "#000000",
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">{t("modal.editarTitulo")}</h2>
+            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("modal.editarTitulo")}</h2>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">{t("modal.nome")}</label>
-              <input
-                type="text"
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className="w-full px-3 py-2 border rounded"
-                style={{
-                  backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                  borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#fffff2" : "#000000",
-                }}
-              />
+            <div className="space-y-3">
+              <div>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("modal.nome")}</label>
+                <input
+                  type="text"
+                  value={form.nome}
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  className="w-full px-3 py-2 rounded border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("modal.email")}</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full px-3 py-2 rounded border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">{t("modal.email")}</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full px-3 py-2 border rounded"
-                style={{
-                  backgroundColor: modoDark ? "#374151" : "#F3F4F6",
-                  borderColor: modoDark ? "#4B5563" : "#D1D5DB",
-                  color: modoDark ? "#fffff2" : "#000000",
-                }}
-              />
-            </div>
-
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => setModalAberto(false)}
-                className="px-4 py-2 rounded hover:bg-gray-400 cursor-pointer"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#fffff2" : "#000000",
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.hover;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = temaAtual.card;
                 }}
               >
                 {t("modal.cancelar")}
               </button>
               <button
                 onClick={handleSalvar}
-                className="px-4 py-2 text-white rounded cursor-pointer"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
-                  backgroundColor: "var(--cor-destaque)",
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
                 }}
               >
                 {t("modal.salvar")}

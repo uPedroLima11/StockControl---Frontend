@@ -1,0 +1,48 @@
+{
+    "titulo": "Exportação de Dados",
+    "abas": {
+      "exportar": "Exportar Dados",
+      "historico": "Histórico"
+    },
+    "alerta": {
+      "titulo": "Empresa Não Ativada",
+      "mensagem": "Você precisa ativar sua empresa para exportar dados.",
+      "botao": "Ativar Agora"
+    },
+    "exportacaoSucesso": "Exportação realizada com sucesso!",
+    "erroExportacao": "Erro na exportação",
+    "erroTitulo": "Erro!",
+    "erroGenerico": "Não foi possível exportar os dados.",
+    "desconhecido": "Desconhecido",
+    "periodoNaoEspecificado": "Período não especificado",
+    "empresaNaoAtivada": {
+      "titulo": "Empresa Não Ativada",
+      "mensagem": "Ative sua empresa para utilizar a exportação de dados"
+    },
+    "filtros": {
+      "titulo": "Filtros",
+      "dataInicial": "Data Inicial",
+      "dataFinal": "Data Final"
+    },
+    "entidades": {
+      "produtos": "Produtos",
+      "vendas": "Vendas",
+      "clientes": "Clientes",
+      "fornecedores": "Fornecedores",
+      "usuarios": "Usuários"
+    },
+    "botaoExportar": "Exportar Excel",
+    "historico": {
+      "titulo": "Histórico de Exportações",
+      "carregando": "Carregando histórico...",
+      "nenhumaExportacao": "Nenhuma exportação realizada",
+      "mostrando": "Mostrando {{inicio}}-{{fim}} de {{total}} exportações",
+      "exportacaoDe": "Exportação de {{entidade}}",
+      "detalhes": {
+        "tipoDados": "Tipo de Dados",
+        "exportadoPor": "Exportado por",
+        "periodo": "Período",
+        "dataExportacao": "Data da Exportação"
+      }
+    }
+  }

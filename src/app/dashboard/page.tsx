@@ -30,6 +30,9 @@ export default function Dashboard() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
+
+    aplicarTema(ativado);
+
     fetchContagem();
     fetchProdutos();
     fetchFornecedores();
@@ -37,20 +40,27 @@ export default function Dashboard() {
     fetchFuncionarios();
 
     localStorage.setItem("TotalVendas", JSON.stringify(todasVendas));
-
-    const root = document.documentElement;
-
-    if (ativado) {
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#ffffff");
-      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-    } else {
-      root.style.setProperty("--cor-fonte", "#000000");
-      root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-    }
   }, []);
+
+  const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement;
+    if (ativado) {
+      root.style.setProperty("--cor-fundo", "#0A1929");
+      root.style.setProperty("--cor-fonte", "#FFFFFF");
+      root.style.setProperty("--cor-subtitulo", "#9CA3AF");
+      root.style.setProperty("--cor-fundo-bloco", "#132F4C");
+      root.style.setProperty("--cor-borda", "#1E4976");
+      root.style.setProperty("--cor-caixa-destaque", "#1976D2");
+    } else {
+      root.style.setProperty("--cor-fundo", "#F8FAFC");
+      root.style.setProperty("--cor-fonte", "#0F172A");
+      root.style.setProperty("--cor-subtitulo", "#6B7280");
+      root.style.setProperty("--cor-fundo-bloco", "#FFFFFF");
+      root.style.setProperty("--cor-borda", "#E2E8F0");
+      root.style.setProperty("--cor-caixa-destaque", "#0284C7");
+    }
+    document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
+  };
 
   async function fetchContagem() {
     try {
@@ -176,18 +186,17 @@ export default function Dashboard() {
     setProdutoExpandido(produtoExpandido === id ? null : id);
   };
 
-
- const produtosCriticos = produtos.filter(
-    (produto) => produto.quantidade < produto.quantidadeMin && 
-    produto.quantidadeMin !== undefined && 
-    produto.quantidadeMin > 0
+  const produtosCriticos = produtos.filter(
+    (produto) => produto.quantidade < produto.quantidadeMin &&
+      produto.quantidadeMin !== undefined &&
+      produto.quantidadeMin > 0
   );
 
   const produtosAtencao = produtos.filter(
-    (produto) => produto.quantidade >= produto.quantidadeMin && 
-    produto.quantidade < produto.quantidadeMin + 5 && 
-    produto.quantidadeMin !== undefined && 
-    produto.quantidadeMin > 0
+    (produto) => produto.quantidade >= produto.quantidadeMin &&
+      produto.quantidade < produto.quantidadeMin + 5 &&
+      produto.quantidadeMin !== undefined &&
+      produto.quantidadeMin > 0
   );
 
   const produtosEstoqueBaixo = [...produtosCriticos, ...produtosAtencao];
@@ -202,151 +211,205 @@ export default function Dashboard() {
     setProdutoExpandido(null);
   };
 
-
   return (
-    <div className="px-2 sm:px-4 pt-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div className="justify-center w-full max-w-6xl rounded-[2rem] px-4 sm:px-8 md:px-12 py-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 mx-auto shadow-[...]" style={{ backgroundColor: "var(--cor-caixa-destaque)" }}>
-        <Image alt="icone" src="/icone.png" width={100} height={100} quality={100} priority className="object-contain" />
+    <div className="px-2 sm:px-4 pt-8 min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
+      <div
+        className="justify-center w-full max-w-6xl rounded-2xl px-4 sm:px-8 md:px-12 py-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 mx-auto mb-8 shadow-xl"
+        style={{
+          background: modoDark
+            ? "linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)"
+            : "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)",
+          border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`
+        }}
+      >
+        <Image
+          alt="icone"
+          src="/icone.png"
+          width={100}
+          height={100}
+          quality={100}
+          priority
+          className="object-contain filter brightness-0 invert"
+        />
         <div className="text-white text-center md:text-left">
           <h1 className="text-3xl font-bold">STOCKCONTROL</h1>
-          <p className="text-base mt-1">
+          <p className="text-base mt-1 opacity-90">
             {t("intro.linha1")} <br />
             {t("intro.linha2")}
           </p>
         </div>
       </div>
 
-      <div className="flex justify-center px-2 sm:px-4 py-10">
-        <div className="w-full max-w-6xl space-y-8">
-          <h1 className="text-center text-2xl font-mono" style={{ color: "var(--cor-fonte)" }}>
+      <div className="flex justify-center px-2 sm:px-4 pb-10">
+        <div className="w-full max-w-6xl space-y-6">
+          <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
             {t("dashboardTitulo")}
           </h1>
           <div
-            className="border-2 rounded-xl p-6 shadow-md"
+            className="border rounded-xl p-6 shadow-md transition-all duration-300"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#fffff2" : "#000000",
+              borderColor: "var(--cor-borda)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.boxShadow = modoDark
+                ? "0 12px 30px rgba(25, 118, 210, 0.25)"
+                : "0 12px 30px rgba(2, 132, 199, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
+            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
+              color: "var(--cor-fonte)",
+              borderColor: "var(--cor-borda)"
+            }}>
               {t("resumo.titulo")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemLucro > 0 ? contagemLucro.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("resumo.lucroTotal")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemValor > 0 ? contagemValor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("resumo.custoItens")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemEstoque}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("resumo.itensDisponiveis")}
-                </p>
-              </div>
+              {[
+                { valor: contagemLucro, label: t("resumo.lucroTotal"), formato: "currency" },
+                { valor: contagemValor, label: t("resumo.custoItens"), formato: "currency" },
+                { valor: contagemEstoque, label: t("resumo.itensDisponiveis"), formato: "number" }
+              ].map((item, index) => (
+                <div key={index} className="p-4 rounded-lg transition-colors duration-200 hover:bg-opacity-20"
+                  style={{
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
+                  }}
+                >
+                  <p className="text-2xl font-semibold mb-1" style={{
+                    color: "var(--cor-fonte)"
+                  }}>
+
+                    {item.formato === "currency"
+                      ? item.valor > 0 ? item.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"
+                      : item.valor
+                    }
+                  </p>
+                  <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                    {item.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
           <div
-            className="border-2 rounded-xl p-6 shadow-md"
+            className="border rounded-xl p-6 shadow-md transition-all duration-300"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#fffff2" : "#000000",
+              borderColor: "var(--cor-borda)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.boxShadow = modoDark
+                ? "0 12px 30px rgba(25, 118, 210, 0.25)"
+                : "0 12px 30px rgba(2, 132, 199, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
+            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
+              color: "var(--cor-fonte)",
+              borderColor: "var(--cor-borda)"
+            }}>
               {t("atividades.titulo")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6 text-center">
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemVendas}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("atividades.contagemVendas")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {vendas30Dias.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("atividades.lucroMensal")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemFornecedores}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("atividades.contagemFornecedores")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemProduto}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("atividades.contagemItens")}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                  {contagemFuncionarios}
-                </p>
-                <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
-                  {t("atividades.contagemFuncionarios")}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
+              {[
+                { valor: contagemVendas, label: t("atividades.contagemVendas"), formato: "number" },
+                { valor: vendas30Dias, label: t("atividades.lucroMensal"), formato: "currency" },
+                { valor: contagemFornecedores, label: t("atividades.contagemFornecedores"), formato: "number" },
+                { valor: contagemProduto, label: t("atividades.contagemItens"), formato: "number" },
+                { valor: contagemFuncionarios, label: t("atividades.contagemFuncionarios"), formato: "number" }
+              ].map((item, index) => (
+                <div key={index} className="p-3 rounded-lg transition-colors duration-200 hover:bg-opacity-20"
+                  style={{
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
+                  }}
+                >
+                  <p className="text-xl font-semibold mb-1" style={{
+                    color: "var(--cor-fonte)"
+                  }}>
+
+                    {item.formato === "currency"
+                      ? item.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                      : item.valor
+                    }
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                    {item.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
           <div
-            className="border-2 rounded-xl p-6 shadow-md"
+            className="border rounded-xl p-6 shadow-md transition-all duration-300"
             style={{
               backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: modoDark ? "#fffff2" : "#000000",
+              borderColor: "var(--cor-borda)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.boxShadow = modoDark
+                ? "0 12px 30px rgba(25, 118, 210, 0.25)"
+                : "0 12px 30px rgba(2, 132, 199, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{ color: "var(--cor-fonte)" }}>
+            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
+              color: "var(--cor-fonte)",
+              borderColor: "var(--cor-borda)"
+            }}>
               {t("estoqueBaixo.titulo")}
             </h2>
 
             <div className="hidden md:block">
               <table className="min-w-full text-sm text-left">
-                <thead className="border-b">
+                <thead className="border-b" style={{ borderColor: "var(--cor-borda)" }}>
                   <tr style={{ color: "var(--cor-fonte)" }} className="font-semibold">
-                    <th className="py-2 pr-4 text-start whitespace-nowrap">{t("estoqueBaixo.colunas.produto")}</th>
-                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
-                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
-                    <th className="py-2 pr-4 text-center whitespace-nowrap">{t("Estado")}</th>
+                    <th className="py-3 px-4 text-start">{t("estoqueBaixo.colunas.produto")}</th>
+                    <th className="py-3 px-4 text-center">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
+                    <th className="py-3 px-4 text-center">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
+                    <th className="py-3 px-4 text-center">{t("Estado")}</th>
                   </tr>
                 </thead>
                 <tbody style={{ color: "var(--cor-fonte)" }}>
                   {produtosAtuais.map((produto) => (
-                    <tr key={produto.id} className="border-b">
-                      <td className="py-2 pr-4 text-start whitespace-nowrap">{produto.nome}</td>
-                      <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidade}</td>
-                      <td className="py-2 pr-4 text-center whitespace-nowrap">{produto.quantidadeMin}</td>
-                      <td className="flex items-center justify-center py-2 pr-4 text-center whitespace-nowrap">
+                    <tr
+                      key={produto.id}
+                      className="border-b transition-all duration-200 cursor-pointer"
+                      style={{ borderColor: "var(--cor-borda)" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = modoDark
+                          ? "rgba(25, 118, 210, 0.15)"  
+                          : "rgba(2, 132, 199, 0.1)";   
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <td className="py-3 px-4 text-start">{produto.nome}</td>
+                      <td className="py-3 px-4 text-center">{produto.quantidade}</td>
+                      <td className="py-3 px-4 text-center">{produto.quantidadeMin}</td>
+                      <td className="flex items-center justify-center py-3 px-4 text-center">
                         {produto.quantidade < produto.quantidadeMin ? (
-                          <div className="flex items-center gap-1">
-                            <LuShieldAlert size={18} color="#dc143c" /> {t("estoqueBaixo.estadoCritico")}
+                          <div className="flex items-center gap-1 text-red-400">
+                            <LuShieldAlert size={18} /> {t("estoqueBaixo.estadoCritico")}
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1">
-                            <LuTriangleAlert size={18} color="#eead2d" /> {t("estoqueBaixo.estadoAtencao")}
+                          <div className="flex items-center gap-1 text-yellow-400">
+                            <LuTriangleAlert size={18} /> {t("estoqueBaixo.estadoAtencao")}
                           </div>
                         )}
                       </td>
@@ -356,59 +419,78 @@ export default function Dashboard() {
               </table>
             </div>
 
-
-            <div className="md:hidden space-y-2">
+            <div className="md:hidden space-y-3">
               {produtosAtuais.length === 0 ? (
-                <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+                <div className="p-4 text-center rounded-lg" style={{
+                  color: "var(--cor-subtitulo)",
+                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
+                }}>
                   {t("estoqueBaixo.nenhumProduto")}
                 </div>
               ) : (
                 produtosAtuais.map((produto) => (
                   <div
                     key={produto.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+                    className="border rounded-lg p-4 transition-all duration-200 cursor-pointer"
+                    style={{
+                      backgroundColor: "var(--cor-fundo-bloco)",
+                      borderColor: "var(--cor-borda)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = modoDark
+                        ? "rgba(25, 118, 210, 0.15)"
+                        : "rgba(2, 132, 199, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "var(--cor-fundo-bloco)";
+                    }}
+                    onClick={() => toggleExpandirProduto(produto.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-2">
                           <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
                             {produto.nome}
                           </p>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span style={{ color: "var(--cor-subtitulo)" }}>
                             {t("estoqueBaixo.colunas.estoqueAtual")}: {produto.quantidade}
-                          </p>
-                          <p className="text-sm" style={{ color: "var(--cor-subtitulo)" }}>
+                          </span>
+                          <span style={{ color: "var(--cor-subtitulo)" }}>
                             {t("estoqueBaixo.colunas.estoqueIdeal")}: {produto.quantidadeMin}
-                          </p>
+                          </span>
                         </div>
                       </div>
 
                       <button
-                        onClick={() => toggleExpandirProduto(produto.id)}
-                        className="text-gray-500 hover:text-gray-700 p-1"
-                        style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpandirProduto(produto.id);
+                        }}
+                        className="p-1"
+                        style={{ color: "var(--cor-subtitulo)" }}
                       >
                         {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
                       </button>
                     </div>
 
                     <div
-                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`}
+                      className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`}
                       style={{ color: "var(--cor-fonte)" }}
                     >
-                      <div className="pt-2 border-t" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
-                        <div className="flex items-center gap-1">
+                      <div className="pt-3 border-t" style={{ borderColor: "var(--cor-borda)" }}>
+                        <div className="flex items-center gap-2">
                           {produto.quantidade < produto.quantidadeMin ? (
                             <>
-                              <LuShieldAlert size={18} color="#dc143c" />
-                              <span>{t("estoqueBaixo.estadoCritico")}</span>
+                              <LuShieldAlert size={18} className="text-red-400" />
+                              <span className="text-red-400">{t("estoqueBaixo.estadoCritico")}</span>
                             </>
                           ) : (
                             <>
-                              <LuTriangleAlert size={18} color="#eead2d" />
-                              <span>{t("estoqueBaixo.estadoAtencao")}</span>
+                              <LuTriangleAlert size={18} className="text-yellow-400" />
+                              <span className="text-yellow-400">{t("estoqueBaixo.estadoAtencao")}</span>
                             </>
                           )}
                         </div>
@@ -420,12 +502,15 @@ export default function Dashboard() {
             </div>
 
             {produtosEstoqueBaixo.length > produtosPorPagina && (
-              <div className="flex justify-center items-center gap-4 mt-4">
+              <div className="flex justify-center items-center gap-4 mt-6">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full transition-colors ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
+                  style={{
+                    color: "var(--cor-fonte)",
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)"
+                  }}
                 >
                   <FaAngleLeft />
                 </button>
@@ -437,8 +522,11 @@ export default function Dashboard() {
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full transition-colors ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
+                  style={{
+                    color: "var(--cor-fonte)",
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)"
+                  }}
                 >
                   <FaAngleRight />
                 </button>
@@ -446,7 +534,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        </div>
       </div>
+    </div>
   );
 }

@@ -42,6 +42,31 @@ export default function Clientes() {
   const [estadoCaracteres, setEstadoCaracteres] = useState(0);
   const [cepCaracteres, setCepCaracteres] = useState(0);
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -155,20 +180,6 @@ export default function Clientes() {
       const temaSalvo = localStorage.getItem("modoDark");
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
-
-      const root = document.documentElement;
-
-      if (ativado) {
-        root.style.setProperty("--cor-fundo", "#20252B");
-        root.style.setProperty("--cor-fonte", "#FFFFFF");
-        root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-        root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-      } else {
-        root.style.setProperty("--cor-fundo", "#FFFFFF");
-        root.style.setProperty("--cor-fonte", "#000000");
-        root.style.setProperty("--cor-subtitulo", "#4B5563");
-        root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      }
 
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
@@ -393,22 +404,22 @@ export default function Clientes() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg flex items-center gap-3"
-            style={{
-              backgroundColor: modoDark ? "#1E3A8A" : "#BFDBFE",
-              color: modoDark ? "#FFFFFF" : "#1E3A8A"
-            }}>
-            <FaLock className="text-lg md:text-xl" />
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+            backgroundColor: temaAtual.primario + "20",
+            color: temaAtual.texto,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <FaLock className="text-xl" />
             <div>
-              <p className="font-bold text-sm md:text-base">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p className="text-xs md:text-sm">{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
             </div>
           </div>
         )}
@@ -418,43 +429,45 @@ export default function Clientes() {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("buscar")}
-                className="outline-none font-mono text-sm bg-transparent"
+                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
+                style={{
+                  color: temaAtual.texto
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -465,11 +478,11 @@ export default function Clientes() {
           {podeEditar && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-4 md:px-6 py-1 md:py-2 border-2 rounded-lg transition font-mono text-sm sm:w-auto"
+              className="px-6 py-2 border-2 rounded-lg transition cursor-pointer font-mono text-sm"
               style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                color: modoDark ? "#FFFFFF" : "#00332C",
+                backgroundColor: temaAtual.primario,
+                borderColor: temaAtual.primario,
+                color: "#FFFFFF",
               }}
             >
               {t("novoCliente")}
@@ -480,24 +493,24 @@ export default function Clientes() {
         <div
           className="border rounded-xl shadow"
           style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000",
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
           }}
         >
           {!empresaId || clientesDaEmpresa.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {t("nenhumClienteEncontrado")}
             </div>
           ) : clientesFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {t("nenhumClienteEncontradoBusca")}
             </div>
           ) : (
             <>
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4 text-center">{t("nome")}</th>
                       <th className="py-3 px-4 text-center">{t("email")}</th>
                       <th className="py-3 px-4 text-center">{t("telefone")}</th>
@@ -510,8 +523,24 @@ export default function Clientes() {
                     {clientesAtuais.map((cliente: ClienteI) => (
                       <tr
                         key={cliente.id}
-                        className={`cursor-pointer border-b transition ${modoDark ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                          }`}
+                        className="border-b transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.hover;
+                          e.currentTarget.style.transform = "translateY(-2px)";
+                          e.currentTarget.style.boxShadow = modoDark
+                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.card;
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
                       >
                         <td
                           onClick={() => {
@@ -569,7 +598,7 @@ export default function Clientes() {
                             onClick={() => handleEntrarContato(cliente)}
                             color="#25D366"
                             size={32}
-                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl"
+                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl transition hover:scale-110"
                           />
                         </td>
                       </tr>
@@ -582,34 +611,56 @@ export default function Clientes() {
                 {clientesAtuais.map((cliente) => (
                   <div
                     key={cliente.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all cursor-pointer"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.hover;
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = modoDark
+                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.card;
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                    onClick={() => toggleExpandirCliente(cliente.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold truncate" style={{ color: "var(--cor-fonte)" }}>
+                          <span className="font-semibold truncate" style={{ color: temaAtual.texto }}>
                             {cliente.nome}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                        <div className="flex items-center gap-2 text-xs" style={{ color: temaAtual.placeholder }}>
                           <span>{formatarData(cliente.createdAt)}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleEntrarContato(cliente)}
-                          className="text-green-500 hover:text-green-700 p-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEntrarContato(cliente);
+                          }}
+                          className="text-green-500 hover:text-green-300 p-1 transition"
                         >
                           <FaPhoneAlt />
                         </button>
 
                         <button
-                          onClick={() => toggleExpandirCliente(cliente.id)}
-                          className="text-gray-500 hover:text-gray-700 p-1"
-                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpandirCliente(cliente.id);
+                          }}
+                          className="p-1 transition"
+                          style={{ color: temaAtual.primario }}
                         >
                           {clienteExpandido === cliente.id ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
@@ -619,9 +670,9 @@ export default function Clientes() {
                     <div
                       className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${clienteExpandido === cliente.id ? "max-h-96" : "max-h-0"
                         }`}
-                      style={{ color: "var(--cor-fonte)" }}
+                      style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex">
                           <span className="font-semibold min-w-[80px]">{t("email")}:</span>
                           <span>{cliente.email || "-"}</span>
@@ -641,28 +692,30 @@ export default function Clientes() {
                         <div className="flex justify-end gap-2 pt-2">
                           {podeEditar ? (
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setModalVisualizar(cliente);
                                 setForm(cliente);
                               }}
-                              className="flex items-center gap-1 px-3 py-1 rounded text-sm"
+                              className="flex items-center gap-1 px-3 py-1 rounded text-sm transition"
                               style={{
-                                backgroundColor: modoDark ? "#1a25359f" : "#ececec",
-                                color: modoDark ? "#FFFFFF" : "#000000",
+                                backgroundColor: temaAtual.primario,
+                                color: "#FFFFFF",
                               }}
                             >
                               <FaEdit /> {t("editar")}
                             </button>
                           ) : (
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setModalVisualizar(cliente);
                                 setForm(cliente);
                               }}
-                              className="flex items-center gap-1 px-3 py-1 rounded text-sm"
+                              className="flex items-center gap-1 px-3 py-1 rounded text-sm transition"
                               style={{
-                                backgroundColor: modoDark ? "#1a25359f" : "#ececec",
-                                color: modoDark ? "#FFFFFF" : "#000000",
+                                backgroundColor: temaAtual.primario,
+                                color: "#FFFFFF",
                               }}
                             >
                               <FaEye /> {t("visualizar")}
@@ -680,215 +733,216 @@ export default function Clientes() {
       </div>
 
       {(modalAberto || modalVisualizar) && (
-  <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-    <div
-      className="p-3 md:p-4 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto bg-opacity-90"
-      style={{
-        backgroundColor: "var(--cor-fundo-bloco)",
-        color: "var(--cor-fonte)",
-      }}
-    >
-      <h2 className="text-lg md:text-xl font-bold mb-3">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
-
-      <div className="space-y-2">
-        <div>
-          <label className="block mb-1 text-xs md:text-sm">{t("nome")}</label>
-          <input
-            placeholder={t("nome")}
-            value={form.nome || ""}
-            onChange={handleNomeChange}
-            className="w-full rounded p-2 text-sm bg-transparent border"
-            disabled={Boolean(!podeEditar && modalVisualizar)}
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div
+            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
-            }}
-            maxLength={20}
-          />
-          <div className="text-xs text-right mt-1" style={{ color: nomeCaracteres === 20 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-            {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite"}
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-xs md:text-sm">{t("email")}</label>
-          <input
-            placeholder={t("email")}
-            value={form.email || ""}
-            onChange={handleEmailChange}
-            className="w-full rounded p-2 text-sm bg-transparent border"
-            disabled={Boolean(!podeEditar && modalVisualizar)}
-            style={{
-              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
-            }}
-            maxLength={45}
-          />
-          <div className="text-xs text-right mt-1" style={{ color: emailCaracteres === 45 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-            {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite"}
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-xs md:text-sm">{t("telefone")}</label>
-          <input
-            placeholder={t("telefone")}
-            value={form.telefone || ""}
-            onChange={handleTelefoneChange}
-            className="w-full rounded p-2 text-sm bg-transparent border"
-            disabled={Boolean(!podeEditar && modalVisualizar)}
-            style={{
-              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
-            }}
-            maxLength={17}
-          />
-          <div className="text-xs text-right mt-1" style={{ color: telefoneCaracteres === 17 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-            {telefoneCaracteres}/17 {telefoneCaracteres === 17 && " - Limite"}
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-xs md:text-sm">{t("endereco")}</label>
-          <input
-            placeholder={t("endereco")}
-            value={form.endereco || ""}
-            onChange={handleEnderecoChange}
-            className="w-full rounded p-2 text-sm bg-transparent border"
-            disabled={Boolean(!podeEditar && modalVisualizar)}
-            style={{
-              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
-            }}
-            maxLength={50}
-          />
-          <div className="text-xs text-right mt-1" style={{ color: enderecoCaracteres === 50 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-            {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite"}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block mb-1 text-xs md:text-sm">{t("cidade")}</label>
-            <input
-              placeholder={t("cidade")}
-              value={form.cidade || ""}
-              onChange={handleCidadeChange}
-              className="w-full rounded p-2 text-sm bg-transparent border"
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000",
-                borderColor: modoDark ? "#FFFFFF" : "#000000"
-              }}
-              maxLength={20}
-            />
-            <div className="text-xs text-right mt-1" style={{ color: cidadeCaracteres === 20 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-              {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite"}
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-1 text-xs md:text-sm">{t("estado")}</label>
-            <input
-              placeholder={t("estado")}
-              value={form.estado || ""}
-              onChange={handleEstadoChange}
-              className="w-full rounded p-2 text-sm bg-transparent border"
-              disabled={Boolean(!podeEditar && modalVisualizar)}
-              style={{
-                backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                color: modoDark ? "#FFFFFF" : "#000000",
-                borderColor: modoDark ? "#FFFFFF" : "#000000"
-              }}
-              maxLength={2}
-            />
-            <div className="text-xs text-right mt-1" style={{ color: estadoCaracteres === 2 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-              {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite"}
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-xs md:text-sm">{t("cep")}</label>
-          <input
-            placeholder={t("cep")}
-            value={form.cep || ""}
-            onChange={handleCepChange}
-            className="w-full rounded p-2 text-sm bg-transparent border"
-            disabled={Boolean(!podeEditar && modalVisualizar)}
-            style={{
-              backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-              color: modoDark ? "#FFFFFF" : "#000000",
-              borderColor: modoDark ? "#FFFFFF" : "#000000"
-            }}
-            maxLength={10}
-          />
-          <div className="text-xs text-right mt-1" style={{ color: cepCaracteres === 10 ? "#ef4444" : "var(--cor-subtitulo)" }}>
-            {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite"}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-between mt-4 flex-wrap gap-2">
-        <button
-          onClick={() => {
-            setModalAberto(false);
-            setModalVisualizar(null);
-          }}
-          className="hover:underline cursor-pointer text-sm"
-          style={{ color: "var(--cor-fonte)" }}
-        >
-          {t("fechar")}
-        </button>
-        {modalVisualizar ? (
-          podeEditar && (
-            <>
-              <button
-                onClick={handleSalvarCliente}
-                className="px-3 py-1 rounded hover:bg-blue-700 cursor-pointer text-sm"
-                style={{
-                  backgroundColor: "green",
-                  color: "white",
-                  border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
-                }}
-              >
-                {t("salvar")}
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-3 py-1 rounded hover:bg-red-700 cursor-pointer text-sm"
-                style={{
-                  backgroundColor: "red",
-                  color: "white",
-                  border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`,
-                }}
-              >
-                {t("excluir")}
-              </button>
-            </>
-          )
-        ) : (
-          <button
-            onClick={handleAdicionarCliente}
-            className="px-3 py-1 rounded hover:bg-[#00443f] cursor-pointer text-sm"
-            style={{
-              backgroundColor: "green",
-              color: "white",
-              border: `1px solid ${modoDark ? "#FFFFFF" : "#000000"}`
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            {t("adicionarCliente")}
-          </button>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+            <h2 className="text-lg md:text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block mb-1 text-sm">{t("nome")}</label>
+                <input
+                  placeholder={t("nome")}
+                  value={form.nome || ""}
+                  onChange={handleNomeChange}
+                  className="w-full rounded p-2 border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    borderColor: temaAtual.borda
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={20}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm">{t("email")}</label>
+                <input
+                  placeholder={t("email")}
+                  value={form.email || ""}
+                  onChange={handleEmailChange}
+                  className="w-full rounded p-2 border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    borderColor: temaAtual.borda
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={45}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm">{t("telefone")}</label>
+                <input
+                  placeholder={t("telefone")}
+                  value={form.telefone || ""}
+                  onChange={handleTelefoneChange}
+                  className="w-full rounded p-2 border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    borderColor: temaAtual.borda
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={17}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {telefoneCaracteres}/17 {telefoneCaracteres === 17 && " - Limite"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm">{t("endereco")}</label>
+                <input
+                  placeholder={t("endereco")}
+                  value={form.endereco || ""}
+                  onChange={handleEnderecoChange}
+                  className="w-full rounded p-2 border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    borderColor: temaAtual.borda
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={50}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite"}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1 text-sm">{t("cidade")}</label>
+                  <input
+                    placeholder={t("cidade")}
+                    value={form.cidade || ""}
+                    onChange={handleCidadeChange}
+                    className="w-full rounded p-2 border"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      borderColor: temaAtual.borda
+                    }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    maxLength={20}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite"}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-sm">{t("estado")}</label>
+                  <input
+                    placeholder={t("estado")}
+                    value={form.estado || ""}
+                    onChange={handleEstadoChange}
+                    className="w-full rounded p-2 border"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      borderColor: temaAtual.borda
+                    }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    maxLength={2}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite"}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 text-sm">{t("cep")}</label>
+                <input
+                  placeholder={t("cep")}
+                  value={form.cep || ""}
+                  onChange={handleCepChange}
+                  className="w-full rounded p-2 border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    borderColor: temaAtual.borda
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={10}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite"}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between mt-6 flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setModalAberto(false);
+                  setModalVisualizar(null);
+                }}
+                className="hover:underline cursor-pointer text-sm px-3 py-2 rounded transition"
+                style={{
+                  color: temaAtual.texto,
+                  backgroundColor: temaAtual.hover,
+                }}
+              >
+                {t("fechar")}
+              </button>
+              {modalVisualizar ? (
+                podeEditar && (
+                  <>
+                    <button
+                      onClick={handleSalvarCliente}
+                      className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
+                      style={{
+                        backgroundColor: "#10B981",
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      {t("salvar")}
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
+                      style={{
+                        backgroundColor: "#EF4444",
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      {t("excluir")}
+                    </button>
+                  </>
+                )
+              ) : (
+                <button
+                  onClick={handleAdicionarCliente}
+                  className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
+                  style={{
+                    backgroundColor: "#10B981",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {t("adicionarCliente")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

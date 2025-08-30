@@ -1,0 +1,48 @@
+{
+    "titulo": "Data Export",
+    "abas": {
+      "exportar": "Export Data",
+      "historico": "History"
+    },
+    "alerta": {
+      "titulo": "Company Not Activated",
+      "mensagem": "You need to activate your company to export data.",
+      "botao": "Activate Now"
+    },
+    "exportacaoSucesso": "Export completed successfully!",
+    "erroExportacao": "Error during export",
+    "erroTitulo": "Error!",
+    "erroGenerico": "Could not export data.",
+    "desconhecido": "Unknown",
+    "periodoNaoEspecificado": "Period not specified",
+    "empresaNaoAtivada": {
+      "titulo": "Company Not Activated",
+      "mensagem": "Activate your company to use data export"
+    },
+    "filtros": {
+      "titulo": "Filters",
+      "dataInicial": "Start Date",
+      "dataFinal": "End Date"
+    },
+    "entidades": {
+      "produtos": "Products",
+      "vendas": "Sales",
+      "clientes": "Clients",
+      "fornecedores": "Suppliers",
+      "usuarios": "Users"
+    },
+    "botaoExportar": "Export Excel",
+    "historico": {
+      "titulo": "Export History",
+      "carregando": "Loading history...",
+      "nenhumaExportacao": "No exports performed",
+      "mostrando": "Showing {{inicio}}-{{fim}} of {{total}} exports",
+      "exportacaoDe": "Export of {{entidade}}",
+      "detalhes": {
+        "tipoDados": "Data Type",
+        "exportadoPor": "Exported by",
+        "periodo": "Period",
+        "dataExportacao": "Export Date"
+      }
+    }
+  }

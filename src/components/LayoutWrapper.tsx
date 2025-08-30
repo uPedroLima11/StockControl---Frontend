@@ -39,7 +39,7 @@ export default function LayoutWrapper({
     const root = document.documentElement;
     if (ativado) {
       root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
+      root.style.setProperty("--cor-fundo", "#0A1929");
     } else {
       root.classList.remove("dark");
       root.style.setProperty("--cor-fundo", "#ffffff");
@@ -72,7 +72,7 @@ export default function LayoutWrapper({
       <Sidebar />
       <main
         className="flex-1 overflow-y-auto max-h-screen bg-white"
-        style={{ backgroundColor: modoDark ? "#20252B" : "#ffffff" }}
+        style={{ backgroundColor: modoDark ? "#0A1929" : "#ffffff" }}
       >
         {children}
       </main>

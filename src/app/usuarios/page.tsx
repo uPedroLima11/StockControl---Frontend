@@ -28,6 +28,31 @@ export default function Usuarios() {
   const usuariosPorPagina = 10;
   const { t } = useTranslation("usuarios");
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   const translateRole = (role: string) => {
     return t(`roles.${role}`, { defaultValue: role });
   };
@@ -36,23 +61,7 @@ export default function Usuarios() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-    aplicarTema(ativo);
   }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-fonte", "#FFFFFF");
-      root.style.setProperty("--cor-subtitulo", "#A3A3A3");
-      root.style.setProperty("--cor-fundo-bloco", "#1a25359f");
-    } else {
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-fonte", "#000000");
-      root.style.setProperty("--cor-subtitulo", "#4B5563");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-    }
-  };
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -107,7 +116,7 @@ export default function Usuarios() {
       buscaUsuarios(usuarioValor);
       fetchDados(usuarioValor);
     }
-  }, []);
+  }, [t, logar]);
 
   const usuariosFiltrados = usuarios.filter((usuario) =>
     usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -315,24 +324,24 @@ export default function Usuarios() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p style={{ color: "var(--cor-fonte)" }}>{t("carregando")}</p>
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: temaAtual.texto }}>{t("carregando")}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <p className="text-red-400" style={{ color: "var(--cor-fonte)" }}>{t("erro")}: {error}</p>
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: "#EF4444" }}>{t("erro")}: {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: "var(--cor-fundo)" }}>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: "var(--cor-fonte)" }}>
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
@@ -341,43 +350,45 @@ export default function Usuarios() {
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-                backgroundColor: "var(--cor-fundo-bloco)",
-                borderColor: modoDark ? "#FFFFFF" : "#000000",
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
                 type="text"
                 placeholder={t("buscarUsuario")}
-                className="outline-none font-mono text-sm bg-transparent"
+                className="outline-none font-mono placeholder-gray-400 text-sm bg-transparent"
+                style={{
+                  color: temaAtual.texto
+                }}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPaginaAtual(1);
                 }}
-                style={{ color: "var(--cor-fonte)" }}
               />
-              <FaSearch className="ml-2" style={{ color: modoDark ? "#FBBF24" : "#00332C" }} />
+              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => mudarPagina(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleLeft />
                 </button>
 
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
                   {paginaAtual}/{totalPaginas}
                 </span>
 
                 <button
                   onClick={() => mudarPagina(paginaAtual + 1)}
                   disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                  style={{ color: "var(--cor-fonte)" }}
+                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                  style={{ color: temaAtual.texto }}
                 >
                   <FaAngleRight />
                 </button>
@@ -388,32 +399,24 @@ export default function Usuarios() {
           {usuarioLogado?.empresaId && (
             <div className="flex gap-2 w-full sm:w-auto sm:flex-row items-center sm:items-stretch justify-center sm:justify-start">
               <button
-                className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
+                className="px-4 py-2 cursor-pointer rounded-lg transition font-mono text-sm flex items-center gap-2"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                  borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                  color: modoDark ? "#FFFFFF" : "#00332C",
-                  border: "1px solid"
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
                 }}
                 onClick={() => setShowModalConvite(true)}
               >
-                <div className="flex items-center justify-center gap-1">
-                  <FaUserPlus /> {t("convidarUsuario")}
-                </div>
+                <FaUserPlus /> {t("convidarUsuario")}
               </button>
               <button
-                className="px-3 md:px-4 py-1 md:py-2 rounded-lg transition font-mono text-sm"
+                className="px-4 py-2 cursor-pointer rounded-lg transition font-mono text-sm flex items-center gap-2"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#FFFFFF",
-                  borderColor: modoDark ? "#FFFFFF" : "#00332C",
-                  color: modoDark ? "#FFFFFF" : "#00332C",
-                  border: "1px solid"
+                  backgroundColor: temaAtual.primario,
+                  color: "#FFFFFF",
                 }}
                 onClick={() => setShowModalMensagem(true)}
               >
-                <div className="flex items-center justify-center gap-1">
-                  <FaEnvelope /> {t("enviarMensagem")}
-                </div>
+                <FaEnvelope /> {t("enviarMensagem")}
               </button>
             </div>
           )}
@@ -422,20 +425,20 @@ export default function Usuarios() {
         <div
           className="border rounded-xl shadow"
           style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            borderColor: modoDark ? "#FFFFFF" : "#000000",
+            backgroundColor: temaAtual.card,
+            borderColor: temaAtual.borda,
           }}
         >
           {usuarios.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: "var(--cor-fonte)" }}>
+            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
               {usuarioLogado?.empresaId ? t("nenhumUsuario") : t("nenhumaEmpresa")}
             </div>
           ) : (
             <>
               <div className="hidden md:block">
                 <table className="w-full text-sm font-mono">
-                  <thead className="border-b">
-                    <tr style={{ color: "var(--cor-fonte)" }}>
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4 text-left">{t("nomeUsuario")}</th>
                       <th className="py-3 px-4 text-left">{t("funcao")}</th>
                       <th className="py-3 px-4 text-left">{t("criadoEm")}</th>
@@ -445,7 +448,27 @@ export default function Usuarios() {
                   </thead>
                   <tbody>
                     {usuariosAtuais.map((usuario) => (
-                      <tr key={usuario.id} className="border-b">
+                      <tr
+                        key={usuario.id}
+                        className="border-b transition-all duration-200 cursor-pointer"
+                        style={{
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.hover;
+                          e.currentTarget.style.transform = "translateY(-2px)";
+                          e.currentTarget.style.boxShadow = modoDark
+                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.card;
+                          e.currentTarget.style.transform = "translateY(0)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                      >
                         <td className="py-3 px-4">{usuario.nome}</td>
                         <td className="py-3 px-4">{translateRole(usuario.tipo)}</td>
                         <td className="py-3 px-4">{formatarData(usuario.createdAt)}</td>
@@ -453,11 +476,12 @@ export default function Usuarios() {
                         <td className="py-3 px-4">
                           {podeEditar(usuario) && (
                             <FaCog
-                              className="cursor-pointer"
+                              className="cursor-pointer transition hover:rotate-90"
                               onClick={() => {
                                 setModalEditarUsuario(usuario);
                                 setNovoTipo(usuario.tipo);
                               }}
+                              style={{ color: temaAtual.primario }}
                             />
                           )}
                         </td>
@@ -471,24 +495,40 @@ export default function Usuarios() {
                 {usuariosAtuais.map((usuario) => (
                   <div
                     key={usuario.id}
-                    className={`border rounded-lg p-3 transition-all ${modoDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                      }`}
+                    className="border rounded-lg p-3 transition-all cursor-pointer"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.hover;
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = modoDark
+                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = temaAtual.card;
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                    onClick={() => toggleExpandirUsuario(usuario.id)}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200">
-                              <span className="text-lg">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: temaAtual.hover }}>
+                              <span className="text-lg" style={{ color: temaAtual.texto }}>
                                 {usuario.nome.charAt(0).toUpperCase()}
                               </span>
                             </div>
                           </div>
                           <div>
-                            <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
+                            <p className="font-semibold" style={{ color: temaAtual.texto }}>
                               {usuario.nome}
                             </p>
-                            <p className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            <p className="text-xs" style={{ color: temaAtual.placeholder }}>
                               {translateRole(usuario.tipo)}
                             </p>
                           </div>
@@ -498,17 +538,22 @@ export default function Usuarios() {
                       <div className="flex items-center gap-2">
                         {podeEditar(usuario) && (
                           <FaCog
-                            className="cursor-pointer"
-                            onClick={() => {
+                            className="cursor-pointer transition hover:rotate-90"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setModalEditarUsuario(usuario);
                               setNovoTipo(usuario.tipo);
                             }}
+                            style={{ color: temaAtual.primario }}
                           />
                         )}
                         <button
-                          onClick={() => toggleExpandirUsuario(usuario.id)}
-                          className="text-gray-500 hover:text-gray-700 p-1"
-                          style={{ color: modoDark ? "#a0aec0" : "#4a5568" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpandirUsuario(usuario.id);
+                          }}
+                          className="p-1 transition"
+                          style={{ color: temaAtual.primario }}
                         >
                           {usuarioExpandido === usuario.id ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
@@ -518,9 +563,9 @@ export default function Usuarios() {
                     <div
                       className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"
                         }`}
-                      style={{ color: "var(--cor-fonte)" }}
+                      style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t space-y-2" style={{ borderColor: modoDark ? "#374151" : "#e5e7eb" }}>
+                      <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex">
                           <span className="font-semibold min-w-[80px]">{t("email")}:</span>
                           <span className="truncate">{usuario.email}</span>
@@ -546,42 +591,44 @@ export default function Usuarios() {
       {showModalConvite && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
+            className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              color: "var(--cor-fonte)",
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.convidarUsuario")}</h2>
+            <h2 className="text-xl font-bold mb-4">{t("modal.convidarUsuario")}</h2>
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.emailUsuario")}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full rounded p-2 border"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               />
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-3 md:px-4 py-1 md:py-2 rounded text-sm"
+                className="px-4 py-2 rounded cursor-pointer transition"
                 style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.hover,
+                  color: temaAtual.texto,
                 }}
                 onClick={() => setShowModalConvite(false)}
               >
                 {t("modal.cancelar")}
               </button>
               <button
-                className={`px-3 md:px-4 py-1 md:py-2 rounded text-sm ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`px-4 py-2 rounded cursor-pointer transition ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
                 style={{
-                  backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
-                  color: modoDark ? "#000000" : "#FFFFFF"
+                  backgroundColor: "#10B981",
+                  color: "#FFFFFF",
                 }}
                 onClick={enviarConvite}
                 disabled={isEnviando}
@@ -596,34 +643,37 @@ export default function Usuarios() {
       {showModalMensagem && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
+            className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              color: "var(--cor-fonte)",
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.enviarMensagem")}</h2>
+            <h2 className="text-xl font-bold mb-4">{t("modal.enviarMensagem")}</h2>
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.de")}</label>
               <input
                 type="text"
                 value={usuarioLogado?.nome || ""}
                 readOnly
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full rounded p-2 border"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               />
             </div>
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.para")}</label>
               <select
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full cursor-pointer rounded p-2 border"
                 onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               >
                 <option value="">{t("modal.selecioneUsuario")}</option>
@@ -641,10 +691,11 @@ export default function Usuarios() {
                 placeholder={t("modal.tituloMensagem")}
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full rounded p-2 border"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               />
             </div>
@@ -654,29 +705,30 @@ export default function Usuarios() {
                 placeholder={t("modal.descricaoMensagem")}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full rounded p-2 border"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               />
             </div>
             <div className="flex justify-end gap-2">
               <button
-                className="px-3 md:px-4 py-1 md:py-2 rounded text-sm"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.hover,
+                  color: temaAtual.texto,
                 }}
                 onClick={() => setShowModalMensagem(false)}
               >
                 {t("modal.cancelar")}
               </button>
               <button
-                className={`px-3 md:px-4 py-1 md:py-2 rounded text-sm ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`px-4 py-2 rounded transition cursor-pointer ${isEnviando ? "opacity-50 cursor-not-allowed" : ""}`}
                 style={{
-                  backgroundColor: modoDark ? "#55D6BE" : "#013C3C",
-                  color: modoDark ? "#000000" : "#FFFFFF"
+                  backgroundColor: "#10B981",
+                  color: "#FFFFFF",
                 }}
                 onClick={enviarNotificacao}
                 disabled={isEnviando}
@@ -691,13 +743,14 @@ export default function Usuarios() {
       {modalEditarUsuario && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md mx-2"
+            className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              color: "var(--cor-fonte)",
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
             }}
           >
-            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{t("modal.editarUsuario")}</h2>
+            <h2 className="text-xl font-bold mb-4">{t("modal.editarUsuario")}</h2>
             <p className="mb-3">{t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong></p>
 
             <div className="mb-3">
@@ -705,10 +758,11 @@ export default function Usuarios() {
               <select
                 value={novoTipo}
                 onChange={(e) => setNovoTipo(e.target.value)}
-                className={`${inputClass} bg-transparent border ${modoDark ? "border-white" : "border-gray-300"}`}
+                className="w-full rounded p-2 border"
                 style={{
-                  backgroundColor: modoDark ? "#1a25359f" : "#F3F4F6",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: temaAtual.borda
                 }}
               >
                 <option value="FUNCIONARIO">{t("modal.funcionario")}</option>
@@ -717,21 +771,22 @@ export default function Usuarios() {
               </select>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
               <button
-                className="px-3 py-1.5 rounded text-sm"
+                className="px-4 py-2 rounded transition"
                 style={{
-                  backgroundColor: modoDark ? "#374151" : "#D1D5DB",
-                  color: modoDark ? "#FFFFFF" : "#000000"
+                  backgroundColor: temaAtual.hover,
+                  color: temaAtual.texto,
                 }}
                 onClick={() => setModalEditarUsuario(null)}
               >
                 {t("modal.cancelar")}
               </button>
               <button
-                className="px-3 py-1.5 rounded text-sm text-white"
+                className="px-4 py-2 rounded transition"
                 style={{
-                  backgroundColor: modoDark ? "#013C3C" : "#55D6BE",
+                  backgroundColor: "#10B981",
+                  color: "#FFFFFF",
                 }}
                 onClick={async () => {
                   if (!usuarioLogado || !modalEditarUsuario) return;
@@ -770,9 +825,10 @@ export default function Usuarios() {
                 {t("modal.salvarCargo")}
               </button>
               <button
-                className="px-3 py-1.5 rounded text-sm text-white"
+                className="px-4 py-2 rounded transition"
                 style={{
-                  backgroundColor: "#ee1010",
+                  backgroundColor: "#EF4444",
+                  color: "#FFFFFF",
                 }}
                 onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
               >
@@ -785,5 +841,3 @@ export default function Usuarios() {
     </div>
   );
 }
-
-const inputClass = "w-full rounded p-2 mb-3 text-sm md:text-base";

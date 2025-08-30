@@ -19,41 +19,40 @@ export default function AtivacaoPage() {
   const router = useRouter();
   const { t } = useTranslation("ativacao");
 
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976",
+      sucesso: "#10B981",
+      erro: "#EF4444"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF",
+      sucesso: "#10B981",
+      erro: "#EF4444"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-    aplicarTema(ativo);
   }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#20252B");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
-      root.style.setProperty("--cor-fundo-bloco", "#1F2937");
-      root.style.setProperty("--cor-borda", "#374151");
-      root.style.setProperty("--cor-cinza", "#A3A3A3");
-      root.style.setProperty("--cor-destaque", "#3B82F6");
-      root.style.setProperty("--cor-botao", "#3B82F6");
-      root.style.setProperty("--cor-botao-hover", "#2563EB");
-      document.body.style.backgroundColor = "#20252B";
-      document.body.style.color = "#FFFFFF";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#FFFFFF");
-      root.style.setProperty("--cor-texto", "#000000");
-      root.style.setProperty("--cor-fundo-bloco", "#ececec");
-      root.style.setProperty("--cor-borda", "#E5E7EB");
-      root.style.setProperty("--cor-cinza", "#4B5563");
-      root.style.setProperty("--cor-destaque", "#3B82F6");
-      root.style.setProperty("--cor-botao", "#3B82F6");
-      root.style.setProperty("--cor-botao-hover", "#2563EB");
-      document.body.style.backgroundColor = "#FFFFFF";
-      document.body.style.color = "#000000";
-    }
-  };
 
   useEffect(() => {
     const checkUsuario = async () => {
@@ -141,23 +140,33 @@ export default function AtivacaoPage() {
 
   if (tipoUsuario && tipoUsuario !== "PROPRIETARIO") {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <div className="p-8 rounded-lg shadow-lg max-w-md w-full text-center" style={{
-          backgroundColor: "var(--cor-fundo-bloco)",
-          border: "1px solid var(--cor-borda)",
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+        <div className="w-full max-w-md p-6 rounded-lg text-center" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`,
         }}>
           <div className="flex justify-center mb-4">
-            <FaLock className="text-red-500 text-4xl" />
+            <FaLock className="text-4xl" style={{ color: temaAtual.erro }} />
           </div>
-          <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--cor-texto)" }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: temaAtual.texto }}>
             {t('acessoRestrito')}
           </h2>
-          <p className="mb-6" style={{ color: "var(--cor-cinza)" }}>
+          <p className="mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
             {t('apenasProprietarios')}
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
+            className="w-full px-4 py-2 rounded-lg transition font-medium"
+            style={{
+              backgroundColor: temaAtual.primario,
+              color: "#FFFFFF",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.9";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
           >
             {t('voltarDashboard')}
           </button>
@@ -168,29 +177,36 @@ export default function AtivacaoPage() {
 
   if (empresaAtivada && tipoUsuario === "PROPRIETARIO") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--cor-fundo)" }}>
-        <div
-          className="p-8 rounded-lg shadow-lg max-w-md w-full relative"
-          style={{
-            backgroundColor: "var(--cor-fundo-bloco)",
-            border: "1px solid var(--cor-borda)",
-          }}
-        >
-          <div className="flex justify-center mb-6">
-            <FaCheckCircle className="text-green-500 text-5xl" />
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+        <div className="w-full max-w-md p-6 rounded-lg text-center" style={{
+          backgroundColor: temaAtual.card,
+          border: `1px solid ${temaAtual.borda}`,
+        }}>
+          <div className="flex justify-center mb-4">
+            <FaCheckCircle className="text-4xl" style={{ color: temaAtual.sucesso }} />
           </div>
 
-          <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: temaAtual.texto }}>
             {t('empresaJaAtivada')}
           </h2>
 
-          <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
+          <p className="mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
             {t('empresaJaAtivadaMensagem')}
           </p>
 
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
+            className="w-full px-4 py-2 cursor-pointer rounded-lg transition font-medium"
+            style={{
+              backgroundColor: temaAtual.primario,
+              color: "#FFFFFF",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.9";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
           >
             {t('voltarDashboard')}
           </button>
@@ -200,83 +216,110 @@ export default function AtivacaoPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div
-      className="p-8 rounded-lg shadow-lg max-w-md w-full relative"
-      style={{
-        backgroundColor: "var(--cor-fundo-bloco)",
-        border: "1px solid var(--cor-borda)",
-      }}
-      >
-      <div className="flex justify-center mb-6">
-        <FaLock className="text-blue-500 text-5xl" />
-      </div>
-
-      <h2 className="text-2xl font-bold text-center mb-2" style={{ color: "var(--cor-texto)" }}>
-        {t('ativacaoTitulo')}
-      </h2>
-
-      <p className="text-center mb-6" style={{ color: "var(--cor-cinza)" }}>
-        {t('ativacaoDescricao')}
-      </p>
-
-      <form onSubmit={handleAtivar} className="space-y-6">
-        <div>
-        <label htmlFor="codigo" className="block text-sm font-medium mb-1" style={{ color: "var(--cor-texto)" }}>
-          {t('codigoAtivacao')}
-        </label>
-        <input
-          id="codigo"
-          type="text"
-          value={codigo}
-          onChange={(e) => setCodigo(e.target.value)}
-          className="w-full px-4 py-2 rounded-md shadow-sm focus:ring-2 focus:ring-[var(--cor-botao)] focus:border-[var(--cor-botao)] transition-colors"
-          style={{
-          backgroundColor: modoDark ? "#1F2937" : "#FFFFFF",
-          border: "1px solid var(--cor-borda)",
-          color: "var(--cor-texto)",
-          }}
-          placeholder={t('codigoAtivacaoPlaceholder')}
-          required
-          disabled={loading}
-        />
-        <p className="mt-1 text-xs text-center" style={{ color: "var(--cor-cinza)" }}>
-          {t('codigoAtivacaoAjuda')}
-        </p>
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
+      <div className="w-full max-w-md p-6 rounded-lg" style={{
+        backgroundColor: temaAtual.card,
+        border: `1px solid ${temaAtual.borda}`,
+      }}>
+        <div className="flex justify-center mb-4">
+          <FaLock className="text-4xl" style={{ color: temaAtual.primario }} />
         </div>
 
-        <div>
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--cor-botao)] transition-colors ${
-          loading ? 'opacity-70 cursor-not-allowed' : 'bg-[var(--cor-botao)] hover:bg-[var(--cor-botao-hover)]'
-          }`}
-        >
-          {loading ? t('ativando') : t('ativarEmpresa')}
-        </button>
-        </div>
-      </form>
+        <h2 className="text-xl font-semibold text-center mb-4" style={{ color: temaAtual.texto }}>
+          {t('ativacaoTitulo')}
+        </h2>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm" style={{ color: "var(--cor-cinza)" }}>
-        {t('naoEfetuouPagamento')}
+        <p className="text-center mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
+          {t('ativacaoDescricao')}
         </p>
-        <Link 
-          href="https://wa.me/+5553981185633" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={`inline-flex items-center mt-2 transition-colors ${
-          modoDark 
-          ? 'text-green-500 hover:text-green-800' 
-          : 'text-green-800 hover:text-green-500'
-          }`}
-        >
-          <FaShoppingCart className="mr-2" />
-          <span className="font-medium">{t('cliqueAqui')}</span>
-          <span className="ml-1">{t('paraComprarAtivacao')}</span>
-        </Link>
-      </div>
+
+        <form onSubmit={handleAtivar} className="space-y-4">
+          <div>
+            <label htmlFor="codigo" className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
+              {t('codigoAtivacao')}
+            </label>
+            <input
+              id="codigo"
+              type="text"
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+              className="w-full px-3 py-2 rounded border text-sm"
+              style={{
+                backgroundColor: temaAtual.card,
+                color: temaAtual.texto,
+                border: `1px solid ${temaAtual.borda}`
+              }}
+              placeholder={t('codigoAtivacaoPlaceholder')}
+              required
+              disabled={loading}
+              onFocus={(e) => {
+                e.target.style.borderColor = temaAtual.primario;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = temaAtual.borda;
+              }}
+            />
+            <p className="mt-1 text-xs text-center" style={{ color: temaAtual.placeholder }}>
+              {t('codigoAtivacaoAjuda')}
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-2 rounded-lg cursor-pointer transition font-medium flex items-center justify-center"
+              style={{
+                backgroundColor: loading ? temaAtual.placeholder : temaAtual.primario,
+                color: "#FFFFFF",
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.opacity = "0.9";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.opacity = "1";
+                }
+              }}
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  {t('ativando')}
+                </div>
+              ) : (
+                t('ativarEmpresa')
+              )}
+            </button>
+          </div>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm mb-2" style={{ color: temaAtual.placeholder }}>
+            {t('naoEfetuouPagamento')}
+          </p>
+          <Link 
+            href="https://wa.me/+5553981185633" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center text-sm transition"
+            style={{
+              color: temaAtual.primario,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.8";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+          >
+            <FaShoppingCart className="mr-2" />
+            <span className="font-medium">{t('cliqueAqui')}</span>
+            <span className="ml-1">{t('paraComprarAtivacao')}</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
