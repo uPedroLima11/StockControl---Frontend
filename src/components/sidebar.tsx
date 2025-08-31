@@ -61,11 +61,7 @@ export default function Sidebar() {
     }
   }, []);
 
-  const resetarNotificacoesTocadas = useCallback((idUsuario: string) => {
-    idsNotificacoesTocadasRef.current = new Set();
-    localStorage.setItem(`idsNotificacoesTocadas_${idUsuario}`, JSON.stringify([]));
-    console.log('Estado de notificações tocadas resetado');
-  }, []);
+ 
 
   const verificarEstoque = async () => {
     try {
@@ -122,51 +118,58 @@ export default function Sidebar() {
   }, [audioInicializado]);
 
   const verificarNotificacoes = useCallback(async (idUsuario: string) => {
-    try {
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-      const notificacoes: NotificacaoI[] = await resposta.json();
+  try {
+    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+    const notificacoes: NotificacaoI[] = await resposta.json();
 
-      const notificacoesFiltradas = notificacoes.filter(n => {
-        if (!n.empresaId) {
-          return n.usuarioId === idUsuario;
-        }
-        return true;
+
+    const notificacoesFiltradas = notificacoes.filter(n => {
+      if (!n.empresaId) {
+        return n.usuarioId === idUsuario;
+      }
+      return true;
+    });
+
+    const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
+      if (n.empresaId) {
+        return !n.NotificacaoLida || n.NotificacaoLida.length === 0 || 
+               !n.NotificacaoLida.some(nl => nl.usuarioId === idUsuario);
+      }
+      return !n.lida;
+    });
+
+
+    notificacoesNaoLidasRef.current = notificacoesNaoLidas;
+    setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
+
+    const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${idUsuario}`);
+    const idsTocados = idsSalvos ? new Set<string>(JSON.parse(idsSalvos) as string[]) : new Set<string>();
+
+
+    const novasNotificacoes = notificacoesNaoLidas.filter(notificacao =>
+      !idsTocados.has(notificacao.id)
+    );
+
+
+    if (novasNotificacoes.length > 0 && !mostrarNotificacoes) {
+      
+      novasNotificacoes.forEach(notificacao => {
+        idsTocados.add(notificacao.id);
       });
-
-      const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
-        if (n.empresaId) {
-          return n.NotificacaoLida && n.NotificacaoLida.length === 0;
-        }
-        return !n.lida;
-      });
-
-      notificacoesNaoLidasRef.current = notificacoesNaoLidas;
-      setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
-
-      const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${idUsuario}`);
-      const idsTocados = idsSalvos ? new Set<string>(JSON.parse(idsSalvos) as string[]) : new Set<string>();
-
-      const novasNotificacoes = notificacoesNaoLidas.filter(notificacao =>
-        !idsTocados.has(notificacao.id)
+      
+      localStorage.setItem(
+        `idsNotificacoesTocadas_${idUsuario}`,
+        JSON.stringify(Array.from(idsTocados))
       );
 
-      if (novasNotificacoes.length > 0 && !mostrarNotificacoes) {
-        const novaNotificacao = novasNotificacoes[0];
+      idsNotificacoesTocadasRef.current = idsTocados;
 
-        idsTocados.add(novaNotificacao.id);
-        localStorage.setItem(
-          `idsNotificacoesTocadas_${idUsuario}`,
-          JSON.stringify(Array.from(idsTocados))
-        );
-
-        idsNotificacoesTocadasRef.current = idsTocados;
-
-        await tocarSomNotificacao();
-      }
-    } catch (erro) {
-      console.error("Erro ao verificar notificações:", erro);
+      await tocarSomNotificacao();
     }
-  }, [mostrarNotificacoes, tocarSomNotificacao]);
+  } catch (erro) {
+    console.error("Erro ao verificar notificações:", erro);
+  }
+}, [mostrarNotificacoes, tocarSomNotificacao]);
 
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
