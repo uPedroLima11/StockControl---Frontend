@@ -758,7 +758,7 @@ export default function Usuarios() {
               <select
                 value={novoTipo}
                 onChange={(e) => setNovoTipo(e.target.value)}
-                className="w-full rounded p-2 border"
+                className="w-full rounded cursor-pointer p-2 border"
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
@@ -773,7 +773,7 @@ export default function Usuarios() {
 
             <div className="flex justify-between gap-2">
               <button
-                className="px-4 py-2 rounded transition"
+                className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
                   backgroundColor: temaAtual.hover,
                   color: temaAtual.texto,
@@ -783,7 +783,7 @@ export default function Usuarios() {
                 {t("modal.cancelar")}
               </button>
               <button
-                className="px-4 py-2 rounded transition"
+                className="px-4 cursor-pointer py-2 rounded transition"
                 style={{
                   backgroundColor: "#10B981",
                   color: "#FFFFFF",
@@ -825,7 +825,7 @@ export default function Usuarios() {
                 {t("modal.salvarCargo")}
               </button>
               <button
-                className="px-4 py-2 rounded transition"
+                className="px-4 cursor-pointer py-2 rounded transition"
                 style={{
                   backgroundColor: "#EF4444",
                   color: "#FFFFFF",
