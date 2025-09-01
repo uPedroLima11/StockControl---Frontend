@@ -46,7 +46,8 @@ export default function Usuarios() {
   const [permissoesPersonalizadas, setPermissoesPersonalizadas] = useState(false);
   const [usuariosGerenciáveis, setUsuariosGerenciáveis] = useState<Record<string, boolean>>({});
   const [temPermissaoVisualizar, setTemPermissaoVisualizar] = useState<boolean | null>(null);
-
+  const [temPermissaoExcluir, setTemPermissaoExcluir] = useState<boolean | null>(null);
+  const [usuariosExcluiveis, setUsuariosExcluiveis] = useState<Record<string, boolean>>({});
 
 
   const cores = {
@@ -100,6 +101,23 @@ export default function Usuarios() {
     }
   };
 
+  const verificarPermissaoExcluir = async () => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) {
+        setTemPermissaoExcluir(false);
+        return;
+      }
+
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const temPermissao = await usuarioTemPermissao(usuarioValor, "usuarios_excluir");
+      setTemPermissaoExcluir(temPermissao);
+    } catch (error) {
+      console.error("Erro ao verificar permissão de exclusão:", error);
+      setTemPermissaoExcluir(false);
+    }
+  };
+
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
@@ -122,6 +140,8 @@ export default function Usuarios() {
 
         const permissao = await usuarioTemPermissao(usuarioValor, "usuarios_visualizar");
         setTemPermissaoVisualizar(permissao);
+
+        await verificarPermissaoExcluir();
 
         if (!permissao) {
           setLoading(false);
@@ -206,19 +226,19 @@ export default function Usuarios() {
     );
   };
   const podeGerenciarPermissoesUsuario = async (targetUser: UsuarioI): Promise<boolean> => {
-  if (!usuarioLogado) return false;
+    if (!usuarioLogado) return false;
 
-  if (usuarioLogado.tipo === "PROPRIETARIO") return true;
+    if (usuarioLogado.tipo === "PROPRIETARIO") return true;
 
-  if (usuarioLogado.tipo === "ADMIN") {
-    if (targetUser.tipo === "PROPRIETARIO") return false;
-    
-    const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_gerenciar_permissoes");
-    return temPermissao && targetUser.tipo === "FUNCIONARIO";
-  }
+    if (usuarioLogado.tipo === "ADMIN") {
+      if (targetUser.tipo === "PROPRIETARIO") return false;
 
-  return false;
-};
+      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_gerenciar_permissoes");
+      return temPermissao && targetUser.tipo === "FUNCIONARIO";
+    }
+
+    return false;
+  };
 
   const salvarPermissoes = async () => {
     if (!modalPermissoes) return;
@@ -294,24 +314,6 @@ export default function Usuarios() {
     }
   };
 
-  useEffect(() => {
-    const carregarTodasPermissoes = async () => {
-      const editaveis: Record<string, boolean> = {};
-      const gerenciáveis: Record<string, boolean> = {};
-
-      for (const usuario of usuarios) {
-        editaveis[usuario.id] = await podeEditar(usuario);
-        gerenciáveis[usuario.id] = await podeGerenciarPermissoesUsuario(usuario);
-      }
-
-      setUsuariosEditaveis(editaveis);
-      setUsuariosGerenciáveis(gerenciáveis);
-    };
-
-    if (usuarios.length > 0 && usuarioLogado) {
-      carregarTodasPermissoes();
-    }
-  }, [usuarios, usuarioLogado]);
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -527,7 +529,6 @@ export default function Usuarios() {
 
   async function confirmarRemocaoUsuario(usuario: UsuarioI) {
     const podeExcluirUsuario = await podeExcluir(usuario);
-
     if (!podeExcluirUsuario) {
       Swal.fire({
         title: t("modal.permissaoNegada.titulo") || "Permissão Negada",
@@ -550,10 +551,19 @@ export default function Usuarios() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}`, {
+          const usuarioSalvo = localStorage.getItem("client_key");
+          if (!usuarioSalvo) {
+            Swal.fire(t("modal.erro.titulo"), t("modal.erro.usuarioNaoEncontrado"), "error");
+            return;
+          }
+
+          const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+          const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}/remover-empresa`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ empresaId: null, tipo: "FUNCIONARIO" }),
+            headers: {
+              "user-id": usuarioId || "" 
+            },
           });
 
           if (res.ok) {
@@ -563,18 +573,22 @@ export default function Usuarios() {
               "success"
             );
             setModalEditarUsuario(null);
-            window.location.reload();
-            setUsuarios((prev) =>
-              prev.map((u) =>
-                u.id === usuario.id ? { ...u, empresaId: null, tipo: "FUNCIONARIO" } : u
-              )
-            );
+            setUsuarios(prev => prev.filter(u => u.id !== usuario.id));
           } else {
-            Swal.fire(
-              t("modal.erro.titulo"),
-              t("modal.confirmacaoRemocao.erro"),
-              "error"
-            );
+            try {
+              const errorData = await res.json();
+              Swal.fire(
+                t("modal.erro.titulo"),
+                errorData.mensagem || t("modal.confirmacaoRemocao.erro"),
+                "error"
+              );
+            } catch {
+              Swal.fire(
+                t("modal.erro.titulo"),
+                t("modal.confirmacaoRemocao.erro"),
+                "error"
+              );
+            }
           }
         } catch (err) {
           console.error("Erro ao remover usuário:", err);
@@ -587,7 +601,6 @@ export default function Usuarios() {
       }
     });
   }
-
   const podeEditar = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
 
@@ -606,19 +619,17 @@ export default function Usuarios() {
 
   const podeExcluir = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
+    if (temPermissaoExcluir === false) return false;
 
     if (usuarioLogado.tipo === "PROPRIETARIO") return true;
 
     if (usuarioLogado.tipo === "ADMIN") {
       if (targetUser.tipo !== "FUNCIONARIO") return false;
-
-      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_excluir");
-      return temPermissao;
+      return temPermissaoExcluir === true;
     }
 
     return false;
   };
-
   const podeAlterarCargo = async (targetUser: UsuarioI, novoTipo: string): Promise<boolean> => {
     if (!usuarioLogado) return false;
 
@@ -640,18 +651,24 @@ export default function Usuarios() {
   const [usuariosEditaveis, setUsuariosEditaveis] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const carregarPermissoesEdicao = async () => {
+    const carregarTodasPermissoes = async () => {
       const editaveis: Record<string, boolean> = {};
+      const gerenciáveis: Record<string, boolean> = {};
+      const excluiveis: Record<string, boolean> = {};
 
       for (const usuario of usuarios) {
         editaveis[usuario.id] = await podeEditar(usuario);
+        gerenciáveis[usuario.id] = await podeGerenciarPermissoesUsuario(usuario);
+        excluiveis[usuario.id] = await podeExcluir(usuario);
       }
 
       setUsuariosEditaveis(editaveis);
+      setUsuariosGerenciáveis(gerenciáveis);
+      setUsuariosExcluiveis(excluiveis);
     };
 
     if (usuarios.length > 0 && usuarioLogado) {
-      carregarPermissoesEdicao();
+      carregarTodasPermissoes();
     }
   }, [usuarios, usuarioLogado]);
 
@@ -685,6 +702,13 @@ export default function Usuarios() {
     );
   }
 
+  if (temPermissaoExcluir === null || Object.keys(usuariosExcluiveis).length === 0) {
+    return (
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: temaAtual.texto }}>Carregando permissões...</p>
+      </div>
+    );
+  }
 
   if (temPermissaoVisualizar === false) {
     return (
@@ -1136,49 +1160,49 @@ export default function Usuarios() {
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.alterarCargo")}</label>
               <select
-              value={novoTipo}
-              onChange={(e) => setNovoTipo(e.target.value)}
-              className="w-full rounded cursor-pointer p-2 border text-sm"
-              style={{
-                backgroundColor: temaAtual.card,
-                color: temaAtual.texto,
-                borderColor: temaAtual.borda,
-                appearance: "none",
-                WebkitAppearance: "none",
-                MozAppearance: "none",
-              }}
-              >
-              <option
-                value="FUNCIONARIO"
-                style={{
-                backgroundColor: temaAtual.card,
-                color: temaAtual.texto,
-                }}
-              >
-                {t("modal.funcionario")}
-              </option>
-              {usuarioLogado?.tipo === "PROPRIETARIO" && (
-                <option
-                value="ADMIN"
+                value={novoTipo}
+                onChange={(e) => setNovoTipo(e.target.value)}
+                className="w-full rounded cursor-pointer p-2 border text-sm"
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
+                  borderColor: temaAtual.borda,
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
                 }}
-                >
-                {t("modal.admin")}
-                </option>
-              )}
-              {usuarioLogado?.tipo === "PROPRIETARIO" && (
+              >
                 <option
-                value="PROPRIETARIO"
-                style={{
-                  backgroundColor: temaAtual.card,
-                  color: temaAtual.texto,
-                }}
+                  value="FUNCIONARIO"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                  }}
                 >
-                {t("modal.proprietario")}
+                  {t("modal.funcionario")}
                 </option>
-              )}
+                {usuarioLogado?.tipo === "PROPRIETARIO" && (
+                  <option
+                    value="ADMIN"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                    }}
+                  >
+                    {t("modal.admin")}
+                  </option>
+                )}
+                {usuarioLogado?.tipo === "PROPRIETARIO" && (
+                  <option
+                    value="PROPRIETARIO"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                    }}
+                  >
+                    {t("modal.proprietario")}
+                  </option>
+                )}
               </select>
             </div>
 
@@ -1258,16 +1282,18 @@ export default function Usuarios() {
               >
                 {t("gerenciarPermissoes")}
               </button>
-              <button
-                className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
-                style={{
-                  backgroundColor: "#EF4444",
-                  color: "#FFFFFF",
-                }}
-                onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
-              >
-                {t("modal.remover")}
-              </button>
+              {usuariosExcluiveis[modalEditarUsuario.id] && (
+                <button
+                  className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
+                  style={{
+                    backgroundColor: "#EF4444",
+                    color: "#FFFFFF",
+                  }}
+                  onClick={() => confirmarRemocaoUsuario(modalEditarUsuario)}
+                >
+                  {t("modal.remover")}
+                </button>
+              )}
             </div>
           </div>
         </div>

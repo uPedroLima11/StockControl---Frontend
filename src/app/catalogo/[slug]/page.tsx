@@ -58,11 +58,9 @@ export default function CatalogoPublico({ params }: PageProps) {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_URL_API || 'http://localhost:3001';
         const url = `${apiUrl}/catalogo/${slug}`;
-        console.log('Buscando catálogo:', url);
 
         const res = await fetch(url);
 
-        console.log('Status:', res.status);
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -78,7 +76,6 @@ export default function CatalogoPublico({ params }: PageProps) {
         }
 
         const catalogoData = await res.json();
-        console.log('Dados recebidos:', catalogoData);
         setData(catalogoData);
       } catch (err) {
         console.error('Erro ao buscar catálogo:', err);

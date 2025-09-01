@@ -6,10 +6,14 @@
         "titulo": "Oops... algo deu errado! tente novamente",
         "mensagem": "Email já existente ou erro ao criar empresa."
     },
-"modal": {
-    "convite.Enviado.titulo": "Convite Enviado",
-    "convite.Enviado.texto": "Convite enviado com sucesso para o email fornecido."
-  },
+    "sucesso": {
+        "titulo": "Empresa criada com sucesso!",
+        "mensagem": "A empresa foi criada e adicionada ao sistema."
+    },
+    "modal": {
+        "convite.Enviado.titulo": "Convite Enviado",
+        "convite.Enviado.texto": "Convite enviado com sucesso para o email fornecido."
+    },
     "campos": {
         "nome": "Nome da empresa",
         "email": "Email da empresa",

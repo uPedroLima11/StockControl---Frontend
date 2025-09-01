@@ -6,6 +6,10 @@
     "titulo": "Create Company",
     "selecionarImagem": "Select Image",
     "botaoCriar": "Create Company",
+    "sucesso": {
+        "titulo": "Company created successfully!",
+        "mensagem": "The company has been created and added to the system."
+    },
     "erro": {
         "titulo": "Oops... something went wrong! Try again",
         "mensagem": "Email already exists or error creating company."
