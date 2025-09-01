@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight, FaLock, FaUnlock } from "react-icons/fa";
+import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
@@ -168,9 +168,9 @@ export default function Usuarios() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/permissoes`);
         if (response.ok) {
-          const dados = await response.json();
+          const dados: Record<string, PermissaoI[]> = await response.json();
           const todasPermissoes: PermissaoI[] = [];
-          Object.values(dados).forEach((categoria: any) => {
+          Object.values(dados).forEach((categoria: PermissaoI[]) => {
             todasPermissoes.push(...categoria);
           });
           setPermissoes(todasPermissoes);
@@ -655,23 +655,7 @@ export default function Usuarios() {
     }
   }, [usuarios, usuarioLogado]);
 
-  const podeEditarCargo = async (targetUser: UsuarioI, novoTipo: string): Promise<boolean> => {
-    if (!usuarioLogado) return false;
 
-    if (usuarioLogado.tipo === "PROPRIETARIO") {
-      return true;
-    }
-
-    if (usuarioLogado.tipo === "ADMIN") {
-      if (targetUser.tipo === "PROPRIETARIO") return false;
-      if (novoTipo === "PROPRIETARIO") return false;
-
-      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_editar");
-      return temPermissao;
-    }
-
-    return false;
-  };
   const toggleExpandirUsuario = (id: string) => {
     setUsuarioExpandido(usuarioExpandido === id ? null : id);
   };

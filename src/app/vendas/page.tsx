@@ -3,7 +3,7 @@
 import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
@@ -358,7 +358,6 @@ export default function Vendas() {
   const finalizarVenda = async () => {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
     const hasValidItems = carrinho.some(item => item.quantidade > 0);
 

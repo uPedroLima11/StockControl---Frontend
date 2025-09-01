@@ -344,23 +344,32 @@ export default function Fornecedores() {
         if (!usuarioSalvo) return;
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-
-      if (response.status === 201) {
-        Swal.fire({
-          text: t("mensagens.fornecedorAdicionado"),
-          icon: "success",
-          confirmButtonColor: "#013C3C",
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+          method: "POST",
+          body: formData,
+          headers: {
+            'user-id': usuarioValor
+          }
         });
-        setModalAberto(false);
-        window.location.reload();
-      } else {
+
+        if (response.status === 201) {
+          Swal.fire({
+            text: t("mensagens.fornecedorAdicionado"),
+            icon: "success",
+            confirmButtonColor: "#013C3C",
+          });
+          setModalAberto(false);
+          window.location.reload();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: t("mensagens.erro"),
+            text: t("mensagens.erroAdicionar"),
+            confirmButtonColor: "#013C3C",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao adicionar fornecedor:", error);
         Swal.fire({
           icon: "error",
           title: t("mensagens.erro"),
@@ -368,15 +377,6 @@ export default function Fornecedores() {
           confirmButtonColor: "#013C3C",
         });
       }
-    } catch (error) {
-      console.error("Erro ao adicionar fornecedor:", error);
-      Swal.fire({
-        icon: "error",
-        title: t("mensagens.erro"),
-        text: t("mensagens.erroAdicionar"),
-        confirmButtonColor: "#013C3C",
-      });
-    }
     });
   }
 
@@ -447,8 +447,9 @@ export default function Fornecedores() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
-      if (!modalVisualizar) return;
+      if (!fornecedor) return;
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
       if (!empresaAtivada) {
@@ -469,7 +470,7 @@ export default function Fornecedores() {
 
       if (result.isConfirmed) {
         try {
-          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedor.id}`, { // ← Use fornecedor.id
             method: "DELETE",
             headers: {
               'user-id': usuarioValor
