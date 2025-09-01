@@ -10,6 +10,7 @@ import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
 import { useTranslation } from "react-i18next";
+import { usuarioTemPermissao } from "@/utils/permissoes";
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -24,6 +25,8 @@ export default function Sidebar() {
   const [audioInicializado, setAudioInicializado] = useState(false);
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
   const idsNotificacoesTocadasRef = useRef<Set<string>>(new Set());
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
+
 
   const cores = {
     azulEscuro: "#0A1929",
@@ -61,7 +64,7 @@ export default function Sidebar() {
     }
   }, []);
 
- 
+
 
   const verificarEstoque = async () => {
     try {
@@ -118,58 +121,87 @@ export default function Sidebar() {
   }, [audioInicializado]);
 
   const verificarNotificacoes = useCallback(async (idUsuario: string) => {
-  try {
-    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-    const notificacoes: NotificacaoI[] = await resposta.json();
+    try {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
+      const notificacoes: NotificacaoI[] = await resposta.json();
 
 
-    const notificacoesFiltradas = notificacoes.filter(n => {
-      if (!n.empresaId) {
-        return n.usuarioId === idUsuario;
-      }
-      return true;
-    });
-
-    const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
-      if (n.empresaId) {
-        return !n.NotificacaoLida || n.NotificacaoLida.length === 0 || 
-               !n.NotificacaoLida.some(nl => nl.usuarioId === idUsuario);
-      }
-      return !n.lida;
-    });
-
-
-    notificacoesNaoLidasRef.current = notificacoesNaoLidas;
-    setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
-
-    const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${idUsuario}`);
-    const idsTocados = idsSalvos ? new Set<string>(JSON.parse(idsSalvos) as string[]) : new Set<string>();
-
-
-    const novasNotificacoes = notificacoesNaoLidas.filter(notificacao =>
-      !idsTocados.has(notificacao.id)
-    );
-
-
-    if (novasNotificacoes.length > 0 && !mostrarNotificacoes) {
-      
-      novasNotificacoes.forEach(notificacao => {
-        idsTocados.add(notificacao.id);
+      const notificacoesFiltradas = notificacoes.filter(n => {
+        if (!n.empresaId) {
+          return n.usuarioId === idUsuario;
+        }
+        return true;
       });
-      
-      localStorage.setItem(
-        `idsNotificacoesTocadas_${idUsuario}`,
-        JSON.stringify(Array.from(idsTocados))
+
+      const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
+        if (n.empresaId) {
+          return !n.NotificacaoLida || n.NotificacaoLida.length === 0 ||
+            !n.NotificacaoLida.some(nl => nl.usuarioId === idUsuario);
+        }
+        return !n.lida;
+      });
+
+
+      notificacoesNaoLidasRef.current = notificacoesNaoLidas;
+      setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
+
+      const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${idUsuario}`);
+      const idsTocados = idsSalvos ? new Set<string>(JSON.parse(idsSalvos) as string[]) : new Set<string>();
+
+
+      const novasNotificacoes = notificacoesNaoLidas.filter(notificacao =>
+        !idsTocados.has(notificacao.id)
       );
 
-      idsNotificacoesTocadasRef.current = idsTocados;
 
-      await tocarSomNotificacao();
+      if (novasNotificacoes.length > 0 && !mostrarNotificacoes) {
+
+        novasNotificacoes.forEach(notificacao => {
+          idsTocados.add(notificacao.id);
+        });
+
+        localStorage.setItem(
+          `idsNotificacoesTocadas_${idUsuario}`,
+          JSON.stringify(Array.from(idsTocados))
+        );
+
+        idsNotificacoesTocadasRef.current = idsTocados;
+
+        await tocarSomNotificacao();
+      }
+    } catch (erro) {
+      console.error("Erro ao verificar notificações:", erro);
     }
-  } catch (erro) {
-    console.error("Erro ao verificar notificações:", erro);
-  }
-}, [mostrarNotificacoes, tocarSomNotificacao]);
+  }, [mostrarNotificacoes, tocarSomNotificacao]);
+
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (usuarioSalvo) {
+        const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+        const permissoesParaVerificar = [
+          "usuarios_visualizar",
+          "produtos_visualizar",
+          "vendas_visualizar",
+          "clientes_visualizar",
+          "fornecedores_visualizar",
+          "exportar_dados"
+        ];
+
+        const permissoes: Record<string, boolean> = {};
+        for (const permissao of permissoesParaVerificar) {
+          const temPermissao = await usuarioTemPermissao(usuarioId, permissao);
+          permissoes[permissao] = temPermissao;
+        }
+
+        setPermissoesUsuario(permissoes);
+      }
+    };
+
+    carregarPermissoes();
+  }, []);
 
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -312,16 +344,33 @@ export default function Sidebar() {
             </button>
 
             <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} />
-            <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />
-            <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />
-            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
-            <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />
-            <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />
-            <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />
-            <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exportacoes")} cores={cores} />
-            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
+            {permissoesUsuario.logs_visualizar && (
+              <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />
+            )}
+            {permissoesUsuario.produtos_visualizar && (
+              <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />
+            )}
+            {permissoesUsuario.vendas_visualizar && (
+              <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+            )}
+            {permissoesUsuario.clientes_visualizar && (
+              <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />
+            )}
+            {permissoesUsuario.usuarios_visualizar && (
+              <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />
+            )}
+            {permissoesUsuario.fornecedores_visualizar && (
+              <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />
+            )}
+            {permissoesUsuario.exportar_dados && (
+              <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exportacoes")} cores={cores} />
+            )}            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
+
             <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
+
+
             <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
+
 
             <Link
               href="/empresa"

@@ -3,11 +3,12 @@
 import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { useEffect, useState, useRef } from "react";
+import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { VendaI } from "@/utils/types/vendas";
+import { useRouter } from "next/navigation";
 
 export default function Vendas() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
@@ -20,10 +21,161 @@ export default function Vendas() {
   const [totalVendas, setTotalVendas] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
+  const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
   const produtosPorPagina = 10;
   const { t } = useTranslation("vendas");
+  const router = useRouter();
+
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976"
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF"
+    }
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return false;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
+        {
+          headers: {
+            'user-id': usuarioId
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+          {
+            headers: {
+              'user-id': usuarioId
+            }
+          }
+        );
+
+        if (response.ok) {
+          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
+
+          const permissoesUsuarioObj: Record<string, boolean> = {};
+          dados.permissoes.forEach(permissao => {
+            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+          });
+
+          setPermissoesUsuario(permissoesUsuarioObj);
+        } else {
+          const permissoesParaVerificar = [
+            "vendas_realizar",
+            "vendas_visualizar"
+          ];
+
+          const permissoes: Record<string, boolean> = {};
+
+          for (const permissao of permissoesParaVerificar) {
+            const temPermissao = await usuarioTemPermissao(permissao);
+            permissoes[permissao] = temPermissao;
+          }
+
+          setPermissoesUsuario(permissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    };
+
+    carregarPermissoes();
+  }, []);
+
+
+
+  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.vendas_visualizar;
+
+  const podeRealizarVendas = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.vendas_realizar;
+
+  const verificarAtivacaoEmpresa = async (empresaId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da empresa");
+      }
+      const empresaData = await response.json();
+
+      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+
+      setEmpresaAtivada(ativada);
+      return ativada;
+    } catch (error) {
+      console.error("Erro ao verificar ativação da empresa:", error);
+      return false;
+    }
+  };
+
+  const mostrarAlertaNaoAtivada = () => {
+    Swal.fire({
+      title: t("empresaNaoAtivada.titulo"),
+      text: t("empresaNaoAtivada.mensagem"),
+      icon: "warning",
+      confirmButtonText: t("empresaNaoAtivada.botao"),
+      confirmButtonColor: "#3085d6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/ativacao");
+      }
+    });
+  };
+
+  const handleAcaoProtegida = (acao: () => void) => {
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
+    acao();
+  };
 
   useEffect(() => {
     const carrinhoSalvo = localStorage.getItem('carrinhoVendas');
@@ -64,7 +216,10 @@ export default function Vendas() {
         }
 
         setEmpresaId(usuario.empresaId);
-        setUserRole(usuario.tipo);
+        setTipoUsuario(usuario.tipo);
+
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
 
         const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
@@ -130,19 +285,8 @@ export default function Vendas() {
     }
   }, [carrinho]);
 
-  const temaAtual = {
-    fundo: modoDark ? "#0A1929" : "#F8FAFC",
-    texto: modoDark ? "#FFFFFF" : "#0F172A",
-    card: modoDark ? "#132F4C" : "#FFFFFF",
-    borda: modoDark ? "#1E4976" : "#E2E8F0",
-    primario: modoDark ? "#1976D2" : "#1976D2",
-    secundario: modoDark ? "#00B4D8" : "#0284C7",
-    placeholder: modoDark ? "#9CA3AF" : "#6B7280",
-    hover: modoDark ? "#1E4976" : "#EFF6FF"
-  };
-
   const adicionarAoCarrinho = (produto: ProdutoI) => {
-    if (userRole !== "ADMIN" && userRole !== "PROPRIETARIO") return;
+    if (!podeRealizarVendas) return;
 
     const itemExistente = carrinho.find(item => item.produto.id === produto.id);
 
@@ -227,79 +371,87 @@ export default function Vendas() {
       return;
     }
 
-    try {
-      setCarregando(true);
-
-      const itemsToSell = carrinho.filter(item => item.quantidade > 0);
-
-      const promises = itemsToSell.map(item => {
-        return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            empresaId,
-            produtoId: Number(item.produto.id),
-            quantidade: item.quantidade,
-            valorCompra: item.produto.preco * 0.8,
-            usuarioId: usuarioValor,
-            clienteId: clienteSelecionado,
-          }),
-        });
-      });
-
-      const responses = await Promise.all(promises);
-
-      const allSuccessful = responses.every(response => response.ok);
-      if (!allSuccessful) {
-        throw new Error('Algumas vendas não foram processadas corretamente');
-      }
-
-      await Swal.fire({
-        position: "center",
-        icon: "success",
-        title: t("vendaSucesso"),
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
-      setCarrinho([]);
-      setClienteSelecionado(null);
-      localStorage.removeItem('carrinhoVendas');
-
+    handleAcaoProtegida(async () => {
       try {
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-        const todosProdutos: ProdutoI[] = await responseProdutos.json();
-        const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === empresaId);
-        setProdutos(produtosDaEmpresa);
+        setCarregando(true);
 
-        const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
-        const vendasData = await responseVendas.json();
+        const itemsToSell = carrinho.filter(item => item.quantidade > 0);
 
-        const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) =>
-          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        );
-        setVendas(vendasOrdenadas);
+        const promises = itemsToSell.map(item => {
+          const usuarioSalvo = localStorage.getItem("client_key");
+          if (!usuarioSalvo) return;
+          const usuarioValor = usuarioSalvo.replace(/"/g, "");
+          
+          return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "user-id": usuarioValor
+            },
+            body: JSON.stringify({
+              empresaId,
+              produtoId: Number(item.produto.id),
+              quantidade: item.quantidade,
+              valorCompra: item.produto.preco * 0.8,
+              usuarioId: usuarioValor,
+              clienteId: clienteSelecionado,
+            }),
+          });
+        });
 
-        const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
-        const totalData = await responseTotal.json();
-        setTotalVendas(totalData?.total?._sum?.valorVenda || 0);
+        const responses = await Promise.all(promises);
 
-      } catch (updateError) {
-        console.error("Erro ao atualizar dados:", updateError);
+        const validResponses = responses.filter((response): response is Response => response !== undefined);
+        const allSuccessful = validResponses.length === promises.length && validResponses.every(response => response.ok);
+        if (!allSuccessful) {
+          throw new Error('Algumas vendas não foram processadas corretamente');
+        }
+
+        await Swal.fire({
+          position: "center",
+          icon: "success",
+          title: t("vendaSucesso"),
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
+        setCarrinho([]);
+        setClienteSelecionado(null);
+        localStorage.removeItem('carrinhoVendas');
+
+        try {
+          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+          const todosProdutos: ProdutoI[] = await responseProdutos.json();
+          const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === empresaId);
+          setProdutos(produtosDaEmpresa);
+
+          const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
+          const vendasData = await responseVendas.json();
+
+          const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) =>
+            new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+          );
+          setVendas(vendasOrdenadas);
+
+          const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
+          const totalData = await responseTotal.json();
+          setTotalVendas(totalData?.total?._sum?.valorVenda || 0);
+
+        } catch (updateError) {
+          console.error("Erro ao atualizar dados:", updateError);
+        }
+
+      } catch (err) {
+        console.error("Erro ao finalizar venda:", err);
+        await Swal.fire({
+          icon: "error",
+          title: "Erro!",
+          text: t("erroFinalizarVenda"),
+        });
+      } finally {
+        setCarregando(false);
       }
-
-    } catch (err) {
-      console.error("Erro ao finalizar venda:", err);
-      await Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: t("erroFinalizarVenda"),
-      });
-    } finally {
-      setCarregando(false);
-    }
+    });
   };
 
   const produtosFiltrados = produtos.filter((produto) =>
@@ -318,6 +470,21 @@ export default function Vendas() {
   const totalCarrinho = carrinho.reduce((total, item) =>
     total + (item.produto.preco * item.quantidade), 0
   );
+
+  if (!podeVisualizar) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizar")}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (carregando && !empresaId) {
     return (
@@ -352,6 +519,20 @@ export default function Vendas() {
           {t("titulo")}
         </h1>
 
+        {empresaId && !empresaAtivada && (
+          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+            backgroundColor: temaAtual.primario + "20",
+            color: temaAtual.texto,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <FaLock className="text-xl" />
+            <div>
+              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
+              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
           <div className="flex items-center gap-4">
             <div
@@ -365,7 +546,7 @@ export default function Vendas() {
                 type="text"
                 placeholder={t("buscarProduto")}
                 className="outline-none placeholder-gray-400 font-mono text-sm bg-transparent"
-                style={{ 
+                style={{
                   color: temaAtual.texto,
                 }}
                 value={busca}
@@ -426,7 +607,7 @@ export default function Vendas() {
                       <th className="py-3 px-4 text-left">{t("produto")}</th>
                       <th className="text-center">{t("estoque")}</th>
                       <th className="text-center">{t("preco")}</th>
-                      {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
+                      {podeRealizarVendas && (
                         <th className="text-center">{t("acoes")}</th>
                       )}
                     </tr>
@@ -461,10 +642,10 @@ export default function Vendas() {
                         <td className="py-3 px-4 text-center">
                           R$ {produto.preco.toFixed(2).replace(".", ",")}
                         </td>
-                        {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
+                        {podeRealizarVendas && (
                           <td className="py-3 px-4 text-center">
                             <button
-                              onClick={() => adicionarAoCarrinho(produto)}
+                              onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
                               disabled={produto.quantidade < 1}
                               className="px-3 py-1 cursor-pointer rounded flex items-center gap-1 transition"
                               style={{
@@ -522,9 +703,9 @@ export default function Vendas() {
                         </div>
                       </div>
 
-                      {(userRole === "ADMIN" || userRole === "PROPRIETARIO") && (
+                      {podeRealizarVendas && (
                         <button
-                          onClick={() => adicionarAoCarrinho(produto)}
+                          onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
                           disabled={produto.quantidade < 1}
                           className="p-2  rounded-full"
                           style={{

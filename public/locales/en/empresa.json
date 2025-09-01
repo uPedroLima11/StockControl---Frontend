@@ -1,33 +1,17 @@
 {
-  "catalogo": {
-    "publico": "Public Catalog",
-    "status": "Status",
-    "ativado": "ENABLED",
-    "desativado": "DISABLED",
-    "processando": "Processing...",
-    "ativar": "Enable",
-    "desativar": "Disable",
-    "disponivelEm": "Your catalog is available at:",
-    "avisoClientes": "📢 Customers will only see products marked as \"Add to Catalog\"",
-    "desativadoAviso": "⚠️ Your catalog is disabled. Enable it to make it public."
-  },
   "empresa": {
     "escolherArquivo": "Choose file",
     "nenhumArquivoEscolhido": "No file chosen",
     "preVisualizacao": "Preview",
+    "fotoAtual": "Current photo",
     "catalogoPublico": "Public Catalog",
     "catalogoAtivado": "Catalog activated!",
     "catalogoDesativado": "Catalog deactivated!",
     "catalogoAgoraPublico": "Your catalog is now public and accessible via the link.",
     "catalogoNaoPublico": "Your catalog is no longer public.",
-    "erroAlterarCatalogo": "It was not possible to change the catalog state.",
-    "ativar": "Activate",
-    "desativar": "Deactivate",
-    "statusAtivado": "ACTIVE",
-    "statusDesativado": "INACTIVE"
+    "erroAlterarCatalogo": "Could not change catalog status."
   },
   "titulo": "My Company",
-  "Pré-visualização:": "Preview",
   "carregando": "Loading company data...",
   "empresaNaoEncontrada": "Company not found.",
   "dadosEmpresa": "Company Data",
@@ -37,9 +21,19 @@
   "editarDados": "Edit Data",
   "deletarEmpresa": "Delete Company",
   "sairEmpresa": "Leave Company",
-  "naoInformado": "Not informed",
-  "escolherArquivo": "Choose File",
-  "nenhumArquivoEscolhido": "No file chosen",
+  "naoInformado": "Not provided",
+  "catalogo": {
+    "publico": "Public Catalog",
+    "status": "Status",
+    "ativado": "ENABLED",
+    "desativado": "DISABLED",
+    "processando": "Processing...",
+    "ativar": "Enable",
+    "desativar": "Disable",
+    "disponivelEm": "Your catalog is available at:",
+    "avisoClientes": "📢 Customers will see only products marked as \"Add to Catalog\"",
+    "desativadoAviso": "⚠️ Your catalog is disabled. Enable it to make it public."
+  },
   "campos": {
     "nome": "Company Name",
     "endereco": "Address",
@@ -51,38 +45,34 @@
     "email": "Corporate Email"
   },
   "modal": {
-    "alterarLogo": {
-      "titulo": "Change Logo",
-      "urlImagem": "URL of new image",
-      "altPreview": "Preview of new image"
-    },
+    "cancelar": "Cancel",
+    "salvar": "Save",
     "editarEmpresa": {
-      "titulo": "Edit Company"
+      "titulo": "Edit Company",
+      "salvar": "Save",
+      "cancelar": "Cancel"
     },
     "excluir": {
-      "titulo": "Are you sure?",
-      "texto": "This action cannot be undone!",
-      "confirmar": "Yes, delete it!",
+      "titulo": "Delete Company",
+      "texto": "Are you sure you want to delete your company? This action cannot be undone.",
+      "confirmar": "Yes, delete",
       "cancelar": "Cancel"
     },
     "sair": {
-      "titulo": "Leave company?",
-      "texto": "You will lose access to company data.",
-      "confirmar": "Yes, leave!",
+      "titulo": "Leave Company",
+      "texto": "Are you sure you want to leave the company? You will lose access to the data.",
+      "confirmar": "Yes, leave",
       "cancelar": "Cancel"
-    },
-    "cancelar": "Cancel",
-    "salvar": "Save"
+    }
   },
   "erros": {
-    "usuarioNaoLogado": "User not logged in",
-    "erroBuscarEmpresa": "Unexpected error when searching for company",
-    "erroAtualizarFoto": "Error updating photo",
-    "erroAtualizarLogo": "Error updating company logo",
-    "erroAtualizarEmpresa": "Error updating company",
-    "erroEditarEmpresa": "Error editing company",
-    "erroExcluirEmpresa": "Error deleting company",
-    "erroSairEmpresa": "Error leaving company",
-    "erroProcessarExclusao": "Error processing deletion/exit from company"
+    "erro": "Error",
+    "usuarioNaoLogado": "User not logged in.",
+    "erroBuscarEmpresa": "Error fetching company data.",
+    "erroAtualizarEmpresa": "Error updating company data.",
+    "erroEditarEmpresa": "Could not edit company.",
+    "erroExcluirEmpresa": "Could not delete company.",
+    "erroSairEmpresa": "Could not leave company.",
+    "erroProcessarExclusao": "Error processing company deletion or leaving."
   }
 }

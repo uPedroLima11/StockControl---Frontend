@@ -2,7 +2,6 @@
   "titulo": "Gerenciar Produtos",
   "buscar": "Buscar...",
   "novo": "Novo Produto",
-  "nenhumProdutoEncontrado": "Nenhum produto encontrado.",
   "novoProduto": "Novo Produto",
   "editarProduto": "Editar Produto",
   "quantidade": "Quantidade",
@@ -11,6 +10,7 @@
   "selecionarFornecedor": "Selecionar Fornecedor",
   "selecionarCategoria": "Selecionar Categoria",
   "fechar": "Fechar",
+  "nenhumProdutoEncontrado": "Nenhum produto encontrado",
   "criar": "Criar",
   "nome": "Nome",
   "fornecedor": "Fornecedor",
@@ -25,9 +25,9 @@
   "editar": "Editar",
   "salvar": "Salvar",
   "excluir": "Excluir",
-
   "removerDoCatalogo": "Remover do Catálogo",
   "adicionarAoCata": "Adicionar ao Catálogo",
+  "semPermissaoVisualizar": "Você não tem permissão para visualizar este conteúdo",
 
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",

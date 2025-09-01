@@ -8,13 +8,14 @@
   "salvar": "Save",
   "excluir": "Delete",
   "nome": "Name",
-  "email": "Email",
+  "email": "E-mail",
   "telefone": "Phone",
-  "endereco": "Address",
   "nenhumClienteEncontrado": "No clients found.",
+  "nenhumClienteEncontradoBusca": "No clients match your search.",
+  "endereco": "Address",
   "cidade": "City",
   "estado": "State",
-  "cep": "ZIP Code",
+  "cep": "ZIP",
   "adicionadoEm": "Added on",
   "contato": "Contact",
   "empresaNaoAtivada": {
@@ -28,7 +29,7 @@
     "adicionarCliente": "Client added successfully!",
     "excluir": {
       "titulo": "Deleted!",
-      "mensagem": "The client has been deleted successfully."
+      "mensagem": "The client has been successfully deleted."
     }
   },
   "erro": {
@@ -43,14 +44,14 @@
     "excluir": {
       "titulo": "Are you sure?",
       "mensagem": "You won't be able to revert this!",
-      "confirmar": "Yes, delete it!",
+      "confirmar": "Yes, delete!",
       "cancelar": "Cancel"
     }
   },
   "info": {
     "semTelefone": {
-      "titulo": "No phone number",
-      "mensagem": "This client doesn't have a registered phone number."
+      "titulo": "No phone",
+      "mensagem": "This client does not have a phone number registered."
     }
   }
 }

@@ -1,86 +1,78 @@
 {
-    "empresa": {
-        "escolherArquivo": "Escolher arquivo",
-        "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
-        "preVisualizacao": "Pré visualização",
-        "catalogoPublico": "Catálogo Público",
-        "catalogoAtivado": "Catálogo ativado!",
-        "catalogoDesativado": "Catálogo desativado!",
-        "catalogoAgoraPublico": "Seu catálogo agora está público e acessível pelo link.",
-        "catalogoNaoPublico": "Seu catálogo não está mais público.",
-        "erroAlterarCatalogo": "Não foi possível alterar o estado do catálogo.",
-        "ativar": "Ativar",
-        "desativar": "Desativar",
-        "statusAtivado": "ATIVADO",
-        "statusDesativado": "DESATIVADO"
+  "empresa": {
+    "escolherArquivo": "Escolher arquivo",
+    "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
+    "preVisualizacao": "Pré visualização",
+    "fotoAtual": "Foto atual",
+    "catalogoPublico": "Catálogo Público",
+    "catalogoAtivado": "Catálogo ativado!",
+    "catalogoDesativado": "Catálogo desativado!",
+    "catalogoAgoraPublico": "Seu catálogo agora está público e acessível pelo link.",
+    "catalogoNaoPublico": "Seu catálogo não está mais público.",
+    "erroAlterarCatalogo": "Não foi possível alterar o estado do catálogo."
+  },
+  "titulo": "Minha Empresa",
+  "carregando": "Carregando dados da empresa...",
+  "empresaNaoEncontrada": "Empresa não encontrada.",
+  "dadosEmpresa": "Dados da Empresa",
+  "logoEmpresa": "Logo da Empresa",
+  "altLogoEmpresa": "Logo da empresa",
+  "alterarLogo": "Alterar Logo",
+  "editarDados": "Editar Dados",
+  "deletarEmpresa": "Deletar Empresa",
+  "sairEmpresa": "Sair da Empresa",
+  "naoInformado": "Não informado",
+  "catalogo": {
+    "publico": "Catálogo Público",
+    "status": "Status",
+    "ativado": "ATIVADO",
+    "desativado": "DESATIVADO",
+    "processando": "Processando...",
+    "ativar": "Ativar",
+    "desativar": "Desativar",
+    "disponivelEm": "Seu catálogo está disponível em:",
+    "avisoClientes": "📢 Os clientes verão apenas os produtos marcados como \"Adicionar ao Catálogo\"",
+    "desativadoAviso": "⚠️ Seu catálogo está desativado. Ative para tornar ele público."
+  },
+  "campos": {
+    "nome": "Nome da Empresa",
+    "endereco": "Endereço",
+    "pais": "País",
+    "estado": "Estado",
+    "cidade": "Cidade",
+    "cep": "CEP",
+    "telefone": "Telefone",
+    "email": "Email Corporativo"
+  },
+  "modal": {
+    "cancelar": "Cancelar",
+    "salvar": "Salvar",
+    "editarEmpresa": {
+      "titulo": "Editar Empresa",
+      "salvar": "Salvar",
+      "cancelar": "Cancelar"
     },
-    "titulo": "Minha Empresa",
-    "carregando": "Carregando dados da empresa...",
-    "empresaNaoEncontrada": "Empresa não encontrada.",
-    "dadosEmpresa": "Dados da Empresa",
-    "logoEmpresa": "Logo da Empresa",
-    "altLogoEmpresa": "Logo da empresa",
-    "alterarLogo": "Alterar Logo",
-    "editarDados": "Editar Dados",
-    "deletarEmpresa": "Deletar Empresa",
-    "sairEmpresa": "Sair da Empresa",
-    "naoInformado": "Não informado",
-    "catalogo": {
-        "publico": "Catálogo Público",
-        "status": "Status",
-        "ativado": "ATIVADO",
-        "desativado": "DESATIVADO",
-        "processando": "Processando...",
-        "ativar": "Ativar",
-        "desativar": "Desativar",
-        "disponivelEm": "Seu catálogo está disponível em:",
-        "avisoClientes": "📢 Os clientes verão apenas os produtos marcados como \"Adicionar ao Catálogo\"",
-        "desativadoAviso": "⚠️ Seu catálogo está desativado. Ative para tornar ele público."
+    "excluir": {
+      "titulo": "Excluir Empresa",
+      "texto": "Tem certeza que deseja excluir sua empresa? Essa ação não pode ser desfeita.",
+      "confirmar": "Sim, excluir",
+      "cancelar": "Cancelar"
     },
-    "campos": {
-        "nome": "Nome da Empresa",
-        "endereco": "Endereço",
-        "pais": "País",
-        "estado": "Estado",
-        "cidade": "Cidade",
-        "cep": "CEP",
-        "telefone": "Telefone",
-        "email": "Email Corporativo"
-    },
-    "modal": {
-        "alterarLogo": {
-            "titulo": "Alterar Logo",
-            "urlImagem": "URL da nova imagem",
-            "altPreview": "Preview da nova imagem"
-        },
-        "editarEmpresa": {
-            "titulo": "Editar Empresa"
-        },
-        "excluir": {
-            "titulo": "Tem certeza?",
-            "texto": "Essa ação não pode ser desfeita!",
-            "confirmar": "Sim, deletar!",
-            "cancelar": "Cancelar"
-        },
-        "sair": {
-            "titulo": "Sair da empresa?",
-            "texto": "Você perderá o acesso aos dados da empresa.",
-            "confirmar": "Sim, sair!",
-            "cancelar": "Cancelar"
-        },
-        "cancelar": "Cancelar",
-        "salvar": "Salvar"
-    },
-    "erros": {
-        "usuarioNaoLogado": "Usuário não logado",
-        "erroBuscarEmpresa": "Erro inesperado ao buscar empresa",
-        "erroAtualizarFoto": "Erro ao atualizar foto",
-        "erroAtualizarLogo": "Erro ao atualizar a logo da empresa",
-        "erroAtualizarEmpresa": "Erro ao atualizar empresa",
-        "erroEditarEmpresa": "Erro ao editar empresa",
-        "erroExcluirEmpresa": "Erro ao excluir a empresa",
-        "erroSairEmpresa": "Erro ao sair da empresa",
-        "erroProcessarExclusao": "Erro ao processar exclusão/saída da empresa"
-    },
-    "preview": "Pré-visualização"
+    "sair": {
+      "titulo": "Sair da Empresa",
+      "texto": "Tem certeza que deseja sair da empresa? Você perderá acesso aos dados.",
+      "confirmar": "Sim, sair",
+      "cancelar": "Cancelar"
+    }
+  },
+  "erros": {
+    "erro": "Erro",
+    "usuarioNaoLogado": "Usuário não logado.",
+    "erroBuscarEmpresa": "Erro ao buscar dados da empresa.",
+    "erroAtualizarEmpresa": "Erro ao atualizar dados da empresa.",
+    "erroEditarEmpresa": "Não foi possível editar a empresa.",
+    "erroExcluirEmpresa": "Não foi possível excluir a empresa.",
+    "erroSairEmpresa": "Não foi possível sair da empresa.",
+    "erroProcessarExclusao": "Erro ao processar exclusão ou saída da empresa."
+  }
 }

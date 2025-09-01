@@ -1,8 +1,9 @@
 "use client";
 import { LogsI } from "@/utils/types/logs";
 import { useEffect, useState } from "react";
-import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { usuarioTemPermissao } from "@/utils/permissoes";
 
 type TipoLog = "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA";
 
@@ -15,6 +16,8 @@ export default function Logs() {
   const [carregando, setCarregando] = useState(true);
   const [logExpandido, setLogExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [temPermissao, setTemPermissao] = useState<boolean | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const logsPorPagina = 14;
 
   const temaAtual = {
@@ -40,12 +43,22 @@ export default function Logs() {
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (!usuarioSalvo) {
-          setLogs([]);
+          setTemPermissao(false);
           setCarregando(false);
           return;
         }
 
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
+        setUserId(usuarioValor);
+
+        const permissao = await usuarioTemPermissao(usuarioValor, "logs_visualizar");
+        setTemPermissao(permissao);
+
+        if (!permissao) {
+          setCarregando(false);
+          return;
+        }
+
         const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
         const usuarioData = await responseUsuario.json();
 
@@ -89,6 +102,7 @@ export default function Logs() {
       } catch (error) {
         console.error("Erro ao carregar logs:", error);
         setLogs([]);
+        setTemPermissao(false);
       } finally {
         setCarregando(false);
       }
@@ -232,6 +246,27 @@ export default function Logs() {
     return (
       <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
         <p style={{ color: temaAtual.texto }}>{t("logs.carregando")}</p>
+      </div>
+    );
+  }
+
+  if (temPermissao === false) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen px-4" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="text-center p-6 rounded-lg" style={{ backgroundColor: temaAtual.card, border: `1px solid ${temaAtual.borda}` }}>
+          <div className="flex justify-center mb-4">
+            <FaLock className="text-4xl" style={{ color: "#EF4444" }} />
+          </div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: temaAtual.texto }}>
+            {t("logs.acesso_negado.titulo")}
+          </h2>
+          <p className="mb-4" style={{ color: temaAtual.texto }}>
+            {t("logs.acesso_negado.mensagem")}
+          </p>
+          <p className="text-sm" style={{ color: temaAtual.placeholder }}>
+            {t("logs.acesso_negado.permissao_necessaria")}: <strong>logs_visualizar</strong>
+          </p>
+        </div>
       </div>
     );
   }

@@ -17,6 +17,7 @@ export default function Fornecedores() {
   const [modalVisualizar, setModalVisualizar] = useState<FornecedorI | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState<FornecedorI>({
     id: "",
     nome: "",
@@ -69,6 +70,96 @@ export default function Fornecedores() {
   };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return false;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
+        {
+          headers: {
+            'user-id': usuarioId
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+          {
+            headers: {
+              'user-id': usuarioId
+            }
+          }
+        );
+
+        if (response.ok) {
+          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
+
+          const permissoesUsuarioObj: Record<string, boolean> = {};
+          dados.permissoes.forEach(permissao => {
+            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+          });
+
+          setPermissoesUsuario(permissoesUsuarioObj);
+        } else {
+          const permissoesParaVerificar = [
+            "fornecedores_criar",
+            "fornecedores_editar",
+            "fornecedores_excluir",
+            "fornecedores_visualizar"
+          ];
+
+          const permissoes: Record<string, boolean> = {};
+
+          for (const permissao of permissoesParaVerificar) {
+            const temPermissao = await usuarioTemPermissao(permissao);
+            permissoes[permissao] = temPermissao;
+          }
+
+          setPermissoesUsuario(permissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    };
+
+    carregarPermissoes();
+  }, []);
+
+
+  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.fornecedores_visualizar;
+
+  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.fornecedores_criar;
+
+  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.fornecedores_editar;
+
+  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.fornecedores_excluir;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -130,7 +221,11 @@ export default function Fornecedores() {
         setEmpresaAtivada(ativada);
       }
 
-      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
+      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
       const fornecedoresData = await responseFornecedores.json();
       const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -221,6 +316,7 @@ export default function Fornecedores() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
       if (!empresaId) return alert("Empresa não identificada.");
 
@@ -241,9 +337,19 @@ export default function Fornecedores() {
       if (fotoFile) {
         formData.append("foto", fotoFile);
       }
+
+
+      try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (!usuarioSalvo) return;
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         method: "POST",
         body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
       });
 
       if (response.status === 201) {
@@ -262,6 +368,15 @@ export default function Fornecedores() {
           confirmButtonColor: "#013C3C",
         });
       }
+    } catch (error) {
+      console.error("Erro ao adicionar fornecedor:", error);
+      Swal.fire({
+        icon: "error",
+        title: t("mensagens.erro"),
+        text: t("mensagens.erroAdicionar"),
+        confirmButtonColor: "#013C3C",
+      });
+    }
     });
   }
 
@@ -269,6 +384,7 @@ export default function Fornecedores() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
@@ -292,9 +408,16 @@ export default function Fornecedores() {
       }
 
       try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (!usuarioSalvo) return;
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
           method: "PUT",
           body: formData,
+          headers: {
+            'user-id': usuarioValor
+          }
         });
 
         if (response.ok) {
@@ -320,7 +443,10 @@ export default function Fornecedores() {
     });
   }
 
-  async function handleDelete() {
+  async function handleDelete(fornecedor: FornecedorI) {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!modalVisualizar) return;
 
@@ -345,6 +471,9 @@ export default function Fornecedores() {
         try {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
             method: "DELETE",
+            headers: {
+              'user-id': usuarioValor
+            }
           });
           Swal.fire(t("mensagens.deletado"), t("mensagens.produtoExcluido"), "success");
           setModalVisualizar(null);
@@ -368,8 +497,6 @@ export default function Fornecedores() {
     setFornecedorExpandido(fornecedorExpandido === id ? null : id);
   };
 
-  const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
-
   const fornecedoresFiltrados = fornecedores.filter(
     (fornecedor) =>
       fornecedor.empresaId === empresaId &&
@@ -386,6 +513,21 @@ export default function Fornecedores() {
     setPaginaAtual(novaPagina);
     setFornecedorExpandido(null);
   };
+
+  if (!podeVisualizar) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizar")}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
@@ -459,7 +601,7 @@ export default function Fornecedores() {
             )}
           </div>
 
-          {podeEditar && (
+          {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 cursor-pointer rounded-lg transition font-mono text-sm"
@@ -717,6 +859,19 @@ export default function Fornecedores() {
                             >
                               {t("editar")}
                             </button>
+                            {podeExcluir && (
+                              <button
+                                onClick={() => handleDelete(fornecedor)}
+                                className="px-3 py-1 text-xs rounded border"
+                                style={{
+                                  backgroundColor: "#EF4444",
+                                  borderColor: "#EF4444",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                {t("excluir")}
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -856,7 +1011,7 @@ export default function Fornecedores() {
                     onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
                   />
                 )}
-                {podeEditar && (
+                {(podeCriar || podeEditar) && (
                   <div className="flex flex-col justify-end">
                     <input
                       type="file"
@@ -923,16 +1078,18 @@ export default function Fornecedores() {
                     >
                       {t("salvar")}
                     </button>
-                    <button
-                      onClick={handleDelete}
-                      className="cursor-pointer px-4 py-2 rounded"
-                      style={{
-                        backgroundColor: "#EF4444",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {t("excluir")}
-                    </button>
+                    {podeExcluir && (
+                      <button
+                        onClick={() => handleDelete(form)}
+                        className="cursor-pointer px-4 py-2 rounded"
+                        style={{
+                          backgroundColor: "#EF4444",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        {t("excluir")}
+                      </button>
+                    )}
                   </>
                 )
               ) : (

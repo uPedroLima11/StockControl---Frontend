@@ -1,19 +1,24 @@
 {
   "logs": {
-    "cliente":"Cliente",
     "produto": "Produto",
-    "quantidade": "QTD",
+    "quantidade": "Quantidade",
+    "cliente": "Cliente",
+    "cliente_nao_informado": "Não Informado",
     "titulo": "Logs",
     "placeholder_busca": "Buscar Logs",
     "usuario": "Usuário",
-    "cliente_nao_informado": "Não Informado",
     "tipo": "Tipo",
     "descricao": "Descrição",
     "datacriacao": "Data de Criação",
+    "nenhum_log_encontrado": "Nenhum log encontrado",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "usuario_nao_informado": "Não Informado",
     "carregando": "Carregando...",
-    "nenhum_log_encontrado": "Nenhum Log encontrado",
+    "acesso_negado": {
+      "titulo": "Acesso Negado",
+      "mensagem": "Você não tem permissão para acessar esta página",
+      "permissao_necessaria": "Permissão necessária"
+    },
     "tipos_logs": {
       "CRIACAO": "Criação",
       "ATUALIZACAO": "Atualização",
@@ -21,10 +26,10 @@
       "BAIXA": "Baixa"
     },
     "descricoes": {
-      "produto_vendido": "Produto vendido: {{nome}} (Quantidade: {{quantidade}})",
-      "produto_excluido": "Produto excluído: {{nome}}",
-      "produto_atualizado": "Produto atualizado: {{nome}}",
-      "produto_criado": "Produto criado: {{nome}}"
+      "produto_vendido": "Produto Vendido: {{nome}} (Quantidade: {{quantidade}})",
+      "produto_excluido": "Produto Excluído: {{nome}}",
+      "produto_atualizado": "Produto Atualizado: {{nome}}",
+      "produto_criado": "Produto Criado: {{nome}}"
     }
   }
 }

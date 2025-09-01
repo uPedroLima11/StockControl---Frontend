@@ -14,6 +14,7 @@
     "semVendas": "No sales yet",
     "naoPossuiProdutos": "You do not have any registered products",
     "quantidade": "Quantity",
+    "semPermissaoVisualizar": "You do not have permission to view this sale",
     "carregando": "Loading...",
     "remover": "Remove",
     "totalVendas": "Total Sales",

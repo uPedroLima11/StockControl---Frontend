@@ -1,10 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight, FaLock, FaUnlock } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
+
+interface PermissaoI {
+  id: string;
+  nome: string;
+  descricao: string;
+  chave: string;
+  categoria: string;
+}
+
+interface PermissoesUsuarioResponse {
+  permissoes: (PermissaoI & { concedida: boolean })[];
+  permissoesPersonalizadas: boolean;
+}
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
@@ -27,6 +40,14 @@ export default function Usuarios() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const usuariosPorPagina = 10;
   const { t } = useTranslation("usuarios");
+  const [permissoes, setPermissoes] = useState<PermissaoI[]>([]);
+  const [permissoesUsuario, setPermissoesUsuario] = useState<(PermissaoI & { concedida: boolean })[]>([]);
+  const [modalPermissoes, setModalPermissoes] = useState<UsuarioI | null>(null);
+  const [permissoesPersonalizadas, setPermissoesPersonalizadas] = useState(false);
+  const [usuariosGerenciáveis, setUsuariosGerenciáveis] = useState<Record<string, boolean>>({});
+  const [temPermissaoVisualizar, setTemPermissaoVisualizar] = useState<boolean | null>(null);
+
+
 
   const cores = {
     dark: {
@@ -62,6 +83,235 @@ export default function Usuarios() {
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
   }, []);
+
+  const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const initialize = async () => {
+      setLoading(true);
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
+      document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
+
+      try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (!usuarioSalvo) {
+          setTemPermissaoVisualizar(false);
+          setLoading(false);
+          return;
+        }
+
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+        setUsuarioLogado(null);
+
+        const permissao = await usuarioTemPermissao(usuarioValor, "usuarios_visualizar");
+        setTemPermissaoVisualizar(permissao);
+
+        if (!permissao) {
+          setLoading(false);
+          return;
+        }
+
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+        const usuarioData = await responseUsuario.json();
+        logar(usuarioData);
+        setUsuarioLogado(usuarioData);
+
+        if (!usuarioData || !usuarioData.empresaId) {
+          setUsuarios([]);
+          setLoading(false);
+          return;
+        }
+
+        const empresaIdRecebido = usuarioData.empresaId;
+
+        const resUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+        if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
+
+        const todosUsuarios: UsuarioI[] = await resUsuarios.json();
+        const usuariosDaEmpresa = todosUsuarios
+          .filter((usuario) => usuario.empresaId === empresaIdRecebido)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        setUsuarios(usuariosDaEmpresa);
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        setUsuarios([]);
+        setTemPermissaoVisualizar(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initialize();
+  }, [t, logar]);
+
+
+  useEffect(() => {
+    async function carregarPermissoes() {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/permissoes`);
+        if (response.ok) {
+          const dados = await response.json();
+          const todasPermissoes: PermissaoI[] = [];
+          Object.values(dados).forEach((categoria: any) => {
+            todasPermissoes.push(...categoria);
+          });
+          setPermissoes(todasPermissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    }
+
+    carregarPermissoes();
+  }, []);
+
+
+
+  const carregarPermissoesUsuario = async (usuarioId: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`
+      );
+      if (response.ok) {
+        const dados: PermissoesUsuarioResponse = await response.json();
+        setPermissoesUsuario(dados.permissoes);
+        setPermissoesPersonalizadas(dados.permissoesPersonalizadas);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar permissões do usuário:", error);
+    }
+  };
+
+  const atualizarPermissao = (permissaoId: string, concedida: boolean) => {
+    setPermissoesUsuario(prev =>
+      prev.map(p => p.id === permissaoId ? { ...p, concedida } : p)
+    );
+  };
+  const podeGerenciarPermissoesUsuario = async (targetUser: UsuarioI): Promise<boolean> => {
+  if (!usuarioLogado) return false;
+
+  if (usuarioLogado.tipo === "PROPRIETARIO") return true;
+
+  if (usuarioLogado.tipo === "ADMIN") {
+    if (targetUser.tipo === "PROPRIETARIO") return false;
+    
+    const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_gerenciar_permissoes");
+    return temPermissao && targetUser.tipo === "FUNCIONARIO";
+  }
+
+  return false;
+};
+
+  const salvarPermissoes = async () => {
+    if (!modalPermissoes) return;
+
+    try {
+      const permissoesParaSalvar = permissoesUsuario.map(p => ({
+        permissaoId: p.id,
+        concedida: p.concedida
+      }));
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            permissoes: permissoesParaSalvar,
+            ativarPersonalizacao: true
+          })
+        }
+      );
+
+      if (response.ok) {
+        Swal.fire({
+          title: t("modal.permissoesSalvas"),
+          icon: "success",
+          confirmButtonColor: "#013C3C",
+        });
+        setModalPermissoes(null);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar permissões:", error);
+      Swal.fire({
+        title: t("modal.erroSalvarPermissoes"),
+        icon: "error",
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  };
+
+  const redefinirPermissoesPadrao = async () => {
+    if (!modalPermissoes) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            permissoes: [],
+            ativarPersonalizacao: false
+          })
+        }
+      );
+
+      if (response.ok) {
+        Swal.fire({
+          title: t("modal.permissoesRedefinidas"),
+          icon: "success",
+          confirmButtonColor: "#013C3C",
+        });
+        setModalPermissoes(null);
+        carregarPermissoesUsuario(modalPermissoes.id);
+      }
+    } catch (error) {
+      console.error("Erro ao redefinir permissões:", error);
+      Swal.fire({
+        title: t("modal.erroRedefinirPermissoes"),
+        icon: "error",
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const carregarTodasPermissoes = async () => {
+      const editaveis: Record<string, boolean> = {};
+      const gerenciáveis: Record<string, boolean> = {};
+
+      for (const usuario of usuarios) {
+        editaveis[usuario.id] = await podeEditar(usuario);
+        gerenciáveis[usuario.id] = await podeGerenciarPermissoesUsuario(usuario);
+      }
+
+      setUsuariosEditaveis(editaveis);
+      setUsuariosGerenciáveis(gerenciáveis);
+    };
+
+    if (usuarios.length > 0 && usuarioLogado) {
+      carregarTodasPermissoes();
+    }
+  }, [usuarios, usuarioLogado]);
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -190,13 +440,36 @@ export default function Usuarios() {
   async function enviarConvite() {
     setIsEnviando(true);
     try {
-      const usuarioSalvo = localStorage.getItem("client_key") as string;
-      const idUsuario = usuarioSalvo.replace(/"/g, "");
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return false;
 
-      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      const temPermissaoCriar = await usuarioTemPermissao(usuarioId, "usuarios_criar");
+
+      if (!temPermissaoCriar) {
+        Swal.fire({
+          title: t("modal.permissaoNegada.titulo") || "Permissão Negada",
+          text: t("modal.permissaoNegada.textoConvite") || "Você não tem permissão para convidar usuários.",
+          icon: "warning",
+          confirmButtonColor: "#013C3C",
+          confirmButtonText: t("modal.botaoOk") || "OK"
+        });
+        return;
+      }
+
+      const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
+        headers: {
+          'user-id': usuarioId
+        }
+      });
       const empresa = await resEmpresa.json();
 
-      const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`);
+      const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`, {
+        headers: {
+          'user-id': usuarioId
+        }
+      });
       const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
 
       const usuarioConvidado = todosUsuarios.find((u) => u.email === email);
@@ -214,7 +487,10 @@ export default function Usuarios() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/convites`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": usuarioId || "",
+        },
         body: JSON.stringify({ email, empresaId: empresa.id }),
       });
 
@@ -229,18 +505,38 @@ export default function Usuarios() {
         setEmail("");
         setShowModalConvite(false);
       } else {
-        alert(t("modal.erro.enviarConvite"));
+        Swal.fire({
+          title: t("modal.erro.titulo") || "Erro",
+          text: t("modal.erro.enviarConvite") || "Erro ao enviar convite.",
+          icon: "error",
+          confirmButtonColor: "#013C3C",
+        });
       }
     } catch (err) {
       console.error(err);
-      alert(t("modal.erro.enviarConvite"));
+      Swal.fire({
+        title: t("modal.erro.titulo") || "Erro",
+        text: t("modal.erro.enviarConvite") || "Erro ao enviar convite.",
+        icon: "error",
+        confirmButtonColor: "#013C3C",
+      });
     } finally {
       setIsEnviando(false);
     }
   }
 
   async function confirmarRemocaoUsuario(usuario: UsuarioI) {
-    if (!podeEditar(usuario)) return;
+    const podeExcluirUsuario = await podeExcluir(usuario);
+
+    if (!podeExcluirUsuario) {
+      Swal.fire({
+        title: t("modal.permissaoNegada.titulo") || "Permissão Negada",
+        text: t("modal.permissaoNegada.textoExcluir") || "Você não tem permissão para excluir este usuário.",
+        icon: "warning",
+        confirmButtonColor: "#013C3C",
+      });
+      return;
+    }
 
     Swal.fire({
       title: t("modal.confirmacaoRemocao.titulo"),
@@ -292,23 +588,90 @@ export default function Usuarios() {
     });
   }
 
-  const podeEditar = (targetUser: UsuarioI) => {
+  const podeEditar = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
+
     if (usuarioLogado.tipo === "PROPRIETARIO") return true;
-    if (usuarioLogado.tipo === "ADMIN" && targetUser.tipo !== "PROPRIETARIO") return true;
+
+    if (usuarioLogado.tipo === "ADMIN") {
+      if (targetUser.tipo !== "FUNCIONARIO") return false;
+
+      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_editar");
+      return temPermissao;
+    }
+
     return false;
   };
 
-  const podeEditarCargo = (tipoUsuarioLogado: string, tipoUsuarioSelecionado: string, cargoSelecionado: string) => {
-    if (tipoUsuarioLogado === "PROPRIETARIO") return true;
-    if (tipoUsuarioLogado === "ADMIN") {
-      if (tipoUsuarioSelecionado === "PROPRIETARIO") return false;
-      if (cargoSelecionado === "PROPRIETARIO") return false;
+
+  const podeExcluir = async (targetUser: UsuarioI): Promise<boolean> => {
+    if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
+
+    if (usuarioLogado.tipo === "PROPRIETARIO") return true;
+
+    if (usuarioLogado.tipo === "ADMIN") {
+      if (targetUser.tipo !== "FUNCIONARIO") return false;
+
+      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_excluir");
+      return temPermissao;
+    }
+
+    return false;
+  };
+
+  const podeAlterarCargo = async (targetUser: UsuarioI, novoTipo: string): Promise<boolean> => {
+    if (!usuarioLogado) return false;
+
+    if (usuarioLogado.tipo === "PROPRIETARIO") return true;
+
+    if (usuarioLogado.tipo === "ADMIN") {
+      if (targetUser.tipo === "PROPRIETARIO") return false;
+
+      if (novoTipo === "ADMIN" || novoTipo === "PROPRIETARIO") return false;
+
+      if (targetUser.tipo !== "FUNCIONARIO") return false;
+
+      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_editar");
+      return temPermissao;
+    }
+
+    return false;
+  };
+  const [usuariosEditaveis, setUsuariosEditaveis] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const carregarPermissoesEdicao = async () => {
+      const editaveis: Record<string, boolean> = {};
+
+      for (const usuario of usuarios) {
+        editaveis[usuario.id] = await podeEditar(usuario);
+      }
+
+      setUsuariosEditaveis(editaveis);
+    };
+
+    if (usuarios.length > 0 && usuarioLogado) {
+      carregarPermissoesEdicao();
+    }
+  }, [usuarios, usuarioLogado]);
+
+  const podeEditarCargo = async (targetUser: UsuarioI, novoTipo: string): Promise<boolean> => {
+    if (!usuarioLogado) return false;
+
+    if (usuarioLogado.tipo === "PROPRIETARIO") {
       return true;
     }
+
+    if (usuarioLogado.tipo === "ADMIN") {
+      if (targetUser.tipo === "PROPRIETARIO") return false;
+      if (novoTipo === "PROPRIETARIO") return false;
+
+      const temPermissao = await usuarioTemPermissao(usuarioLogado.id, "usuarios_editar");
+      return temPermissao;
+    }
+
     return false;
   };
-
   const toggleExpandirUsuario = (id: string) => {
     setUsuarioExpandido(usuarioExpandido === id ? null : id);
   };
@@ -338,6 +701,21 @@ export default function Usuarios() {
     );
   }
 
+
+  if (temPermissaoVisualizar === false) {
+    return (
+      <div className="flex flex-col items-center justify-start min-h-screen px-4 pt-16 gap-4" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="text-center mt-8">
+          <h1 className="text-xl font-bold mb-2" style={{ color: temaAtual.texto }}>
+            {t("acessoNegado") || "Acesso Negado"}
+          </h1>
+          <p className="mb-4" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizarUsuarios") || "Você não tem permissão para visualizar a tela de usuários."}
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
@@ -474,7 +852,8 @@ export default function Usuarios() {
                         <td className="py-3 px-4">{formatarData(usuario.createdAt)}</td>
                         <td className="py-3 px-4">{formatarData(usuario.updatedAt)}</td>
                         <td className="py-3 px-4">
-                          {podeEditar(usuario) && (
+                          {usuariosEditaveis[usuario.id] && (
+
                             <FaCog
                               className="cursor-pointer transition hover:rotate-90"
                               onClick={() => {
@@ -536,17 +915,34 @@ export default function Usuarios() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {podeEditar(usuario) && (
-                          <FaCog
-                            className="cursor-pointer transition hover:rotate-90"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setModalEditarUsuario(usuario);
-                              setNovoTipo(usuario.tipo);
-                            }}
-                            style={{ color: temaAtual.primario }}
-                          />
+                        {usuariosEditaveis[usuario.id] && (
+                          <>
+                            <FaCog
+                              className="cursor-pointer transition hover:rotate-90 mx-1"
+                              onClick={() => {
+                                setModalEditarUsuario(usuario);
+                                setNovoTipo(usuario.tipo);
+                              }}
+                              style={{ color: temaAtual.primario }}
+                              title={t("editarUsuario")}
+                            />
+                            <FaLock
+                              className={`cursor-pointer transition mx-1 ${usuariosGerenciáveis[usuario.id] ? "hover:text-green-500" : "opacity-50 cursor-not-allowed"
+                                }`}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+
+                                if (!usuariosGerenciáveis[usuario.id]) return;
+
+                                setModalPermissoes(usuario);
+                                await carregarPermissoesUsuario(usuario.id);
+                              }}
+                              style={{ color: temaAtual.secundario }}
+                              title={usuariosGerenciáveis[usuario.id] ? t("gerenciarPermissoes") : t("semPermissaoGerenciar")}
+                            />
+                          </>
                         )}
+
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -741,9 +1137,9 @@ export default function Usuarios() {
       )}
 
       {modalEditarUsuario && (
-        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0,0,0,0.8)" }}>
           <div
-            className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="p-6 rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
@@ -756,24 +1152,55 @@ export default function Usuarios() {
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.alterarCargo")}</label>
               <select
-                value={novoTipo}
-                onChange={(e) => setNovoTipo(e.target.value)}
-                className="w-full rounded cursor-pointer p-2 border"
+              value={novoTipo}
+              onChange={(e) => setNovoTipo(e.target.value)}
+              className="w-full rounded cursor-pointer p-2 border text-sm"
+              style={{
+                backgroundColor: temaAtual.card,
+                color: temaAtual.texto,
+                borderColor: temaAtual.borda,
+                appearance: "none",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+              }}
+              >
+              <option
+                value="FUNCIONARIO"
+                style={{
+                backgroundColor: temaAtual.card,
+                color: temaAtual.texto,
+                }}
+              >
+                {t("modal.funcionario")}
+              </option>
+              {usuarioLogado?.tipo === "PROPRIETARIO" && (
+                <option
+                value="ADMIN"
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  borderColor: temaAtual.borda
                 }}
-              >
-                <option value="FUNCIONARIO">{t("modal.funcionario")}</option>
-                <option value="ADMIN">{t("modal.admin")}</option>
-                <option value="PROPRIETARIO">{t("modal.proprietario")}</option>
+                >
+                {t("modal.admin")}
+                </option>
+              )}
+              {usuarioLogado?.tipo === "PROPRIETARIO" && (
+                <option
+                value="PROPRIETARIO"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                }}
+                >
+                {t("modal.proprietario")}
+                </option>
+              )}
               </select>
             </div>
 
-            <div className="flex justify-between gap-2">
+            <div className="flex flex-wrap justify-between gap-2">
               <button
-                className="px-4 py-2 cursor-pointer rounded transition"
+                className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
                 style={{
                   backgroundColor: temaAtual.hover,
                   color: temaAtual.texto,
@@ -783,14 +1210,16 @@ export default function Usuarios() {
                 {t("modal.cancelar")}
               </button>
               <button
-                className="px-4 cursor-pointer py-2 rounded transition"
+                className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
                 style={{
                   backgroundColor: "#10B981",
                   color: "#FFFFFF",
                 }}
                 onClick={async () => {
                   if (!usuarioLogado || !modalEditarUsuario) return;
-                  if (!podeEditarCargo(usuarioLogado.tipo, modalEditarUsuario.tipo, novoTipo)) {
+
+                  const podeAlterar = await podeAlterarCargo(modalEditarUsuario, novoTipo);
+                  if (!podeAlterar) {
                     Swal.fire(
                       t("modal.erroPermissao.titulo"),
                       t("modal.erroPermissao.texto"),
@@ -798,13 +1227,11 @@ export default function Usuarios() {
                     );
                     return;
                   }
-
                   const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${modalEditarUsuario.id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ tipo: novoTipo }),
                   });
-
                   if (res.ok) {
                     Swal.fire(
                       t("modal.cargoAtualizado"),
@@ -825,7 +1252,30 @@ export default function Usuarios() {
                 {t("modal.salvarCargo")}
               </button>
               <button
-                className="px-4 cursor-pointer py-2 rounded transition"
+                className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
+                style={{
+                  backgroundColor: temaAtual.secundario,
+                  color: "#FFFFFF",
+                }}
+                onClick={async () => {
+                  if (!modalEditarUsuario) return;
+                  const podeGerenciar = await podeGerenciarPermissoesUsuario(modalEditarUsuario);
+                  if (!podeGerenciar) {
+                    Swal.fire(
+                      t("modal.erroPermissao.titulo"),
+                      t("modal.erroPermissao.texto"),
+                      "warning"
+                    );
+                    return;
+                  }
+                  setModalPermissoes(modalEditarUsuario);
+                  await carregarPermissoesUsuario(modalEditarUsuario.id);
+                }}
+              >
+                {t("gerenciarPermissoes")}
+              </button>
+              <button
+                className="px-3 py-1.5 text-sm cursor-pointer rounded transition"
                 style={{
                   backgroundColor: "#EF4444",
                   color: "#FFFFFF",
@@ -835,6 +1285,132 @@ export default function Usuarios() {
                 {t("modal.remover")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {modalPermissoes && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0,0,0,0.8)" }}>
+          <div
+            className="relative p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: temaAtual.card,
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`
+            }}
+          >
+            <button
+              onClick={() => setModalPermissoes(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-xl font-bold mb-4">
+              {t("modal.permissoesUsuario")} - {modalPermissoes.nome}
+            </h2>
+
+            <div className="mb-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={permissoesPersonalizadas}
+                  onChange={(e) => setPermissoesPersonalizadas(e.target.checked)}
+                  className="rounded"
+                />
+                <span>{t("modal.permissoesPersonalizadas")}</span>
+              </label>
+              <p className="text-sm text-gray-500 mt-1">
+                {t("modal.permissoesPersonalizadasDescricao")}
+              </p>
+            </div>
+
+            {permissoesPersonalizadas ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 max-h-96 overflow-y-auto">
+                  {permissoes.map(permissao => {
+                    const usuarioPermissao = permissoesUsuario.find(p => p.id === permissao.id);
+                    const concedida = usuarioPermissao?.concedida || false;
+                    return (
+                      <div key={permissao.id} className="flex items-center gap-2 p-2 border rounded">
+                        <input
+                          type="checkbox"
+                          checked={concedida}
+                          onChange={(e) => atualizarPermissao(permissao.id, e.target.checked)}
+                          className="rounded"
+                        />
+                        <div>
+                          <div className="font-medium">{permissao.nome}</div>
+                          <div className="text-xs text-gray-500">{permissao.descricao}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-between gap-2">
+                  <button
+                    className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                    style={{
+                      backgroundColor: temaAtual.hover,
+                      color: temaAtual.texto,
+                    }}
+                    onClick={redefinirPermissoesPadrao}
+                  >
+                    {t("modal.redefinirPadrao")}
+                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                      style={{
+                        backgroundColor: temaAtual.hover,
+                        color: temaAtual.texto,
+                      }}
+                      onClick={() => setModalPermissoes(null)}
+                    >
+                      {t("modal.cancelar")}
+                    </button>
+                    <button
+                      className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                      style={{
+                        backgroundColor: "#10B981",
+                        color: "#FFFFFF",
+                      }}
+                      onClick={salvarPermissoes}
+                    >
+                      {t("modal.salvarPermissoes")}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-end gap-2 mt-6">
+                <button
+                  className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                  style={{
+                    backgroundColor: temaAtual.hover,
+                    color: temaAtual.texto,
+                  }}
+                  onClick={() => setModalPermissoes(null)}
+                >
+                  {t("modal.cancelar")}
+                </button>
+                <button
+                  className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                  style={{
+                    backgroundColor: "#10B981",
+                    color: "#FFFFFF",
+                  }}
+                  onClick={async () => {
+                    await redefinirPermissoesPadrao();
+                    setModalPermissoes(null);
+                  }}
+                >
+                  {t("modal.confirmar")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

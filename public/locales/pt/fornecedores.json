@@ -3,13 +3,13 @@
   "buscar": "Buscar fornecedores",
   "selecionarImagem": "Selecionar Imagem",
   "novoFornecedor": "Novo Fornecedor",
-  "nenhumFornecedorEncontrado": "Nenhum fornecedor encontrado.",
+  "nenhumFornecedorEncontrado": "Nenhum fornecedor foi encontrado.",
   "foto": "Foto",
   "nome": "Nome",
   "cnpj": "CNPJ",
   "email": "E-mail",
   "escolherArquivo": "Escolher Arquivo",
-  "nenhumArquivoEscolhido": "Nenhum arquivo escolhido",
+  "nenhumArquivoEscolhido": "Nenhum arquivo foi escolhido",
   "telefone": "Telefone",
   "categoria": "Categoria",
   "adicionadoEm": "Adicionado em",
@@ -20,26 +20,26 @@
   "fechar": "Fechar",
   "salvar": "Salvar",
   "excluir": "Excluir",
+  "semPermissaoVisualizar": "Você não possui permissão para visualizar fornecedores.",
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",
-    "mensagem": "Sua empresa ainda não foi ativada. Ative para continuar.",
+    "mensagem": "Por favor, ative sua empresa para realizar esta ação.",
     "botao": "Ativar agora",
-    "alertaTitulo": "Empresa não ativada!",
-    "alertaMensagem": "Você precisa ativar sua empresa para acessar todas as funcionalidades."
+    "alertaTitulo": "Empresa não ativada",
+    "alertaMensagem": "Algumas ações estão desabilitadas até a ativação da empresa."
   },
   "mensagens": {
-    "fornecedorAdicionado": "Fornecedor adicionado com sucesso!",
-    "fornecedorAtualizado": "Fornecedor atualizado com sucesso!",
+    "fornecedorAdicionado": "Fornecedor adicionado com sucesso.",
+    "fornecedorAtualizado": "Fornecedor atualizado com sucesso.",
     "erro": "Erro",
-    "erroAdicionar": "Erro ao adicionar fornecedor.",
-    "erroAtualizar": "Erro ao atualizar fornecedor.",
-    "temCerteza": "Tem certeza?",
-    "naoReverter": "Esta ação não pode ser desfeita!",
-    "simDeletar": "Sim, deletar!",
+    "erroAdicionar": "Falha ao adicionar fornecedor.",
+    "erroAtualizar": "Falha ao atualizar fornecedor.",
+    "temCerteza": "Você tem certeza?",
+    "naoReverter": "Esta ação não pode ser desfeita.",
+    "simDeletar": "Sim, deletar",
     "cancelar": "Cancelar",
-    "deletado": "Deletado!",
-    "produtoExcluido": "Fornecedor excluído com sucesso.",
-    "erroDeletar": "Erro ao excluir fornecedor."
-    
+    "deletado": "Deletado",
+    "produtoExcluido": "Fornecedor removido com sucesso.",
+    "erroDeletar": "Falha ao deletar fornecedor."
   }
 }

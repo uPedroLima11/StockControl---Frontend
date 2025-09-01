@@ -27,6 +27,7 @@ export default function Exportacoes() {
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [paginaAtual, setPaginaAtual] = useState(1);
     const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+    const [temPermissaoExportar, setTemPermissaoExportar] = useState<boolean | null>(null);
     const router = useRouter();
     const { t, i18n } = useTranslation("exportacoes");
 
@@ -57,6 +58,22 @@ export default function Exportacoes() {
 
     const temaAtual = modoDark ? cores.dark : cores.light;
 
+    const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`
+            );
+            if (response.ok) {
+                const data = await response.json();
+                return data.temPermissao;
+            }
+            return false;
+        } catch (error) {
+            console.error("Erro ao verificar permissão:", error);
+            return false;
+        }
+    };
+
     useEffect(() => {
         const initialize = async () => {
             const temaSalvo = localStorage.getItem("modoDark");
@@ -67,6 +84,12 @@ export default function Exportacoes() {
             if (!usuarioSalvo) return;
 
             const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+            const temPermissao = await usuarioTemPermissao(usuarioValor, "exportar_dados");
+            setTemPermissaoExportar(temPermissao);
+
+            if (!temPermissao) return;
+
             const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
 
             if (responseUsuario.ok) {
@@ -110,7 +133,22 @@ export default function Exportacoes() {
         });
     };
 
+    const mostrarAlertaSemPermissao = () => {
+        Swal.fire({
+            title: t("semPermissao.titulo") || "Permissão Negada",
+            text: t("semPermissao.mensagem") || "Você não tem permissão para exportar dados.",
+            icon: "warning",
+            confirmButtonText: t("semPermissao.botao") || "OK",
+            confirmButtonColor: "#3085d6",
+        });
+    };
+
     const handleAcaoProtegida = (acao: () => void) => {
+        if (temPermissaoExportar === false) {
+            mostrarAlertaSemPermissao();
+            return;
+        }
+
         if (!empresaAtivada) {
             mostrarAlertaNaoAtivada();
             return;
@@ -120,7 +158,7 @@ export default function Exportacoes() {
 
     const handleExport = async (entityType: string) => {
         handleAcaoProtegida(async () => {
-            if (!empresaId) return;
+            if (!empresaId || temPermissaoExportar === false) return;
 
             setLoading(true);
             try {
@@ -176,7 +214,7 @@ export default function Exportacoes() {
     };
 
     const fetchExportHistory = async () => {
-        if (!empresaId) return;
+        if (!empresaId || temPermissaoExportar === false) return;
 
         setCarregandoHistorico(true);
         try {
@@ -257,6 +295,31 @@ export default function Exportacoes() {
         fornecedores: t("entidades.fornecedores"),
         usuarios: t("entidades.usuarios")
     };
+
+
+    if (temPermissaoExportar === false) {
+        return (
+            <div className="flex flex-col items-center justify-start min-h-screen px-4 py-8 gap-4" style={{ backgroundColor: temaAtual.fundo }}>
+                <div className="w-full max-w-md mt-8">
+                    <h1 className="text-xl font-bold mb-2 text-center" style={{ color: temaAtual.texto }}>
+                        {t("acessoNegado.titulo") || "Acesso Negado"}
+                    </h1>
+                    <p className="text-center" style={{ color: temaAtual.texto }}>
+                        {t("acessoNegado.mensagem") || "Você não tem permissão para acessar esta funcionalidade."}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (temPermissaoExportar === null) {
+        return (
+            <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+                <p style={{ color: temaAtual.texto }}>{t("carregando") || "Carregando..."}</p>
+            </div>
+        );
+    }
+
 
     return (
         <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
@@ -361,18 +424,18 @@ export default function Exportacoes() {
                                     backgroundColor: temaAtual.card,
                                     border: `1px solid ${temaAtual.borda}`,
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = temaAtual.hover;
-                                    e.currentTarget.style.transform = "translateY(-2px)";
-                                    e.currentTarget.style.boxShadow = modoDark
-                                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = temaAtual.card;
-                                    e.currentTarget.style.transform = "translateY(0)";
-                                    e.currentTarget.style.boxShadow = "none";
-                                }}>
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = temaAtual.hover;
+                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                        e.currentTarget.style.boxShadow = modoDark
+                                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
+                                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = temaAtual.card;
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                    }}>
                                     <h3 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{name}</h3>
                                     <button
                                         onClick={() => handleExport(key)}
@@ -467,16 +530,16 @@ export default function Exportacoes() {
                                                 borderColor: temaAtual.borda,
                                                 backgroundColor: isExpanded ? temaAtual.hover : temaAtual.card,
                                             }}
-                                            onMouseEnter={(e) => {
-                                                if (!isExpanded) {
-                                                    e.currentTarget.style.backgroundColor = temaAtual.hover;
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isExpanded) {
-                                                    e.currentTarget.style.backgroundColor = temaAtual.card;
-                                                }
-                                            }}>
+                                                onMouseEnter={(e) => {
+                                                    if (!isExpanded) {
+                                                        e.currentTarget.style.backgroundColor = temaAtual.hover;
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isExpanded) {
+                                                        e.currentTarget.style.backgroundColor = temaAtual.card;
+                                                    }
+                                                }}>
                                                 <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpand(item.id)}>
                                                     <div className="flex-1">
                                                         <p className="font-medium" style={{ color: temaAtual.texto }}>
@@ -549,7 +612,7 @@ export default function Exportacoes() {
                                                 onClick={() => mudarPagina(paginaAtual - 1)}
                                                 disabled={paginaAtual === 1}
                                                 className={`px-3 py-1 rounded ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{ 
+                                                style={{
                                                     color: temaAtual.texto,
                                                     backgroundColor: temaAtual.card,
                                                     border: `1px solid ${temaAtual.borda}`
@@ -582,7 +645,7 @@ export default function Exportacoes() {
                                                 onClick={() => mudarPagina(paginaAtual + 1)}
                                                 disabled={paginaAtual === totalPaginas}
                                                 className={`px-3 py-1 rounded ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{ 
+                                                style={{
                                                     color: temaAtual.texto,
                                                     backgroundColor: temaAtual.card,
                                                     border: `1px solid ${temaAtual.borda}`

@@ -19,11 +19,22 @@
       "titulo": "Empresa Não Ativada",
       "mensagem": "Ative sua empresa para utilizar a exportação de dados"
     },
-    "filtros": {
-      "titulo": "Filtros",
-      "dataInicial": "Data Inicial",
-      "dataFinal": "Data Final"
-    },
+
+  "acessoNegado": {
+    "titulo": "Acesso Negado",
+    "mensagem": "Você não tem permissão para acessar a funcionalidade de exportação."
+  },
+  "semPermissao": {
+    "titulo": "Permissão Negada",
+    "mensagem": "Você não tem permissão para exportar dados.",
+    "botao": "OK"
+  },
+  "carregando": "Carregando permissões...",
+  "filtros": {
+    "titulo": "Filtros",
+    "dataInicial": "Data Inicial",
+    "dataFinal": "Data Final"
+  },
     "entidades": {
       "produtos": "Produtos",
       "vendas": "Vendas",

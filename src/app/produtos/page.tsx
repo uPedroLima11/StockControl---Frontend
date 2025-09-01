@@ -26,6 +26,7 @@ export default function Produtos() {
   const produtosPorPagina = 10;
   const { t } = useTranslation("produtos");
   const router = useRouter();
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
 
   const [form, setForm] = useState<ProdutoI>({
     id: "",
@@ -79,6 +80,109 @@ export default function Produtos() {
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 
+
+
+  const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return false;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
+        {
+          headers: {
+            'user-id': usuarioId
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+          {
+            headers: {
+              'user-id': usuarioId
+            }
+          }
+        );
+
+        if (response.ok) {
+          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
+
+          const permissoesUsuarioObj: Record<string, boolean> = {};
+          dados.permissoes.forEach(permissao => {
+            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+          });
+
+          setPermissoesUsuario(permissoesUsuarioObj);
+        } else {
+          const permissoesParaVerificar = [
+            "produtos_criar",
+            "produtos_editar",
+            "produtos_excluir",
+            "produtos_visualizar"
+          ];
+
+          const permissoes: Record<string, boolean> = {};
+
+          for (const permissao of permissoesParaVerificar) {
+            const temPermissao = await usuarioTemPermissao(permissao);
+            permissoes[permissao] = temPermissao;
+          }
+
+          setPermissoesUsuario(permissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    };
+
+    carregarPermissoes();
+  }, []);
+
+  useEffect(() => {
+    console.log("Permissões do usuário:", permissoesUsuario);
+    console.log("Tipo do usuário:", tipoUsuario);
+    console.log("Pode visualizar:", podeVisualizar);
+  }, [permissoesUsuario, tipoUsuario]);
+
+  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.produtos_visualizar;
+
+  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.produtos_criar;
+
+  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.produtos_editar;
+
+  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.produtos_excluir;
+
+  const podeGerenciarCatalogo = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.produtos_editar;
+
+
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -129,7 +233,11 @@ export default function Produtos() {
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
       if (!responseUsuario.ok) {
         console.error("Erro ao buscar os dados do usuário");
         return;
@@ -156,13 +264,21 @@ export default function Produtos() {
         }
       }
 
-      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
+      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
       if (responseFornecedores.ok) {
         const fornecedoresData = await responseFornecedores.json();
         setFornecedores(fornecedoresData);
       }
 
-      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
+      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
       if (responseCategorias.ok) {
         const categoriasData = await responseCategorias.json();
         setCategorias(categoriasData);
@@ -216,12 +332,17 @@ export default function Produtos() {
   };
 
   const toggleCatalogo = async (produtoId: string, noCatalogo: boolean) => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produtoId}/catalogo`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            'user-id': usuarioValor
           },
           body: JSON.stringify({ noCatalogo: !noCatalogo }),
         });
@@ -229,13 +350,16 @@ export default function Produtos() {
         if (response.ok) {
           const produtoAtualizado = await response.json();
 
-          setProdutos(produtos.map(p =>
-            p.id === produtoId ? { ...p, noCatalogo: produtoAtualizado.noCatalogo } : p
-          ));
+          setProdutos(prevProdutos =>
+            prevProdutos.map(p =>
+              p.id === produtoId
+                ? { ...p, noCatalogo: produtoAtualizado.noCatalogo }
+                : p
+            )
+          );
 
           if (modalVisualizar && modalVisualizar.id === produtoId) {
-            setModalVisualizar({ ...modalVisualizar, noCatalogo: produtoAtualizado.noCatalogo });
-            setForm({ ...form, noCatalogo: produtoAtualizado.noCatalogo });
+            setModalVisualizar(prev => prev ? { ...prev, noCatalogo: produtoAtualizado.noCatalogo } : null);
           }
 
           Swal.fire({
@@ -256,7 +380,6 @@ export default function Produtos() {
       }
     });
   };
-
   const handleSubmit = async () => {
     handleAcaoProtegida(async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -266,6 +389,7 @@ export default function Produtos() {
         Swal.fire("Erro", "Empresa não identificada.", "error");
         return;
       }
+
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
       if (!empresaAtivada) {
@@ -296,6 +420,9 @@ export default function Produtos() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
           method: "POST",
           body: formData,
+          headers: {
+            'user-id': usuarioValor
+          }
         });
 
         if (response.ok) {
@@ -378,6 +505,9 @@ export default function Produtos() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
           method: "PUT",
           body: formData,
+          headers: {
+            'user-id': usuarioValor
+          }
         });
 
         if (response.ok) {
@@ -438,10 +568,16 @@ export default function Produtos() {
         cancelButtonText: t("confirmacaoExclusao.botaoCancelar"),
       });
 
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (result.isConfirmed) {
         try {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
             method: "DELETE",
+            headers: {
+              'user-id': usuarioValor
+            }
           });
           Swal.fire(
             t("produtoExcluidoSucesso.titulo"),
@@ -467,8 +603,6 @@ export default function Produtos() {
   const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
   const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
 
-  const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
-
   const toggleExpandirProduto = (id: string) => {
     setProdutoExpandido(produtoExpandido === id ? null : id);
   };
@@ -482,12 +616,28 @@ export default function Produtos() {
     setProdutoExpandido(null);
   };
 
+  if (!podeVisualizar) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizar")}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
         <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
+
 
         {empresaId && !empresaAtivada && (
           <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
@@ -554,7 +704,7 @@ export default function Produtos() {
             )}
           </div>
 
-          {podeEditar && (
+          {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm cursor-pointer"
@@ -649,16 +799,18 @@ export default function Produtos() {
                           R$ {formatarPreco(produto.preco)}
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleCatalogo(produto.id, produto.noCatalogo);
-                            }}
-                            className="p-1 text-yellow-500 hover:text-yellow-300 transition"
-                            title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
-                          >
-                            {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
-                          </button>
+                          {podeGerenciarCatalogo && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCatalogo(produto.id, produto.noCatalogo);
+                              }}
+                              className="p-1 text-yellow-500 hover:text-yellow-300 transition"
+                              title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
+                            >
+                              {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -714,13 +866,15 @@ export default function Produtos() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleCatalogo(produto.id, produto.noCatalogo)}
-                          className="text-yellow-500 hover:text-yellow-300 p-1"
-                          title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
-                        >
-                          {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
-                        </button>
+                        {podeGerenciarCatalogo && (
+                          <button
+                            onClick={() => toggleCatalogo(produto.id, produto.noCatalogo)}
+                            className="text-yellow-500 hover:text-yellow-300 p-1"
+                            title={produto.noCatalogo ? t("removerDoCatalogo") : t("adicionarAoCata")}
+                          >
+                            {produto.noCatalogo ? <FaStar /> : <FaRegStar />}
+                          </button>
+                        )}
 
                         <button
                           onClick={() => toggleExpandirProduto(produto.id)}
@@ -767,20 +921,22 @@ export default function Produtos() {
                           </div>
                         )}
                         <div className="mt-3 flex justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setModalVisualizar(produto);
-                              setForm(produto);
-                            }}
-                            className="px-3 py-1 text-sm rounded border"
-                            style={{
-                              backgroundColor: temaAtual.primario,
-                              borderColor: temaAtual.primario,
-                              color: "#FFFFFF",
-                            }}
-                          >
-                            {t("editar")}
-                          </button>
+                          {podeEditar && (
+                            <button
+                              onClick={() => {
+                                setModalVisualizar(produto);
+                                setForm(produto);
+                              }}
+                              className="px-3 py-1 text-sm rounded border"
+                              style={{
+                                backgroundColor: temaAtual.primario,
+                                borderColor: temaAtual.primario,
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              {t("editar")}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1030,16 +1186,18 @@ export default function Produtos() {
                       >
                         {t("salvar")}
                       </button>
-                      <button
-                        onClick={handleDelete}
-                        className="cursor-pointer px-4 py-2 rounded"
-                        style={{
-                          backgroundColor: "#EF4444",
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        {t("excluir")}
-                      </button>
+                      {podeExcluir && (
+                        <button
+                          onClick={handleDelete}
+                          className="cursor-pointer px-4 py-2 rounded"
+                          style={{
+                            backgroundColor: "#EF4444",
+                            color: "#FFFFFF",
+                          }}
+                        >
+                          {t("excluir")}
+                        </button>
+                      )}
                     </>
                   )
                 ) : (

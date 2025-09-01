@@ -7,6 +7,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
+import { usuarioTemPermissao } from "@/utils/permissoes";
 
 interface Empresa {
   slug: string;
@@ -38,6 +39,8 @@ export default function Empresa() {
   const { logar } = useUsuarioStore();
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("empresa");
+  const [temPermissaoGerenciar, setTemPermissaoGerenciar] = useState(false);
+  const [carregandoPermissao, setCarregandoPermissao] = useState(true);
 
   const cores = {
     dark: {
@@ -99,6 +102,18 @@ export default function Empresa() {
     setModoDark(ativo);
   }, []);
 
+  const verificarPermissaoGerenciar = async (userId: string) => {
+    try {
+      const temPermissao = await usuarioTemPermissao(userId, "empresa_gerenciar");
+      setTemPermissaoGerenciar(temPermissao);
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      setTemPermissaoGerenciar(false);
+    } finally {
+      setCarregandoPermissao(false);
+    }
+  };
+
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -106,6 +121,7 @@ export default function Empresa() {
         const dados = await response.json();
         logar(dados);
         setTipoUsuario(dados.tipo as TipoUsuario);
+        await verificarPermissaoGerenciar(idUsuario);
       }
     }
 
@@ -190,16 +206,19 @@ export default function Empresa() {
   };
 
   const toggleCatalogoPublico = async () => {
-    if (!empresa || atualizandoCatalogo) return;
+    if (!empresa || atualizandoCatalogo || !temPermissaoGerenciar) return;
 
     setAtualizandoCatalogo(true);
     try {
       const novoEstado = !empresa.catalogoPublico;
 
+      const usuarioSalvo = localStorage.getItem("client_key") as string;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresa.id}/catalogo`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "user-id": usuarioValor
         },
         body: JSON.stringify({
           catalogoPublico: novoEstado
@@ -240,7 +259,7 @@ export default function Empresa() {
   };
 
   const editarDadosEmpresa = async () => {
-    if (!empresaEditada) return;
+    if (!empresaEditada || !temPermissaoGerenciar) return;
 
     try {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
@@ -266,6 +285,9 @@ export default function Empresa() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}/${usuarioValor}`, {
         method: "PUT",
         body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
       });
 
       if (!res.ok) throw new Error(t("erros.erroAtualizarEmpresa"));
@@ -362,7 +384,7 @@ export default function Empresa() {
     }
   };
 
-  if (loading) {
+  if (loading || carregandoPermissao) {
     return (
       <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
         <p className="font-mono" style={{ color: temaAtual.texto }}>
@@ -450,43 +472,45 @@ export default function Empresa() {
                     : t("catalogo.desativado")}
                 </strong>
               </span>
-              <button
-                onClick={toggleCatalogoPublico}
-                disabled={atualizandoCatalogo}
-                className={`px-3 py-1 cursor-pointer rounded text-sm font-medium transition ${empresa.catalogoPublico
-                  ? "bg-red-100 text-red-800 hover:bg-red-200"
-                  : "bg-green-100 text-green-800 hover:bg-green-200"
-                  } disabled:opacity-50 w-fit`}
-              >
-                {atualizandoCatalogo
-                  ? t("catalogo.processando")
-                  : empresa.catalogoPublico
-                    ? t("catalogo.desativar")
-                    : t("catalogo.ativar")}
-              </button>
+              {temPermissaoGerenciar && (
+                <button
+                  onClick={toggleCatalogoPublico}
+                  disabled={atualizandoCatalogo}
+                  className={`px-3 py-1 cursor-pointer rounded text-sm font-medium transition ${empresa.catalogoPublico
+                    ? "bg-red-100 text-red-800 hover:bg-red-200"
+                    : "bg-green-100 text-green-800 hover:bg-green-200"
+                    } disabled:opacity-50 w-fit`}
+                >
+                  {atualizandoCatalogo
+                    ? t("catalogo.processando")
+                    : empresa.catalogoPublico
+                      ? t("catalogo.desativar")
+                      : t("catalogo.ativar")}
+                </button>
+              )}
             </div>
 
             <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>{t("catalogo.disponivelEm")}</p>
             <a
               href={`${process.env.NEXT_PUBLIC_APP_URL ||
-              (typeof window !== "undefined"
-                ? window.location.origin
-                : "https://stockcontrol-six.vercel.app")
-              }/catalogo/${empresa.slug}`}
+                (typeof window !== "undefined"
+                  ? window.location.origin
+                  : "https://stockcontrol-six.vercel.app")
+                }/catalogo/${empresa.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-2 rounded text-sm break-all font-mono transition hover:opacity-80"
               style={{
-              backgroundColor: temaAtual.primario + "20",
-              color: "#22c55e", 
-              border: `1px solid #22c55e40`,
+                backgroundColor: temaAtual.primario + "20",
+                color: "#22c55e",
+                border: `1px solid #22c55e40`,
               }}
             >
               {`${process.env.NEXT_PUBLIC_APP_URL ||
-              (typeof window !== "undefined"
-                ? window.location.origin
-                : "https://stockcontrol-six.vercel.app")
-              }/catalogo/${empresa.slug}`}
+                (typeof window !== "undefined"
+                  ? window.location.origin
+                  : "https://stockcontrol-six.vercel.app")
+                }/catalogo/${empresa.slug}`}
             </a>
 
             <p className="text-sm mt-2" style={{ color: temaAtual.texto }}>{t("catalogo.avisoClientes")}</p>
@@ -510,7 +534,7 @@ export default function Empresa() {
                 style={{ borderColor: temaAtual.borda }}
               />
             )}
-            {tipoUsuario !== "FUNCIONARIO" && (
+            {temPermissaoGerenciar && (
               <button
                 onClick={() => {
                   setEmpresaEditada(empresa);
@@ -535,7 +559,7 @@ export default function Empresa() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            {(tipoUsuario === "PROPRIETARIO" || tipoUsuario === "ADMIN") && (
+            {temPermissaoGerenciar && (
               <button
                 onClick={() => {
                   setEmpresaEditada(empresa);

@@ -27,7 +27,7 @@ export default function Clientes() {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
-
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [busca, setBusca] = useState("");
   const [clienteExpandido, setClienteExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -66,6 +66,95 @@ export default function Clientes() {
   };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return false;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
+        {
+          headers: {
+            'user-id': usuarioId
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+          {
+            headers: {
+              'user-id': usuarioId
+            }
+          }
+        );
+
+        if (response.ok) {
+          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
+
+          const permissoesUsuarioObj: Record<string, boolean> = {};
+          dados.permissoes.forEach(permissao => {
+            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+          });
+
+          setPermissoesUsuario(permissoesUsuarioObj);
+        } else {
+          const permissoesParaVerificar = [
+            "clientes_criar",
+            "clientes_editar",
+            "clientes_excluir",
+            "clientes_visualizar"
+          ];
+
+          const permissoes: Record<string, boolean> = {};
+
+          for (const permissao of permissoesParaVerificar) {
+            const temPermissao = await usuarioTemPermissao(permissao);
+            permissoes[permissao] = temPermissao;
+          }
+
+          setPermissoesUsuario(permissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    };
+
+    carregarPermissoes();
+  }, []);
+
+  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.clientes_visualizar;
+
+  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.clientes_criar;
+
+  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.clientes_editar;
+
+  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.clientes_excluir;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -206,6 +295,21 @@ export default function Clientes() {
     initialize();
   }, []);
 
+  if (!podeVisualizar) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizar")}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const clientesDaEmpresa = empresaId
     ? clientes.filter(cliente => cliente.empresaId === empresaId)
     : [];
@@ -237,10 +341,12 @@ export default function Clientes() {
         return;
       }
 
+      const usuarioValor = localStorage.getItem("client_key")?.replace(/"/g, "");
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "user-id": usuarioValor || "",
         },
         body: JSON.stringify({
           ...form,
@@ -268,6 +374,9 @@ export default function Clientes() {
   }
 
   async function handleSalvarCliente() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
@@ -282,6 +391,7 @@ export default function Clientes() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "user-id": usuarioValor || "",
           },
           body: JSON.stringify(form),
         });
@@ -310,6 +420,10 @@ export default function Clientes() {
   }
 
   async function handleDelete() {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
       if (!modalVisualizar) return;
 
@@ -334,6 +448,9 @@ export default function Clientes() {
         try {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes/${modalVisualizar.id}`, {
             method: "DELETE",
+            headers: {
+              'user-id': usuarioValor
+            }
           });
           Swal.fire(
             t("sucesso.excluir.titulo"),
@@ -396,8 +513,6 @@ export default function Clientes() {
       minute: "2-digit",
     });
   }
-
-  const podeEditar = (tipoUsuario === "ADMIN" || tipoUsuario === "PROPRIETARIO") && empresaAtivada;
 
   const toggleExpandirCliente = (id: string) => {
     setClienteExpandido(clienteExpandido === id ? null : id);
@@ -475,7 +590,7 @@ export default function Clientes() {
             )}
           </div>
 
-          {podeEditar && (
+          {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 rounded-lg transition cursor-pointer font-mono text-sm"
@@ -915,16 +1030,18 @@ export default function Clientes() {
                     >
                       {t("salvar")}
                     </button>
-                    <button
-                      onClick={handleDelete}
-                      className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
-                      style={{
-                        backgroundColor: "#EF4444",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {t("excluir")}
-                    </button>
+                    {podeExcluir && (
+                      <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
+                        style={{
+                          backgroundColor: "#EF4444",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        {t("excluir")}
+                      </button>
+                    )}
                   </>
                 )
               ) : (
