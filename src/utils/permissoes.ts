@@ -26,7 +26,7 @@ export const carregarPermissoesUsuario = async (userId: string) => {
     }
     return null;
   } catch (error) {
-    console.error("Erro ao carregar permissões:", error);
+    console.error("Erro ao carregar as permissões:", error);
     return null;
   }
 };
