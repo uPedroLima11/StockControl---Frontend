@@ -26,6 +26,8 @@ export default function Sidebar() {
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
   const idsNotificacoesTocadasRef = useRef<Set<string>>(new Set());
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
+  const [ultimaVerificacao, setUltimaVerificacao] = useState<number>(0);
+
 
 
   const cores = {
@@ -39,32 +41,20 @@ export default function Sidebar() {
 
   const limparNotificacoesLidas = useCallback(async (idUsuario: string) => {
     try {
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-      const notificacoes: NotificacaoI[] = await resposta.json();
+      const idsSalvos = localStorage.getItem(`idsNotificacoesSom_${idUsuario}`);
+      if (idsSalvos) {
+        const idsArray = JSON.parse(idsSalvos);
+        const idsLimitadas = idsArray.slice(-50);
+        localStorage.setItem(`idsNotificacoesSom_${idUsuario}`, JSON.stringify(idsLimitadas));
+      }
 
-      const notificacoesLidas = notificacoes.filter((n: NotificacaoI) => {
-        if (n.empresaId) {
-          return n.NotificacaoLida && n.NotificacaoLida.length > 0;
-        }
-        return n.lida;
-      });
+      localStorage.removeItem(`idsNotificacoesTocadas_${idUsuario}`);
 
-      const idsLidos = notificacoesLidas.map(n => n.id);
-
-      const idsAtuais = Array.from(idsNotificacoesTocadasRef.current);
-      const idsParaManter = idsAtuais.filter(id => !idsLidos.includes(id));
-
-      idsNotificacoesTocadasRef.current = new Set(idsParaManter);
-      localStorage.setItem(`idsNotificacoesTocadas_${idUsuario}`, JSON.stringify(idsParaManter));
-
-      console.log('IDs de notificações lidas removidos:', idsLidos.length);
-
+      console.log('IDs antigas limpas, mantendo histórico recente');
     } catch (erro) {
       console.error("Erro ao limpar notificações lidas:", erro);
     }
   }, []);
-
-
 
   const verificarEstoque = async () => {
     try {
@@ -107,24 +97,39 @@ export default function Sidebar() {
   }, []);
 
   const tocarSomNotificacao = useCallback(async () => {
-    if (!audioInicializado || !audioRef.current) return;
+    if (!audioRef.current) {
+      inicializarAudio();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
     const somAtivado = localStorage.getItem("somNotificacao") !== "false";
-    if (!somAtivado) return;
+    if (!somAtivado) {
+      return;
+    }
 
     try {
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
+      const audio = new Audio("/notification-sound.mp3");
+      audio.volume = 0.3;
+
+      await audio.play();
     } catch (erro) {
       console.error("Erro ao reproduzir som:", erro);
+
+      if (audioRef.current) {
+        try {
+          audioRef.current.currentTime = 0;
+          await audioRef.current.play();
+        } catch (fallbackError) {
+          console.error("Erro no fallback também:", fallbackError);
+        }
+      }
     }
-  }, [audioInicializado]);
+  }, [inicializarAudio]);
 
   const verificarNotificacoes = useCallback(async (idUsuario: string) => {
     try {
       const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
       const notificacoes: NotificacaoI[] = await resposta.json();
-
 
       const notificacoesFiltradas = notificacoes.filter(n => {
         if (!n.empresaId) {
@@ -141,38 +146,28 @@ export default function Sidebar() {
         return !n.lida;
       });
 
-
       notificacoesNaoLidasRef.current = notificacoesNaoLidas;
       setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
 
-      const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${idUsuario}`);
-      const idsTocados = idsSalvos ? new Set<string>(JSON.parse(idsSalvos) as string[]) : new Set<string>();
-
-
-      const novasNotificacoes = notificacoesNaoLidas.filter(notificacao =>
-        !idsTocados.has(notificacao.id)
+      const todasOrdenadas = [...notificacoes].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
+      const notificacaoMaisRecente = todasOrdenadas[0];
 
-      if (novasNotificacoes.length > 0 && !mostrarNotificacoes) {
+      if (!notificacaoMaisRecente) return;
+      const ultimaIdSom = localStorage.getItem(`ultimaNotificacaoSom_${idUsuario}`);
+      if (ultimaIdSom !== notificacaoMaisRecente.id) {
 
-        novasNotificacoes.forEach(notificacao => {
-          idsTocados.add(notificacao.id);
-        });
-
-        localStorage.setItem(
-          `idsNotificacoesTocadas_${idUsuario}`,
-          JSON.stringify(Array.from(idsTocados))
-        );
-
-        idsNotificacoesTocadasRef.current = idsTocados;
-
-        await tocarSomNotificacao();
+        setTimeout(async () => {
+          await tocarSomNotificacao();
+          localStorage.setItem(`ultimaNotificacaoSom_${idUsuario}`, notificacaoMaisRecente.id);
+        }, 300);
       }
     } catch (erro) {
       console.error("Erro ao verificar notificações:", erro);
     }
-  }, [mostrarNotificacoes, tocarSomNotificacao]);
+  }, [tocarSomNotificacao]);
 
 
   useEffect(() => {
@@ -222,6 +217,11 @@ export default function Sidebar() {
         idsNotificacoesTocadasRef.current = new Set();
         localStorage.setItem(`idsNotificacoesTocadas_${usuarioId}`, JSON.stringify([]));
       }
+
+      const timestampSalvo = localStorage.getItem(`ultimaVerificacao_${usuarioId}`);
+      if (timestampSalvo) {
+        setUltimaVerificacao(Number(timestampSalvo));
+      }
     }
 
     const intervaloEstoque = setInterval(verificarEstoque, 60 * 60 * 1000);
@@ -257,7 +257,7 @@ export default function Sidebar() {
 
     const intervaloNotificacoes = setInterval(() => {
       if (usuarioId) verificarNotificacoes(usuarioId);
-    }, 30000);
+    }, 10000);
 
     return () => {
       clearInterval(intervaloEstoque);
@@ -292,6 +292,7 @@ export default function Sidebar() {
 
   return (
     <>
+      <></>
       <button
         className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#1976D2] p-3 rounded-full shadow-lg hover:bg-[#1565C0] transition-colors"
         onClick={alternarSidebar}
@@ -401,6 +402,9 @@ export default function Sidebar() {
               if (usuarioSalvo) {
                 const usuarioId = usuarioSalvo.replace(/"/g, "");
                 localStorage.removeItem(`idsNotificacoesTocadas_${usuarioId}`);
+                localStorage.removeItem(`idsNotificacoesSom_${usuarioId}`);
+                localStorage.removeItem(`ultimaNotificacaoSom_${usuarioId}`);
+                localStorage.removeItem(`ultimaVerificacao_${usuarioId}`);
               }
               window.location.href = "/";
             }}
