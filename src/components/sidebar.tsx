@@ -124,7 +124,7 @@ export default function Sidebar() {
         }
       }
     }
-  }, [inicializarAudio]);
+  }, [inicializarAudio, audioInicializado]);
 
   const verificarNotificacoes = useCallback(async (idUsuario: string) => {
     try {
@@ -167,7 +167,7 @@ export default function Sidebar() {
     } catch (erro) {
       console.error("Erro ao verificar notificações:", erro);
     }
-  }, [tocarSomNotificacao]);
+  }, [tocarSomNotificacao, ultimaVerificacao]);
 
 
   useEffect(() => {
