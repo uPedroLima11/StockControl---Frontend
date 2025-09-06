@@ -1,0 +1,41 @@
+{
+    "tituloRelatorioEstoque": "Stock Report",
+    "buscarProduto": "Search product...",
+    "todosProdutos": "All products",
+    "estoqueBaixo": "Low stock",
+    "historicoMovimentacoes": "Movement History",
+    "selecioneProduto": "Select a product to view the history",
+    "estoque": "Stock",
+    "gerenciarEstoque": "Manage Stock",
+    "entrada": "Entry",
+    "saida": "Exit",
+    "quantidade": "Quantity",
+    "motivo": "Reason",
+    "observacao": "Note (optional)",
+    "verHistorico": "View History",
+    "cancelar": "Cancel",
+    "adicionar": "Add",
+    "remover": "Remove",
+    "voltar": "Back",
+    "carregando": "Carregando...",
+    "historicoTitulo": "Histórico de Movimentações",
+    "unidades": "unidades",
+    "por": "Por",
+    "cliente": "Cliente",
+    "nenhumaMovimentacao": "Nenhuma movimentação registrada",
+    "motivos": {
+        "compra": "Purchase",
+        "venda": "Sale",
+        "ajuste": "Adjustment",
+        "devolucao": "Return",
+        "perda": "Loss",
+        "inventario": "Inventory"
+    },
+    "mensagens": {
+        "sucessoTitulo": "Transaction completed!",
+        "sucessoTexto": "{{tipo}} of {{quantidade}} units recorded.",
+        "erroTitulo": "Error",
+        "erroGenerico": "Error while processing transaction",
+        "erroConexao": "Connection error with server"
+    }
+}

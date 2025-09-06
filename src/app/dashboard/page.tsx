@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const { t } = useTranslation("dashboard");
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date>(new Date());
 
   const produtosPorPagina = 5;
 
@@ -41,6 +42,15 @@ export default function Dashboard() {
 
     localStorage.setItem("TotalVendas", JSON.stringify(todasVendas));
   }, []);
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    fetchContagem();
+    fetchVendas();
+  }, 5000); 
+
+  return () => clearInterval(interval);
+}, []);
 
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
@@ -76,22 +86,33 @@ export default function Dashboard() {
         setContagemValor(0);
         setContagemLucro(0);
         return;
-      } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`);
-        if (response.status === 200) {
-          const data = await response.json();
-          setContagemEstoque(data.contagemQuantidade);
-          setContagemValor(data.contagemPreco);
-          setContagemProduto(data.count);
-        }
-
-        const responseLucro = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
-        if (responseLucro.status === 200) {
-          const data = await responseLucro.json();
-          setContagemLucro(data.total);
-          setContagemVendas(data.quantidadeVendas);
-        }
       }
+
+      const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
+      if (responseVendas.ok) {
+        const totalData = await responseVendas.json();
+        setContagemLucro(totalData.total || 0);
+        setContagemVendas(totalData.quantidadeVendas || 0);
+      }
+
+      const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+      if (responseProdutos.ok) {
+        const todosProdutos = await responseProdutos.json();
+        const produtosDaEmpresa = todosProdutos.filter((p: any) => p.empresaId === usuario.empresaId);
+
+        const contagemQuantidade = produtosDaEmpresa.reduce((sum: number, produto: any) =>
+          sum + (produto.quantidade || 0), 0
+        );
+
+        const contagemPreco = produtosDaEmpresa.reduce((sum: number, produto: any) =>
+          sum + ((produto.preco || 0) * (produto.quantidade || 0)), 0
+        );
+
+        setContagemEstoque(contagemQuantidade);
+        setContagemValor(contagemPreco);
+        setContagemProduto(produtosDaEmpresa.length);
+      }
+
     } catch (error) {
       console.error("Erro de conexão:", error);
     }
@@ -139,9 +160,43 @@ export default function Dashboard() {
 
     const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
     const todosProdutos: ProdutoI[] = await responseProdutos.json();
+
     const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
-    setProdutos(produtosDaEmpresa);
+
+    const produtosComSaldos = await Promise.all(
+      produtosDaEmpresa.map(async (produto) => {
+        try {
+          const responseSaldo = await fetch(
+            `${process.env.NEXT_PUBLIC_URL_API}/produtos/${produto.id}/saldo`
+          );
+          if (responseSaldo.ok) {
+            const { saldo } = await responseSaldo.json();
+            return { ...produto, quantidade: saldo };
+          }
+        } catch (error) {
+          console.error("Erro ao buscar saldo:", error);
+        }
+        return produto;
+      })
+    );
+
+    setProdutos(produtosComSaldos);
   }
+
+  useEffect(() => {
+    const handleVendaRealizada = () => {
+      fetchContagem();
+      fetchVendas();
+      fetchProdutos();
+    };
+
+    window.addEventListener('venda-realizada', handleVendaRealizada);
+
+    return () => {
+      window.removeEventListener('venda-realizada', handleVendaRealizada);
+    };
+  }, []);
+
 
   async function fetchVendas() {
     try {
@@ -160,8 +215,12 @@ export default function Dashboard() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
       if (response.ok) {
         const data = await response.json();
-        setTodasVendas(data.vendas || []);
-        calcularVendas30Dias(data.vendas || []);
+        const vendas = data.vendas || [];
+
+        setTodasVendas(vendas);
+        calcularVendas30Dias(vendas);
+
+        setContagemVendas(vendas.length);
       }
     } catch (error) {
       console.error("Erro ao buscar vendas:", error);
@@ -178,7 +237,7 @@ export default function Dashboard() {
       return dataVenda >= data30DiasAtras;
     });
 
-    const total = vendasFiltradas.reduce((sum, venda) => sum + venda.valorVenda, 0);
+    const total = vendasFiltradas.reduce((sum, venda) => sum + (venda.valorVenda || 0), 0);
     setVendas30Dias(total);
   }
 
@@ -392,8 +451,8 @@ export default function Dashboard() {
                       style={{ borderColor: "var(--cor-borda)" }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = modoDark
-                          ? "rgba(25, 118, 210, 0.15)"  
-                          : "rgba(2, 132, 199, 0.1)";   
+                          ? "rgba(25, 118, 210, 0.15)"
+                          : "rgba(2, 132, 199, 0.1)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";

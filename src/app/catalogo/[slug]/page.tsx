@@ -11,7 +11,7 @@ interface ProdutoCatalogo {
   preco: number;
   foto?: string;
   quantidade: number;
-  vendas: number; 
+  vendas: number;
 }
 
 interface CatalogoProps {

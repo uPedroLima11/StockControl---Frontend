@@ -109,7 +109,7 @@ export default function Vendas() {
         } else {
           const permissoesParaVerificar = [
             "vendas_realizar",
-            "vendas_visualizar"
+            "vendas_visualizar",
           ];
 
           const permissoes: Record<string, boolean> = {};
@@ -373,15 +373,30 @@ export default function Vendas() {
     handleAcaoProtegida(async () => {
       try {
         setCarregando(true);
+        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+        for (const item of carrinho.filter(i => i.quantidade > 0)) {
+          const responseSaldo = await fetch(
+            `${process.env.NEXT_PUBLIC_URL_API}/produtos/${item.produto.id}/saldo`
+          );
+
+          if (responseSaldo.ok) {
+            const { saldo } = await responseSaldo.json();
+            if (saldo < item.quantidade) {
+              Swal.fire({
+                icon: "error",
+                title: t("estoqueInsuficiente"),
+                text: `${item.produto.nome}: ${t("saldoDisponivel")} ${saldo}`,
+              });
+              return;
+            }
+          }
+        }
 
         const itemsToSell = carrinho.filter(item => item.quantidade > 0);
 
-        const promises = itemsToSell.map(item => {
-          const usuarioSalvo = localStorage.getItem("client_key");
-          if (!usuarioSalvo) return;
-          const usuarioValor = usuarioSalvo.replace(/"/g, "");
-          
-          return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
+        const vendasPromises = itemsToSell.map(item =>
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -391,20 +406,15 @@ export default function Vendas() {
               empresaId,
               produtoId: Number(item.produto.id),
               quantidade: item.quantidade,
-              valorCompra: item.produto.preco * 0.8,
+              valorVenda: item.produto.preco * item.quantidade,
+              valorCompra: item.produto.preco * 0.8 * item.quantidade,
               usuarioId: usuarioValor,
               clienteId: clienteSelecionado,
             }),
-          });
-        });
+          })
+        );
 
-        const responses = await Promise.all(promises);
-
-        const validResponses = responses.filter((response): response is Response => response !== undefined);
-        const allSuccessful = validResponses.length === promises.length && validResponses.every(response => response.ok);
-        if (!allSuccessful) {
-          throw new Error('Algumas vendas não foram processadas corretamente');
-        }
+        await Promise.all(vendasPromises);
 
         await Swal.fire({
           position: "center",
@@ -418,27 +428,18 @@ export default function Vendas() {
         setClienteSelecionado(null);
         localStorage.removeItem('carrinhoVendas');
 
-        try {
-          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-          const todosProdutos: ProdutoI[] = await responseProdutos.json();
-          const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === empresaId);
+        await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`).then(res => res.json()),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`).then(res => res.json()),
+        ]).then(([produtosData, vendasData]) => {
+          const produtosDaEmpresa = produtosData.filter((p: ProdutoI) => p.empresaId === empresaId);
           setProdutos(produtosDaEmpresa);
-
-          const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`);
-          const vendasData = await responseVendas.json();
 
           const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) =>
             new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
           );
           setVendas(vendasOrdenadas);
-
-          const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${empresaId}`);
-          const totalData = await responseTotal.json();
-          setTotalVendas(totalData?.total?._sum?.valorVenda || 0);
-
-        } catch (updateError) {
-          console.error("Erro ao atualizar dados:", updateError);
-        }
+        });
 
       } catch (err) {
         console.error("Erro ao finalizar venda:", err);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble } from "react-icons/fa";
+import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 
 import { NotificacaoI } from "@/utils/types/notificacao";
@@ -27,7 +27,7 @@ export default function Sidebar() {
   const idsNotificacoesTocadasRef = useRef<Set<string>>(new Set());
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [ultimaVerificacao, setUltimaVerificacao] = useState<number>(0);
-
+  const [modoDark, setModoDark] = useState(false);
 
 
   const cores = {
@@ -38,6 +38,119 @@ export default function Sidebar() {
     azulNeon: "#00B4D8",
     cinzaEscuro: "#1A2027",
   };
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativo = temaSalvo === "true";
+    setModoDark(ativo);
+  }, []);
+
+  const aplicarTema = (ativado: boolean) => {
+    const root = document.documentElement;
+    if (ativado) {
+      root.classList.add("dark");
+      root.style.setProperty("--cor-fundo", "#0A1929");
+      root.style.setProperty("--cor-texto", "#FFFFFF");
+      document.body.style.backgroundColor = "#0A1929";
+      document.body.style.color = "#FFFFFF";
+    } else {
+      root.classList.remove("dark");
+      root.style.setProperty("--cor-fundo", "#F8FAFC");
+      root.style.setProperty("--cor-texto", "#0F172A");
+      document.body.style.backgroundColor = "#F8FAFC";
+      document.body.style.color = "#0F172A";
+    }
+  };
+
+  const alternarTema = () => {
+    const novoTema = !modoDark;
+    setModoDark(novoTema);
+    localStorage.setItem("modoDark", String(novoTema));
+    aplicarTema(novoTema);
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.querySelector('aside');
+      const menuButton = document.querySelector('button.md\\:hidden');
+
+      if (window.innerWidth < 768 &&
+        estaAberto &&
+        sidebar &&
+        !sidebar.contains(event.target as Node) &&
+        menuButton &&
+        !menuButton.contains(event.target as Node)) {
+        setEstaAberto(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [estaAberto]);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .sidebar-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-thumb {
+        background: ${cores.azulClaro};
+        border-radius: 3px;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: ${cores.azulBrilhante};
+      }
+      
+      .sidebar-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: ${cores.azulClaro} transparent;
+      }
+      
+      .sidebar-scrollbar {
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+      }
+      
+     @media (max-width: 768px) {
+  .sidebar-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background: ${cores.azulBrilhante};
+    border-radius: 2px;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: ${cores.azulNeon};
+  }
+  
+  .sidebar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: ${cores.azulBrilhante} transparent;
+  }
+}
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [cores.azulClaro, cores.azulBrilhante]);
 
   const limparNotificacoesLidas = useCallback(async (idUsuario: string) => {
     try {
@@ -182,7 +295,9 @@ export default function Sidebar() {
           "vendas_visualizar",
           "clientes_visualizar",
           "fornecedores_visualizar",
-          "exportar_dados"
+          "logs_visualizar",
+          "exportar_dados",
+          "inventario_visualizar"
         ];
 
         const permissoes: Record<string, boolean> = {};
@@ -300,7 +415,7 @@ export default function Sidebar() {
         <FaBars />
       </button>
       <aside
-        className={`fixed top-0 h-screen w-64 flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}
+        className={`sidebar-scrollbar fixed top-0 h-screen w-64 flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}
         style={{
           backgroundColor: cores.azulEscuro,
           borderRight: `3px solid transparent`,
@@ -343,7 +458,6 @@ export default function Sidebar() {
               </span>
               <span className="text-sm md:inline cursor-pointer">{t("notifications")}</span>
             </button>
-
             <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} />
             {permissoesUsuario.logs_visualizar && (
               <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />
@@ -351,9 +465,13 @@ export default function Sidebar() {
             {permissoesUsuario.produtos_visualizar && (
               <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />
             )}
-            {permissoesUsuario.vendas_visualizar && (
-              <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+
+            {permissoesUsuario.inventario_visualizar && (
+              <LinkSidebar href="/inventario" icon={<FaHistory />} label="Inventário" cores={cores} />
             )}
+
+            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+
             {permissoesUsuario.clientes_visualizar && (
               <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />
             )}
@@ -365,32 +483,47 @@ export default function Sidebar() {
             )}
             {permissoesUsuario.exportar_dados && (
               <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exportacoes")} cores={cores} />
-            )}            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
-
+            )}
+            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
             <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
-
-
             <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
-
 
             <Link
               href="/empresa"
-              className="flex items-center gap-2 p-3 rounded-lg transition hover:bg-[#132F4C]"
+              className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
             >
-              <Image
-                src={fotoEmpresa || "/contadefault.png"}
-                alt="Foto da Empresa"
-                width={40}
-                height={40}
-                className="rounded-full object-cover border"
-                style={{ borderColor: cores.azulClaro }}
-              />
-              <h1 className="text-sm font-medium">{nomeEmpresa || t("create_company")}</h1>
+              <div className="flex items-center justify-center w-6 h-6">
+                <Image
+                  src={fotoEmpresa || "/contadefault.png"}
+                  alt="Foto da Empresa"
+                  width={24}
+                  height={24}
+                  className="rounded-full object-cover border"
+                  style={{
+                    borderColor: cores.azulClaro,
+                    minWidth: "45px",
+                    minHeight: "45px"
+                  }}
+                />
+              </div>
+              <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
           </nav>
         </div>
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
+          <button
+            onClick={alternarTema}
+            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
+          >
+            <span className="text-lg">
+              {modoDark ? <FaMoon /> : <FaSun />}
+            </span>
+            <span className="text-sm md:inline cursor-pointer">
+              {modoDark ? t("dark_mode") : t("light_mode")}
+            </span>
+          </button>
+
           {possuiEmpresa && (
             <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} />
           )}
@@ -584,6 +717,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa, cores, onMarca
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [estaVisivel, usuario, mostrarLidas, aoFechar, buscarNotificacoes]);
+
 
   const responderConvite = useCallback(async (id: string, convite: ConviteI) => {
     const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {

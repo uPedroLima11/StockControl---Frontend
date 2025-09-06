@@ -1,0 +1,41 @@
+{
+    "tituloRelatorioEstoque": "Relatório de Estoque",
+    "buscarProduto": "Buscar produto...",
+    "todosProdutos": "Todos os produtos",
+    "estoqueBaixo": "Estoque baixo",
+    "historicoMovimentacoes": "Histórico de Movimentações",
+    "selecioneProduto": "Selecione um produto para ver o histórico",
+    "estoque": "Estoque",
+    "gerenciarEstoque": "Gerenciar Estoque",
+    "entrada": "Entrada",
+    "saida": "Saída",
+    "quantidade": "Quantidade",
+    "motivo": "Motivo",
+    "observacao": "Observação (opcional)",
+    "verHistorico": "Ver Histórico",
+    "cancelar": "Cancelar",
+    "adicionar": "Adicionar",
+    "remover": "Remover",
+    "voltar": "Voltar",
+    "carregando": "Carregando...",
+    "historicoTitulo": "Histórico de Movimentações",
+    "unidades": "unidades",
+    "por": "Por",
+    "cliente": "Cliente",
+    "nenhumaMovimentacao": "Nenhuma movimentação registrada",
+    "motivos": {
+        "compra": "Compra",
+        "venda": "Venda",
+        "ajuste": "Ajuste",
+        "devolucao": "Devolução",
+        "perda": "Perda",
+        "inventario": "Inventário"
+    },
+    "mensagens": {
+        "sucessoTitulo": "Movimentação realizada!",
+        "sucessoTexto": "{{tipo}} de {{quantidade}} unidades registrada.",
+        "erroTitulo": "Erro",
+        "erroGenerico": "Erro ao realizar movimentação",
+        "erroConexao": "Erro de conexão com o servidor"
+    }
+}

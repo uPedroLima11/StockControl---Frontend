@@ -36,6 +36,9 @@ import clientesPt from '../public/locales/pt/clientes.json';
 import clientesEn from '../public/locales/en/clientes.json';
 import exportacoesEn from '../public/locales/en/exportacoes.json';
 import exportacoesPt from '../public/locales/pt/exportacoes.json';
+import estoquePt from '../public/locales/pt/estoque.json';
+import estoqueEn from '../public/locales/en/estoque.json';
+
 
 
 if (!i18n.isInitialized) {
@@ -45,7 +48,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes', 'exportacoes'],
+      ns: ['settings', 'sidebar', 'dashboard', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes', 'exportacoes', 'estoque'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -66,6 +69,7 @@ if (!i18n.isInitialized) {
           esqueci: esqueciEn,
           alteracao: alteracaoEn,
           clientes: clientesEn,
+          estoque: estoqueEn,
         },
         pt: {
           settings: settingsPt,
@@ -85,6 +89,7 @@ if (!i18n.isInitialized) {
           esqueci: esqueciPt,
           alteracao: alteracaoPt,
           clientes: clientesPt,
+          estoque: estoquePt,
         },
       },
       detection: {

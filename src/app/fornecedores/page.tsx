@@ -470,7 +470,7 @@ export default function Fornecedores() {
 
       if (result.isConfirmed) {
         try {
-          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedor.id}`, { // ← Use fornecedor.id
+          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedor.id}`, {
             method: "DELETE",
             headers: {
               'user-id': usuarioValor

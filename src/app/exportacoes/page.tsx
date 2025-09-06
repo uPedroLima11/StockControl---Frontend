@@ -293,7 +293,8 @@ export default function Exportacoes() {
         vendas: t("entidades.vendas"),
         clientes: t("entidades.clientes"),
         fornecedores: t("entidades.fornecedores"),
-        usuarios: t("entidades.usuarios")
+        usuarios: t("entidades.usuarios"),
+        movimentacoes: t("entidades.movimentacoes")
     };
 
 

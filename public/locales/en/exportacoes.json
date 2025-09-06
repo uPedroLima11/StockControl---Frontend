@@ -29,7 +29,8 @@
       "vendas": "Sales",
       "clientes": "Clients",
       "fornecedores": "Suppliers",
-      "usuarios": "Users"
+      "usuarios": "Users",
+      "movimentacoes": "Stock Movements"
     },
     "botaoExportar": "Export Excel",
     "historico": {
