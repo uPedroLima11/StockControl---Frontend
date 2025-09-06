@@ -23,7 +23,6 @@ export default function Dashboard() {
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const { t } = useTranslation("dashboard");
-  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date>(new Date());
 
   const produtosPorPagina = 5;
 
@@ -98,13 +97,13 @@ export default function Dashboard() {
       const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
       if (responseProdutos.ok) {
         const todosProdutos = await responseProdutos.json();
-        const produtosDaEmpresa = todosProdutos.filter((p: any) => p.empresaId === usuario.empresaId);
+        const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId);
 
-        const contagemQuantidade = produtosDaEmpresa.reduce((sum: number, produto: any) =>
+        const contagemQuantidade = produtosDaEmpresa.reduce((sum: number, produto: ProdutoI) =>
           sum + (produto.quantidade || 0), 0
         );
 
-        const contagemPreco = produtosDaEmpresa.reduce((sum: number, produto: any) =>
+        const contagemPreco = produtosDaEmpresa.reduce((sum: number, produto: ProdutoI) =>
           sum + ((produto.preco || 0) * (produto.quantidade || 0)), 0
         );
 

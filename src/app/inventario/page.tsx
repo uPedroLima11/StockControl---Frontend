@@ -114,7 +114,7 @@ export default function EstoquePage() {
         const usuario = await responseUsuario.json();
         setTipoUsuario(usuario.tipo);
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-        const todosProdutos: any[] = await response.json();
+        const todosProdutos: (Produto & { empresaId: number })[] = await response.json();
 
         const produtosDaEmpresa = todosProdutos
           .filter((p) => p.empresaId === usuario.empresaId)
@@ -227,7 +227,7 @@ export default function EstoquePage() {
 
                 <select
                   value={filtroTipo}
-                  onChange={(e) => setFiltroTipo(e.target.value as any)}
+                  onChange={(e) => setFiltroTipo(e.target.value as "TODOS" | "BAIXO")}
                   className="p-2 rounded border"
                   style={{
                     backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
