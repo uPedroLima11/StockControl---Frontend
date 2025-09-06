@@ -66,11 +66,7 @@ export default function MovimentacaoEstoqueModal({
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-                {
-                    headers: {
-                        'user-id': usuarioId
-                    }
-                }
+                { headers: { 'user-id': usuarioId } }
             );
 
             if (response.ok) {
@@ -89,8 +85,8 @@ export default function MovimentacaoEstoqueModal({
                 return permissao?.concedida || false;
             }
             return false;
-        } catch (error) {
-            console.error("Erro ao verificar permissão:", error);
+        } catch {
+            console.error("Erro ao verificar permissão")
             return false;
         }
     }, [tipoUsuario]);
@@ -107,9 +103,7 @@ export default function MovimentacaoEstoqueModal({
                 const usuarioId = usuarioSalvo.replace(/"/g, "");
 
                 const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
-                    headers: {
-                        'user-id': usuarioId
-                    }
+                    headers: { 'user-id': usuarioId }
                 });
 
                 if (responseUsuario.ok) {
@@ -124,35 +118,27 @@ export default function MovimentacaoEstoqueModal({
 
                 const responsePermissoes = await fetch(
                     `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-                    {
-                        headers: {
-                            'user-id': usuarioId
-                        }
-                    }
+                    { headers: { 'user-id': usuarioId } }
                 );
 
                 if (responsePermissoes.ok) {
                     const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await responsePermissoes.json();
-
                     const permissoesUsuarioObj: Record<string, boolean> = {};
                     dados.permissoes.forEach(permissao => {
                         permissoesUsuarioObj[permissao.chave] = permissao.concedida;
                     });
-
                     setPermissoesUsuario(permissoesUsuarioObj);
                 } else {
                     const permissoesParaVerificar = ["estoque_gerenciar"];
                     const permissoes: Record<string, boolean> = {};
-
                     for (const permissao of permissoesParaVerificar) {
                         const temPermissao = await usuarioTemPermissao(permissao);
                         permissoes[permissao] = temPermissao;
                     }
-
                     setPermissoesUsuario(permissoes);
                 }
-            } catch (error) {
-                console.error("Erro ao carregar permissões:", error);
+            } catch {
+                console.error("Erro ao carregar permissões")
             } finally {
                 setCarregandoPermissao(false);
             }
@@ -165,22 +151,14 @@ export default function MovimentacaoEstoqueModal({
 
     const realizarMovimentacao = async () => {
         if (!podeGerenciarEstoque) {
-            Swal.fire({
-                icon: "error",
-                title: t("semPermissaoTitulo"),
-                text: t("semPermissaoEstoque"),
-            });
+            Swal.fire({ icon: "error", title: t("semPermissaoTitulo"), text: t("semPermissaoEstoque") });
             return;
         }
 
         try {
             const quantidadeNum = parseInt(quantidade) || 0;
             if (quantidadeNum <= 0) {
-                Swal.fire({
-                    icon: "error",
-                    title: t("mensagens.erroTitulo"),
-                    text: t("mensagens.quantidadeInvalida"),
-                });
+                Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: t("mensagens.quantidadeInvalida") });
                 return;
             }
 
@@ -190,104 +168,53 @@ export default function MovimentacaoEstoqueModal({
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/movimentacoes-estoque`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    'user-id': usuarioValor
-                },
-                body: JSON.stringify({
-                    produtoId: Number(produto.id),
-                    tipo: tipoMovimentacao,
-                    quantidade: quantidadeNum,
-                    motivo,
-                    observacao,
-                    empresaId
-                })
+                headers: { "Content-Type": "application/json", 'user-id': usuarioValor },
+                body: JSON.stringify({ produtoId: Number(produto.id), tipo: tipoMovimentacao, quantidade: quantidadeNum, motivo, observacao, empresaId })
             });
 
             if (response.ok) {
                 Swal.fire({
                     icon: "success",
                     title: t("mensagens.sucessoTitulo"),
-                    text: t("mensagens.sucessoTexto", {
-                        tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"),
-                        quantidade: quantidadeNum
-                    })
+                    text: t("mensagens.sucessoTexto", { tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"), quantidade: quantidadeNum })
                 });
-
                 setModalAberto(false);
                 onMovimentacaoConcluida();
             } else {
                 const erro = await response.json();
-                Swal.fire({
-                    icon: "error",
-                    title: t("mensagens.erroTitulo"),
-                    text: erro.mensagem || t("mensagens.erroGenerico"),
-                });
+                Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: erro.mensagem || t("mensagens.erroGenerico") });
             }
-        } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: t("mensagens.erroTitulo"),
-                text: t("mensagens.erroConexao"),
-            });
+        } catch {
+            Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: t("mensagens.erroConexao") });
         }
     };
 
     const handleQuantidadeChange = (value: string) => {
-        if (value === "") {
-            setQuantidade("0");
-        }
-        else if (/^\d+$/.test(value)) {
-            const numValue = parseInt(value, 10);
-            setQuantidade(numValue.toString());
-        }
+        if (value === "") setQuantidade("0");
+        else if (/^\d+$/.test(value)) setQuantidade(parseInt(value, 10).toString());
     };
 
     const handleQuantidadeBlur = () => {
-        if (quantidade === "" || !/^\d+$/.test(quantidade)) {
-            setQuantidade("1");
-        } else {
-            const numValue = parseInt(quantidade, 10);
-            if (numValue < 1) {
-                setQuantidade("1");
-            }
-        }
+        if (quantidade === "" || !/^\d+$/.test(quantidade)) setQuantidade("1");
+        else if (parseInt(quantidade, 10) < 1) setQuantidade("1");
     };
 
     const handleAbrirModal = (e: React.MouseEvent) => {
         e.stopPropagation();
-
         if (!podeGerenciarEstoque && !carregandoPermissao) {
-            Swal.fire({
-                icon: "warning",
-                title: t("semPermissaoTitulo"),
-                text: t("semPermissaoEstoque"),
-            });
+            Swal.fire({ icon: "warning", title: t("semPermissaoTitulo"), text: t("semPermissaoEstoque") });
             return;
         }
-
         setModalAberto(true);
     };
 
     return (
         <>
-            <button
-                onClick={handleAbrirModal}
-                className="px-3 py-1 rounded cursor-pointer flex items-center gap-2 text-sm font-medium"
-                style={{
-                    backgroundColor: temaAtual.primario,
-                    color: "#FFFFFF",
-                    opacity: carregandoPermissao ? 0.7 : 1,
-                }}
-                disabled={carregandoPermissao}
-            >
-                {carregandoPermissao ? (
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                ) : !podeGerenciarEstoque ? (
-                    <FaLock size={12} />
-                ) : (
-                    <FaHistory size={12} />
-                )}
+            <button onClick={handleAbrirModal} className="px-3 py-1 rounded cursor-pointer flex items-center gap-2 text-sm font-medium"
+                style={{ backgroundColor: temaAtual.primario, color: "#FFFFFF", opacity: carregandoPermissao ? 0.7 : 1 }}
+                disabled={carregandoPermissao}>
+                {carregandoPermissao ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                    : !podeGerenciarEstoque ? <FaLock size={12} /> : <FaHistory size={12} />}
                 {t("estoque")}
             </button>
 
