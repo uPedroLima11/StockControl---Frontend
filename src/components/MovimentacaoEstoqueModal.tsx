@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaPlus, FaMinus, FaHistory, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
 import HistoricoEstoque from "./HistoricoEstoque";
@@ -53,7 +53,7 @@ export default function MovimentacaoEstoqueModal({
 
     const temaAtual = modoDark ? temas.dark : temas.light;
 
-    const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
+    const usuarioTemPermissao = useCallback(async (permissaoChave: string): Promise<boolean> => {
         try {
             const usuarioSalvo = localStorage.getItem("client_key");
             if (!usuarioSalvo) return false;
@@ -93,7 +93,7 @@ export default function MovimentacaoEstoqueModal({
             console.error("Erro ao verificar permissão:", error);
             return false;
         }
-    };
+    }, [tipoUsuario]);
 
     useEffect(() => {
         const carregarDadosUsuario = async () => {
@@ -159,7 +159,7 @@ export default function MovimentacaoEstoqueModal({
         };
 
         carregarDadosUsuario();
-    }, []);
+    }, [usuarioTemPermissao]);
 
     const podeGerenciarEstoque = (tipoUsuario === "PROPRIETARIO") || permissoesUsuario.estoque_gerenciar;
 
@@ -330,10 +330,10 @@ export default function MovimentacaoEstoqueModal({
                                     <button
                                         onClick={() => setTipoMovimentacao('ENTRADA')}
                                         className={`p-3 cursor-pointer rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${tipoMovimentacao === 'ENTRADA'
-                                                ? 'border-green-700 bg-green-700'
-                                                : modoDark
-                                                    ? 'border-white bg-transparent'
-                                                    : 'border-gray-300 bg-gray-100'
+                                            ? 'border-green-700 bg-green-700'
+                                            : modoDark
+                                                ? 'border-white bg-transparent'
+                                                : 'border-gray-300 bg-gray-100'
                                             }`}
                                     >
                                         <FaPlus className={tipoMovimentacao === 'ENTRADA' ? "text-white" : modoDark ? "text-white" : "text-green-700"} />
@@ -345,8 +345,8 @@ export default function MovimentacaoEstoqueModal({
                                     <button
                                         onClick={() => setTipoMovimentacao('SAIDA')}
                                         className={`p-3 cursor-pointer rounded-lg border-2 transition-all ${tipoMovimentacao === 'SAIDA'
-                                                ? 'border-red-500 bg-red-500 bg-opacity-10'
-                                                : 'border-gray-300'
+                                            ? 'border-red-500 bg-red-500 bg-opacity-10'
+                                            : 'border-gray-300'
                                             }`}
                                     >
                                         <div className="flex items-center justify-center gap-2">
