@@ -492,19 +492,24 @@ export default function Sidebar() {
               href="/empresa"
               className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
             >
-              <div className="flex items-center justify-center w-6 h-6">
-                <Image
-                  src={fotoEmpresa || "/contadefault.png"}
-                  alt="Foto da Empresa"
-                  width={24}
-                  height={24}
-                  className="rounded-full object-cover border"
-                  style={{
-                    borderColor: cores.azulClaro,
-                    minWidth: "45px",
-                    minHeight: "45px"
-                  }}
-                />
+              <div className="flex items-center justify-center w-8 h-8">
+              <Image
+                src={fotoEmpresa || "/contadefault.png"}
+                alt="Foto da Empresa"
+                width={48}
+                height={48}
+                className="rounded-full object-cover border"
+                style={{
+                borderColor: cores.azulClaro,
+                width: "48px",
+                height: "48px",
+                minWidth: "48px",
+                minHeight: "48px",
+                background: "#fff"
+                }}
+                quality={100}
+                priority
+              />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
