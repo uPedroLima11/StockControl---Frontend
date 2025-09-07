@@ -511,15 +511,43 @@ export default function Usuarios() {
     setUsuarioExpandido(null);
   };
 
+
   async function enviarNotificacao() {
     setIsEnviando(true);
     try {
-      if (!usuarioSelecionado || !titulo || !descricao) {
+      let mensagemErro = "";
+
+      if (!usuarioSelecionado) {
+        mensagemErro += "• Selecione um usuário destinatário\n";
+      }
+
+      if (!titulo.trim()) {
+        mensagemErro += "• Título da mensagem é obrigatório\n";
+      }
+
+      if (!descricao.trim()) {
+        mensagemErro += "• Descrição da mensagem é obrigatória\n";
+      }
+
+      if (mensagemErro) {
         Swal.fire({
-          title: t("modal.camposObrigatorios.titulo"),
-          text: t("modal.camposObrigatorios.texto"),
+          title: "Preencha os campos obrigatórios",
+          html: `Por favor, preencha os seguintes campos:<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
           icon: "warning",
+          confirmButtonColor: "#013C3C",
         });
+        setIsEnviando(false);
+        return;
+      }
+
+      if (usuarioSelecionado && usuarioSelecionado.id === usuarioLogado?.id) {
+        Swal.fire({
+          title: "Não é possível enviar para si mesmo",
+          text: "Você não pode enviar mensagens para você mesmo.",
+          icon: "warning",
+          confirmButtonColor: "#013C3C",
+        });
+        setIsEnviando(false);
         return;
       }
 
@@ -527,9 +555,9 @@ export default function Usuarios() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          titulo,
-          descricao,
-          usuarioId: usuarioSelecionado.id,
+          titulo: titulo.trim(),
+          descricao: descricao.trim(),
+          usuarioId: usuarioSelecionado ? usuarioSelecionado.id : undefined,
           nomeRemetente: usuarioLogado?.nome,
         }),
       });
@@ -538,9 +566,10 @@ export default function Usuarios() {
 
       if (response.status === 201) {
         Swal.fire({
-          title: t("modal.mensagemEnviada.titulo"),
-          text: t("modal.mensagemEnviada.texto", { email: usuarioSelecionado.email }),
+          title: "Mensagem enviada",
+          text: `Mensagem enviada para ${usuarioSelecionado ? usuarioSelecionado.nome : ""}`,
           icon: "success",
+          confirmButtonColor: "#013C3C",
         });
         setTitulo("");
         setDescricao("");
@@ -548,17 +577,19 @@ export default function Usuarios() {
         setShowModalMensagem(false);
       } else {
         Swal.fire({
-          title: t("modal.erro.titulo"),
-          text: data.message || t("modal.erro.textoEnviarNotificacao"),
+          title: "Erro ao enviar",
+          text: data.message || "Ocorreu um erro ao enviar a mensagem.",
           icon: "error",
+          confirmButtonColor: "#013C3C",
         });
       }
     } catch (err) {
       console.error("Erro ao enviar notificação:", err);
       Swal.fire({
-        title: t("modal.erro.titulo"),
-        text: t("modal.erro.textoInterno"),
+        title: "Erro",
+        text: "Ocorreu um erro interno ao tentar enviar a mensagem.",
         icon: "error",
+        confirmButtonColor: "#013C3C",
       });
     } finally {
       setIsEnviando(false);
@@ -1209,12 +1240,14 @@ export default function Usuarios() {
                   borderColor: temaAtual.borda
                 }}
               >
-                <option value="">{t("modal.selecioneUsuario")}</option>
-                {usuarios.map((usuario) => (
-                  <option key={usuario.id} value={usuario.id}>
-                    {usuario.nome}
-                  </option>
-                ))}
+                <option value="">Selecione um usuário</option>
+                {usuarios
+                  .filter(usuario => usuario.id !== usuarioLogado?.id)
+                  .map((usuario) => (
+                    <option key={usuario.id} value={usuario.id}>
+                      {usuario.nome}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="mb-3">

@@ -17,6 +17,7 @@
   "ultimaAtualizacao": "Última Atualização",
   "email": "E-mail",
   "acao": "Ação",
+  "selecioneUsuario": "Selecione um usuário",
   "nenhumUsuario": "Nenhum usuário encontrado",
   "nenhumaEmpresa": "Você não pertence a nenhuma empresa",
   "semPermissaoVisualizarUsuarios": "Você não tem permissão para visualizar usuários.",
@@ -44,6 +45,14 @@
       "titulo": "Mensagem enviada",
       "texto": "A mensagem foi enviada com sucesso para {{email}}"
     },
+    "selecioneUsuario": {
+      "titulo": "Selecione um usuário",
+      "texto": "Por favor, selecione um destinatário para a mensagem."
+    },
+    "naoPodeEnviarParaSi": {
+      "titulo": "Não é possível enviar para si mesmo",
+      "texto": "Você não pode enviar mensagens para você mesmo."
+    },
     "erro": {
       "titulo": "Erro",
       "textoEnviarNotificacao": "Não foi possível enviar a notificação",
@@ -67,7 +76,6 @@
     "cargoAtualizadoSucesso": "Cargo atualizado com sucesso",
     "de": "De",
     "para": "Para",
-    "selecioneUsuario": "Selecione o usuário",
     "tituloMensagem": "Título da mensagem",
     "descricaoMensagem": "Descrição da mensagem",
     "editarUsuario": "Editar Usuário",
