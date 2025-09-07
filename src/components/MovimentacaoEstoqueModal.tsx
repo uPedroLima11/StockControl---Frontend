@@ -118,7 +118,9 @@ export default function MovimentacaoEstoqueModal({
 
                 const responsePermissoes = await fetch(
                     `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-                    { headers: { 'user-id': usuarioId } }
+                    {
+                        headers: { 'user-id': usuarioId }
+                    }
                 );
 
                 if (responsePermissoes.ok) {

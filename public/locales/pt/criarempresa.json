@@ -1,28 +1,50 @@
 {
-    "titulo": "Criar Empresa",
-    "botaoCriar": "Criar Empresa",
-    "selecionarImagem": "Selecionar Imagem",
-    "erro": {
-        "titulo": "Oops... algo deu errado! tente novamente",
-        "mensagem": "Email já existente ou erro ao criar empresa."
-    },
-    "sucesso": {
-        "titulo": "Empresa criada com sucesso!",
-        "mensagem": "A empresa foi criada e adicionada ao sistema."
-    },
-    "modal": {
-        "convite.Enviado.titulo": "Convite Enviado",
-        "convite.Enviado.texto": "Convite enviado com sucesso para o email fornecido."
-    },
-    "campos": {
-        "nome": "Nome da empresa",
-        "email": "Email da empresa",
-        "telefone": "Telefone",
-        "endereco": "Endereço",
-        "pais": "País",
-        "estado": "Estado",
-        "cidade": "Cidade",
-        "cep": "CEP",
-        "foto": "URL da Foto (opcional)"
-    }
+  "titulo": "Criar Empresa",
+  "carregando": "Carregando...",
+  "botaoCriar": "Criar Empresa",
+  "selecionarImagem": "Selecionar Imagem",
+  "erro": {
+    "titulo": "Oops... algo deu errado! tente novamente",
+    "mensagem": "Email já existente ou erro ao criar empresa."
+  },
+  "sucesso": {
+    "titulo": "Empresa criada com sucesso!",
+    "mensagem": "A empresa foi criada e adicionada ao sistema.",
+    "catalogoTitulo": "Seu catálogo:"
+  },
+  "modal": {
+    "convite.Enviado.titulo": "Convite Enviado",
+    "convite.Enviado.texto": "Convite enviado com sucesso para o email fornecido."
+  },
+  "campos": {
+    "nome": "Nome da empresa",
+    "email": "Email da empresa",
+    "telefone": "Telefone",
+    "endereco": "Endereço",
+    "pais": "País",
+    "estado": "Estado",
+    "cidade": "Cidade",
+    "cep": "CEP",
+    "foto": "URL da Foto (opcional)",
+    "dominio": "Endereço do Seu Catálogo",
+    "dominioPlaceholder": "ex: meunegocio",
+    "dominioDescricao": "Este será o endereço do seu catálogo online: stockcontrol-six.vercel.app/seudominio",
+    "dominioExemplo": "seudominio"
+  },
+  "validacao": {
+    "nomeObrigatorio": "Nome é obrigatório",
+    "emailObrigatorio": "Email é obrigatório",
+    "emailInvalido": "Email inválido",
+    "dominioObrigatorio": "Domínio é obrigatório",
+    "dominioMinimo": "Domínio deve ter pelo menos 4 caracteres",
+    "limiteExcedido": "Limite excedido"
+  },
+  "erros": {
+    "dominioInvalidoTitulo": "Domínio inválido",
+    "dominioInvalidoTexto": "O domínio é obrigatório e deve ter pelo menos 4 caracteres",
+    "emailExistenteTitulo": "Email já cadastrado",
+    "emailExistenteTexto": "Este email já está em uso por outra empresa",
+    "verificacaoDominio": "Erro ao verificar domínio",
+    "verificacaoEmail": "Erro ao verificar email"
+  }
 }

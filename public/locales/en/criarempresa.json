@@ -1,28 +1,50 @@
 {
-    "modal": {
-        "convite.Enviado.titulo": "Invitation Sent",
-        "convite.Enviado.texto": "Invitation successfully sent to the provided email."
-    },
-    "titulo": "Create Company",
-    "selecionarImagem": "Select Image",
-    "botaoCriar": "Create Company",
-    "sucesso": {
-        "titulo": "Company created successfully!",
-        "mensagem": "The company has been created and added to the system."
-    },
-    "erro": {
-        "titulo": "Oops... something went wrong! Try again",
-        "mensagem": "Email already exists or error creating company."
-    },
-    "campos": {
-        "nome": "Company name",
-        "email": "Company email",
-        "telefone": "Phone",
-        "endereco": "Address",
-        "pais": "Country",
-        "estado": "State",
-        "cidade": "City",
-        "cep": "ZIP Code",
-        "foto": "Photo URL (optional)"
-    }
+  "titulo": "Create Company",
+  "carregando": "Loading...",
+  "botaoCriar": "Create Company",
+  "selecionarImagem": "Select Image",
+  "erro": {
+    "titulo": "Oops... something went wrong! Try again",
+    "mensagem": "Email already exists or error creating company."
+  },
+  "sucesso": {
+    "titulo": "Company created successfully!",
+    "mensagem": "The company has been created and added to the system.",
+    "catalogoTitulo": "Your catalog:"
+  },
+  "modal": {
+    "convite.Enviado.titulo": "Invitation Sent",
+    "convite.Enviado.texto": "Invitation successfully sent to the provided email."
+  },
+  "campos": {
+    "nome": "Company name",
+    "email": "Company email",
+    "telefone": "Phone",
+    "endereco": "Address",
+    "pais": "Country",
+    "estado": "State",
+    "cidade": "City",
+    "cep": "ZIP Code",
+    "foto": "Photo URL (optional)",
+    "dominio": "Catalog Address",
+    "dominioPlaceholder": "e.g. mybusiness",
+    "dominioDescricao": "This will be the address of your online catalog: stockcontrol-six.vercel.app/yourdomain",
+    "dominioExemplo": "yourdomain"
+  },
+  "validacao": {
+    "nomeObrigatorio": "Name is required",
+    "emailObrigatorio": "Email is required",
+    "emailInvalido": "Invalid email",
+    "dominioObrigatorio": "Domain is required",
+    "dominioMinimo": "Domain must have at least 4 characters",
+    "limiteExcedido": "Limit exceeded"
+  },
+  "erros": {
+    "dominioInvalidoTitulo": "Invalid domain",
+    "dominioInvalidoTexto": "Domain is required and must have at least 4 characters",
+    "emailExistenteTitulo": "Email already registered",
+    "emailExistenteTexto": "This email is already in use by another company",
+    "verificacaoDominio": "Error verifying domain",
+    "verificacaoEmail": "Error verifying email"
+  }
 }

@@ -5,15 +5,18 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
 
+type CampoOrdenacao = 'nome' | 'estoque' | 'preco' | 'none';
+type DirecaoOrdenacao = 'asc' | 'desc';
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
+  const [produtosOriginais, setProdutosOriginais] = useState<ProdutoI[]>([]); 
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
   const [modalAberto, setModalAberto] = useState(false);
@@ -30,6 +33,9 @@ export default function Produtos() {
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
+
+  const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao>('none');
+  const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
 
   const [form, setForm] = useState<ProdutoI>({
     id: "",
@@ -87,6 +93,56 @@ export default function Produtos() {
     setRecarregarProdutos(prev => prev + 1);
   };
 
+  const ordenarProdutos = (produtos: ProdutoI[], campo: CampoOrdenacao, direcao: DirecaoOrdenacao) => {
+    if (campo === 'none') return [...produtos];
+    
+    return [...produtos].sort((a, b) => {
+      let valorA, valorB;
+      
+      switch (campo) {
+        case 'nome':
+          valorA = a.nome.toLowerCase();
+          valorB = b.nome.toLowerCase();
+          break;
+        case 'estoque':
+          valorA = a.quantidade;
+          valorB = b.quantidade;
+          break;
+        case 'preco':
+          valorA = a.preco;
+          valorB = b.preco;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (valorA < valorB) {
+        return direcao === 'asc' ? -1 : 1;
+      }
+      if (valorA > valorB) {
+        return direcao === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const handleOrdenar = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao === campo) {
+      setDirecaoOrdenacao(direcaoOrdenacao === 'asc' ? 'desc' : 'asc');
+    } else {
+      setCampoOrdenacao(campo);
+      setDirecaoOrdenacao('asc');
+    }
+  };
+
+  const obterIconeOrdenacao = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao !== campo) {
+      return <FaSort />;
+    }
+    
+    return direcaoOrdenacao === 'asc' ? <FaSortUp /> : <FaSortDown />;
+  };
+
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -119,7 +175,6 @@ export default function Produtos() {
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!usuarioSalvo) return;
-
 
       try {
         const response = await fetch(
@@ -261,6 +316,7 @@ export default function Produtos() {
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
               );
             setProdutos(produtosDaEmpresa);
+            setProdutosOriginais(produtosDaEmpresa); 
           }
         }
       }
@@ -316,12 +372,20 @@ export default function Produtos() {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
           setProdutos(produtosDaEmpresa);
+          setProdutosOriginais(produtosDaEmpresa); 
         }
       }
     };
 
     carregarProdutos();
   }, [recarregarProdutos, empresaAtivada]);
+
+  useEffect(() => {
+    if (produtosOriginais.length > 0) {
+      const produtosOrdenados = ordenarProdutos(produtosOriginais, campoOrdenacao, direcaoOrdenacao);
+      setProdutos(produtosOrdenados);
+    }
+  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao]);
 
   useEffect(() => {
     if (modalVisualizar) {
@@ -770,14 +834,31 @@ export default function Produtos() {
                   <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
                     <tr style={{ color: temaAtual.texto }}>
                       <th className="py-3 px-4">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleOrdenar('nome')}>
                           <FaCog /> {t("nome")}
+                          <span className="ml-1">
+                            {obterIconeOrdenacao('nome')}
+                          </span>
                         </div>
                       </th>
                       <th>{t("fornecedor")}</th>
                       <th>{t("categoria")}</th>
-                      <th className="text-center">{t("estoque")}</th>
-                      <th>{t("preco")}</th>
+                      <th className="text-center">
+                        <div className="flex items-center justify-center gap-1 cursor-pointer" onClick={() => handleOrdenar('estoque')}>
+                          {t("estoque")}
+                          <span>
+                            {obterIconeOrdenacao('estoque')}
+                          </span>
+                        </div>
+                      </th>
+                      <th>
+                        <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleOrdenar('preco')}>
+                          {t("preco")}
+                          <span>
+                            {obterIconeOrdenacao('preco')}
+                          </span>
+                        </div>
+                      </th>
                       <th className="text-center">{t("catalogo")}</th>
                     </tr>
                   </thead>

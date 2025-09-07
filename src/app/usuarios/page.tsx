@@ -14,10 +14,26 @@ interface PermissaoI {
   categoria: string;
 }
 
+interface PermissaoAgrupada {
+  [categoria: string]: (PermissaoI & { concedida: boolean })[];
+}
+
 interface PermissoesUsuarioResponse {
   permissoes: (PermissaoI & { concedida: boolean })[];
   permissoesPersonalizadas: boolean;
 }
+
+const ordenarUsuariosPorFuncao = (usuarios: UsuarioI[]) => {
+  const ordemFuncoes = {
+    "PROPRIETARIO": 1,
+    "ADMIN": 2,
+    "FUNCIONARIO": 3
+  };
+
+  return [...usuarios].sort((a, b) => {
+    return ordemFuncoes[a.tipo as keyof typeof ordemFuncoes] - ordemFuncoes[b.tipo as keyof typeof ordemFuncoes];
+  });
+};
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioI[]>([]);
@@ -48,7 +64,8 @@ export default function Usuarios() {
   const [temPermissaoVisualizar, setTemPermissaoVisualizar] = useState<boolean | null>(null);
   const [temPermissaoExcluir, setTemPermissaoExcluir] = useState<boolean | null>(null);
   const [usuariosExcluiveis, setUsuariosExcluiveis] = useState<Record<string, boolean>>({});
-
+  const [permissoesAgrupadas, setPermissoesAgrupadas] = useState<PermissaoAgrupada>({});
+  const [todasMarcadas, setTodasMarcadas] = useState(false);
 
   const cores = {
     dark: {
@@ -85,6 +102,37 @@ export default function Usuarios() {
     setModoDark(ativo);
   }, []);
 
+  const toggleTodasPermissoes = () => {
+    const novoEstado = !todasMarcadas;
+    setTodasMarcadas(novoEstado);
+
+    setPermissoesUsuario(prev =>
+      prev.map(p => ({ ...p, concedida: novoEstado }))
+    );
+
+    setPermissoesAgrupadas(prev => {
+      const novoAgrupado = { ...prev };
+      Object.keys(novoAgrupado).forEach(categoria => {
+        novoAgrupado[categoria] = novoAgrupado[categoria].map(p =>
+          ({ ...p, concedida: novoEstado })
+        );
+      });
+      return novoAgrupado;
+    });
+  };
+
+  useEffect(() => {
+    if (permissoesUsuario.length > 0) {
+      const todasConcedidas = permissoesUsuario.every(p => p.concedida);
+      const nenhumaConcedida = permissoesUsuario.every(p => !p.concedida);
+
+      if (todasConcedidas) {
+        setTodasMarcadas(true);
+      } else if (nenhumaConcedida) {
+        setTodasMarcadas(false);
+      }
+    }
+  }, [permissoesUsuario]);
   const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
     try {
       const response = await fetch(
@@ -166,10 +214,11 @@ export default function Usuarios() {
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
         const usuariosDaEmpresa = todosUsuarios
-          .filter((usuario) => usuario.empresaId === empresaIdRecebido)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          .filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
-        setUsuarios(usuariosDaEmpresa);
+        const usuariosOrdenados = ordenarUsuariosPorFuncao(usuariosDaEmpresa);
+
+        setUsuarios(usuariosOrdenados);
       } catch (error) {
         console.error("Erro ao carregar usuários:", error);
         setUsuarios([]);
@@ -181,7 +230,6 @@ export default function Usuarios() {
 
     initialize();
   }, [t, logar]);
-
 
   useEffect(() => {
     async function carregarPermissoes() {
@@ -203,8 +251,6 @@ export default function Usuarios() {
     carregarPermissoes();
   }, []);
 
-
-
   const carregarPermissoesUsuario = async (usuarioId: string) => {
     try {
       const response = await fetch(
@@ -214,17 +260,96 @@ export default function Usuarios() {
         const dados: PermissoesUsuarioResponse = await response.json();
         setPermissoesUsuario(dados.permissoes);
         setPermissoesPersonalizadas(dados.permissoesPersonalizadas);
+
+        const agrupadas = dados.permissoes.reduce((acc, permissao) => {
+          if (!acc[permissao.categoria]) {
+            acc[permissao.categoria] = [];
+          }
+          acc[permissao.categoria].push(permissao);
+          return acc;
+        }, {} as PermissaoAgrupada);
+
+        setPermissoesAgrupadas(agrupadas);
       }
     } catch (error) {
       console.error("Erro ao carregar permissões do usuário:", error);
     }
   };
 
+  const traduzirCategoria = (categoria: string): string => {
+    const traducoes: { [key: string]: string } = {
+      "USUARIOS": "Usuários",
+      "PRODUTOS": "Produtos",
+      "CLIENTES": "Clientes",
+      "FORNECEDORES": "Fornecedores",
+      "VENDAS": "Vendas",
+      "RELATORIOS": "Relatórios",
+      "CONFIGURACOES": "Configurações",
+      "ESTOQUE": "Estoque"
+    };
+
+    return traducoes[categoria] || categoria;
+  };
+
+  const renderizarPermissoesPorCategoria = () => {
+    if (Object.keys(permissoesAgrupadas).length === 0) {
+      return <p className="text-center py-4" style={{ color: temaAtual.placeholder }}>Nenhuma permissão encontrada</p>;
+    }
+
+    return Object.entries(permissoesAgrupadas).map(([categoria, permissoesDaCategoria]) => (
+      <div key={categoria} className="mb-6">
+        <h3 className="text-lg font-semibold mb-3 border-b pb-2" style={{
+          color: temaAtual.texto,
+          borderColor: temaAtual.borda
+        }}>
+          {traduzirCategoria(categoria)}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {permissoesDaCategoria.map(permissao => (
+            <div key={permissao.id} className="flex items-start gap-3 p-3 border rounded-lg" style={{
+              backgroundColor: temaAtual.card,
+              borderColor: temaAtual.borda,
+            }}>
+              <input
+                type="checkbox"
+                checked={permissao.concedida}
+                onChange={(e) => atualizarPermissao(permissao.id, e.target.checked)}
+                className="mt-1 rounded cursor-pointer"
+                style={{
+                  accentColor: temaAtual.primario
+                }}
+              />
+              <div className="flex-1">
+                <div className="font-medium" style={{ color: temaAtual.texto }}>
+                  {permissao.nome}
+                </div>
+                <div className="text-xs mt-1" style={{ color: temaAtual.placeholder }}>
+                  {permissao.descricao}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ));
+  };
+
   const atualizarPermissao = (permissaoId: string, concedida: boolean) => {
     setPermissoesUsuario(prev =>
       prev.map(p => p.id === permissaoId ? { ...p, concedida } : p)
     );
+
+    setPermissoesAgrupadas(prev => {
+      const novoAgrupado = { ...prev };
+      Object.keys(novoAgrupado).forEach(categoria => {
+        novoAgrupado[categoria] = novoAgrupado[categoria].map(p =>
+          p.id === permissaoId ? { ...p, concedida } : p
+        );
+      });
+      return novoAgrupado;
+    });
   };
+
   const podeGerenciarPermissoesUsuario = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado) return false;
 
@@ -279,6 +404,7 @@ export default function Usuarios() {
     }
   };
 
+
   const redefinirPermissoesPadrao = async () => {
     if (!modalPermissoes) return;
 
@@ -314,7 +440,6 @@ export default function Usuarios() {
     }
   };
 
-
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -346,10 +471,11 @@ export default function Usuarios() {
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
         const usuariosDaEmpresa = todosUsuarios
-          .filter((usuario) => usuario.empresaId === empresaIdRecebido)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          .filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
-        setUsuarios(usuariosDaEmpresa);
+        const usuariosOrdenados = ordenarUsuariosPorFuncao(usuariosDaEmpresa);
+
+        setUsuarios(usuariosOrdenados);
       } catch (err: unknown) {
         console.error("Erro ao carregar dados:", err);
         if (err instanceof Error) {
@@ -562,7 +688,7 @@ export default function Usuarios() {
           const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}/remover-empresa`, {
             method: "PUT",
             headers: {
-              "user-id": usuarioId || "" 
+              "user-id": usuarioId || ""
             },
           });
 
@@ -601,6 +727,7 @@ export default function Usuarios() {
       }
     });
   }
+
   const podeEditar = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
 
@@ -616,7 +743,6 @@ export default function Usuarios() {
     return false;
   };
 
-
   const podeExcluir = async (targetUser: UsuarioI): Promise<boolean> => {
     if (!usuarioLogado || usuarioLogado.id === targetUser.id) return false;
     if (temPermissaoExcluir === false) return false;
@@ -630,6 +756,7 @@ export default function Usuarios() {
 
     return false;
   };
+
   const podeAlterarCargo = async (targetUser: UsuarioI, novoTipo: string): Promise<boolean> => {
     if (!usuarioLogado) return false;
 
@@ -648,6 +775,7 @@ export default function Usuarios() {
 
     return false;
   };
+
   const [usuariosEditaveis, setUsuariosEditaveis] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -672,10 +800,10 @@ export default function Usuarios() {
     }
   }, [usuarios, usuarioLogado]);
 
-
   const toggleExpandirUsuario = (id: string) => {
     setUsuarioExpandido(usuarioExpandido === id ? null : id);
   };
+
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
@@ -724,6 +852,7 @@ export default function Usuarios() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-6xl">
@@ -1302,7 +1431,7 @@ export default function Usuarios() {
       {modalPermissoes && (
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0,0,0,0.8)" }}>
           <div
-            className="relative p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="relative p-6 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
@@ -1312,6 +1441,7 @@ export default function Usuarios() {
             <button
               onClick={() => setModalPermissoes(null)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg"
+              style={{ color: temaAtual.texto }}
             >
               ✕
             </button>
@@ -1320,47 +1450,56 @@ export default function Usuarios() {
               {t("modal.permissoesUsuario")} - {modalPermissoes.nome}
             </h2>
 
-            <div className="mb-4">
+            <div className="flex justify-between items-center mb-4">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={permissoesPersonalizadas}
                   onChange={(e) => setPermissoesPersonalizadas(e.target.checked)}
-                  className="rounded"
+                  className="rounded cursor-pointer"
+                  style={{
+                    accentColor: temaAtual.primario
+                  }}
                 />
                 <span>{t("modal.permissoesPersonalizadas")}</span>
               </label>
-              <p className="text-sm text-gray-500 mt-1">
-                {t("modal.permissoesPersonalizadasDescricao")}
-              </p>
+
+              {permissoesPersonalizadas && (
+                <button
+                  onClick={toggleTodasPermissoes}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                  style={{
+                    backgroundColor: todasMarcadas ? temaAtual.primario : temaAtual.hover,
+                    color: todasMarcadas ? "#FFFFFF" : temaAtual.texto,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={todasMarcadas}
+                    onChange={toggleTodasPermissoes}
+                    className="rounded cursor-pointer"
+                    style={{
+                      accentColor: temaAtual.primario
+                    }}
+                  />
+                  {todasMarcadas ? "Desmarcar Todas" : "Marcar Todas"}
+                </button>
+              )}
             </div>
+
+            <p className="text-sm mb-4" style={{ color: temaAtual.placeholder }}>
+              {t("modal.permissoesPersonalizadasDescricao")}
+            </p>
 
             {permissoesPersonalizadas ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 max-h-96 overflow-y-auto">
-                  {permissoes.map(permissao => {
-                    const usuarioPermissao = permissoesUsuario.find(p => p.id === permissao.id);
-                    const concedida = usuarioPermissao?.concedida || false;
-                    return (
-                      <div key={permissao.id} className="flex items-center gap-2 p-2 border rounded">
-                        <input
-                          type="checkbox"
-                          checked={concedida}
-                          onChange={(e) => atualizarPermissao(permissao.id, e.target.checked)}
-                          className="rounded"
-                        />
-                        <div>
-                          <div className="font-medium">{permissao.nome}</div>
-                          <div className="text-xs text-gray-500">{permissao.descricao}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="mb-6 max-h-96 overflow-y-auto pr-2">
+                  {renderizarPermissoesPorCategoria()}
                 </div>
 
                 <div className="flex justify-between gap-2">
                   <button
-                    className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                    className="px-4 py-2 text-sm rounded cursor-pointer transition"
                     style={{
                       backgroundColor: temaAtual.hover,
                       color: temaAtual.texto,
@@ -1372,7 +1511,7 @@ export default function Usuarios() {
 
                   <div className="flex gap-2">
                     <button
-                      className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                      className="px-4 py-2 text-sm rounded cursor-pointer transition"
                       style={{
                         backgroundColor: temaAtual.hover,
                         color: temaAtual.texto,
@@ -1382,9 +1521,9 @@ export default function Usuarios() {
                       {t("modal.cancelar")}
                     </button>
                     <button
-                      className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                      className="px-4 py-2 text-sm rounded cursor-pointer transition"
                       style={{
-                        backgroundColor: "#10B981",
+                        backgroundColor: temaAtual.primario,
                         color: "#FFFFFF",
                       }}
                       onClick={salvarPermissoes}
@@ -1397,7 +1536,7 @@ export default function Usuarios() {
             ) : (
               <div className="flex justify-end gap-2 mt-6">
                 <button
-                  className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                  className="px-4 py-2 text-sm rounded cursor-pointer transition"
                   style={{
                     backgroundColor: temaAtual.hover,
                     color: temaAtual.texto,
@@ -1407,9 +1546,9 @@ export default function Usuarios() {
                   {t("modal.cancelar")}
                 </button>
                 <button
-                  className="px-3 py-1.5 text-sm rounded cursor-pointer transition"
+                  className="px-4 py-2 text-sm rounded cursor-pointer transition"
                   style={{
-                    backgroundColor: "#10B981",
+                    backgroundColor: temaAtual.primario,
                     color: "#FFFFFF",
                   }}
                   onClick={async () => {
@@ -1425,5 +1564,6 @@ export default function Usuarios() {
         </div>
       )}
     </div>
-  );
+  )
 }
+

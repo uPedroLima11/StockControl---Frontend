@@ -20,6 +20,7 @@ export default function Sidebar() {
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const [possuiEmpresa, setPossuiEmpresa] = useState(false);
+  const [empresaAtivada, setEmpresaAtivada] = useState(false); 
   const { logar } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioInicializado, setAudioInicializado] = useState(false);
@@ -28,6 +29,7 @@ export default function Sidebar() {
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [ultimaVerificacao, setUltimaVerificacao] = useState<number>(0);
   const [modoDark, setModoDark] = useState(false);
+
 
 
   const cores = {
@@ -69,6 +71,25 @@ export default function Sidebar() {
     aplicarTema(novoTema);
     window.location.reload();
   };
+
+  
+   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da empresa");
+      }
+      const empresaData = await response.json();
+
+      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+      setEmpresaAtivada(ativada);
+      return ativada;
+    } catch (error) {
+      console.error("Erro ao verificar ativação da empresa:", error);
+      setEmpresaAtivada(false);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -314,6 +335,46 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
+    const carregarDados = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+        if (respostaUsuario.status === 200) {
+          const dadosUsuario = await respostaUsuario.json();
+          logar(dadosUsuario);
+        }
+
+        const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
+        if (respostaEmpresa.status === 200) {
+          const dadosEmpresa = await respostaEmpresa.json();
+          setFotoEmpresa(dadosEmpresa.foto);
+          setNomeEmpresa(dadosEmpresa.nome);
+          setPossuiEmpresa(true);
+          
+          if (dadosEmpresa.id) {
+            await verificarAtivacaoEmpresa(dadosEmpresa.id);
+          }
+        } else {
+          setPossuiEmpresa(false);
+          setEmpresaAtivada(false);
+        }
+
+        await verificarNotificacoes(usuarioId);
+      } catch (erro) {
+        console.error("Erro ao carregar dados:", erro);
+        setPossuiEmpresa(false);
+        setEmpresaAtivada(false);
+      }
+    };
+
+    carregarDados();
+  }, [logar, verificarNotificacoes, verificarAtivacaoEmpresa]);
+
+  useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
     const usuarioId = usuarioSalvo?.replace(/"/g, "");
 
@@ -378,6 +439,7 @@ export default function Sidebar() {
       clearInterval(intervaloEstoque);
       clearInterval(intervaloNotificacoes);
     };
+    
   }, [logar, verificarNotificacoes]);
 
   const alternarSidebar = () => {
@@ -493,23 +555,23 @@ export default function Sidebar() {
               className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
             >
               <div className="flex items-center justify-center w-8 h-8">
-              <Image
-                src={fotoEmpresa || "/contadefault.png"}
-                alt="Foto da Empresa"
-                width={48}
-                height={48}
-                className="rounded-full object-cover border"
-                style={{
-                borderColor: cores.azulClaro,
-                width: "48px",
-                height: "48px",
-                minWidth: "48px",
-                minHeight: "48px",
-                background: "#fff"
-                }}
-                quality={100}
-                priority
-              />
+                <Image
+                  src={fotoEmpresa || "/contadefault.png"}
+                  alt="Foto da Empresa"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover border"
+                  style={{
+                    borderColor: cores.azulClaro,
+                    width: "48px",
+                    height: "48px",
+                    minWidth: "48px",
+                    minHeight: "48px",
+                    background: "#fff"
+                  }}
+                  quality={100}
+                  priority
+                />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
@@ -529,7 +591,7 @@ export default function Sidebar() {
             </span>
           </button>
 
-          {possuiEmpresa && (
+          {possuiEmpresa && !empresaAtivada && (
             <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} />
           )}
 
