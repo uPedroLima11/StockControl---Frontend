@@ -133,7 +133,7 @@ export default function CriarEmpresa() {
             dominioSugerido: data.dominioSugerido
           });
         }
-      } catch (_error) {
+      } catch (error) {
         setDominioStatus({
           disponivel: false,
           carregando: false,
@@ -181,7 +181,7 @@ export default function CriarEmpresa() {
             mensagem: t("erros.verificacaoEmail")
           });
         }
-      } catch (_error) {
+      } catch (error) {
         setEmailStatus({
           existe: false,
           carregando: false,
@@ -254,8 +254,8 @@ export default function CriarEmpresa() {
             return;
           }
         }
-      } catch (_err) {
-        console.error("Erro em buscar os dados:", _err);
+      } catch (err) {
+        console.error("Erro em buscar os dados:", err);
       } finally {
         setLoading(false);
       }
@@ -354,8 +354,8 @@ export default function CriarEmpresa() {
           color: temaAtual.texto
         });
       }
-    } catch (_err) {
-      console.error(_err);
+    } catch (err) {
+      console.error(err);
       Swal.fire({
         icon: "error",
         title: t("erro.titulo"),

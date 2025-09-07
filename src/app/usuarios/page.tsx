@@ -56,7 +56,7 @@ export default function Usuarios() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const usuariosPorPagina = 10;
   const { t } = useTranslation("usuarios");
-  const [permissoes, setPermissoes] = useState<PermissaoI[]>([]);
+  const [, setPermissoes] = useState<PermissaoI[]>([]);
   const [permissoesUsuario, setPermissoesUsuario] = useState<(PermissaoI & { concedida: boolean })[]>([]);
   const [modalPermissoes, setModalPermissoes] = useState<UsuarioI | null>(null);
   const [permissoesPersonalizadas, setPermissoesPersonalizadas] = useState(false);
