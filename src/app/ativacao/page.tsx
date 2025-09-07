@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { FaCheckCircle, FaLock, FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
 
@@ -18,6 +19,11 @@ export default function AtivacaoPage() {
   const [empresaAtivada, setEmpresaAtivada] = useState(false);
   const router = useRouter();
   const { t } = useTranslation("ativacao");
+  const [statusAtivacao, setStatusAtivacao] = useState<{
+    ativada: boolean;
+    chave: string | null;
+    dataAtivacao: Date | null;
+  }>({ ativada: false, chave: null, dataAtivacao: null });
 
   const cores = {
     dark: {
@@ -55,7 +61,7 @@ export default function AtivacaoPage() {
   }, []);
 
   useEffect(() => {
-    const checkUsuario = async () => {
+    const checkUsuarioEStatus = async () => {
       try {
         const userId = localStorage.getItem("client_key")?.replace(/"/g, "");
         if (!userId) {
@@ -65,39 +71,28 @@ export default function AtivacaoPage() {
 
         const userRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${userId}`);
         const userData = await userRes.json();
-
         if (!userRes.ok) throw new Error(t('erroBuscarUsuario'));
-
         setTipoUsuario(userData.tipo);
 
         const empresaRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${userId}`);
         const empresaData = await empresaRes.json();
-
         if (!empresaRes.ok) throw new Error(t('erroBuscarEmpresa'));
-
         setEmpresaId(empresaData.id);
-        
-        const empresaCompletaRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaData.id}`);
-        const empresaCompletaData = await empresaCompletaRes.json();
-        
-        const estaAtivada = !!empresaCompletaData.ChaveAtivacao;
-        setEmpresaAtivada(estaAtivada);
 
-        if (estaAtivada && tipoUsuario === "PROPRIETARIO") {
-          toast.success(t('empresaAtivada'));
+        const statusRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/status-ativacao/${empresaData.id}`);
+        const statusData = await statusRes.json();
+        if (statusRes.ok) {
+          setStatusAtivacao(statusData);
+          setEmpresaAtivada(statusData.ativada);
         }
       } catch (error: unknown) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error(t('erroGenerico'));
-        }
-        router.push('/dashboard');
+        console.error('Erro ao verificar status:', error);
       }
     };
 
-    checkUsuario();
-  }, [router, t, tipoUsuario]);
+    checkUsuarioEStatus();
+  }, [router, t]);
+
 
   const handleAtivar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,9 +103,13 @@ export default function AtivacaoPage() {
         throw new Error(t('erroCodigoVazio'));
       }
 
-      if (codigo.length < 10 || !codigo.includes('-')) {
+      const chaveRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!chaveRegex.test(codigo)) {
+        console.log('Formato inválido detectado:', codigo);
         throw new Error(t('erroCodigoInvalido'));
       }
+
+      console.log('Fazendo requisição para:', `${process.env.NEXT_PUBLIC_URL_API}/chave/${codigo}`);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/chave/${codigo}`, {
         method: 'PUT',
@@ -118,20 +117,68 @@ export default function AtivacaoPage() {
         body: JSON.stringify({ empresaId }),
       });
 
+      console.log('Status da resposta:', res.status);
+
+      const responseData = await res.json();
+      console.log('Dados da resposta:', responseData);
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || t('erroAtivacao'));
+        if (res.status === 404) {
+          throw new Error(t('chaveNaoEncontrada') || "Código de ativação não existe");
+        } else if (res.status === 400) {
+          if (responseData.mensagem?.includes('já foi utilizada')) {
+            throw new Error(t('chaveJaUtilizada') || "Este código de ativação já foi utilizado por outra empresa");
+          }
+          if (responseData.mensagem?.includes('já possui uma chave')) {
+            throw new Error(t('empresaJaAtivada') || "Esta empresa já possui uma chave de ativação");
+          }
+          throw new Error(responseData.mensagem || t('erroAtivacao'));
+        }
+        throw new Error(responseData.mensagem || t('erroAtivacao'));
       }
 
-      toast.success(t('empresaAtivada'));
+      Swal.fire({
+        icon: 'success',
+        title: t('empresaAtivada') || 'Empresa ativada!',
+        text: 'Sua empresa foi ativada com sucesso.',
+        confirmButtonColor: temaAtual.primario,
+      });
+
       setEmpresaAtivada(true);
-      
-      
+      setStatusAtivacao(prev => ({ ...prev, ativada: true }));
+
     } catch (error: unknown) {
+      console.error('Erro completo:', error);
+
       if (error instanceof Error) {
-        toast.error(error.message);
+        let mensagemErro = error.message;
+
+        if (error.message.includes('não encontrada')) {
+          mensagemErro = t('chaveNaoEncontrada') || "Código de ativação não existe";
+        } else if (error.message.includes('já foi utilizada')) {
+          mensagemErro = t('chaveJaUtilizada') || "Este código de ativação já foi utilizado por outra empresa";
+        } else if (error.message.includes('já possui uma chave')) {
+          mensagemErro = t('empresaJaAtivada') || "Esta empresa já possui uma chave de ativação";
+        }
+
+        console.log('Mensagem de erro para usuário:', mensagemErro);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro na ativação',
+          text: mensagemErro,
+          confirmButtonColor: temaAtual.erro,
+        });
+
       } else {
-        toast.error(t('erroGenerico'));
+        console.log('Erro desconhecido');
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: t('erroGenerico') || "Erro desconhecido ao ativar empresa",
+          confirmButtonColor: temaAtual.erro,
+        });
       }
     } finally {
       setLoading(false);
@@ -300,10 +347,10 @@ export default function AtivacaoPage() {
           <p className="text-sm mb-2" style={{ color: temaAtual.placeholder }}>
             {t('naoEfetuouPagamento')}
           </p>
-          <Link 
-            href="https://wa.me/+5553981185633" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <Link
+            href="https://wa.me/+5553981185633"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center text-sm transition"
             style={{
               color: temaAtual.primario,

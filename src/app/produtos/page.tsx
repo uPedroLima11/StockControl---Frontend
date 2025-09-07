@@ -5,8 +5,7 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
-import Swal from "sweetalert2";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle } from "react-icons/fa"; import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
@@ -16,7 +15,7 @@ type DirecaoOrdenacao = 'asc' | 'desc';
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
-  const [produtosOriginais, setProdutosOriginais] = useState<ProdutoI[]>([]); 
+  const [produtosOriginais, setProdutosOriginais] = useState<ProdutoI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
   const [modalAberto, setModalAberto] = useState(false);
@@ -59,6 +58,7 @@ export default function Produtos() {
 
   const [nomeCaracteres, setNomeCaracteres] = useState(0);
   const [descricaoCaracteres, setDescricaoCaracteres] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -95,10 +95,10 @@ export default function Produtos() {
 
   const ordenarProdutos = (produtos: ProdutoI[], campo: CampoOrdenacao, direcao: DirecaoOrdenacao) => {
     if (campo === 'none') return [...produtos];
-    
+
     return [...produtos].sort((a, b) => {
       let valorA, valorB;
-      
+
       switch (campo) {
         case 'nome':
           valorA = a.nome.toLowerCase();
@@ -115,7 +115,7 @@ export default function Produtos() {
         default:
           return 0;
       }
-      
+
       if (valorA < valorB) {
         return direcao === 'asc' ? -1 : 1;
       }
@@ -139,7 +139,7 @@ export default function Produtos() {
     if (campoOrdenacao !== campo) {
       return <FaSort />;
     }
-    
+
     return direcaoOrdenacao === 'asc' ? <FaSortUp /> : <FaSortDown />;
   };
 
@@ -171,7 +171,7 @@ export default function Produtos() {
 
   useEffect(() => {
     const carregarPermissoes = async () => {
-       const usuarioSalvo = localStorage.getItem("client_key");
+      const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!usuarioSalvo) return;
@@ -316,7 +316,7 @@ export default function Produtos() {
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
               );
             setProdutos(produtosDaEmpresa);
-            setProdutosOriginais(produtosDaEmpresa); 
+            setProdutosOriginais(produtosDaEmpresa);
           }
         }
       }
@@ -372,7 +372,7 @@ export default function Produtos() {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
           setProdutos(produtosDaEmpresa);
-          setProdutosOriginais(produtosDaEmpresa); 
+          setProdutosOriginais(produtosDaEmpresa);
         }
       }
     };
@@ -490,6 +490,36 @@ export default function Produtos() {
         return;
       }
 
+      const camposObrigatorios = {
+        nome: form.nome.trim(),
+        descricao: form.descricao.trim(),
+        quantidadeMin: form.quantidadeMin !== 0
+      };
+
+      const camposFaltando = Object.entries(camposObrigatorios)
+        .filter(([_, value]) => !value)
+        .map(([campo]) => campo);
+
+      if (camposFaltando.length > 0) {
+        const camposTraduzidos = camposFaltando.map(campo => {
+          switch (campo) {
+            case 'nome': return t("nome");
+            case 'descricao': return t("descricao");
+            case 'quantidadeMin': return t("quantidadeMinima");
+            default: return campo;
+          }
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
+          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
+          confirmButtonColor: '#EF4444'
+        });
+        return;
+      }
+
+
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
       if (!empresaAtivada) {
         mostrarAlertaNaoAtivada();
@@ -507,8 +537,8 @@ export default function Produtos() {
 
         formData.append("nome", form.nome);
         formData.append("descricao", form.descricao);
-        formData.append("preco", form.preco.toString());
-        formData.append("quantidade", form.quantidade.toString());
+        formData.append("preco", (form.preco || 0).toString());
+        formData.append("quantidade", (form.quantidade || 0).toString());
         formData.append("quantidadeMin", form.quantidadeMin.toString());
         formData.append("noCatalogo", form.noCatalogo.toString());
         if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
@@ -558,8 +588,8 @@ export default function Produtos() {
 
           setTimeout(() => window.location.reload(), 1600);
         } else {
-          const errorText = await response.text();
-          Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorText}`, "error");
+          const errorData = await response.json();
+          Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorData.mensagem || 'Erro desconhecido'}`, "error");
         }
       } catch (err) {
         console.error("Erro ao criar produto:", err);
@@ -574,6 +604,35 @@ export default function Produtos() {
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!modalVisualizar) return;
+
+      const camposObrigatorios = {
+        nome: form.nome.trim(),
+        descricao: form.descricao.trim(),
+        quantidadeMin: form.quantidadeMin !== 0
+      };
+
+      const camposFaltando = Object.entries(camposObrigatorios)
+        .filter(([_, value]) => !value)
+        .map(([campo]) => campo);
+
+      if (camposFaltando.length > 0) {
+        const camposTraduzidos = camposFaltando.map(campo => {
+          switch (campo) {
+            case 'nome': return t("nome");
+            case 'descricao': return t("descricao");
+            case 'quantidadeMin': return t("quantidadeMinima");
+            default: return campo;
+          }
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
+          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
+          confirmButtonColor: '#EF4444'
+        });
+        return;
+      }
 
       if (empresaId) {
         const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
@@ -1076,7 +1135,9 @@ export default function Produtos() {
               </h2>
 
               <div className="mb-3">
-                <label className="block mb-1 text-sm">{t("nome")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("nome")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("nome")}
                   value={form.nome || ""}
@@ -1096,7 +1157,9 @@ export default function Produtos() {
               </div>
 
               <div className="mb-3">
-                <label className="block mb-1 text-sm">{t("descricao")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("descricao")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("descricao")}
                   value={form.descricao || ""}
@@ -1174,7 +1237,68 @@ export default function Produtos() {
                   </div>
                 )}
                 <div className="flex-1">
-                  <label className="block mb-1 text-sm">{t("quantidadeMinima")}</label>
+                  <div className="flex items-center gap-1 mb-1">
+                    <label className="text-sm">
+                      {t("quantidadeMinima")} <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative inline-flex items-center group">
+                      <FaQuestionCircle
+                        className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
+                        size={14}
+                        onClick={() => {
+                          if (window.innerWidth < 768) {
+                            setShowTooltip(!showTooltip);
+                          }
+                        }}
+                      />
+
+                        <div
+                          className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                          style={{
+                          backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
+                          color: modoDark ? "#FFFFFF" : "#1E293B",
+                          border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
+                          top: "auto",
+                          bottom: "100%",
+                          marginBottom: "8px"
+                          }}
+                        >
+                          <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
+                          <div className="text-xs leading-tight text-center">
+                          {t("quantidadeMinimaTooltip")}
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+
+                    {showTooltip && window.innerWidth < 768 && (
+                    <div
+                      className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
+                      style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+                      onClick={() => setShowTooltip(false)}
+                    >
+                      <div
+                      className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
+                      onClick={(e) => e.stopPropagation()}
+                      >
+                      <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
+                        💡 {t("quantidadeMinima")}
+                      </div>
+                      <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
+                        {t("quantidadeMinimaTooltip")}
+                      </div>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => setShowTooltip(false)}
+                          className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                        >
+                          Fechar
+                        </button>
+                      </div>
+                      </div>
+                    </div>
+                    )}
+
                   <input
                     placeholder={t("quantidadeMinima")}
                     type="number"
@@ -1244,22 +1368,22 @@ export default function Produtos() {
                 </select>
               </div>
 
-                {modalVisualizar && podeGerenciarEstoque && (
+              {modalVisualizar && podeGerenciarEstoque && (
                 <div className="flex items-center mt-6 pt-4 border-t">
                   <div>
-                  <MovimentacaoEstoqueModal
-                    produto={{
-                    id: modalVisualizar.id,
-                    nome: modalVisualizar.nome,
-                    quantidade: modalVisualizar.quantidade
-                    }}
-                    modoDark={modoDark}
-                    empresaId={empresaId!}
-                    onMovimentacaoConcluida={recarregarListaProdutos}
-                  />
+                    <MovimentacaoEstoqueModal
+                      produto={{
+                        id: modalVisualizar.id,
+                        nome: modalVisualizar.nome,
+                        quantidade: modalVisualizar.quantidade
+                      }}
+                      modoDark={modoDark}
+                      empresaId={empresaId!}
+                      onMovimentacaoConcluida={recarregarListaProdutos}
+                    />
                   </div>
                 </div>
-                )}
+              )}
 
               <div className="flex justify-between mt-4">
                 <div>
@@ -1268,9 +1392,9 @@ export default function Produtos() {
                       onClick={handleDelete}
                       className="px-5 py-2 cursor-pointer rounded border"
                       style={{
-                      backgroundColor: "#F87171",
-                      borderColor: "#F87171",
-                      color: "#fff"
+                        backgroundColor: "#F87171",
+                        borderColor: "#F87171",
+                        color: "#fff"
                       }}
                     >
                       {t("excluir")}

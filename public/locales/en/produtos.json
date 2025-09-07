@@ -13,6 +13,7 @@
   "criar": "Create",
   "nenhumProdutoEncontrado": "No product found",
   "nome": "Name",
+  "quantidadeMinimaTooltip": "Defines the minimum stock for alerts. When the stock is close to or below this value, the system will generate critical alert notifications to prevent product shortages.",
   "fornecedor": "Supplier",
   "categoria": "Category",
   "atualizar": "Update",
@@ -30,7 +31,6 @@
   "removerDoCatalogo": "Remove from Catalog",
   "adicionarAoCatalogo": "Add to Catalog",
   "semPermissaoVisualizar": "You do not have permission to view this content",
-
   "empresaNaoAtivada": {
     "titulo": "Company not activated",
     "mensagem": "You must activate your company before accessing this feature.",
@@ -38,7 +38,6 @@
     "alertaTitulo": "Company not activated",
     "alertaMensagem": "Activate your company to unlock all features."
   },
-
   "produtoAdicionadoCatalogo": {
     "titulo": "Product added to catalog!"
   },
@@ -55,7 +54,6 @@
     "titulo": "Product deleted successfully!",
     "mensagem": "The product has been removed from the system."
   },
-
   "confirmacaoExclusao": {
     "titulo": "Do you want to delete this product?",
     "mensagem": "This action cannot be undone.",

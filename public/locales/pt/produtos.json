@@ -19,6 +19,7 @@
   "catalogo": "Catálogo",
   "quantidadeMinima": "Quantidade mínima",
   "descricao": "Descrição",
+  "quantidadeMinimaTooltip": "Define o estoque mínimo para alertas. Quando o estoque ficar próximo ou abaixo deste valor, o sistema gerará notificações de alerta crítico para evitar a falta do produto.",
   "sim": "Sim",
   "atualizar": "Atualizar",
   "cancelar": "Cancelar",
@@ -30,7 +31,6 @@
   "removerDoCatalogo": "Remover do Catálogo",
   "adicionarAoCata": "Adicionar ao Catálogo",
   "semPermissaoVisualizar": "Você não tem permissão para visualizar este conteúdo",
-
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",
     "mensagem": "Você precisa ativar sua empresa antes de acessar esta funcionalidade.",
@@ -38,7 +38,6 @@
     "alertaTitulo": "Empresa não ativada",
     "alertaMensagem": "Ative sua empresa para liberar todos os recursos."
   },
-
   "produtoAdicionadoCatalogo": {
     "titulo": "Produto adicionado ao catálogo!"
   },
@@ -55,11 +54,15 @@
     "titulo": "Produto excluído com sucesso!",
     "mensagem": "O produto foi removido do sistema."
   },
-
   "confirmacaoExclusao": {
     "titulo": "Deseja excluir este produto?",
     "mensagem": "Essa ação não poderá ser desfeita.",
     "botaoConfirmar": "Sim, excluir",
     "botaoCancelar": "Cancelar"
+  },
+   
+    "erroCamposObrigatorios": {
+    "titulo": "Erro!",
+    "mensagem": "Preencha os campos obrigatórios:"
   }
 }

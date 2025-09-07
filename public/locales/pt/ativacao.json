@@ -26,5 +26,13 @@
     "ativando": "Ativando...",
     "naoEfetuouPagamento": "Caso não tenha efetuado o pagamento",
     "cliqueAqui": "CLIQUE AQUI",
-    "paraComprarAtivacao": "para comprar a ativação"
+    "paraComprarAtivacao": "para comprar a ativação",
+    "chaveJaUtilizada": "Este código de ativação já foi utilizado por outra empresa",
+    "formatoChaveInvalido": "Formato de chave inválido. Use o formato UUID",
+    "chaveNaoEncontrada": "Código de ativação não existe",
+    "empresaJaPossuiChave": "Esta empresa já possui uma chave de ativação",
+    "sucessoTitulo": "Sucesso!",
+    "erroTitulo": "Erro!",
+    "sucessoAtivacaoTexto": "Sua empresa foi ativada com sucesso e todas as funcionalidades estão liberadas.",
+    "erroAtivacaoTexto": "Não foi possível ativar sua empresa. Verifique o código e tente novamente."
 }
