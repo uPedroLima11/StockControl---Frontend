@@ -7,7 +7,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { useTranslation } from "react-i18next";
-import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink, FaAsterisk } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink } from "react-icons/fa";
 
 type Inputs = {
   nome: string;
@@ -133,7 +133,7 @@ export default function CriarEmpresa() {
             dominioSugerido: data.dominioSugerido
           });
         }
-      } catch (error) {
+      } catch (_error) {
         setDominioStatus({
           disponivel: false,
           carregando: false,
@@ -181,7 +181,7 @@ export default function CriarEmpresa() {
             mensagem: t("erros.verificacaoEmail")
           });
         }
-      } catch (error) {
+      } catch (_error) {
         setEmailStatus({
           existe: false,
           carregando: false,
@@ -234,9 +234,7 @@ export default function CriarEmpresa() {
 
         const usuarioId = clientKey.replace(/"/g, "");
 
-        const responseUser = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`
-        );
+        const responseUser = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
         if (responseUser.ok) {
           const dados: UsuarioI = await responseUser.json();
           logar(dados);
@@ -248,9 +246,7 @@ export default function CriarEmpresa() {
           }
         }
 
-        const responseEmpresa = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`
-        );
+        const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`);
         if (responseEmpresa.ok) {
           const data = await responseEmpresa.json();
           if (data.empresa) {
@@ -258,8 +254,8 @@ export default function CriarEmpresa() {
             return;
           }
         }
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err);
+      } catch (_err) {
+        console.error("Erro ao buscar dados:", _err);
       } finally {
         setLoading(false);
       }
@@ -324,29 +320,21 @@ export default function CriarEmpresa() {
         formData.append("foto", data.foto[0]);
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/empresa`,
-        {
-          method: "POST",
-          headers: {
-            "user-id": usuarioValor || "",
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa`, {
+        method: "POST",
+        headers: {
+          "user-id": usuarioValor || "",
+        },
+        body: formData,
+      });
 
       if (response.ok) {
-        const empresaCriada = await response.json();
+        await response.json(); 
 
         Swal.fire({
           icon: "success",
           title: t("sucesso.titulo"),
-          html: `
-            <div>
-              <p>${t("sucesso.mensagem")}</p>
-              </p>
-            </div>
-          `,
+          html: `<div><p>${t("sucesso.mensagem")}</p></div>`,
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto
@@ -366,8 +354,8 @@ export default function CriarEmpresa() {
           color: temaAtual.texto
         });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (_err) {
+      console.error(_err);
       Swal.fire({
         icon: "error",
         title: t("erro.titulo"),
@@ -388,9 +376,7 @@ export default function CriarEmpresa() {
     </div>
   );
 
-  const CampoObrigatorio = () => (
-    <span className="text-red-500 ml-1">*</span>
-  );
+  const CampoObrigatorio = () => <span className="text-red-500 ml-1">*</span>;
 
   if (loading) {
     return (
@@ -720,7 +706,7 @@ export default function CriarEmpresa() {
                 color: "#FFFFFF",
               }}
               disabled={
-                !dominioWatch || 
+                !dominioWatch ||
                 dominioWatch.length < 4 ||
                 (dominioWatch.length >= 4 && !dominioStatus.disponivel && !dominioStatus.carregando) ||
                 emailStatus.existe ||
