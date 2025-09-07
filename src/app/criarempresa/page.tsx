@@ -255,7 +255,7 @@ export default function CriarEmpresa() {
           }
         }
       } catch (_err) {
-        console.error("Erro ao buscar dados:", _err);
+        console.error("Erro em buscar os dados:", _err);
       } finally {
         setLoading(false);
       }
