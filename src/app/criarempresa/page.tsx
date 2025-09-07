@@ -133,7 +133,7 @@ export default function CriarEmpresa() {
             dominioSugerido: data.dominioSugerido
           });
         }
-      } catch (error) {
+      } catch {
         setDominioStatus({
           disponivel: false,
           carregando: false,
@@ -181,7 +181,7 @@ export default function CriarEmpresa() {
             mensagem: t("erros.verificacaoEmail")
           });
         }
-      } catch (error) {
+      } catch {
         setEmailStatus({
           existe: false,
           carregando: false,
@@ -329,7 +329,7 @@ export default function CriarEmpresa() {
       });
 
       if (response.ok) {
-        await response.json(); 
+        await response.json();
 
         Swal.fire({
           icon: "success",
