@@ -218,11 +218,21 @@ export default function Exportacoes() {
 
         setCarregandoHistorico(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`);
+            const usuarioSalvo = localStorage.getItem("client_key");
+            const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`, {
+                headers: {
+                    'user-id': usuarioValor
+                }
+            });
+
             if (response.ok) {
                 const history = await response.json();
                 setExportHistory(history);
                 setPaginaAtual(1);
+            } else {
+                console.error("Erro na resposta:", response.status);
             }
         } catch (error) {
             console.error("Erro ao carregar histórico:", error);
