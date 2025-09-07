@@ -497,7 +497,7 @@ export default function Produtos() {
       };
 
       const camposFaltando = Object.entries(camposObrigatorios)
-        .filter(([_, value]) => !value)
+        .filter(([, value]) => !value)
         .map(([campo]) => campo);
 
       if (camposFaltando.length > 0) {
@@ -612,7 +612,7 @@ export default function Produtos() {
       };
 
       const camposFaltando = Object.entries(camposObrigatorios)
-        .filter(([_, value]) => !value)
+        .filter(([, value]) => !value)
         .map(([campo]) => campo);
 
       if (camposFaltando.length > 0) {

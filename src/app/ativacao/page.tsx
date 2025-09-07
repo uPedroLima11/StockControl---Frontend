@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
 import { FaCheckCircle, FaLock, FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
@@ -19,7 +18,7 @@ export default function AtivacaoPage() {
   const [empresaAtivada, setEmpresaAtivada] = useState(false);
   const router = useRouter();
   const { t } = useTranslation("ativacao");
-  const [statusAtivacao, setStatusAtivacao] = useState<{
+  const [, setStatusAtivacao] = useState<{
     ativada: boolean;
     chave: string | null;
     dataAtivacao: Date | null;
