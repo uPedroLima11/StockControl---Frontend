@@ -29,6 +29,9 @@
     "alertaMensagem": "Algumas ações estão desabilitadas até a ativação da empresa."
   },
   "mensagens": {
+    "camposObrigatorios": "Campos obrigatórios",
+    "preenchaCampos": "Por favor, preencha os seguintes campos:",
+    "campoObrigatorio": "é obrigatório",
     "fornecedorAdicionado": "Fornecedor adicionado com sucesso.",
     "fornecedorAtualizado": "Fornecedor atualizado com sucesso.",
     "erro": "Erro",
@@ -41,5 +44,11 @@
     "deletado": "Deletado",
     "produtoExcluido": "Fornecedor removido com sucesso.",
     "erroDeletar": "Falha ao deletar fornecedor."
+  },
+  "validacao": {
+    "camposObrigatorios": "Campos obrigatórios",
+    "preenchaCampos": "Por favor, preencha os seguintes campos:",
+    "campoObrigatorio": "é obrigatório",
+    "nomeObrigatorio": "O nome é obrigatório"
   }
 }

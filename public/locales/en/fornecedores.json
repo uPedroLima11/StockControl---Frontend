@@ -29,6 +29,9 @@
     "alertaMensagem": "Certain actions are unavailable until the company is activated."
   },
   "mensagens": {
+    "camposObrigatorios": "Required fields",
+    "preenchaCampos": "Please fill in the following fields:",
+    "campoObrigatorio": "is required",
     "fornecedorAdicionado": "Supplier added successfully.",
     "fornecedorAtualizado": "Supplier updated successfully.",
     "erro": "Error",
@@ -41,5 +44,11 @@
     "deletado": "Deleted",
     "produtoExcluido": "Supplier removed successfully.",
     "erroDeletar": "Unable to delete supplier."
+  },
+   "validacao": {
+    "camposObrigatorios": "Required fields",
+    "preenchaCampos": "Please fill in the following fields:",
+    "campoObrigatorio": "is required",
+    "nomeObrigatorio": "Name is required"
   }
 }

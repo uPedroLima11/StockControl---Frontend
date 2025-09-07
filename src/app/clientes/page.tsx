@@ -225,13 +225,12 @@ export default function Clientes() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 17) {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
       setForm({ ...form, telefone: value });
       setTelefoneCaracteres(value.length);
     }
   };
-
   const handleEnderecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value.length <= 50) {
@@ -335,6 +334,16 @@ export default function Clientes() {
     handleAcaoProtegida(async () => {
       if (!empresaId) return alert("Empresa não identificada.");
 
+      if (!form.nome.trim()) {
+        Swal.fire({
+          title: t("modal.camposObrigatorios.titulo", "Campo obrigatório"),
+          text: `${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}`,
+          icon: "warning",
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
+
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
       if (!empresaAtivada) {
         mostrarAlertaNaoAtivada();
@@ -377,9 +386,19 @@ export default function Clientes() {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
+      if (!form.nome.trim()) {
+        Swal.fire({
+          title: t("modal.camposObrigatorios.titulo", "Campo obrigatório"),
+          text: `${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}`,
+          icon: "warning",
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
       if (!empresaAtivada) {
         mostrarAlertaNaoAtivada();
@@ -483,8 +502,10 @@ export default function Clientes() {
     }
 
     const telefoneFormatado = cliente.telefone.replace(/\D/g, "");
-    const numeroComDdd = `${telefoneFormatado}`;
-    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComDdd}`;
+
+    const numeroComCodigoPais = `55${telefoneFormatado}`;
+
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComCodigoPais}`;
     window.open(urlWhatsApp, "_blank");
   }
 
@@ -500,9 +521,16 @@ export default function Clientes() {
 
   function formatarTelefone(telefone: string) {
     if (!telefone) return "-";
-    return `(${telefone.slice(0, 2)}) ${telefone.slice(2, 7)}-${telefone.slice(7)}`;
-  }
 
+    const numeros = telefone.replace(/\D/g, '');
+
+    if (numeros.length === 11) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+    } else if (numeros.length === 10) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+    }
+    return telefone;
+  }
   function formatarData(dataString: string | Date) {
     const data = new Date(dataString);
     return data.toLocaleString("pt-BR", {
@@ -861,7 +889,9 @@ export default function Clientes() {
 
             <div className="space-y-3">
               <div>
-                <label className="block mb-1 text-sm">{t("nome")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("nome")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("nome")}
                   value={form.nome || ""}
@@ -913,10 +943,10 @@ export default function Clientes() {
                     borderColor: temaAtual.borda
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={17}
+                  maxLength={11}
                 />
                 <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {telefoneCaracteres}/17 {telefoneCaracteres === 17 && " - Limite"}
+                  {telefoneCaracteres}/11 {telefoneCaracteres === 11 && " - Limite"}
                 </div>
               </div>
 

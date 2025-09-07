@@ -263,8 +263,8 @@ export default function Fornecedores() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 14) {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
       setForm({ ...form, telefone: value });
       setTelefoneCaracteres(value.length);
     }
@@ -280,9 +280,15 @@ export default function Fornecedores() {
   };
 
   const formatarTelefone = (telefone: string) => {
-    return `(${telefone.slice(2, 4)}) ${telefone.slice(4, 9)}-${telefone.slice(9)}`;
-  };
+    const numeros = telefone.replace(/\D/g, '');
 
+    if (numeros.length === 11) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+    } else if (numeros.length === 10) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+    }
+    return telefone;
+  };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -313,12 +319,36 @@ export default function Fornecedores() {
   };
 
   async function handleAdicionarFornecedor() {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+  const usuarioSalvo = localStorage.getItem("client_key");
+  if (!usuarioSalvo) return;
+  const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-    handleAcaoProtegida(async () => {
-      if (!empresaId) return alert("Empresa não identificada.");
+  handleAcaoProtegida(async () => {
+    if (!empresaId) return alert("Empresa não identificada.");
+
+    let mensagemErro = "";
+    
+    if (!form.nome.trim()) {
+      mensagemErro += `• ${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
+    }
+    
+    if (!form.email.trim()) {
+      mensagemErro += `• ${t("email")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
+    }
+    
+    if (!form.cnpj.trim()) {
+      mensagemErro += `• ${t("cnpj")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
+    }
+
+    if (mensagemErro) {
+      Swal.fire({
+        title: t("modal.camposObrigatorios.titulo", "Campos obrigatórios"),
+        html: `${t("modal.camposObrigatorios.texto", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+        icon: "warning",
+        confirmButtonColor: "#013C3C",
+      });
+      return;
+    }
 
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
       if (!empresaAtivada) {
@@ -327,17 +357,16 @@ export default function Fornecedores() {
       }
 
       const formData = new FormData();
-      formData.append("nome", form.nome);
-      formData.append("email", form.email);
-      formData.append("cnpj", form.cnpj);
-      formData.append("telefone", form.telefone);
-      formData.append("categoria", form.categoria);
+      formData.append("nome", form.nome.trim());
+      formData.append("email", form.email.trim());
+      formData.append("cnpj", form.cnpj.trim());
+      formData.append("telefone", form.telefone.trim());
+      formData.append("categoria", form.categoria.trim());
       formData.append("empresaId", empresaId);
       formData.append("usuarioId", usuarioValor || "");
       if (fotoFile) {
         formData.append("foto", fotoFile);
       }
-
 
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
@@ -388,6 +417,30 @@ export default function Fornecedores() {
     handleAcaoProtegida(async () => {
       if (!modalVisualizar?.id) return;
 
+      let mensagemErro = "";
+
+      if (!form.nome.trim()) {
+        mensagemErro += `• ${t("nome")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+      }
+
+      if (!form.email.trim()) {
+        mensagemErro += `• ${t("email")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+      }
+
+      if (!form.cnpj.trim()) {
+        mensagemErro += `• ${t("cnpj")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+      }
+
+      if (mensagemErro) {
+        Swal.fire({
+          title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
+          html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          icon: "warning",
+          confirmButtonColor: "#013C3C",
+        });
+        return;
+      }
+
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
       if (!empresaAtivada) {
         mostrarAlertaNaoAtivada();
@@ -395,11 +448,11 @@ export default function Fornecedores() {
       }
 
       const formData = new FormData();
-      formData.append("nome", form.nome);
-      formData.append("email", form.email);
-      formData.append("cnpj", form.cnpj);
-      formData.append("telefone", form.telefone);
-      formData.append("categoria", form.categoria);
+      formData.append("nome", form.nome.trim());
+      formData.append("email", form.email.trim());
+      formData.append("cnpj", form.cnpj.trim());
+      formData.append("telefone", form.telefone.trim());
+      formData.append("categoria", form.categoria.trim());
       formData.append("empresaId", empresaId || "");
       formData.append("usuarioId", usuarioValor || "");
 
@@ -489,8 +542,10 @@ export default function Fornecedores() {
 
   function handleEntrarContato(fornecedor: FornecedorI) {
     const telefoneFormatado = fornecedor.telefone.replace(/\D/g, "");
-    const numeroComDdd = `${telefoneFormatado}`;
-    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComDdd}`;
+
+    const numeroComCodigoPais = `55${telefoneFormatado}`;
+
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroComCodigoPais}`;
     window.open(urlWhatsApp, "_blank");
   }
 
@@ -901,7 +956,9 @@ export default function Fornecedores() {
 
             <div className="space-y-3">
               <div>
-                <label className="block mb-1 text-sm">{t("nome")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("nome")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("nome")}
                   value={form.nome || ""}
@@ -921,7 +978,9 @@ export default function Fornecedores() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm">{t("email")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("email")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("email")}
                   value={form.email || ""}
@@ -941,7 +1000,9 @@ export default function Fornecedores() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm">{t("cnpj")}</label>
+                <label className="block mb-1 text-sm">
+                  {t("cnpj")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("cnpj")}
                   value={form.cnpj || ""}

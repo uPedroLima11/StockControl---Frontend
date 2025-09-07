@@ -55,5 +55,11 @@
       "titulo": "Sem telefone",
       "mensagem": "Este cliente não possui um número de telefone cadastrado."
     }
+  },
+   "validacao": {
+    "camposObrigatorios": "Campos obrigatórios",
+    "preenchaCampos": "Por favor, preencha os seguintes campos:",
+    "campoObrigatorio": "é obrigatório",
+    "nomeObrigatorio": "O nome é obrigatório"
   }
 }

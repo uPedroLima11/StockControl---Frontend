@@ -53,5 +53,11 @@
       "titulo": "No phone",
       "mensagem": "This client does not have a phone number registered."
     }
+  },
+  "validacao": {
+    "camposObrigatorios": "Required fields",
+    "preenchaCampos": "Please fill in the following fields:",
+    "campoObrigatorio": "is required",
+    "nomeObrigatorio": "Name is required"
   }
 }

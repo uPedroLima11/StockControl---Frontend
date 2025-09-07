@@ -1,103 +1,113 @@
 {
-    "roles": {
-        "FUNCIONARIO": "Employee",
-        "ADMIN": "Administrator",
-        "PROPRIETARIO": "Owner"
+  "roles": {
+    "FUNCIONARIO": "Employee",
+    "ADMIN": "Administrator",
+    "PROPRIETARIO": "Owner"
+  },
+  "titulo": "Users",
+  "carregando": "Loading Users...",
+  "erro": "Error",
+  "erroBuscarUsuarios": "Error fetching users",
+  "erroDesconhecido": "Unknown error",
+  "convidarUsuario": "Invite User",
+  "enviarMensagem": "Send Message",
+  "nomeUsuario": "Username",
+  "funcao": "Role",
+  "criadoEm": "Created at",
+  "ultimaAtualizacao": "Last Updated",
+  "email": "Email",
+  "acao": "Action",
+  "selecioneUsuario": "Select a user",
+  "nenhumUsuario": "No users found",
+  "nenhumaEmpresa": "You don't belong to any company",
+  "semPermissaoVisualizarUsuarios": "You don't have permission to view users.",
+  "acessoNegado": "Access Denied",
+  "buscarUsuario": "Search User",
+  "editarUsuario": "Edit User",
+  "gerenciarPermissoes": "Manage Permissions",
+  "semPermissaoGerenciar": "No permission to manage",
+  "modal": {
+    "permissaoNegada": {
+      "titulo": "Permission Denied",
+      "textoConvite": "You don't have permission to perform this action",
+      "textoExcluir": "You don't have permission to delete this user."
     },
-    "titulo": "Users",
-    "carregando": "Loading Users...",
-    "erro": "Error",
-    "erroBuscarUsuarios": "Error fetching users",
-    "erroDesconhecido": "Unknown error",
+    "confirmar": "Confirm",
+    "conviteEnviado": {
+      "titulo": "Invite sent",
+      "texto": "Invite was successfully sent to {{email}}"
+    },
+    "usuarioVinculado": {
+      "titulo": "User already linked",
+      "texto": "The user is already linked to a company"
+    },
+    "botaoOk": "OK",
+    "mensagemEnviada": {
+      "titulo": "Message sent",
+      "texto": "Message was successfully sent to {{email}}"
+    },
+    "selecioneUsuario": {
+      "titulo": "Select a user",
+      "texto": "Please select a recipient for the message."
+    },
+    "naoPodeEnviarParaSi": {
+      "titulo": "Cannot send to yourself",
+      "texto": "You cannot send messages to yourself."
+    },
+    "erro": {
+      "titulo": "Error",
+      "textoEnviarNotificacao": "Could not send notification",
+      "textoInterno": "An internal error occurred",
+      "enviarConvite": "Error sending invite",
+      "alterarCargo": "Error changing role",
+      "removerUsuario": "Error removing user",
+      "usuarioNaoEncontrado": "User not found"
+    },
+    "camposObrigatorios": {
+      "titulo": "Required fields",
+      "texto": "Please fill all required fields"
+    },
+    "usuario": "User",
     "convidarUsuario": "Invite User",
+    "emailUsuario": "User Email",
+    "cancelar": "Cancel",
+    "enviarConvite": "Send Invite",
+    "enviando": "Sending...",
     "enviarMensagem": "Send Message",
-    "nomeUsuario": "Username",
-    "funcao": "Role",
-    "criadoEm": "Created At",
-    "ultimaAtualizacao": "Last Update",
-    "email": "Email",
-    "acao": "Action",
-    "nenhumUsuario": "No users found",
-    "semPermissaoVisualizarUsuarios": "You don't have permission to view users.",
-    "acessoNegado": "Access Denied",
-    "nenhumaEmpresa": "You don't belong to any company",
-    "buscarUsuario": "Search User",
+    "cargoAtualizado": "Role updated",
+    "cargoAtualizadoSucesso": "Role updated successfully",
+    "de": "From",
+    "para": "To",
+    "tituloMensagem": "Message title",
+    "descricaoMensagem": "Message description",
     "editarUsuario": "Edit User",
-    "gerenciarPermissoes": "Manage Permissions",
-    "semPermissaoGerenciar": "No permission to manage",
-    "modal": {
-        "permissaoNegada": {
-            "titulo": "Permission Denied",
-            "textoConvite": "You don't have permission to perform this action"
-        },
-        "confirmar": "Confirm",
-        "conviteEnviado": {
-            "titulo": "Invite sent",
-            "texto": "Invite successfully sent to {{email}}"
-        },
-        "usuarioVinculado": {
-            "titulo": "User already linked",
-            "texto": "The user is already linked to a company"
-        },
-        "botaoOk": "OK",
-        "mensagemEnviada": {
-            "titulo": "Message sent",
-            "texto": "Message successfully sent to {{email}}"
-        },
-        "erro": {
-            "titulo": "Error",
-            "textoEnviarNotificacao": "Could not send notification",
-            "textoInterno": "An internal error occurred",
-            "enviarConvite": "Error sending invite",
-            "alterarCargo": "Error changing role",
-            "removerUsuario": "Error removing user"
-        },
-        "camposObrigatorios": {
-            "titulo": "Required fields",
-            "texto": "Fill all required fields"
-        },
-        "usuario": "User",
-        "convidarUsuario": "Invite User",
-        "emailUsuario": "User Email",
-        "cancelar": "Cancel",
-        "enviarConvite": "Send Invite",
-        "enviando": "Sending...",
-        "enviarMensagem": "Send Message",
-        "cargoAtualizado": "Role updated",
-        "cargoAtualizadoSucesso": "Role successfully updated",
-        "de": "From",
-        "para": "To",
-        "selecioneUsuario": "Select user",
-        "tituloMensagem": "Message title",
-        "descricaoMensagem": "Message description",
-        "editarUsuario": "Edit User",
-        "alterarCargo": "Change Role",
-        "funcionario": "Employee",
-        "admin": "Administrator",
-        "proprietario": "Owner",
-        "salvarCargo": "Save Role",
-        "remover": "Remove",
-        "removido": "Removed",
-        "confirmacaoRemocao": {
-            "titulo": "Are you sure?",
-            "texto": "Do you really want to remove user {{nome}} from the company?",
-            "confirmar": "Yes, remove",
-            "cancelar": "Cancel",
-            "sucesso": "User {{nome}} was successfully removed from the company",
-            "erro": "Could not remove user"
-        },
-        "erroPermissao": {
-            "titulo": "Permission Denied",
-            "texto": "You don't have permission to perform this action"
-        },
-        "permissoesUsuario": "User Permissions",
-        "permissoesPersonalizadas": "Custom Permissions",
-        "permissoesPersonalizadasDescricao": "Enable to set specific permissions for this user",
-        "permissoesSalvas": "Permissions saved successfully!",
-        "permissoesRedefinidas": "Permissions reset to default!",
-        "erroSalvarPermissoes": "Error saving permissions",
-        "erroRedefinirPermissoes": "Error resetting permissions",
-        "redefinirPadrao": "Reset to Default",
-        "salvarPermissoes": "Save Permissions"
-    }
+    "alterarCargo": "Change Role",
+    "funcionario": "Employee",
+    "admin": "Administrator",
+    "proprietario": "Owner",
+    "salvarCargo": "Save Role",
+    "remover": "Remove",
+    "removido": "Removed",
+    "confirmacaoRemocao": {
+      "titulo": "Are you sure?",
+      "texto": "Do you really want to remove user {{nome}} from the company?",
+      "confirmar": "Yes, remove",
+      "cancelar": "Cancel",
+      "sucesso": "User {{nome}} was successfully removed from the company",
+      "erro": "Could not remove the user"
+    },
+    "erroPermissao": {
+      "titulo": "Permission Denied",
+      "texto": "You don't have permission to perform this action"
+    },
+    "permissoesUsuario": "Permissions",
+    "permissoesPersonalizadas": "Custom Permissions",
+    "permissoesPersonalizadasDescricao": "Enable to define specific permissions for this user",
+    "permissoesSalvas": "Permissions saved successfully!",
+    "permissoesRedefinidas": "Permissions reset to default!",
+    "erroSalvarPermissoes": "Error saving permissions",
+    "erroRedefinirPermissoes": "Error resetting permissions",
+    "redefinirPadrao": "Reset to Default",
+    "salvarPermissoes": "Save Permissions"
+  }
 }
