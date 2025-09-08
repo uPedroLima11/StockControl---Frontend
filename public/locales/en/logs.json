@@ -10,26 +10,40 @@
     "tipo": "Type",
     "descricao": "Description",
     "datacriacao": "Creation Date",
+    "exportacao_de": "Export of",
+    "periodo": "Period",
+    "periodo_todos": "All data",
     "nenhum_log_encontrado": "No logs found",
     "usuario_nao_encontrado": "User not found",
     "usuario_nao_informado": "Not Informed",
     "carregando": "Loading...",
     "acesso_negado": {
       "titulo": "Access Denied",
-      "mensagem": "You do not have permission to access this page",
+      "mensagem": "You don't have permission to access this page",
       "permissao_necessaria": "Required permission"
     },
     "tipos_logs": {
       "CRIACAO": "Creation",
       "ATUALIZACAO": "Update",
       "EXCLUSAO": "Deletion",
-      "BAIXA": "Write-off"
+      "BAIXA": "Sale"
+    },
+    "entidades": {
+      "produtos": "Products",
+      "vendas": "Sales",
+      "clientes": "Customers",
+      "fornecedores": "Suppliers",
+      "usuarios": "Users",
+      "movimentacoes": "Movements"
     },
     "descricoes": {
+      "produto_exportado": "Product Exported: {{nome}} (Period: {{periodo}})",
       "produto_vendido": "Product Sold: {{nome}} (Quantity: {{quantidade}})",
       "produto_excluido": "Product Deleted: {{nome}}",
       "produto_atualizado": "Product Updated: {{nome}}",
-      "produto_criado": "Product Created: {{nome}}"
+      "produto_criado": "Product Created: {{nome}}",
+      "vendas_excluidas_automaticamente": "Sales automatically deleted for product: {{nome}} ({{quantidade}} sales)",
+      "movimentacoes_excluidas_automaticamente": "Stock movements automatically deleted for product: {{nome}} ({{quantidade}} movements)"
     }
   }
 }

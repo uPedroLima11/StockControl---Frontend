@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -260,26 +259,46 @@ export default function Exportacoes() {
             };
         }
 
-        const parts = descricao.split(' | ');
+        try {
+            const parsed = JSON.parse(descricao);
+            return {
+                entity: parsed.entityType || t("desconhecido"),
+                user: t("desconhecido"),
+                period: parsed.periodo === "Todos os dados" ? t("periodoNaoEspecificado") : parsed.periodo
+            };
+        } catch {
+            const parts = descricao.split(' | ');
 
-        if (parts.length >= 3) {
-            const entityMatch = parts[0].match(/Exportação de (\w+)/);
-            const userMatch = parts[1].match(/Usuário: (.+)/);
-            const periodMatch = parts[2].match(/Período: (.+)/);
+            if (parts.length === 2) {
+                const entityMatch = parts[0].match(/Exportação de (\w+)/);
+                const periodMatch = parts[1].match(/Período: (.+)/);
 
+                return {
+                    entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+                    user: t("desconhecido"),
+                    period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado")
+                };
+            }
+
+            if (parts.length >= 3) {
+                const entityMatch = parts[0].match(/Exportação de (\w+)/);
+                const userMatch = parts[1].match(/Usuário: (.+)/);
+                const periodMatch = parts[2].match(/Período: (.+)/);
+
+                return {
+                    entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+                    user: userMatch ? userMatch[1] : t("desconhecido"),
+                    period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado")
+                };
+            }
+
+            const entityMatch = descricao.match(/Exportação de (\w+)/);
             return {
                 entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-                user: userMatch ? userMatch[1] : t("desconhecido"),
-                period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado")
+                user: t("desconhecido"),
+                period: t("periodoNaoEspecificado")
             };
         }
-
-        const entityMatch = descricao.match(/Exportação de (\w+)/);
-        return {
-            entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-            user: t("desconhecido"),
-            period: t("periodoNaoEspecificado")
-        };
     };
 
     const indexUltimoItem = paginaAtual * itensPorPagina;
@@ -306,7 +325,6 @@ export default function Exportacoes() {
         usuarios: t("entidades.usuarios"),
         movimentacoes: t("entidades.movimentacoes")
     };
-
 
     if (temPermissaoExportar === false) {
         return (
@@ -556,7 +574,7 @@ export default function Exportacoes() {
                                                         <p className="font-medium" style={{ color: temaAtual.texto }}>
                                                             {t("historico.exportacaoDe", { entidade: entityNames[entity as keyof typeof entityNames] || entity })}
                                                             <span className="ml-2 text-sm font-normal" style={{ color: temaAtual.placeholder }}>
-                                                                ({user})
+                                                                ({item.usuario?.nome || t("desconhecido")})
                                                             </span>
                                                         </p>
                                                         <p className="text-sm mt-1" style={{ color: temaAtual.placeholder }}>
@@ -592,7 +610,7 @@ export default function Exportacoes() {
                                                                 <p className="font-semibold" style={{ color: temaAtual.texto }}>
                                                                     {t("historico.detalhes.exportadoPor")}:
                                                                 </p>
-                                                                <p style={{ color: temaAtual.placeholder }}>{user}</p>
+                                                                <p style={{ color: temaAtual.placeholder }}>{item.usuario?.nome || t("desconhecido")}</p>
                                                             </div>
                                                             <div>
                                                                 <p className="font-semibold" style={{ color: temaAtual.texto }}>

@@ -10,6 +10,9 @@
     "tipo": "Tipo",
     "descricao": "Descrição",
     "datacriacao": "Data de Criação",
+    "exportacao_de": "Exportação de",
+    "periodo": "Período",
+    "periodo_todos": "Todos os dados",
     "nenhum_log_encontrado": "Nenhum log encontrado",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "usuario_nao_informado": "Não Informado",
@@ -25,11 +28,22 @@
       "EXCLUSAO": "Exclusão",
       "BAIXA": "Baixa"
     },
+    "entidades": {
+      "produtos": "Produtos",
+      "vendas": "Vendas",
+      "clientes": "Clientes",
+      "fornecedores": "Fornecedores",
+      "usuarios": "Usuários",
+      "movimentacoes": "Movimentações"
+    },
     "descricoes": {
+      "produto_exportado": "Produto Exportado: {{nome}} (Período: {{periodo}})",
       "produto_vendido": "Produto Vendido: {{nome}} (Quantidade: {{quantidade}})",
       "produto_excluido": "Produto Excluído: {{nome}}",
       "produto_atualizado": "Produto Atualizado: {{nome}}",
-      "produto_criado": "Produto Criado: {{nome}}"
+      "produto_criado": "Produto Criado: {{nome}}",
+      "vendas_excluidas_automaticamente": "Vendas excluídas automaticamente para o produto: {{nome}} ({{quantidade}} vendas)",
+      "movimentacoes_excluidas_automaticamente": "Movimentações de estoque excluídas automaticamente para o produto: {{nome}} ({{quantidade}} movimentações)"
     }
   }
 }

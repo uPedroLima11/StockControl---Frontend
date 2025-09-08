@@ -410,6 +410,7 @@ export default function Vendas() {
               valorCompra: item.produto.preco * 0.8 * item.quantidade,
               usuarioId: usuarioValor,
               clienteId: clienteSelecionado,
+               clienteNome: clientes.find(c => c.id === clienteSelecionado)?.nome || null 
             }),
           })
         );

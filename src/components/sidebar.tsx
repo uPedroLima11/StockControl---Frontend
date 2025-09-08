@@ -20,7 +20,7 @@ export default function Sidebar() {
   const [nomeEmpresa, setNomeEmpresa] = useState<string | null>(null);
   const [temNotificacaoNaoLida, setTemNotificacaoNaoLida] = useState(false);
   const [possuiEmpresa, setPossuiEmpresa] = useState(false);
-  const [empresaAtivada, setEmpresaAtivada] = useState(false); 
+  const [empresaAtivada, setEmpresaAtivada] = useState(false);
   const { logar } = useUsuarioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioInicializado, setAudioInicializado] = useState(false);
@@ -72,8 +72,8 @@ export default function Sidebar() {
     window.location.reload();
   };
 
-  
-   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
+
+  const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
       if (!response.ok) {
@@ -198,14 +198,9 @@ export default function Sidebar() {
         return;
       }
 
-      const usuarioId = usuarioSalvo.replace(/"/g, "");
 
       const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ usuarioId }),
         credentials: 'include'
       });
 
@@ -354,7 +349,7 @@ export default function Sidebar() {
           setFotoEmpresa(dadosEmpresa.foto);
           setNomeEmpresa(dadosEmpresa.nome);
           setPossuiEmpresa(true);
-          
+
           if (dadosEmpresa.id) {
             await verificarAtivacaoEmpresa(dadosEmpresa.id);
           }
@@ -439,7 +434,7 @@ export default function Sidebar() {
       clearInterval(intervaloEstoque);
       clearInterval(intervaloNotificacoes);
     };
-    
+
   }, [logar, verificarNotificacoes]);
 
   const alternarSidebar = () => {
@@ -529,7 +524,7 @@ export default function Sidebar() {
             )}
 
             {permissoesUsuario.inventario_visualizar && (
-              <LinkSidebar href="/inventario" icon={<FaHistory />} label="Inventário" cores={cores} />
+              <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} />
             )}
 
             <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
@@ -554,20 +549,21 @@ export default function Sidebar() {
               href="/empresa"
               className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
             >
-              <div className="flex items-center justify-center w-8 h-8">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
                 <Image
                   src={fotoEmpresa || "/contadefault.png"}
                   alt="Foto da Empresa"
                   width={48}
                   height={48}
-                  className="rounded-full object-cover border"
+                  className="object-cover w-full h-full"
                   style={{
-                    borderColor: cores.azulClaro,
-                    width: "48px",
-                    height: "48px",
-                    minWidth: "48px",
-                    minHeight: "48px",
-                    background: "#fff"
+                    objectFit: "cover",
+                    width: "100%",
+                    height: "100%",
+                    minWidth: "100%",
+                    minHeight: "100%",
+                    background: "#fff",
+                    padding: 0
                   }}
                   quality={100}
                   priority
