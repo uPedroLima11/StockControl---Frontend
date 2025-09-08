@@ -551,7 +551,7 @@ export default function Exportacoes() {
 
                                 <div className="space-y-3">
                                     {itensAtuais.map((item) => {
-                                        const { entity, user, period } = parseExportDescription(item.descricao);
+                                        const { entity, period } = parseExportDescription(item.descricao);
                                         const isExpanded = expandedItems.has(item.id);
 
                                         return (
