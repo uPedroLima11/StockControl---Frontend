@@ -5,7 +5,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
-
+import { getTranslatedPermission, getTranslatedCategory } from '@/utils/permissoeTranslations';
 interface PermissaoI {
   id: string;
   nome: string;
@@ -66,6 +66,8 @@ export default function Usuarios() {
   const [usuariosExcluiveis, setUsuariosExcluiveis] = useState<Record<string, boolean>>({});
   const [permissoesAgrupadas, setPermissoesAgrupadas] = useState<PermissaoAgrupada>({});
   const [todasMarcadas, setTodasMarcadas] = useState(false);
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language;
 
   const cores = {
     dark: {
@@ -277,18 +279,7 @@ export default function Usuarios() {
   };
 
   const traduzirCategoria = (categoria: string): string => {
-    const traducoes: { [key: string]: string } = {
-      "USUARIOS": "Usuários",
-      "PRODUTOS": "Produtos",
-      "CLIENTES": "Clientes",
-      "FORNECEDORES": "Fornecedores",
-      "VENDAS": "Vendas",
-      "RELATORIOS": "Relatórios",
-      "CONFIGURACOES": "Configurações",
-      "ESTOQUE": "Estoque"
-    };
-
-    return traducoes[categoria] || categoria;
+    return getTranslatedCategory(categoria, currentLanguage);
   };
 
   const renderizarPermissoesPorCategoria = () => {
@@ -321,10 +312,10 @@ export default function Usuarios() {
               />
               <div className="flex-1">
                 <div className="font-medium" style={{ color: temaAtual.texto }}>
-                  {permissao.nome}
+                  {getTranslatedPermission(permissao.chave, 'nome', currentLanguage)}
                 </div>
                 <div className="text-xs mt-1" style={{ color: temaAtual.placeholder }}>
-                  {permissao.descricao}
+                  {getTranslatedPermission(permissao.chave, 'descricao', currentLanguage)}
                 </div>
               </div>
             </div>
@@ -1502,20 +1493,20 @@ export default function Usuarios() {
                   onClick={toggleTodasPermissoes}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm rounded cursor-pointer transition"
                   style={{
-                    backgroundColor: todasMarcadas ? temaAtual.primario : temaAtual.hover,
-                    color: todasMarcadas ? "#FFFFFF" : temaAtual.texto,
+                  backgroundColor: todasMarcadas ? temaAtual.primario : temaAtual.hover,
+                  color: todasMarcadas ? "#FFFFFF" : temaAtual.texto,
                   }}
                 >
                   <input
-                    type="checkbox"
-                    checked={todasMarcadas}
-                    onChange={toggleTodasPermissoes}
-                    className="rounded cursor-pointer"
-                    style={{
-                      accentColor: temaAtual.primario
-                    }}
+                  type="checkbox"
+                  checked={todasMarcadas}
+                  onChange={toggleTodasPermissoes}
+                  className="rounded cursor-pointer"
+                  style={{
+                    accentColor: temaAtual.primario
+                  }}
                   />
-                  {todasMarcadas ? "Desmarcar Todas" : "Marcar Todas"}
+                  {todasMarcadas ? t("modal.desmarcarTodas") : t("modal.marcarTodas")}
                 </button>
               )}
             </div>

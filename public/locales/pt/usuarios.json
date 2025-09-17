@@ -32,6 +32,8 @@
       "textoConvite": "Você não tem permissão para realizar esta ação",
       "textoExcluir": "Você não tem permissão para excluir este usuário."
     },
+    "desmarcarTodas": "Desmarcar Todas",
+    "marcarTodas": "Marcar Todas",
     "confirmar": "Confirmar",
     "conviteEnviado": {
       "titulo": "Convite enviado",

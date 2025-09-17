@@ -32,6 +32,8 @@
       "textoConvite": "You don't have permission to perform this action",
       "textoExcluir": "You don't have permission to delete this user."
     },
+    "desmarcarTodas": "Uncheck All",
+    "marcarTodas": "Check All",
     "confirmar": "Confirm",
     "conviteEnviado": {
       "titulo": "Invite sent",
