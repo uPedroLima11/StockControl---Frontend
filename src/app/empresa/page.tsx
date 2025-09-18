@@ -41,7 +41,7 @@ export default function Empresa() {
   const { t } = useTranslation("empresa");
   const [temPermissaoGerenciar, setTemPermissaoGerenciar] = useState(false);
   const [carregandoPermissao, setCarregandoPermissao] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
+  const [, setIsUploading] = useState(false);
 
   const cores = {
     dark: {

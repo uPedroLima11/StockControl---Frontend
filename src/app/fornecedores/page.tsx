@@ -45,7 +45,7 @@ export default function Fornecedores() {
   const [emailCaracteres, setEmailCaracteres] = useState(0);
   const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [, setIsUploading] = useState(false);
 
 
   const cores = {
