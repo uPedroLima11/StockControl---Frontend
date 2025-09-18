@@ -513,7 +513,7 @@ export default function Exportacoes() {
                                     <button
                                         onClick={() => handleExport(key)}
                                         disabled={loading || !empresaAtivada}
-                                        className="flex cursor-pointer items-center gap-2 px-4 py-2 rounded disabled:opacity-50 transition-colors"
+                                        className="flex transition-all duration-200 hover:scale-105 cursor-pointer items-center gap-2 px-4 py-2 rounded disabled:opacity-50 "
                                         style={{
                                             backgroundColor: temaAtual.primario,
                                             color: "#FFFFFF",

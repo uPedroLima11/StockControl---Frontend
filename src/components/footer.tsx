@@ -3,28 +3,30 @@ import Link from "next/link";
 
 export default function Footer() {
     return (
-        <footer className="bg-[#181818] py-8 px-6 overflow-hidden">
+        <footer className="bg-[#1E2A38] py-8 px-6 overflow-hidden">
             <div className="max-w-7xl mx-auto w-full flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between">
+                
                 <div className="flex items-center">
                     <Image
                         src="/icone.png"
                         alt="Logo StockControl"
                         width={60}
                         height={60}
-                        className="mr-2"
+                        className="mr-2 object-contain filter brightness-0 invert"
                     />
                     <span className="text-white text-lg font-semibold">StockControl</span>
                 </div>
 
                 <div className="flex flex-col items-center text-center text-gray-300 gap-4">
                     <p className="text-sm">
-                        Desenvolvido por <span className="font-bold">Pedro Lima</span>, <span className="font-bold">Pedro Siqueira</span>
+                        Desenvolvido por <span className="font-bold">Pedro Lima</span> e <span className="font-bold">Pedro Siqueira</span>
                     </p>
+
                     <div className="flex flex-wrap justify-center gap-6 text-sm">
-                        <Link href="/politica-privacidade" className="hover:underline">
+                        <Link href="/politica-privacidade" className="hover:underline text-gray-300">
                             Política de Privacidade
                         </Link>
-                        <Link href="/termos-uso" className="hover:underline">
+                        <Link href="/termos-uso" className="hover:underline text-gray-300">
                             Termos de Uso
                         </Link>
                         <Link
@@ -37,7 +39,7 @@ export default function Footer() {
                         </Link>
                     </div>
 
-                    <p className="text-xs">
+                    <p className="text-xs text-gray-400">
                         © 2025 StockControl. Todos os direitos reservados
                     </p>
                 </div>

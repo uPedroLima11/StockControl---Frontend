@@ -690,7 +690,7 @@ useEffect(() => {
                             <button
                               onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
                               disabled={produto.quantidade < 1}
-                              className="px-3 py-1 cursor-pointer rounded flex items-center gap-1 transition"
+                              className="px-3 transition-all duration-200 hover:scale-105 py-1 cursor-pointer rounded flex items-center gap-1"
                               style={{
                                 backgroundColor: temaAtual.primario,
                                 color: "#FFFFFF",

@@ -664,7 +664,7 @@ export default function Clientes() {
           {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition cursor-pointer font-mono text-sm"
+              className="px-6 py-2 border-2 rounded-lg transition-all duration-200 hover:scale-105 cursor-pointer font-mono text-sm"
               style={{
                 backgroundColor: temaAtual.primario,
                 borderColor: temaAtual.primario,

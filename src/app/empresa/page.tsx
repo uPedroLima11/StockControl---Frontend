@@ -622,7 +622,7 @@ export default function Empresa() {
                       setEmpresaEditada(empresa);
                       setModalEdicaoAberto(true);
                     }}
-                    className="flex items-center cursor-pointer justify-center gap-1 px-3 py-2 rounded-lg transition text-sm whitespace-nowrap"
+                    className="flex items-center cursor-pointer justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 text-sm whitespace-nowrap"
                     style={{
                       backgroundColor: temaAtual.primario,
                       color: "#FFFFFF",
@@ -646,7 +646,7 @@ export default function Empresa() {
                 {tipoUsuario && (
                   <button
                     onClick={excluirOuSairDaEmpresa}
-                    className="flex items-center justify-center cursor-pointer gap-1 px-3 py-2 rounded-lg transition text-sm whitespace-nowrap"
+                    className="flex transition-all duration-200 hover:scale-105 items-center justify-center cursor-pointer gap-1 px-3 py-2 rounded-lg text-sm whitespace-nowrap"
                     style={{
                       backgroundColor: tipoUsuario === "PROPRIETARIO" ? "#EF4444" : "#6B7280",
                       color: "#FFFFFF",
@@ -704,7 +704,7 @@ export default function Empresa() {
                     <button
                       onClick={toggleCatalogoPublico}
                       disabled={atualizandoCatalogo}
-                      className={`px-4 py-2 cursor-pointer rounded-lg text-sm font-medium transition ${empresa.catalogoPublico
+                      className={`px-4 py-2 transition-all duration-200 hover:scale-105 cursor-pointer rounded-lg text-sm font-medium ${empresa.catalogoPublico
                         ? "bg-red-500 text-white hover:bg-red-600"
                         : "bg-green-500 text-white hover:bg-green-600"
                         } disabled:opacity-50 w-full md:w-auto`}

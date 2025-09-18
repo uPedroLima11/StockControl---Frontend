@@ -33,6 +33,7 @@ export default function Produtos() {
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
+  const [totalProdutos, setTotalProdutos] = useState<number>(0);
 
   const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao>('none');
   const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
@@ -241,6 +242,49 @@ export default function Produtos() {
   const podeGerenciarEstoque = (tipoUsuario === "PROPRIETARIO") ||
     permissoesUsuario.estoque_gerenciar;
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -319,6 +363,7 @@ export default function Produtos() {
               );
             setProdutos(produtosDaEmpresa);
             setProdutosOriginais(produtosDaEmpresa);
+            setTotalProdutos(produtosDaEmpresa.length);
           }
         }
       }
@@ -375,6 +420,7 @@ export default function Produtos() {
             );
           setProdutos(produtosDaEmpresa);
           setProdutosOriginais(produtosDaEmpresa);
+          setTotalProdutos(produtosDaEmpresa.length);
         }
       }
     };
@@ -870,7 +916,7 @@ export default function Produtos() {
 
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-7xl">
         <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
@@ -939,40 +985,45 @@ export default function Produtos() {
               </div>
             )}
           </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+              {t("produtosCadastrados")}: {totalProdutos}
+            </span>
 
-          {podeCriar && empresaAtivada && (
-            <button
-              onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition font-mono text-sm cursor-pointer"
-              style={{
-                backgroundColor: temaAtual.primario,
-                borderColor: temaAtual.primario,
-                color: "#FFFFFF",
-              }}
-            >
-              {t("novo")}
-            </button>
-          )}
+            {podeCriar && empresaAtivada && (
+              <button
+                onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
+                className="px-6 py-2 border-2 rounded-lg transition-all duration-200 font-mono text-sm cursor-pointer hover:scale-105"
+                style={{
+                  backgroundColor: temaAtual.primario,
+                  borderColor: temaAtual.primario,
+                  color: "#FFFFFF",
+                }}
+              >
+                {t("novo")}
+              </button>
+            )}
+          </div>
         </div>
 
         <div
-          className="border rounded-xl shadow"
+          className="border rounded-xl shadow-lg"
           style={{
             backgroundColor: temaAtual.card,
             borderColor: temaAtual.borda,
           }}
         >
           {produtosFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            <div className="p-6 text-center" style={{ color: temaAtual.texto }}>
               {t("nenhumProdutoEncontrado")}
             </div>
           ) : (
             <>
-              <div className="hidden md:block">
-                <table className="w-full text-sm font-mono">
-                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm font-mono" style={{ tableLayout: 'fixed' }}>
+                  <thead className="border-b w-full" style={{ borderColor: temaAtual.borda }}>
                     <tr style={{ color: temaAtual.texto }}>
-                      <th className="py-3 px-4">
+                      <th className="py-4 px-6 text-left" style={{ width: '25%' }}>
                         <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleOrdenar('nome')}>
                           <FaCog /> {t("nome")}
                           <span className="ml-1">
@@ -980,9 +1031,9 @@ export default function Produtos() {
                           </span>
                         </div>
                       </th>
-                      <th>{t("fornecedor")}</th>
-                      <th>{t("categoria")}</th>
-                      <th className="text-center">
+                      <th className="py-4 px-6 text-center" style={{ width: '15%' }}>{t("fornecedor")}</th>
+                      <th className="py-4 px-6 text-center" style={{ width: '15%' }}>{t("categoria")}</th>
+                      <th className="py-4 px-6 text-center" style={{ width: '15%' }}>
                         <div className="flex items-center justify-center gap-1 cursor-pointer" onClick={() => handleOrdenar('estoque')}>
                           {t("estoque")}
                           <span>
@@ -990,15 +1041,15 @@ export default function Produtos() {
                           </span>
                         </div>
                       </th>
-                      <th>
-                        <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleOrdenar('preco')}>
+                      <th className="py-4 px-6 text-center" style={{ width: '15%' }}>
+                        <div className="flex items-center justify-center gap-1 cursor-pointer" onClick={() => handleOrdenar('preco')}>
                           {t("preco")}
                           <span>
                             {obterIconeOrdenacao('preco')}
                           </span>
                         </div>
                       </th>
-                      <th className="text-center">{t("catalogo")}</th>
+                      <th className="py-4 px-6 text-center" style={{ width: '15%' }}>{t("catalogo")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1030,7 +1081,7 @@ export default function Produtos() {
                           setForm(produto);
                         }}
                       >
-                        <td className="py-3 px-4 flex items-center gap-2">
+                        <td className="py-4 px-6 flex items-center gap-3">
                           <Image
                             src={produto.foto || "/out.jpg"}
                             width={30}
@@ -1145,7 +1196,7 @@ export default function Produtos() {
                       style={{ color: temaAtual.texto }}
                     >
                       <div className="pt-2 border-t" style={{ borderColor: temaAtual.borda }}>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                           <div>
                             <p className="font-semibold">{t("fornecedor")}:</p>
                             <p>{produto.fornecedor?.nome || "-"}</p>

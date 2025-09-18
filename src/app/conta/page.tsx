@@ -230,7 +230,7 @@ export default function MinhaConta() {
             <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("senha")}</h2>
             <Link
               href="/esqueci"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg transition font-mono text-sm w-fit"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 font-mono text-sm w-fit"
               style={{
                 backgroundColor: temaAtual.primario,
                 color: "#FFFFFF",
@@ -295,7 +295,7 @@ export default function MinhaConta() {
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <button
               onClick={abrirModal}
-              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
+              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 font-medium"
               style={{
                 backgroundColor: temaAtual.primario,
                 color: "#FFFFFF",
@@ -312,7 +312,7 @@ export default function MinhaConta() {
             </button>
             <button
               onClick={handleExcluir}
-              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
+              className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 font-medium"
               style={{
                 backgroundColor: "#EF4444",
                 color: "#FFFFFF",

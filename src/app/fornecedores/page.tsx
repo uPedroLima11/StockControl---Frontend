@@ -748,9 +748,9 @@ export default function Fornecedores() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-            <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+            <div className="flex items-center gap-4">
             <div
-              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1 sm:max-w-xs md:max-w-sm lg:max-w-md"
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
               backgroundColor: temaAtual.card,
               borderColor: temaAtual.borda,
@@ -801,7 +801,7 @@ export default function Fornecedores() {
           {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 cursor-pointer rounded-lg transition font-mono text-sm whitespace-nowrap mt-2 sm:mt-0"
+              className="px-6 py-2 border-2 cursor-pointer rounded-lg transition-all duration-200 hover:scale-105 font-mono text-sm whitespace-nowrap mt-2 sm:mt-0"
               style={{
           backgroundColor: temaAtual.primario,
           borderColor: temaAtual.primario,

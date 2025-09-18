@@ -494,7 +494,7 @@ export default function Sidebar() {
             }}
             onClick={() => setTimeout(() => window.location.reload(), 500)}
           >
-            <Image src="/icone.png" alt="Logo" width={28} height={28} />
+            <Image className="object-contain filter brightness-0 invert" src="/icone.png" alt="Logo" width={28} height={28} />
             <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
           </Link>
 
@@ -686,6 +686,66 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa, cores, onMarca
     setModoDark(ativo);
   }, []);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .sidebar-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-thumb {
+        background: ${cores.azulClaro};
+        border-radius: 3px;
+      }
+      
+      .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: ${cores.azulBrilhante};
+      }
+      
+      .sidebar-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: ${cores.azulClaro} transparent;
+      }
+      
+      .sidebar-scrollbar {
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+      }
+      
+     @media (max-width: 768px) {
+  .sidebar-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background: ${cores.azulBrilhante};
+    border-radius: 2px;
+  }
+  
+  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: ${cores.azulNeon};
+  }
+  
+  .sidebar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: ${cores.azulBrilhante} transparent;
+  }
+}
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [cores.azulClaro, cores.azulBrilhante]);
+  
   const marcarTodasComoLidas = useCallback(async () => {
     if (!usuario?.id) return;
 

@@ -46,10 +46,10 @@ export default function Navbar() {
   }, [logar]);
 
   return (
-    <nav className="font-sans bg-gradient-to-r py-2 bg-[#0f0e17] shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] fixed w-screen z-20 top-0">
+    <nav className="font-sans bg-[#0A1929] py-2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] fixed w-screen z-20 top-0">
       <div className="w-full flex items-center justify-between px-4 lg:px-10">
         <Link href="/" className="flex items-center space-x-2">
-          <img src="/icone.png" className="h-16" />
+          <img src="/icone.png" className="h-16 object-contain filter brightness-0 invert" />
           <span className="text-lg font-semibold text-white">StockControl</span>
         </Link>
 
@@ -60,10 +60,10 @@ export default function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center space-x-14">
-          <a href="#recursos" className="text-white hover:text-[#b37400] text-lg font-bold">
+          <a href="#recursos" className="text-white hover:text-[#1E4976] text-lg font-bold">
             Recursos
           </a>
-          <Link href="#assinatura" className="text-white hover:text-[#b37400] text-lg font-bold">
+          <Link href="#assinatura" className="text-white hover:text-[#1E4976] text-lg font-bold">
             Assinatura
           </Link>
           {fotoEmpresa ? (
@@ -86,7 +86,7 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="lg:hidden bg-[#0f0e17] px-4 py-6 flex flex-col gap-6 text-white text-lg font-semibold shadow-md">
+        <div className="lg:hidden bg-[#0A1929] px-4 py-6 flex flex-col gap-6 text-white text-lg font-semibold shadow-md">
           <a href="#recursos" onClick={toggleMenu} className="hover:text-[#b37400]">
             Recursos
           </a>

@@ -104,7 +104,7 @@ export default function Configuracoes() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
+  }, [modoDark]);
   const temaAtual = {
     fundo: modoDark ? "#0A1929" : "#F8FAFC",
     texto: modoDark ? "#FFFFFF" : "#0F172A",
@@ -147,7 +147,7 @@ export default function Configuracoes() {
         <div className="mt-6 space-y-4">
           <button
             onClick={alternarTema}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition-all hover:scale-105 duration-200 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.primario,
@@ -160,7 +160,7 @@ export default function Configuracoes() {
 
           <button
             onClick={alternarSomNotificacao}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition duration-200 text-sm font-medium cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border w-full justify-center transition-all  hover:scale-105 duration-200 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.primario,
@@ -173,7 +173,7 @@ export default function Configuracoes() {
 
           <button
             onClick={toggleIdiomas}
-            className="flex items-center justify-between px-4 py-2 rounded-lg border w-full transition duration-200 text-sm font-medium cursor-pointer"
+            className="flex items-center justify-between px-4 py-2 rounded-lg border w-full transition-all duration-200 hover:scale-105 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.primario,
@@ -190,7 +190,7 @@ export default function Configuracoes() {
             <div className="flex flex-col gap-2 mt-2">
               <button
                 onClick={() => mudarIdioma("pt")}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
+                className="flex  items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 cursor-pointer"
                 style={{
                   backgroundColor: temaAtual.primario + "20",
                   color: temaAtual.primario,
@@ -201,7 +201,7 @@ export default function Configuracoes() {
               </button>
               <button
                 onClick={() => mudarIdioma("en")}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg transition cursor-pointer"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 cursor-pointer"
                 style={{
                   backgroundColor: temaAtual.primario + "20",
                   color: temaAtual.primario,
