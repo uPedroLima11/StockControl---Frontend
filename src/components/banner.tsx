@@ -15,7 +15,7 @@ export default function Banner() {
             <div className="w-full lg:w-1/2 flex justify-center">
                 <Image
                     alt="Banner ilustrativo de gestão de estoque"
-                    src="/banner.png"
+                    src="/banner2.png"
                     width={1344}
                     height={1260}
                     quality={100}
