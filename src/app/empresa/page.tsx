@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCloudUploadAlt, FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
