@@ -117,7 +117,7 @@ export default function MovimentacaoEstoqueModal({
                 }
 
                 const responsePermissoes = await fetch(
-                    `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+                    `${process.env.NEXT_PPUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
                     {
                         headers: { 'user-id': usuarioId }
                     }
@@ -212,11 +212,24 @@ export default function MovimentacaoEstoqueModal({
 
     return (
         <>
-            <button onClick={handleAbrirModal} className="px-3 py-1 rounded cursor-pointer flex items-center gap-2 text-sm font-medium"
-                style={{ backgroundColor: temaAtual.primario, color: "#FFFFFF", opacity: carregandoPermissao ? 0.7 : 1 }}
-                disabled={carregandoPermissao}>
-                {carregandoPermissao ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                    : !podeGerenciarEstoque ? <FaLock size={12} /> : <FaHistory size={12} />}
+            <button 
+                onClick={handleAbrirModal} 
+                className="w-full px-4 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-sm font-medium h-[42px]"
+                style={{ 
+                    backgroundColor: temaAtual.primario, 
+                    color: "#FFFFFF", 
+                    opacity: carregandoPermissao ? 0.7 : 1,
+                    border: `1px solid ${temaAtual.primario}`
+                }}
+                disabled={carregandoPermissao}
+            >
+                {carregandoPermissao ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : !podeGerenciarEstoque ? (
+                    <FaLock size={14} />
+                ) : (
+                    <FaHistory size={14} />
+                )}
                 {t("estoque")}
             </button>
 

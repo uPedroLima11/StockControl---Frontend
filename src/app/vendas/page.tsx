@@ -129,7 +129,49 @@ export default function Vendas() {
     carregarPermissoes();
   }, []);
 
+useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
 
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]); 
 
   const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
     permissoesUsuario.vendas_visualizar;

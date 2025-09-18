@@ -88,6 +88,49 @@ export default function CatalogoPublico({ params }: PageProps) {
     fetchCatalogo();
   }, [slug]);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: #132F4C;
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: #132F4C; 
+      border-radius: 5px;
+      border: 2px solid #132F4C;
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: #132F4C; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: #132F4C #0A1830;
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid #132F4C;
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const formatarPreco = (preco: number) => {
     return preco.toLocaleString('pt-BR', {
       style: 'currency',

@@ -1,68 +1,76 @@
 {
-  "titulo": "Gerenciar Produtos",
-  "buscar": "Buscar...",
+  "titulo": "Produtos",
+  "buscar": "Buscar produtos...",
   "novo": "Novo Produto",
-  "novoProduto": "Novo Produto",
-  "editarProduto": "Editar Produto",
-  "quantidade": "Quantidade",
-  "selecionarImagem": "Selecionar Foto",
-  "foto": "Foto",
-  "selecionarFornecedor": "Selecionar Fornecedor",
-  "selecionarCategoria": "Selecionar Categoria",
-  "fechar": "Fechar",
-  "nenhumProdutoEncontrado": "Nenhum produto encontrado",
-  "criar": "Criar",
   "nome": "Nome",
+  "descricao": "Descrição",
+  "preco": "Preço",
+  "quantidadeMinima": "Quantidade Mínima",
+  "foto": "Foto",
   "fornecedor": "Fornecedor",
   "categoria": "Categoria",
-  "preco": "Preço",
+  "estoque": "Estoque",
   "catalogo": "Catálogo",
-  "quantidadeMinima": "Quantidade mínima",
-  "descricao": "Descrição",
-  "quantidadeMinimaTooltip": "Define o estoque mínimo para alertas. Quando o estoque ficar próximo ou abaixo deste valor, o sistema gerará notificações de alerta crítico para evitar a falta do produto.",
   "sim": "Sim",
-  "atualizar": "Atualizar",
-  "cancelar": "Cancelar",
   "nao": "Não",
   "editar": "Editar",
-  "estoque": "Estoque",
-  "salvar": "Salvar",
   "excluir": "Excluir",
-  "removerDoCatalogo": "Remover do Catálogo",
+  "cancelar": "Cancelar",
+  "salvar": "Salvar",
+  "atualizar": "Atualizar",
+  "enviando": "Enviando...",
+  "selecionarImagem": "Selecionar Imagem",
+  "selecionarFornecedor": "Selecionar Fornecedor",
+  "selecionarCategoria": "Selecionar Categoria",
   "adicionarAoCata": "Adicionar ao Catálogo",
-  "semPermissaoVisualizar": "Você não tem permissão para visualizar este conteúdo",
+  "removerDoCatalogo": "Remover do Catálogo",
+  "editarProduto": "Editar Produto",
+  "novoProduto": "Novo Produto",
+  "nenhumProdutoEncontrado": "Nenhum produto encontrado",
+  "semPermissaoVisualizar": "Você não tem permissão para visualizar produtos",
+  
   "empresaNaoAtivada": {
-    "titulo": "Empresa não ativada",
-    "mensagem": "Você precisa ativar sua empresa antes de acessar esta funcionalidade.",
-    "botao": "Ativar agora",
+    "titulo": "Empresa Não Ativada",
+    "mensagem": "Sua empresa precisa ser ativada para gerenciar produtos.",
+    "botao": "Ativar Empresa",
     "alertaTitulo": "Empresa não ativada",
-    "alertaMensagem": "Ative sua empresa para liberar todos os recursos."
+    "alertaMensagem": "Algumas funcionalidades podem estar limitadas."
   },
-  "produtoAdicionadoCatalogo": {
-    "titulo": "Produto adicionado ao catálogo!"
+  
+  "erroCamposObrigatorios": {
+    "titulo": "Campos Obrigatórios",
+    "mensagem": "Por favor, preencha todos os campos obrigatórios:"
   },
-  "produtoRemovidoCatalogo": {
-    "titulo": "Produto removido do catálogo!"
-  },
+  
   "produtoCriadoSucesso": {
-    "titulo": "Produto cadastrado com sucesso!"
+    "titulo": "Produto criado com sucesso!"
   },
+  
   "produtoAtualizadoSucesso": {
     "titulo": "Produto atualizado com sucesso!"
   },
+  
   "produtoExcluidoSucesso": {
-    "titulo": "Produto excluído com sucesso!",
-    "mensagem": "O produto foi removido do sistema."
+    "titulo": "Produto excluído",
+    "mensagem": "O produto foi excluído com sucesso."
   },
+  
   "confirmacaoExclusao": {
-    "titulo": "Deseja excluir este produto?",
-    "mensagem": "Essa ação não poderá ser desfeita.",
-    "botaoConfirmar": "Sim, excluir",
+    "titulo": "Tem certeza?",
+    "mensagem": "Esta ação não pode ser desfeita!",
+    "botaoConfirmar": "Sim, excluir!",
     "botaoCancelar": "Cancelar"
   },
-   
-    "erroCamposObrigatorios": {
-    "titulo": "Erro!",
-    "mensagem": "Preencha os campos obrigatórios:"
-  }
+  
+  "produtoAdicionadoCatalogo": {
+    "titulo": "Produto adicionado ao catálogo!"
+  },
+  
+  "produtoRemovidoCatalogo": {
+    "titulo": "Produto removido do catálogo!"
+  },
+  
+  "quantidadeMinimaTooltip": "Quantidade mínima em estoque para alertas de reabastecimento. O sistema irá notificar quando o estoque atingir este nível.",
+  
+  "fazendoUpload": "Fazendo upload..."
 }

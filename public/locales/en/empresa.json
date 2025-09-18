@@ -1,78 +1,98 @@
 {
-  "empresa": {
-    "escolherArquivo": "Choose file",
-    "nenhumArquivoEscolhido": "No file chosen",
-    "preVisualizacao": "Preview",
-    "fotoAtual": "Current photo",
-    "catalogoPublico": "Public Catalog",
-    "catalogoAtivado": "Catalog activated!",
-    "catalogoDesativado": "Catalog deactivated!",
-    "catalogoAgoraPublico": "Your catalog is now public and accessible via the link.",
-    "catalogoNaoPublico": "Your catalog is no longer public.",
-    "erroAlterarCatalogo": "Could not change catalog status."
-  },
-  "titulo": "My Company",
-  "carregando": "Loading company data...",
+  "titulo": "Company",
+  "dadosEmpresa": "Company Information",
+  "naoInformado": "Not provided",
+  "carregando": "Loading...",
   "empresaNaoEncontrada": "Company not found.",
-  "dadosEmpresa": "Company Data",
   "logoEmpresa": "Company Logo",
   "altLogoEmpresa": "Company logo",
-  "alterarLogo": "Change Logo",
-  "editarDados": "Edit Data",
-  "deletarEmpresa": "Delete Company",
-  "sairEmpresa": "Leave Company",
-  "naoInformado": "Not provided",
-  "catalogo": {
-    "publico": "Public Catalog",
-    "status": "Status",
-    "ativado": "ENABLED",
-    "desativado": "DISABLED",
-    "processando": "Processing...",
-    "ativar": "Enable",
-    "desativar": "Disable",
-    "disponivelEm": "Your catalog is available at:",
-    "avisoClientes": "📢 Customers will see only products marked as \"Add to Catalog\"",
-    "desativadoAviso": "⚠️ Your catalog is disabled. Enable it to make it public."
-  },
+  "alterarLogo": "Change logo",
+  "editarDados": "Edit information",
+  "deletarEmpresa": "Delete company",
+  "sairEmpresa": "Leave company",
+  "nenhumArquivoEscolhido": "No file chosen",
+  "preVisualizacao": "Preview",
+  "escolherArquivo": "Choose file",
+  "catalogoAtivado": "Catalog enabled",
+  "catalogoDesativado": "Catalog disabled",
+  "catalogoAgoraPublico": "The catalog is now public.",
+  "catalogoNaoPublico": "The catalog is no longer public.",
+  "sucessoTituloAtivado": "Catalog enabled",
+  "sucessoTituloDesativado": "Catalog disabled",
+  "sucessoTextoAtivado": "The catalog is now public.",
+  "sucessoTextoDesativado": "The catalog is no longer public.",
+  "erroTitulo": "Error",
+  "erroTexto": "Could not change the catalog state.",
+  "fotoAtual": "Current photo",
   "campos": {
-    "nome": "Company Name",
+    "nome": "Name",
+    "email": "Email",
+    "telefone": "Phone",
     "endereco": "Address",
     "pais": "Country",
     "estado": "State",
     "cidade": "City",
-    "cep": "ZIP Code",
-    "telefone": "Phone",
-    "email": "Corporate Email"
+    "cep": "Postal Code"
+  },
+  "catalogo": {
+    "publico": "Public Catalog",
+    "status": "Status",
+    "ativado": "Enabled",
+    "desativado": "Disabled",
+    "ativar": "Enable catalog",
+    "desativar": "Disable catalog",
+    "processando": "Processing...",
+    "disponivelEm": "Available at:",
+    "avisoClientes": "Share this link with your clients so they can access the catalog.",
+    "desativadoAviso": "The catalog is disabled and will not be accessible to clients.",
+    "catalogoAtivado": "Catalog enabled",
+    "catalogoDesativado": "Catalog disabled",
+    "catalogoAgoraPublico": "The catalog is now public.",
+    "catalogoNaoPublico": "The catalog is no longer public.",
+    "sucessoTituloAtivado": "Catalog enabled",
+    "sucessoTituloDesativado": "Catalog disabled",
+    "sucessoTextoAtivado": "The catalog is now public.",
+    "sucessoTextoDesativado": "The catalog is no longer public.",
+    "erroTitulo": "Error",
+    "erroTexto": "Could not change the catalog state."
+  },
+  "avisos": {
+    "uploadFotoFalhouTitulo": "Upload failed",
+    "uploadFotoFalhouTexto": "The company photo could not be uploaded."
+  },
+  "sucesso": {
+    "empresaAtualizada": "Company successfully updated",
+    "dadosAtualizados": "The data has been successfully updated."
+  },
+  "erros": {
+    "usuarioNaoLogado": "User not logged in.",
+    "erroBuscarEmpresa": "Error fetching company.",
+    "erroAtualizarEmpresa": "Error updating company.",
+    "erroEditarEmpresa": "Error editing company.",
+    "erroExcluirEmpresa": "Error deleting company.",
+    "erroSairEmpresa": "Error leaving company.",
+    "erroProcessarExclusao": "Error processing deletion.",
+    "erroAlterarCatalogo": "Could not change the catalog state.",
+    "erro": "Error"
   },
   "modal": {
-    "cancelar": "Cancel",
     "salvar": "Save",
+    "cancelar": "Cancel",
+    "deletar": "Delete",
     "editarEmpresa": {
-      "titulo": "Edit Company",
-      "salvar": "Save",
-      "cancelar": "Cancel"
+      "titulo": "Edit Company"
     },
     "excluir": {
       "titulo": "Delete Company",
-      "texto": "Are you sure you want to delete your company? This action cannot be undone.",
-      "confirmar": "Yes, delete",
+      "texto": "Are you sure you want to delete this company? This action cannot be undone.",
+      "confirmar": "Delete",
       "cancelar": "Cancel"
     },
     "sair": {
       "titulo": "Leave Company",
-      "texto": "Are you sure you want to leave the company? You will lose access to the data.",
-      "confirmar": "Yes, leave",
+      "texto": "Do you really want to leave the company?",
+      "confirmar": "Leave",
       "cancelar": "Cancel"
     }
-  },
-  "erros": {
-    "erro": "Error",
-    "usuarioNaoLogado": "User not logged in.",
-    "erroBuscarEmpresa": "Error fetching company data.",
-    "erroAtualizarEmpresa": "Error updating company data.",
-    "erroEditarEmpresa": "Could not edit company.",
-    "erroExcluirEmpresa": "Could not delete company.",
-    "erroSairEmpresa": "Could not leave company.",
-    "erroProcessarExclusao": "Error processing company deletion or leaving."
   }
 }

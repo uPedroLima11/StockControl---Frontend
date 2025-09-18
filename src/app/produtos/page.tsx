@@ -639,148 +639,148 @@ export default function Produtos() {
   };
 
   const uploadFotoUpdate = async (file: File, produtoId: string): Promise<string | null> => {
-  try {
-    setIsUploading(true);
-    
-    const formData = new FormData();
-    formData.append("foto", file);
-
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return null;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produtoId}/upload-foto`, {
-      method: "PUT",
-      body: formData,
-      headers: {
-        'user-id': usuarioValor
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.fotoUrl;
-    } else {
-      console.error("Erro no upload da foto:", await response.text());
-      return null;
-    }
-  } catch (error) {
-    console.error("Erro no upload:", error);
-    return null;
-  } finally {
-    setIsUploading(false);
-  }
-};
-
-const handleUpdate = async () => {
-  handleAcaoProtegida(async () => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-    if (!modalVisualizar) return;
-
-    const camposObrigatorios = {
-      nome: form.nome.trim(),
-      descricao: form.descricao.trim(),
-      quantidadeMin: form.quantidadeMin !== 0
-    };
-
-    const camposFaltando = Object.entries(camposObrigatorios)
-      .filter(([, value]) => !value)
-      .map(([campo]) => campo);
-
-    if (camposFaltando.length > 0) {
-      const camposTraduzidos = camposFaltando.map(campo => {
-        switch (campo) {
-          case 'nome': return t("nome");
-          case 'descricao': return t("descricao");
-          case 'quantidadeMin': return t("quantidadeMinima");
-          default: return campo;
-        }
-      });
-
-      Swal.fire({
-        icon: 'error',
-        title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
-        html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
-        confirmButtonColor: '#EF4444'
-      });
-      return;
-    }
-
-    if (empresaId) {
-      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
-      if (!empresaAtivada) {
-        mostrarAlertaNaoAtivada();
-        return;
-      }
-    }
-
     try {
-      let fotoUrl = form.foto;
+      setIsUploading(true);
 
-      if (file) {
-        const uploadedUrl = await uploadFotoUpdate(file, modalVisualizar.id);
-        if (uploadedUrl) {
-          fotoUrl = uploadedUrl;
-        } else {
-          Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
-        }
-      }
+      const formData = new FormData();
+      formData.append("foto", file);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produtoId}/upload-foto`, {
         method: "PUT",
+        body: formData,
         headers: {
-          "Content-Type": "application/json",
           'user-id': usuarioValor
-        },
-        body: JSON.stringify({
-          nome: form.nome,
-          descricao: form.descricao,
-          preco: form.preco,
-          quantidadeMin: form.quantidadeMin,
-          noCatalogo: form.noCatalogo,
-          fornecedorId: form.fornecedorId,
-          categoriaId: form.categoriaId,
-          usuarioId: usuarioValor,
-          fotoUrl: fotoUrl
-        })
+        }
       });
 
       if (response.ok) {
-        const updatedProduto = await response.json();
-
-        setModalVisualizar(null);
-        setFile(null);
-        setPreview(null);
-
-        setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: t("produtoAtualizadoSucesso.titulo"),
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        setTimeout(() => window.location.reload(), 1600);
+        const data = await response.json();
+        return data.fotoUrl;
       } else {
-        const errorText = await response.text();
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    handleAcaoProtegida(async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      if (!modalVisualizar) return;
+
+      const camposObrigatorios = {
+        nome: form.nome.trim(),
+        descricao: form.descricao.trim(),
+        quantidadeMin: form.quantidadeMin !== 0
+      };
+
+      const camposFaltando = Object.entries(camposObrigatorios)
+        .filter(([, value]) => !value)
+        .map(([campo]) => campo);
+
+      if (camposFaltando.length > 0) {
+        const camposTraduzidos = camposFaltando.map(campo => {
+          switch (campo) {
+            case 'nome': return t("nome");
+            case 'descricao': return t("descricao");
+            case 'quantidadeMin': return t("quantidadeMinima");
+            default: return campo;
+          }
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
+          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
+          confirmButtonColor: '#EF4444'
+        });
+        return;
+      }
+
+      if (empresaId) {
+        const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+        if (!empresaAtivada) {
+          mostrarAlertaNaoAtivada();
+          return;
+        }
+      }
+
+      try {
+        let fotoUrl = form.foto;
+
+        if (file) {
+          const uploadedUrl = await uploadFotoUpdate(file, modalVisualizar.id);
+          if (uploadedUrl) {
+            fotoUrl = uploadedUrl;
+          } else {
+            Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
+          }
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            'user-id': usuarioValor
+          },
+          body: JSON.stringify({
+            nome: form.nome,
+            descricao: form.descricao,
+            preco: form.preco,
+            quantidadeMin: form.quantidadeMin,
+            noCatalogo: form.noCatalogo,
+            fornecedorId: form.fornecedorId,
+            categoriaId: form.categoriaId,
+            usuarioId: usuarioValor,
+            fotoUrl: fotoUrl
+          })
+        });
+
+        if (response.ok) {
+          const updatedProduto = await response.json();
+
+          setModalVisualizar(null);
+          setFile(null);
+          setPreview(null);
+
+          setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: t("produtoAtualizadoSucesso.titulo"),
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          setTimeout(() => window.location.reload(), 1600);
+        } else {
+          const errorText = await response.text();
+          Swal.fire({
+            icon: "error",
+            title: "Erro!",
+            text: `Erro ao atualizar produto: ${errorText}`
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao atualizar produto:", err);
         Swal.fire({
           icon: "error",
           title: "Erro!",
-          text: `Erro ao atualizar produto: ${errorText}`
+          text: "Erro inesperado ao tentar atualizar."
         });
       }
-    } catch (err) {
-      console.error("Erro ao atualizar produto:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: "Erro inesperado ao tentar atualizar."
-      });
-    }
-  });
-};
+    });
+  };
 
   const handleDelete = async () => {
     handleAcaoProtegida(async () => {
@@ -1214,12 +1214,6 @@ const handleUpdate = async () => {
                 {modalVisualizar ? t("editarProduto") : t("novoProduto")}
               </h2>
 
-              {isUploading && (
-                <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded text-center">
-                  {t("fazendoUpload")}...
-                </div>
-              )}
-
               <div className="mb-3">
                 <label className="block mb-1 text-sm">
                   {t("nome")} <span className="text-red-500">*</span>
@@ -1285,45 +1279,25 @@ const handleUpdate = async () => {
                 </div>
               </div>
 
-              <div className="flex gap-2 w-full">
-                {podeEditar && (
-                  <div className="flex-1 flex flex-col justify-end mb-3">
-                    <label className="block mb-1 text-sm">{t("foto")}</label>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 mb-3"
-                      style={{
-                        backgroundColor: temaAtual.primario,
-                        color: "#FFFFFF",
-                        borderColor: temaAtual.primario,
-                      }}
-                      disabled={isUploading}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#FFFFFF"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                        />
-                      </svg>
-                      {t("selecionarImagem")}
-                    </button>
+              <div className="flex gap-2 w-full items-end">
+                {modalVisualizar && podeGerenciarEstoque && (
+                  <div className="flex-1">
+                    <label className="block mb-1 text-sm">{t("estoque")}</label>
+                    <div className="w-full">
+                      <MovimentacaoEstoqueModal
+                        produto={{
+                          id: modalVisualizar.id,
+                          nome: modalVisualizar.nome,
+                          quantidade: modalVisualizar.quantidade
+                        }}
+                        modoDark={modoDark}
+                        empresaId={empresaId!}
+                        onMovimentacaoConcluida={recarregarListaProdutos}
+                      />
+                    </div>
                   </div>
                 )}
+
                 <div className="flex-1">
                   <div className="flex items-center gap-1 mb-1">
                     <label className="text-sm">
@@ -1393,7 +1367,7 @@ const handleUpdate = async () => {
                     min={0}
                     value={form.quantidadeMin || ""}
                     onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                    className="w-full rounded p-2 mb-3"
+                    className="w-full rounded p-2"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
@@ -1403,6 +1377,48 @@ const handleUpdate = async () => {
                   />
                 </div>
               </div>
+
+              {podeEditar && (
+                <div className="mb-3 mt-3 flex gap-2">
+                  <div className="flex-1">
+                    <label className="block mb-1 text-sm">{t("foto")}</label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                      style={{
+                        backgroundColor: temaAtual.primario,
+                        color: "#FFFFFF",
+                        borderColor: temaAtual.primario,
+                      }}
+                      disabled={isUploading}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#FFFFFF"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                        />
+                      </svg>
+                      {t("selecionarImagem")}
+                    </button>
+                  </div>
+                  <div className="flex-1" />
+                </div>
+              )}
 
               {(preview || form.foto) && (
                 <div className="mb-4">
@@ -1455,23 +1471,6 @@ const handleUpdate = async () => {
                   ))}
                 </select>
               </div>
-
-              {modalVisualizar && podeGerenciarEstoque && (
-                <div className="flex items-center mt-6 pt-4 border-t">
-                  <div>
-                    <MovimentacaoEstoqueModal
-                      produto={{
-                        id: modalVisualizar.id,
-                        nome: modalVisualizar.nome,
-                        quantidade: modalVisualizar.quantidade
-                      }}
-                      modoDark={modoDark}
-                      empresaId={empresaId!}
-                      onMovimentacaoConcluida={recarregarListaProdutos}
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="flex justify-between mt-4">
                 <div>
@@ -1531,7 +1530,6 @@ const handleUpdate = async () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

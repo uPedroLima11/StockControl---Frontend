@@ -1,7 +1,7 @@
 "use client";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState, useRef } from "react";
-import { FaCog, FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -248,6 +248,50 @@ export default function Fornecedores() {
     }
   }, [modalVisualizar]);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]); 
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value.length <= 45) {
@@ -321,166 +365,175 @@ export default function Fornecedores() {
   };
 
   const uploadFotoSeparada = async (file: File): Promise<string | null> => {
-  try {
-    setIsUploading(true);
-    
-    const formData = new FormData();
-    formData.append("foto", file);
+    try {
+      setIsUploading(true);
 
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return null;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const formData = new FormData();
+      formData.append("foto", file);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/upload-foto`, {
-      method: "POST",
-      body: formData,
-      headers: {
-        'user-id': usuarioValor
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/upload-foto`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.fotoUrl;
+      } else {
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
       }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.fotoUrl;
-    } else {
-      console.error("Erro no upload da foto:", await response.text());
+    } catch (error) {
+      console.error("Erro no upload:", error);
       return null;
+    } finally {
+      setIsUploading(false);
     }
-  } catch (error) {
-    console.error("Erro no upload:", error);
-    return null;
-  } finally {
-    setIsUploading(false);
-  }
-};
+  };
 
-const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<string | null> => {
-  try {
-    setIsUploading(true);
-    
-    const formData = new FormData();
-    formData.append("foto", file);
+  const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<string | null> => {
+    try {
+      setIsUploading(true);
 
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return null;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const formData = new FormData();
+      formData.append("foto", file);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedorId}/upload-foto`, {
-      method: "PUT",
-      body: formData,
-      headers: {
-        'user-id': usuarioValor
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedorId}/upload-foto`, {
+        method: "PUT",
+        body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.fotoUrl;
+      } else {
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
       }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.fotoUrl;
-    } else {
-      console.error("Erro no upload da foto:", await response.text());
+    } catch (error) {
+      console.error("Erro no upload:", error);
       return null;
+    } finally {
+      setIsUploading(false);
     }
-  } catch (error) {
-    console.error("Erro no upload:", error);
-    return null;
-  } finally {
-    setIsUploading(false);
-  }
-};
+  };
 
   async function handleAdicionarFornecedor() {
-  const usuarioSalvo = localStorage.getItem("client_key");
-  if (!usuarioSalvo) return;
-  const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-  handleAcaoProtegida(async () => {
-    if (!empresaId) return alert("Empresa não identificada.");
+    handleAcaoProtegida(async () => {
+      if (!empresaId) return alert("Empresa não identificada.");
 
-    let mensagemErro = "";
-    
-    if (!form.nome.trim()) {
-      mensagemErro += `• ${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
-    }
-    
-    if (!form.email.trim()) {
-      mensagemErro += `• ${t("email")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
-    }
-    
-    if (!form.cnpj.trim()) {
-      mensagemErro += `• ${t("cnpj")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
-    }
+      let mensagemErro = "";
 
-    if (mensagemErro) {
-      Swal.fire({
-        title: t("modal.camposObrigatorios.titulo", "Campos obrigatórios"),
-        html: `${t("modal.camposObrigatorios.texto", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
-        icon: "warning",
-        confirmButtonColor: "#013C3C",
-      });
-      return;
-    }
-
-    const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
-    if (!empresaAtivada) {
-      mostrarAlertaNaoAtivada();
-      return;
-    }
-
-    try {
-      let fotoUrl = form.foto;
-
-      if (fotoFile) {
-        const uploadedUrl = await uploadFotoSeparada(fotoFile);
-        if (uploadedUrl) {
-          fotoUrl = uploadedUrl;
-        } else {
-          Swal.fire("Aviso", "Upload da foto falhou, continuando sem imagem", "warning");
-        }
+      if (!form.nome.trim()) {
+        mensagemErro += `• ${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          'user-id': usuarioValor
-        },
-        body: JSON.stringify({
-          nome: form.nome.trim(),
-          email: form.email.trim(),
-          cnpj: form.cnpj.trim(),
-          telefone: form.telefone.trim(),
-          categoria: form.categoria.trim(),
-          empresaId: empresaId,
-          usuarioId: usuarioValor,
-          fotoUrl: fotoUrl
-        })
-      });
+      if (!form.email.trim()) {
+        mensagemErro += `• ${t("email")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
+      }
 
-      if (response.status === 201) {
+      if (!form.cnpj.trim()) {
+        mensagemErro += `• ${t("cnpj")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}\n`;
+      }
+
+      if (mensagemErro) {
         Swal.fire({
-          text: t("mensagens.fornecedorAdicionado"),
-          icon: "success",
+          title: t("modal.camposObrigatorios.titulo", "Campos obrigatórios"),
+          html: `${t("modal.camposObrigatorios.texto", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          icon: "warning",
           confirmButtonColor: "#013C3C",
         });
-        setModalAberto(false);
-        setFotoFile(null);
-        setFotoPreview(null);
-        setForm({
-          id: "",
-          nome: "",
-          email: "",
-          cnpj: "",
-          telefone: "",
-          categoria: "",
-          foto: "",
-          empresaId: "",
-          usuarioId: "",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          Produto: [],
+        return;
+      }
+
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
+      }
+
+      try {
+        let fotoUrl = form.foto;
+
+        if (fotoFile) {
+          const uploadedUrl = await uploadFotoSeparada(fotoFile);
+          if (uploadedUrl) {
+            fotoUrl = uploadedUrl;
+          } else {
+            Swal.fire("Aviso", "Upload da foto falhou, continuando sem imagem", "warning");
+          }
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            'user-id': usuarioValor
+          },
+          body: JSON.stringify({
+            nome: form.nome.trim(),
+            email: form.email.trim(),
+            cnpj: form.cnpj.trim(),
+            telefone: form.telefone.trim(),
+            categoria: form.categoria.trim(),
+            empresaId: empresaId,
+            usuarioId: usuarioValor,
+            fotoUrl: fotoUrl
+          })
         });
-        window.location.reload();
-      } else {
+
+        if (response.status === 201) {
+          Swal.fire({
+            text: t("mensagens.fornecedorAdicionado"),
+            icon: "success",
+            confirmButtonColor: "#013C3C",
+          });
+          setModalAberto(false);
+          setFotoFile(null);
+          setFotoPreview(null);
+          setForm({
+            id: "",
+            nome: "",
+            email: "",
+            cnpj: "",
+            telefone: "",
+            categoria: "",
+            foto: "",
+            empresaId: "",
+            usuarioId: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            Produto: [],
+          });
+          window.location.reload();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: t("mensagens.erro"),
+            text: t("mensagens.erroAdicionar"),
+            confirmButtonColor: "#013C3C",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao adicionar fornecedor:", error);
         Swal.fire({
           icon: "error",
           title: t("mensagens.erro"),
@@ -488,110 +541,101 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
           confirmButtonColor: "#013C3C",
         });
       }
-    } catch (error) {
-      console.error("Erro ao adicionar fornecedor:", error);
-      Swal.fire({
-        icon: "error",
-        title: t("mensagens.erro"),
-        text: t("mensagens.erroAdicionar"),
-        confirmButtonColor: "#013C3C",
-      });
-    }
-  });
-}
+    });
+  }
 
   async function handleSalvarFornecedor() {
-  const usuarioSalvo = localStorage.getItem("client_key");
-  if (!usuarioSalvo) return;
-  const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-  handleAcaoProtegida(async () => {
-    if (!modalVisualizar?.id) return;
+    handleAcaoProtegida(async () => {
+      if (!modalVisualizar?.id) return;
 
-    let mensagemErro = "";
+      let mensagemErro = "";
 
-    if (!form.nome.trim()) {
-      mensagemErro += `• ${t("nome")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-    }
-
-    if (!form.email.trim()) {
-      mensagemErro += `• ${t("email")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-    }
-
-    if (!form.cnpj.trim()) {
-      mensagemErro += `• ${t("cnpj")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-    }
-
-    if (mensagemErro) {
-      Swal.fire({
-        title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
-        html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
-        icon: "warning",
-        confirmButtonColor: "#013C3C",
-        });
-      return;
-    }
-
-    const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
-    if (!empresaAtivada) {
-      mostrarAlertaNaoAtivada();
-      return;
-    }
-
-    try {
-      let fotoUrl = form.foto;
-
-      if (fotoFile) {
-        const uploadedUrl = await uploadFotoUpdate(fotoFile, modalVisualizar.id);
-        if (uploadedUrl) {
-          fotoUrl = uploadedUrl;
-        } else {
-          Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
-        }
+      if (!form.nome.trim()) {
+        mensagemErro += `• ${t("nome")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          'user-id': usuarioValor
-        },
-        body: JSON.stringify({
-          nome: form.nome.trim(),
-          email: form.email.trim(),
-          cnpj: form.cnpj.trim(),
-          telefone: form.telefone.trim(),
-          categoria: form.categoria.trim(),
-          empresaId: empresaId || "",
-          usuarioId: usuarioValor,
-          fotoUrl: fotoUrl
-        })
-      });
+      if (!form.email.trim()) {
+        mensagemErro += `• ${t("email")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+      }
 
-      if (response.ok) {
+      if (!form.cnpj.trim()) {
+        mensagemErro += `• ${t("cnpj")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+      }
+
+      if (mensagemErro) {
         Swal.fire({
-          text: t("mensagens.fornecedorAtualizado"),
-          icon: "success",
+          title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
+          html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          icon: "warning",
           confirmButtonColor: "#013C3C",
         });
-        setModalVisualizar(null);
-        setFotoFile(null);
-        setFotoPreview(null);
-        window.location.reload();
-      } else {
-        throw new Error("Erro ao atualizar fornecedor");
+        return;
       }
-    } catch (error) {
-      console.error("Erro ao atualizar fornecedor:", error);
-      Swal.fire({
-        icon: "error",
-        title: t("mensagens.erro"),
-        text: t("mensagens.erroAtualizar"),
-        confirmButtonColor: "#013C3C",
-      });
-    }
-  });
-}
+
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
+        return;
+      }
+
+      try {
+        let fotoUrl = form.foto;
+
+        if (fotoFile) {
+          const uploadedUrl = await uploadFotoUpdate(fotoFile, modalVisualizar.id);
+          if (uploadedUrl) {
+            fotoUrl = uploadedUrl;
+          } else {
+            Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
+          }
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            'user-id': usuarioValor
+          },
+          body: JSON.stringify({
+            nome: form.nome.trim(),
+            email: form.email.trim(),
+            cnpj: form.cnpj.trim(),
+            telefone: form.telefone.trim(),
+            categoria: form.categoria.trim(),
+            empresaId: empresaId || "",
+            usuarioId: usuarioValor,
+            fotoUrl: fotoUrl
+          })
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            text: t("mensagens.fornecedorAtualizado"),
+            icon: "success",
+            confirmButtonColor: "#013C3C",
+          });
+          setModalVisualizar(null);
+          setFotoFile(null);
+          setFotoPreview(null);
+          window.location.reload();
+        } else {
+          throw new Error("Erro ao atualizar fornecedor");
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar fornecedor:", error);
+        Swal.fire({
+          icon: "error",
+          title: t("mensagens.erro"),
+          text: t("mensagens.erroAtualizar"),
+          confirmButtonColor: "#013C3C",
+        });
+      }
+    });
+  }
 
   async function handleDelete(fornecedor: FornecedorI) {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -704,70 +748,101 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
             <div
-              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1 sm:max-w-xs md:max-w-sm lg:max-w-md"
               style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
+              backgroundColor: temaAtual.card,
+              borderColor: temaAtual.borda,
               }}
             >
               <input
-                type="text"
-                placeholder={t("buscar")}
-                className="outline-none placeholder-gray-400 font-mono text-sm bg-transparent"
-                style={{
-                  color: temaAtual.texto
-                }}
-                value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setPaginaAtual(1);
-                }}
+              type="text"
+              placeholder={t("buscar")}
+              className="outline-none font-mono text-sm bg-transparent placeholder-gray-400 w-full"
+              style={{
+                color: temaAtual.texto,
+              }}
+              value={busca}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                setPaginaAtual(1);
+              }}
               />
               <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
-                  <FaAngleLeft />
-                </button>
+              <div className="flex items-center gap-2 mt-2 sm:mt-0">
+              <button
+                onClick={() => mudarPagina(paginaAtual - 1)}
+                disabled={paginaAtual === 1}
+                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{ color: temaAtual.texto }}
+              >
+                <FaAngleLeft />
+              </button>
 
-                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
-                  {paginaAtual}/{totalPaginas}
-                </span>
+              <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+                {paginaAtual}/{totalPaginas}
+              </span>
 
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
-                  <FaAngleRight />
-                </button>
+              <button
+                onClick={() => mudarPagina(paginaAtual + 1)}
+                disabled={paginaAtual === totalPaginas}
+                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{ color: temaAtual.texto }}
+              >
+                <FaAngleRight />
+              </button>
               </div>
             )}
-          </div>
+            </div>
 
           {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 cursor-pointer rounded-lg transition font-mono text-sm"
+              className="px-6 py-2 border-2 cursor-pointer rounded-lg transition font-mono text-sm whitespace-nowrap mt-2 sm:mt-0"
               style={{
-                backgroundColor: temaAtual.primario,
-                borderColor: temaAtual.primario,
-                color: "#FFFFFF",
+          backgroundColor: temaAtual.primario,
+          borderColor: temaAtual.primario,
+          color: "#FFFFFF",
               }}
             >
               {t("novoFornecedor")}
             </button>
           )}
         </div>
+
+        {totalPaginas > 1 && (
+          <div className="hidden md:flex justify-between items-center mb-4">
+            <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+              {t("totalFornecedores")}: {fornecedoresFiltrados.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => mudarPagina(paginaAtual - 1)}
+                disabled={paginaAtual === 1}
+                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{ color: temaAtual.texto }}
+              >
+                <FaAngleLeft />
+              </button>
+
+              <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+                {paginaAtual} / {totalPaginas}
+              </span>
+
+              <button
+                onClick={() => mudarPagina(paginaAtual + 1)}
+                disabled={paginaAtual === totalPaginas}
+                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{ color: temaAtual.texto }}
+              >
+                <FaAngleRight />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div
           className="border rounded-xl shadow"
@@ -777,26 +852,21 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
           }}
         >
           {fornecedoresFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-              {t("nenhumFornecedorEncontrado")}
+            <div className="p-8 text-center" style={{ color: temaAtual.texto }}>
+              {busca ? t("nenhumFornecedorEncontradoBusca") : t("nenhumFornecedorEncontrado")}
             </div>
           ) : (
             <>
-              <div className="hidden md:block">
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-sm font-mono">
                   <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
                     <tr style={{ color: temaAtual.texto }}>
-                      <th className="py-3 px-4 text-center">
-                        <div className="flex items-center gap-1 justify-center">
-                          <FaCog /> {t("foto")}
-                        </div>
-                      </th>
-                      <th className="py-3 px-4 text-center">{t("nome")}</th>
-                      <th className="py-3 px-4 text-center">{t("cnpj")}</th>
-                      <th className="py-3 px-4 text-center">{t("email")}</th>
+                      <th className="py-3 px-4 text-center w-16">{t("foto")}</th>
+                      <th className="py-3 px-4 text-left">{t("nome")}</th>
+                      <th className="py-3 px-4 text-left">{t("cnpj")}</th>
+                      <th className="py-3 px-4 text-left">{t("email")}</th>
                       <th className="py-3 px-4 text-center">{t("telefone")}</th>
                       <th className="py-3 px-4 text-center">{t("categoria")}</th>
-                      <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
                       <th className="py-3 px-4 text-center">{t("contato")}</th>
                     </tr>
                   </thead>
@@ -804,7 +874,7 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                     {fornecedoresAtuais.map((fornecedor) => (
                       <tr
                         key={fornecedor.id}
-                        className="border-b transition-all duration-200 cursor-pointer"
+                        className="border-b transition-all duration-200"
                         style={{
                           color: temaAtual.texto,
                           borderColor: temaAtual.borda,
@@ -812,95 +882,84 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.hover;
-                          e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow = modoDark
-                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.card;
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow = "none";
                         }}
                       >
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(fornecedor);
-                            setForm(fornecedor);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          <Image
-                            src={fornecedor.foto || "/contadefault.png"}
-                            width={40}
-                            height={40}
-                            className="mx-auto rounded-full object-cover"
-                            alt={fornecedor.nome}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/contadefault.png";
+                        <td className="py-3 px-4 text-center">
+                          <div
+                            className="cursor-pointer mx-auto"
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
                             }}
-                          />
+                          >
+                            <Image
+                              src={fornecedor.foto || "/contadefault.png"}
+                              width={40}
+                              height={40}
+                              className="rounded-full object-cover"
+                              alt={fornecedor.nome}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/contadefault.png";
+                              }}
+                            />
+                          </div>
                         </td>
                         <td
+                          className="py-3 px-4 text-left cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(fornecedor);
                             setForm(fornecedor);
                           }}
-                          className="py-3 px-4 text-center"
                         >
                           {fornecedor.nome}
                         </td>
                         <td
+                          className="py-3 px-4 text-left cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(fornecedor);
                             setForm(fornecedor);
                           }}
-                          className="py-3 px-4 text-center"
                         >
                           {fornecedor.cnpj}
                         </td>
                         <td
+                          className="py-3 px-4 text-left cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(fornecedor);
                             setForm(fornecedor);
                           }}
-                          className="py-3 px-4 text-center"
                         >
-                          {fornecedor.email}
+                          <span className="text-xs">{fornecedor.email}</span>
                         </td>
                         <td
+                          className="py-3 px-4 text-center cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(fornecedor);
                             setForm(fornecedor);
                           }}
-                          className="py-3 px-4 text-center"
                         >
                           {formatarTelefone(fornecedor.telefone)}
                         </td>
                         <td
+                          className="py-3 px-4 text-center cursor-pointer"
                           onClick={() => {
                             setModalVisualizar(fornecedor);
                             setForm(fornecedor);
                           }}
-                          className="py-3 px-4 text-center"
                         >
-                          {fornecedor.categoria}
-                        </td>
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(fornecedor);
-                            setForm(fornecedor);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          {formatarData(fornecedor.createdAt)}
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded" >
+                            {fornecedor.categoria}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-center">
                           <FaPhoneAlt
                             onClick={() => handleEntrarContato(fornecedor)}
                             color="#25D366"
-                            size={20}
-                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl hover:bg-green-100 transition"
+                            size={18}
+                            className="cursor-pointer m-auto hover:scale-110 transition-transform"
                           />
                         </td>
                       </tr>
@@ -908,64 +967,167 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                   </tbody>
                 </table>
               </div>
-              <div className="md:hidden space-y-2 p-2">
+
+              <div className="hidden md:block lg:hidden overflow-x-auto">
+                <table className="w-full text-sm font-mono">
+                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
+                    <tr style={{ color: temaAtual.texto }}>
+                      <th className="py-3 px-2 text-center w-14">{t("foto")}</th>
+                      <th className="py-3 px-2 text-left">{t("nome")}</th>
+                      <th className="py-3 px-2 text-left">{t("cnpj")}</th>
+                      <th className="py-3 px-2 text-center">{t("categoria")}</th>
+                      <th className="py-3 px-2 text-center">{t("contato")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fornecedoresAtuais.map((fornecedor) => (
+                      <tr
+                        key={fornecedor.id}
+                        className="border-b transition-all duration-200"
+                        style={{
+                          color: temaAtual.texto,
+                          borderColor: temaAtual.borda,
+                          backgroundColor: temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.hover;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = temaAtual.card;
+                        }}
+                      >
+                        <td className="py-3 px-2 text-center">
+                          <div
+                            className="cursor-pointer mx-auto"
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                          >
+                            <Image
+                              src={fornecedor.foto || "/contadefault.png"}
+                              width={36}
+                              height={36}
+                              className="rounded-full object-cover"
+                              alt={fornecedor.nome}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/contadefault.png";
+                              }}
+                            />
+                          </div>
+                        </td>
+                        <td
+                          className="py-3 px-2 text-left cursor-pointer"
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                        >
+                          <div>
+                            <div className="font-medium">{fornecedor.nome}</div>
+                            <div className="text-xs" style={{ color: temaAtual.texto }}>
+                              {fornecedor.email}
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className="py-3 px-2 text-left cursor-pointer"
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                        >
+                          <div className="text-xs">{fornecedor.cnpj}</div>
+                          <div className="text-xs">{formatarTelefone(fornecedor.telefone)}</div>
+                        </td>
+                        <td
+                          className="py-3 px-2 text-center cursor-pointer"
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
+                          }}
+                        >
+                          <span className="text-xs font-medium px-1.5 py-0.5 rounded">
+                            {fornecedor.categoria}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <FaPhoneAlt
+                            onClick={() => handleEntrarContato(fornecedor)}
+                            color="#25D366"
+                            size={16}
+                            className="cursor-pointer m-auto hover:scale-110 transition-transform"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Layout para mobile (< 768px) */}
+              <div className="md:hidden space-y-3 p-3">
                 {fornecedoresAtuais.map((fornecedor) => (
                   <div
                     key={fornecedor.id}
-                    className="border rounded-lg p-3 transition-all cursor-pointer"
+                    className="border rounded-lg p-4 transition-all"
                     style={{
                       backgroundColor: temaAtual.card,
                       borderColor: temaAtual.borda,
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = temaAtual.hover;
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = modoDark
-                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = temaAtual.card;
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                    onClick={() => toggleExpandirFornecedor(fornecedor.id)}
                   >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={fornecedor.foto || "/contadefault.png"}
-                          width={40}
-                          height={40}
-                          className="rounded-full object-cover"
-                          alt={fornecedor.nome}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/contadefault.png";
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setModalVisualizar(fornecedor);
+                            setForm(fornecedor);
                           }}
-                        />
-                        <div>
-                          <p className="font-semibold" style={{ color: temaAtual.texto }}>{fornecedor.nome}</p>
-                          <p className="text-xs" style={{ color: temaAtual.primario }}>
-                            {fornecedor.categoria}
-                          </p>
+                        >
+                          <Image
+                            src={fornecedor.foto || "/contadefault.png"}
+                            width={48}
+                            height={48}
+                            className="rounded-full object-cover flex-shrink-0"
+                            alt={fornecedor.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/contadefault.png";
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setModalVisualizar(fornecedor);
+                              setForm(fornecedor);
+                            }}
+                          >
+                            <p className="font-semibold truncate" style={{ color: temaAtual.texto }}>
+                              {fornecedor.nome}
+                            </p>
+                            <p className="text-xs truncate" style={{ color: temaAtual.texto }}>
+                              {fornecedor.email}
+                            </p>
+                          </div>
+                          <div className="mt-1">
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded" style={{ color: temaAtual.texto }}>
+                              {fornecedor.categoria}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <FaPhoneAlt
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEntrarContato(fornecedor);
-                          }}
+                          onClick={() => handleEntrarContato(fornecedor)}
                           color="#25D366"
                           size={16}
                           className="cursor-pointer border p-1 rounded-full hover:bg-green-100 transition"
                         />
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpandirFornecedor(fornecedor.id);
-                          }}
+                          onClick={() => toggleExpandirFornecedor(fornecedor.id)}
                           className="p-1"
                           style={{ color: temaAtual.primario }}
                         >
@@ -975,35 +1137,32 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                     </div>
 
                     <div
-                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
+                      className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
                         }`}
                       style={{ color: temaAtual.texto }}
                     >
-                      <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("cnpj")}:</span>
+                      <div className="pt-3 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{t("cnpj")}:</span>
                           <span>{fornecedor.cnpj}</span>
                         </div>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("email")}:</span>
-                          <span>{fornecedor.email}</span>
-                        </div>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{t("telefone")}:</span>
                           <span>{formatarTelefone(fornecedor.telefone)}</span>
                         </div>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("adicionadoEm")}:</span>
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{t("adicionadoEm")}:</span>
                           <span>{formatarData(fornecedor.createdAt)}</span>
                         </div>
+
                         {podeEditar && (
-                          <div className="flex justify-end gap-2 pt-2">
+                          <div className="flex justify-end gap-2 pt-3">
                             <button
                               onClick={() => {
                                 setModalVisualizar(fornecedor);
                                 setForm(fornecedor);
                               }}
-                              className="px-3 py-1 text-xs rounded border"
+                              className="px-3 py-1.5 text-xs rounded border"
                               style={{
                                 backgroundColor: temaAtual.primario,
                                 borderColor: temaAtual.primario,
@@ -1015,7 +1174,7 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                             {podeExcluir && (
                               <button
                                 onClick={() => handleDelete(fornecedor)}
-                                className="px-3 py-1 text-xs rounded border"
+                                className="px-3 py-1.5 text-xs rounded border"
                                 style={{
                                   backgroundColor: "#EF4444",
                                   borderColor: "#EF4444",
@@ -1035,10 +1194,48 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
             </>
           )}
         </div>
+
+        {/* Controles de paginação para mobile */}
+        {totalPaginas > 1 && (
+          <div className="md:hidden flex justify-between items-center mt-4 p-3 rounded-lg" style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+              {paginaAtual} / {totalPaginas}
+            </span>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => mudarPagina(paginaAtual - 1)}
+                disabled={paginaAtual === 1}
+                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{
+                  color: temaAtual.texto,
+                  backgroundColor: temaAtual.primario + "20"
+                }}
+              >
+                <FaAngleLeft />
+              </button>
+
+              <button
+                onClick={() => mudarPagina(paginaAtual + 1)}
+                disabled={paginaAtual === totalPaginas}
+                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                style={{
+                  color: temaAtual.texto,
+                  backgroundColor: temaAtual.primario + "20"
+                }}
+              >
+                <FaAngleRight />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {(modalAberto || modalVisualizar) && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
             className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             style={{
@@ -1051,7 +1248,7 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
               {modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}
             </h2>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
                 <label className="block mb-1 text-sm">
                   {t("nome")} <span className="text-red-500">*</span>
@@ -1210,7 +1407,7 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
               </div>
             </div>
 
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-6 gap-3">
               <button
                 onClick={() => {
                   setModalAberto(false);
@@ -1218,15 +1415,18 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                   setFotoFile(null);
                   setFotoPreview(null);
                 }}
-                className="cursor-pointer hover:underline"
-                style={{ color: temaAtual.texto }}
+                className="cursor-pointer hover:underline px-4 py-2 rounded"
+                style={{
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
               >
                 {t("fechar")}
               </button>
 
               {modalVisualizar ? (
                 podeEditar && (
-                  <>
+                  <div className="flex gap-2">
                     <button
                       onClick={handleSalvarFornecedor}
                       className="px-4 cursor-pointer py-2 rounded"
@@ -1249,7 +1449,7 @@ const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<strin
                         {t("excluir")}
                       </button>
                     )}
-                  </>
+                  </div>
                 )
               ) : (
                 <button

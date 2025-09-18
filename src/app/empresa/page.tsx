@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCloudUploadAlt, FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
@@ -77,6 +77,7 @@ export default function Empresa() {
   const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
   const [cepCaracteres, setCepCaracteres] = useState(0);
 
+
   useEffect(() => {
     if (modalEdicaoAberto && empresaEditada) {
       setNomeCaracteres(empresaEditada.nome?.length || 0);
@@ -114,6 +115,50 @@ export default function Empresa() {
       setCarregandoPermissao(false);
     }
   };
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
 
   useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
@@ -184,7 +229,7 @@ export default function Empresa() {
     if (fileInput) {
       fileInput.addEventListener('change', (e) => {
         const target = e.target as HTMLInputElement;
-        const fileName = target.files?.[0]?.name || t("empresa.nenhumArquivoEscolhido");
+        const fileName = target.files?.[0]?.name || t("nenhumArquivoEscolhido");
         const displayElement = fileInput.nextElementSibling?.querySelector('.text-gray-500');
         if (displayElement) {
           displayElement.textContent = fileName;
@@ -235,10 +280,10 @@ export default function Empresa() {
 
       Swal.fire({
         icon: "success",
-        title: novoEstado ? t("empresa.catalogoAtivado") : t("empresa.catalogoDesativado"),
+        title: novoEstado ? t("catalogoAtivado") : t("catalogoDesativado"),
         text: novoEstado
-          ? t("empresa.catalogoAgoraPublico")
-          : t("empresa.catalogoNaoPublico"),
+          ? t("catalogoAgoraPublico")
+          : t("catalogoNaoPublico"),
         timer: 2000,
         showConfirmButton: false,
         background: temaAtual.card,
@@ -248,8 +293,8 @@ export default function Empresa() {
       console.error("Erro ao alterar estado do catálogo:", error);
       Swal.fire({
         icon: "error",
-        title: t("empresa.erro"),
-        text: t("empresa.erroAlterarCatalogo"),
+        title: t("erro"),
+        text: t("erroAlterarCatalogo"),
         background: temaAtual.card,
         color: temaAtual.texto,
         confirmButtonColor: temaAtual.primario
@@ -467,208 +512,252 @@ export default function Empresa() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-      <div className="w-full max-w-3xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
+    <div
+      className="flex flex-col items-center justify-center px-4 py-6 md:px-6 md:py-8"
+      style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}
+    >
+      <div className="w-full max-w-4xl">
+        <h1
+          className="text-center text-xl md:text-2xl font-semibold mb-6"
+          style={{ color: temaAtual.texto }}
+        >
           {t("titulo")}
         </h1>
 
-        <div className="p-6 rounded-lg mb-6" style={{
-          backgroundColor: temaAtual.card,
-          border: `1px solid ${temaAtual.borda}`
-        }}>
-          <div className="border-b mb-4 pb-4" style={{ borderColor: temaAtual.borda }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("dadosEmpresa")}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.nome")}</p>
-                <p style={{ color: temaAtual.texto }}><strong>{empresa.nome}</strong></p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.email")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.email}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.telefone")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.telefone || t("naoInformado")}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.endereco")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.endereco || t("naoInformado")}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.pais")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.pais || t("naoInformado")}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.estado")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.estado || t("naoInformado")}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.cidade")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.cidade || t("naoInformado")}</p>
-              </div>
-              <div>
-                <p style={{ color: temaAtual.placeholder }}>{t("campos.cep")}</p>
-                <p style={{ color: temaAtual.texto }}>{empresa.cep || t("naoInformado")}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6 p-4 rounded-lg" style={{
-            backgroundColor: temaAtual.hover,
-            border: `1px solid ${temaAtual.borda}`
-          }}>
-            <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: temaAtual.texto }}>
-              {empresa.catalogoPublico ?
-                <FaEye style={{ color: temaAtual.texto }} /> :
-                <FaEyeSlash style={{ color: temaAtual.texto }} />
-              }
-              {t("catalogo.publico")}
-            </h3>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-              <span className="text-sm" style={{ color: temaAtual.texto }}>
-                {t("catalogo.status")}:{" "}
-                <strong>
-                  {empresa.catalogoPublico
-                    ? t("catalogo.ativado")
-                    : t("catalogo.desativado")}
-                </strong>
-              </span>
-              {temPermissaoGerenciar && (
-                <button
-                  onClick={toggleCatalogoPublico}
-                  disabled={atualizandoCatalogo}
-                  className={`px-3 py-1 cursor-pointer rounded text-sm font-medium transition ${empresa.catalogoPublico
-                    ? "bg-red-100 text-red-800 hover:bg-red-200"
-                    : "bg-green-100 text-green-800 hover:bg-green-200"
-                    } disabled:opacity-50 w-fit`}
-                >
-                  {atualizandoCatalogo
-                    ? t("catalogo.processando")
-                    : empresa.catalogoPublico
-                      ? t("catalogo.desativar")
-                      : t("catalogo.ativar")}
-                </button>
-              )}
-            </div>
-
-            <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>{t("catalogo.disponivelEm")}</p>
-            <a
-              href={`${process.env.NEXT_PUBLIC_APP_URL ||
-                (typeof window !== "undefined"
-                  ? window.location.origin
-                  : "https://stockcontrol-six.vercel.app")
-                }/catalogo/${empresa.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-2 rounded text-sm break-all font-mono transition hover:opacity-80"
-              style={{
-                backgroundColor: temaAtual.primario + "20",
-                color: "#22c55e",
-                border: `1px solid #22c55e40`,
-              }}
+        <div
+          className="p-5 md:p-6 rounded-xl shadow-lg mb-6"
+          style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`,
+          }}
+        >
+          <div
+            className="border-b mb-5 pb-5"
+            style={{ borderColor: temaAtual.borda }}
+          >
+            <h2
+              className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-2"
+              style={{ color: temaAtual.texto }}
             >
-              {`${process.env.NEXT_PUBLIC_APP_URL ||
-                (typeof window !== "undefined"
-                  ? window.location.origin
-                  : "https://stockcontrol-six.vercel.app")
-                }/catalogo/${empresa.slug}`}
-            </a>
-
-            <p className="text-sm mt-2" style={{ color: temaAtual.texto }}>{t("catalogo.avisoClientes")}</p>
-
-            {!empresa.catalogoPublico && (
-              <p className="text-sm mt-2" style={{ color: "#F59E0B" }}>
-                {t("catalogo.desativadoAviso")}
-              </p>
-            )}
+              <FaGlobe className="text-lg" />
+              {t("dadosEmpresa")}
+            </h2>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base"
+            >
+              {[
+                { label: t("campos.nome"), value: empresa.nome, key: "nome" },
+                { label: t("campos.email"), value: empresa.email, key: "email" },
+                { label: t("campos.telefone"), value: empresa.telefone || t("naoInformado"), key: "telefone" },
+                { label: t("campos.endereco"), value: empresa.endereco || t("naoInformado"), key: "endereco" },
+                { label: t("campos.pais"), value: empresa.pais || t("naoInformado"), key: "pais" },
+                { label: t("campos.estado"), value: empresa.estado || t("naoInformado"), key: "estado" },
+                { label: t("campos.cidade"), value: empresa.cidade || t("naoInformado"), key: "cidade" },
+                { label: t("campos.cep"), value: empresa.cep || t("naoInformado"), key: "cep" },
+              ].map((field) => (
+                <div
+                  key={field.key}
+                  className="p-3 rounded-lg"
+                  style={{
+                    backgroundColor: modoDark ? temaAtual.fundo : "#F8FAFC",
+                    border: modoDark ? "none" : `1px solid ${temaAtual.borda}`,
+                    boxShadow: modoDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)"
+                  }}
+                >
+                  <p style={{
+                    color: modoDark ? temaAtual.placeholder : "#64748B",
+                    fontSize: '0.875rem',
+                    marginBottom: '0.5rem',
+                    fontWeight: modoDark ? "normal" : "500"
+                  }}>
+                    {field.label}
+                  </p>
+                  <p style={{
+                    color: temaAtual.texto,
+                    fontSize: '0.95rem',
+                    fontWeight: field.key === "nome" ? '500' : 'normal'
+                  }}>
+                    {field.value}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("logoEmpresa")}</h2>
-            {empresa.foto && (
-              <Image
-                src={empresa.foto}
-                alt={t("altLogoEmpresa")}
-                width={128}
-                height={128}
-                className="rounded mb-4 border"
-                style={{ borderColor: temaAtual.borda }}
-              />
-            )}
-            {temPermissaoGerenciar && (
-              <button
-                onClick={() => {
-                  setEmpresaEditada(empresa);
-                  setModalEdicaoAberto(true);
-                }}
-                className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg transition font-medium"
-                style={{
-                  backgroundColor: temaAtual.primario,
-                  color: "#FFFFFF",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-              >
-                <FaCloudUploadAlt className="text-sm" style={{ color: "#FFFFFF" }} />
-                {t("alterarLogo")}
-              </button>
-            )}
-          </div>
+          <div className="flex flex-col md:flex-row gap-6 items-start">
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            {temPermissaoGerenciar && (
-              <button
-                onClick={() => {
-                  setEmpresaEditada(empresa);
-                  setModalEdicaoAberto(true);
-                }}
-                className="flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-lg transition font-medium"
-                style={{
-                  backgroundColor: temaAtual.primario,
-                  color: "#FFFFFF",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-              >
-                <FaEdit className="text-sm" style={{ color: "#FFFFFF" }} />
-                {t("editarDados")}
-              </button>
-            )}
+            <div className="md:w-2/5">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                  {t("logoEmpresa")}
+                </h2>
+                <div className="flex justify-start">
+                  {empresa.foto ? (
+                    <Image
+                      src={empresa.foto}
+                      alt={t("altLogoEmpresa")}
+                      width={120}
+                      height={120}
+                      className="rounded-lg border-2 object-contain"
+                      style={{ borderColor: temaAtual.borda }}
+                    />
+                  ) : (
+                    <div
+                      className="w-32 h-32 rounded-lg border-2 flex items-center justify-center"
+                      style={{
+                        borderColor: temaAtual.borda,
+                        backgroundColor: temaAtual.fundo
+                      }}
+                    >
+                      <span style={{ color: temaAtual.placeholder }}>{t("semLogo")}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-            {tipoUsuario && (
-              <button
-                onClick={excluirOuSairDaEmpresa}
-                className="flex items-center justify-center cursor-pointer gap-2 px-4 py-2 rounded-lg transition font-medium"
-                style={{
-                  backgroundColor: tipoUsuario === "PROPRIETARIO" ? "#EF4444" : "#6B7280",
-                  color: "#FFFFFF",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-              >
-                {tipoUsuario === "PROPRIETARIO" ? (
-                  <FaTrash className="text-sm" style={{ color: "#FFFFFF" }} />
-                ) : (
-                  <FaSignOutAlt className="text-sm" style={{ color: "#FFFFFF" }} />
+              <div className="flex flex-col sm:flex-row md:flex-col gap-2 justify-start">
+                {temPermissaoGerenciar && (
+                  <button
+                    onClick={() => {
+                      setEmpresaEditada(empresa);
+                      setModalEdicaoAberto(true);
+                    }}
+                    className="flex items-center cursor-pointer justify-center gap-1 px-3 py-2 rounded-lg transition text-sm whitespace-nowrap"
+                    style={{
+                      backgroundColor: temaAtual.primario,
+                      color: "#FFFFFF",
+                      minWidth: "unset",
+                      width: "fit-content",
+                      paddingLeft: "10px",
+                      paddingRight: "10px"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.9";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                  >
+                    <FaEdit className="text-xs" style={{ color: "#FFFFFF" }} />
+                    {t("editarDados")}
+                  </button>
                 )}
-                {tipoUsuario === "PROPRIETARIO" ? t("deletarEmpresa") : t("sairEmpresa")}
-              </button>
-            )}
+
+                {tipoUsuario && (
+                  <button
+                    onClick={excluirOuSairDaEmpresa}
+                    className="flex items-center justify-center cursor-pointer gap-1 px-3 py-2 rounded-lg transition text-sm whitespace-nowrap"
+                    style={{
+                      backgroundColor: tipoUsuario === "PROPRIETARIO" ? "#EF4444" : "#6B7280",
+                      color: "#FFFFFF",
+                      minWidth: "unset",
+                      width: "fit-content",
+                      paddingLeft: "10px",
+                      paddingRight: "10px"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.9";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                  >
+                    {tipoUsuario === "PROPRIETARIO" ? (
+                      <FaTrash className="text-xs" style={{ color: "#FFFFFF" }} />
+                    ) : (
+                      <FaSignOutAlt className="text-xs" style={{ color: "#FFFFFF" }} />
+                    )}
+                    {t(tipoUsuario === "PROPRIETARIO" ? "deletarEmpresa" : "sairEmpresa")}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="md:w-full">
+              <div
+                className="p-5 rounded-xl"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+              >
+                <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg" style={{ color: temaAtual.texto }}>
+                  {empresa.catalogoPublico ?
+                    <FaEye className="text-xl" style={{ color: "#10B981" }} /> :
+                    <FaEyeSlash className="text-xl" style={{ color: "#EF4444" }} />
+                  }
+                  {t("catalogo.publico")}
+                </h3>
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
+                  <div>
+                    <span className="text-sm font-medium" style={{ color: temaAtual.texto }}>
+                      {t("catalogo.status")}:{" "}
+                      <strong style={{ color: empresa.catalogoPublico ? "#10B981" : "#EF4444" }}>
+                        {empresa.catalogoPublico
+                          ? t("catalogo.ativado")
+                          : t("catalogo.desativado")}
+                      </strong>
+                    </span>
+                  </div>
+                  {temPermissaoGerenciar && (
+                    <button
+                      onClick={toggleCatalogoPublico}
+                      disabled={atualizandoCatalogo}
+                      className={`px-4 py-2 cursor-pointer rounded-lg text-sm font-medium transition ${empresa.catalogoPublico
+                        ? "bg-red-500 text-white hover:bg-red-600"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                        } disabled:opacity-50 w-full md:w-auto`}
+                    >
+                      {atualizandoCatalogo
+                        ? t("catalogo.processando")
+                        : empresa.catalogoPublico
+                          ? t("catalogo.desativar")
+                          : t("catalogo.ativar")}
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-sm mb-3 font-medium" style={{ color: temaAtual.texto }}>{t("catalogo.disponivelEm")}</p>
+                <div className="flex items-center gap-2 p-3 rounded-lg mb-3" style={{
+                  backgroundColor: temaAtual.fundo,
+                  border: `1px solid ${temaAtual.borda}`
+                }}>
+                  <FaLink className="flex-shrink-0" style={{ color: temaAtual.primario }} />
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_APP_URL ||
+                      (typeof window !== "undefined"
+                        ? window.location.origin
+                        : "https://stockcontrol-six.vercel.app")
+                      }/catalogo/${empresa.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm break-all font-mono transition hover:opacity-80"
+                    style={{
+                      color: temaAtual.primario,
+                    }}
+                  >
+                    {`${process.env.NEXT_PUBLIC_APP_URL ||
+                      (typeof window !== "undefined"
+                        ? window.location.origin
+                        : "https://stockcontrol-six.vercel.app")
+                      }/catalogo/${empresa.slug}`}
+                  </a>
+                </div>
+
+                <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>{t("catalogo.avisoClientes")}</p>
+
+                {!empresa.catalogoPublico && (
+                  <p className="text-sm mt-2 p-3 rounded-lg" style={{
+                    backgroundColor: modoDark ? "#422727" : "#FEF2F2",
+                    color: modoDark ? "#FCA5A5" : "#DC2626",
+                    border: modoDark ? "none" : "1px solid #FECACA"
+                  }}>
+                    {t("catalogo.desativadoAviso")}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -862,16 +951,16 @@ export default function Empresa() {
                       border: `1px solid ${temaAtual.borda}`,
                       color: temaAtual.placeholder
                     }}>
-                    <span>{t("empresa.escolherArquivo")}</span>
+                    <span>{t("escolherArquivo")}</span>
                     <span>
-                      {t("empresa.nenhumArquivoEscolhido")}
+                      {t("nenhumArquivoEscolhido")}
                     </span>
                   </div>
                 </div>
 
                 {fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("empresa.preVisualizacao")}:</p>
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("preVisualizacao")}:</p>
                     <Image
                       src={fotoPreview}
                       alt="Preview"
@@ -884,7 +973,7 @@ export default function Empresa() {
                 )}
                 {empresa.foto && !fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("empresa.fotoAtual")}:</p>
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("fotoAtual")}:</p>
                     <Image
                       src={empresa.foto}
                       alt="Foto atual"
@@ -942,4 +1031,4 @@ export default function Empresa() {
       )}
     </div>
   );
-}
+};
