@@ -41,6 +41,7 @@ export default function Empresa() {
   const { t } = useTranslation("empresa");
   const [temPermissaoGerenciar, setTemPermissaoGerenciar] = useState(false);
   const [carregandoPermissao, setCarregandoPermissao] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   const cores = {
     dark: {
@@ -258,6 +259,40 @@ export default function Empresa() {
     }
   };
 
+  const uploadFotoUpdate = async (file: File, empresaId: string): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("foto", file);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaId}/upload-foto`, {
+        method: "PUT",
+        body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.fotoUrl;
+      } else {
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const editarDadosEmpresa = async () => {
     if (!empresaEditada || !temPermissaoGerenciar) return;
 
@@ -266,28 +301,41 @@ export default function Empresa() {
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       if (!usuarioValor) return;
 
-      const formData = new FormData();
-      formData.append('nome', empresaEditada.nome);
-      formData.append('email', empresaEditada.email);
-      if (empresaEditada.telefone) formData.append('telefone', empresaEditada.telefone);
-      if (empresaEditada.endereco) formData.append('endereco', empresaEditada.endereco);
-      if (empresaEditada.pais) formData.append('pais', empresaEditada.pais);
-      if (empresaEditada.estado) formData.append('estado', empresaEditada.estado);
-      if (empresaEditada.cidade) formData.append('cidade', empresaEditada.cidade);
-      if (empresaEditada.cep) formData.append('cep', empresaEditada.cep);
+      let fotoUrl = empresaEditada.foto;
 
       if (fotoFile) {
-        formData.append('foto', fotoFile);
-      } else if (empresaEditada.foto === null) {
-        formData.append('foto', 'null');
+        const uploadedUrl = await uploadFotoUpdate(fotoFile, empresaEditada.id);
+        if (uploadedUrl) {
+          fotoUrl = uploadedUrl;
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: t("avisos.uploadFotoFalhouTitulo"),
+            text: t("avisos.uploadFotoFalhouTexto"),
+            background: temaAtual.card,
+            color: temaAtual.texto,
+            confirmButtonColor: temaAtual.primario
+          });
+        }
       }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${empresaEditada.id}/${usuarioValor}`, {
         method: "PUT",
-        body: formData,
         headers: {
+          "Content-Type": "application/json",
           'user-id': usuarioValor
-        }
+        },
+        body: JSON.stringify({
+          nome: empresaEditada.nome?.trim(),
+          email: empresaEditada.email?.trim(),
+          telefone: empresaEditada.telefone?.trim(),
+          endereco: empresaEditada.endereco?.trim(),
+          pais: empresaEditada.pais?.trim(),
+          estado: empresaEditada.estado?.trim(),
+          cidade: empresaEditada.cidade?.trim(),
+          cep: empresaEditada.cep?.trim(),
+          fotoUrl: fotoUrl
+        })
       });
 
       if (!res.ok) throw new Error(t("erros.erroAtualizarEmpresa"));
@@ -295,7 +343,23 @@ export default function Empresa() {
       const data = await res.json();
       setEmpresa(data);
       setModalEdicaoAberto(false);
-      window.location.reload();
+      setFotoFile(null);
+      setFotoPreview(null);
+
+      Swal.fire({
+        icon: "success",
+        title: t("sucesso.empresaAtualizada"),
+        text: t("sucesso.dadosAtualizados"),
+        background: temaAtual.card,
+        color: temaAtual.texto,
+        confirmButtonColor: temaAtual.primario,
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2100);
     } catch (error) {
       console.error(t("erros.erroEditarEmpresa"), error);
       Swal.fire({

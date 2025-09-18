@@ -45,6 +45,8 @@ export default function Fornecedores() {
   const [emailCaracteres, setEmailCaracteres] = useState(0);
   const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+
 
   const cores = {
     dark: {
@@ -318,6 +320,74 @@ export default function Fornecedores() {
     }
   };
 
+  const uploadFotoSeparada = async (file: File): Promise<string | null> => {
+  try {
+    setIsUploading(true);
+    
+    const formData = new FormData();
+    formData.append("foto", file);
+
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return null;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/upload-foto`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        'user-id': usuarioValor
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.fotoUrl;
+    } else {
+      console.error("Erro no upload da foto:", await response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error("Erro no upload:", error);
+    return null;
+  } finally {
+    setIsUploading(false);
+  }
+};
+
+const uploadFotoUpdate = async (file: File, fornecedorId: string): Promise<string | null> => {
+  try {
+    setIsUploading(true);
+    
+    const formData = new FormData();
+    formData.append("foto", file);
+
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return null;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedorId}/upload-foto`, {
+      method: "PUT",
+      body: formData,
+      headers: {
+        'user-id': usuarioValor
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.fotoUrl;
+    } else {
+      console.error("Erro no upload da foto:", await response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error("Erro no upload:", error);
+    return null;
+  } finally {
+    setIsUploading(false);
+  }
+};
+
   async function handleAdicionarFornecedor() {
   const usuarioSalvo = localStorage.getItem("client_key");
   if (!usuarioSalvo) return;
@@ -350,55 +420,67 @@ export default function Fornecedores() {
       return;
     }
 
-      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
-      if (!empresaAtivada) {
-        mostrarAlertaNaoAtivada();
-        return;
-      }
+    const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
 
-      const formData = new FormData();
-      formData.append("nome", form.nome.trim());
-      formData.append("email", form.email.trim());
-      formData.append("cnpj", form.cnpj.trim());
-      formData.append("telefone", form.telefone.trim());
-      formData.append("categoria", form.categoria.trim());
-      formData.append("empresaId", empresaId);
-      formData.append("usuarioId", usuarioValor || "");
+    try {
+      let fotoUrl = form.foto;
+
       if (fotoFile) {
-        formData.append("foto", fotoFile);
+        const uploadedUrl = await uploadFotoSeparada(fotoFile);
+        if (uploadedUrl) {
+          fotoUrl = uploadedUrl;
+        } else {
+          Swal.fire("Aviso", "Upload da foto falhou, continuando sem imagem", "warning");
+        }
       }
 
-      try {
-        const usuarioSalvo = localStorage.getItem("client_key");
-        if (!usuarioSalvo) return;
-        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'user-id': usuarioValor
+        },
+        body: JSON.stringify({
+          nome: form.nome.trim(),
+          email: form.email.trim(),
+          cnpj: form.cnpj.trim(),
+          telefone: form.telefone.trim(),
+          categoria: form.categoria.trim(),
+          empresaId: empresaId,
+          usuarioId: usuarioValor,
+          fotoUrl: fotoUrl
+        })
+      });
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-          method: "POST",
-          body: formData,
-          headers: {
-            'user-id': usuarioValor
-          }
+      if (response.status === 201) {
+        Swal.fire({
+          text: t("mensagens.fornecedorAdicionado"),
+          icon: "success",
+          confirmButtonColor: "#013C3C",
         });
-
-        if (response.status === 201) {
-          Swal.fire({
-            text: t("mensagens.fornecedorAdicionado"),
-            icon: "success",
-            confirmButtonColor: "#013C3C",
-          });
-          setModalAberto(false);
-          window.location.reload();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: t("mensagens.erro"),
-            text: t("mensagens.erroAdicionar"),
-            confirmButtonColor: "#013C3C",
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao adicionar fornecedor:", error);
+        setModalAberto(false);
+        setFotoFile(null);
+        setFotoPreview(null);
+        setForm({
+          id: "",
+          nome: "",
+          email: "",
+          cnpj: "",
+          telefone: "",
+          categoria: "",
+          foto: "",
+          empresaId: "",
+          usuarioId: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          Produto: [],
+        });
+        window.location.reload();
+      } else {
         Swal.fire({
           icon: "error",
           title: t("mensagens.erro"),
@@ -406,95 +488,110 @@ export default function Fornecedores() {
           confirmButtonColor: "#013C3C",
         });
       }
-    });
-  }
+    } catch (error) {
+      console.error("Erro ao adicionar fornecedor:", error);
+      Swal.fire({
+        icon: "error",
+        title: t("mensagens.erro"),
+        text: t("mensagens.erroAdicionar"),
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  });
+}
 
   async function handleSalvarFornecedor() {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+  const usuarioSalvo = localStorage.getItem("client_key");
+  if (!usuarioSalvo) return;
+  const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-    handleAcaoProtegida(async () => {
-      if (!modalVisualizar?.id) return;
+  handleAcaoProtegida(async () => {
+    if (!modalVisualizar?.id) return;
 
-      let mensagemErro = "";
+    let mensagemErro = "";
 
-      if (!form.nome.trim()) {
-        mensagemErro += `• ${t("nome")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-      }
+    if (!form.nome.trim()) {
+      mensagemErro += `• ${t("nome")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+    }
 
-      if (!form.email.trim()) {
-        mensagemErro += `• ${t("email")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-      }
+    if (!form.email.trim()) {
+      mensagemErro += `• ${t("email")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+    }
 
-      if (!form.cnpj.trim()) {
-        mensagemErro += `• ${t("cnpj")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
-      }
+    if (!form.cnpj.trim()) {
+      mensagemErro += `• ${t("cnpj")} ${t("mensagens.campoObrigatorio", "é obrigatório")}\n`;
+    }
 
-      if (mensagemErro) {
-        Swal.fire({
-          title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
-          html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
-          icon: "warning",
-          confirmButtonColor: "#013C3C",
+    if (mensagemErro) {
+      Swal.fire({
+        title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
+        html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+        icon: "warning",
+        confirmButtonColor: "#013C3C",
         });
-        return;
-      }
+      return;
+    }
 
-      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
-      if (!empresaAtivada) {
-        mostrarAlertaNaoAtivada();
-        return;
-      }
+    const empresaAtivada = await verificarAtivacaoEmpresa(empresaId || "");
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
 
-      const formData = new FormData();
-      formData.append("nome", form.nome.trim());
-      formData.append("email", form.email.trim());
-      formData.append("cnpj", form.cnpj.trim());
-      formData.append("telefone", form.telefone.trim());
-      formData.append("categoria", form.categoria.trim());
-      formData.append("empresaId", empresaId || "");
-      formData.append("usuarioId", usuarioValor || "");
+    try {
+      let fotoUrl = form.foto;
 
       if (fotoFile) {
-        formData.append("foto", fotoFile);
+        const uploadedUrl = await uploadFotoUpdate(fotoFile, modalVisualizar.id);
+        if (uploadedUrl) {
+          fotoUrl = uploadedUrl;
+        } else {
+          Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
+        }
       }
 
-      try {
-        const usuarioSalvo = localStorage.getItem("client_key");
-        if (!usuarioSalvo) return;
-        const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          'user-id': usuarioValor
+        },
+        body: JSON.stringify({
+          nome: form.nome.trim(),
+          email: form.email.trim(),
+          cnpj: form.cnpj.trim(),
+          telefone: form.telefone.trim(),
+          categoria: form.categoria.trim(),
+          empresaId: empresaId || "",
+          usuarioId: usuarioValor,
+          fotoUrl: fotoUrl
+        })
+      });
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${modalVisualizar.id}`, {
-          method: "PUT",
-          body: formData,
-          headers: {
-            'user-id': usuarioValor
-          }
-        });
-
-        if (response.ok) {
-          Swal.fire({
-            text: t("mensagens.fornecedorAtualizado"),
-            icon: "success",
-            confirmButtonColor: "#013C3C",
-          });
-          setModalVisualizar(null);
-          window.location.reload();
-        } else {
-          throw new Error("Erro ao atualizar fornecedor");
-        }
-      } catch (error) {
-        console.error("Erro ao atualizar fornecedor:", error);
+      if (response.ok) {
         Swal.fire({
-          icon: "error",
-          title: t("mensagens.erro"),
-          text: t("mensagens.erroAtualizar"),
+          text: t("mensagens.fornecedorAtualizado"),
+          icon: "success",
           confirmButtonColor: "#013C3C",
         });
+        setModalVisualizar(null);
+        setFotoFile(null);
+        setFotoPreview(null);
+        window.location.reload();
+      } else {
+        throw new Error("Erro ao atualizar fornecedor");
       }
-    });
-  }
+    } catch (error) {
+      console.error("Erro ao atualizar fornecedor:", error);
+      Swal.fire({
+        icon: "error",
+        title: t("mensagens.erro"),
+        text: t("mensagens.erroAtualizar"),
+        confirmButtonColor: "#013C3C",
+      });
+    }
+  });
+}
 
   async function handleDelete(fornecedor: FornecedorI) {
     const usuarioSalvo = localStorage.getItem("client_key");

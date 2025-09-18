@@ -17,7 +17,7 @@ export default function Logs() {
   const [logExpandido, setLogExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [temPermissao, setTemPermissao] = useState<boolean | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [, setUserId] = useState<string | null>(null);
 
   const logsPorPagina = 14;
 
@@ -112,11 +112,6 @@ export default function Logs() {
     initialize();
   }, [t]);
 
-  useEffect(() => {
-    if (userId !== null) {
-      console.log("userId em uso:", userId);
-    }
-  }, [userId]);
 
   const indexUltimoLog = paginaAtual * logsPorPagina;
   const indexPrimeiroLog = indexUltimoLog - logsPorPagina;

@@ -40,12 +40,14 @@ export default function CriarEmpresa() {
     mode: "onChange"
   });
   const router = useRouter();
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
+  const [, setUsuarioLogado] = useState<UsuarioI | null>(null);
   const [modoDark, setModoDark] = useState(false);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const { logar } = useUsuarioStore();
   const { t } = useTranslation("criarempresa");
   const [loading, setLoading] = useState(true);
+  const [, setIsUploading] = useState(false);
+
   const [dominioStatus, setDominioStatus] = useState<DominioStatus>({
     disponivel: false,
     carregando: false,
@@ -218,12 +220,6 @@ export default function CriarEmpresa() {
   }, []);
 
   useEffect(() => {
-    if (usuarioLogado) {
-      console.log("Usuário logado:", usuarioLogado);
-    }
-  }, [usuarioLogado]);
-
-  useEffect(() => {
     async function init() {
       try {
         const clientKey = localStorage.getItem("client_key");
@@ -277,6 +273,40 @@ export default function CriarEmpresa() {
     }
   };
 
+  const uploadFotoSeparada = async (file: File): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("foto", file);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/upload-foto`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.fotoUrl;
+      } else {
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   async function onSubmit(data: Inputs) {
     if (!data.dominio || data.dominio.trim().length < 4) {
       Swal.fire({
@@ -306,39 +336,63 @@ export default function CriarEmpresa() {
     const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
     try {
-      const formData = new FormData();
-      formData.append("nome", data.nome);
-      formData.append("email", data.email);
-      if (data.telefone) formData.append("telefone", data.telefone);
-      if (data.endereco) formData.append("endereco", data.endereco);
-      if (data.pais) formData.append("pais", data.pais);
-      if (data.estado) formData.append("estado", data.estado);
-      if (data.cidade) formData.append("cidade", data.cidade);
-      if (data.cep) formData.append("cep", data.cep);
-      if (data.dominio) formData.append("dominio", data.dominio);
+      let fotoUrl = null;
+
       if (data.foto && data.foto[0]) {
-        formData.append("foto", data.foto[0]);
+        const uploadedUrl = await uploadFotoSeparada(data.foto[0]);
+        if (uploadedUrl) {
+          fotoUrl = uploadedUrl;
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: t("avisos.uploadFotoFalhouTitulo"),
+            text: t("avisos.uploadFotoFalhouTexto"),
+            confirmButtonColor: temaAtual.primario,
+            background: temaAtual.card,
+            color: temaAtual.texto
+          });
+        }
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa`, {
         method: "POST",
         headers: {
-          "user-id": usuarioValor || "",
+          "Content-Type": "application/json",
+          "user-id": usuarioValor
         },
-        body: formData,
+        body: JSON.stringify({
+          nome: data.nome,
+          email: data.email,
+          telefone: data.telefone,
+          endereco: data.endereco,
+          pais: data.pais,
+          estado: data.estado,
+          cidade: data.cidade,
+          cep: data.cep,
+          dominioSolicitado: data.dominio,
+          fotoUrl: fotoUrl
+        })
       });
 
       if (response.ok) {
-        await response.json();
+        const result = await response.json();
 
         Swal.fire({
           icon: "success",
           title: t("sucesso.titulo"),
-          html: `<div><p>${t("sucesso.mensagem")}</p></div>`,
+          html: `
+          <div>
+            <p>${t("sucesso.mensagem")}</p>
+            <p class="mt-2 text-sm">${t("sucesso.dominioCriado")}: ${result.dominio}</p>
+            <p class="text-sm">${t("sucesso.urlCatalogo")}: ${result.urlCatalogo}</p>
+          </div>
+        `,
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
+          confirmButtonText: t("sucesso.botaoConfirmar")
         });
+
         router.push("/empresa");
         setTimeout(() => {
           window.location.reload();

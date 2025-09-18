@@ -108,18 +108,14 @@ export default function AtivacaoPage() {
         throw new Error(t('erroCodigoInvalido'));
       }
 
-      console.log('Fazendo requisição para:', `${process.env.NEXT_PUBLIC_URL_API}/chave/${codigo}`);
-
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/chave/${codigo}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ empresaId }),
       });
 
-      console.log('Status da resposta:', res.status);
 
       const responseData = await res.json();
-      console.log('Dados da resposta:', responseData);
 
       if (!res.ok) {
         if (res.status === 404) {

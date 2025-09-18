@@ -5,7 +5,8 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle } from "react-icons/fa"; import Swal from "sweetalert2";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle } from "react-icons/fa";
+import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
@@ -62,6 +63,7 @@ export default function Produtos() {
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const cores = {
@@ -430,6 +432,40 @@ export default function Produtos() {
     }
   };
 
+  const uploadFotoSeparada = async (file: File): Promise<string | null> => {
+    try {
+      setIsUploading(true);
+
+      const formData = new FormData();
+      formData.append("foto", file);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return null;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/upload-foto`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.fotoUrl;
+      } else {
+        console.error("Erro no upload da foto:", await response.text());
+        return null;
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const toggleCatalogo = async (produtoId: string, noCatalogo: boolean) => {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
@@ -519,7 +555,6 @@ export default function Produtos() {
         return;
       }
 
-
       const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
       if (!empresaAtivada) {
         mostrarAlertaNaoAtivada();
@@ -527,31 +562,36 @@ export default function Produtos() {
       }
 
       try {
-        const formData = new FormData();
+        let fotoUrl = form.foto;
 
         if (file) {
-          formData.append("foto", file);
-        } else if (form.foto) {
-          formData.append("foto", form.foto);
+          const uploadedUrl = await uploadFotoSeparada(file);
+          if (uploadedUrl) {
+            fotoUrl = uploadedUrl;
+          } else {
+            Swal.fire("Aviso", "Upload da foto falhou, continuando sem imagem", "warning");
+          }
         }
-
-        formData.append("nome", form.nome);
-        formData.append("descricao", form.descricao);
-        formData.append("preco", (form.preco || 0).toString());
-        formData.append("quantidade", (form.quantidade || 0).toString());
-        formData.append("quantidadeMin", form.quantidadeMin.toString());
-        formData.append("noCatalogo", form.noCatalogo.toString());
-        if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
-        if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-        formData.append("empresaId", empresaId);
-        formData.append("usuarioId", usuarioValor);
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
           method: "POST",
-          body: formData,
           headers: {
+            "Content-Type": "application/json",
             'user-id': usuarioValor
-          }
+          },
+          body: JSON.stringify({
+            nome: form.nome,
+            descricao: form.descricao,
+            preco: form.preco || 0,
+            quantidade: form.quantidade || 0,
+            quantidadeMin: form.quantidadeMin,
+            noCatalogo: form.noCatalogo,
+            fornecedorId: form.fornecedorId,
+            categoriaId: form.categoriaId,
+            empresaId: empresaId,
+            usuarioId: usuarioValor,
+            fotoUrl: fotoUrl
+          })
         });
 
         if (response.ok) {
@@ -598,109 +638,149 @@ export default function Produtos() {
     });
   };
 
-  const handleUpdate = async () => {
-    handleAcaoProtegida(async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      if (!modalVisualizar) return;
+  const uploadFotoUpdate = async (file: File, produtoId: string): Promise<string | null> => {
+  try {
+    setIsUploading(true);
+    
+    const formData = new FormData();
+    formData.append("foto", file);
 
-      const camposObrigatorios = {
-        nome: form.nome.trim(),
-        descricao: form.descricao.trim(),
-        quantidadeMin: form.quantidadeMin !== 0
-      };
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return null;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-      const camposFaltando = Object.entries(camposObrigatorios)
-        .filter(([, value]) => !value)
-        .map(([campo]) => campo);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produtoId}/upload-foto`, {
+      method: "PUT",
+      body: formData,
+      headers: {
+        'user-id': usuarioValor
+      }
+    });
 
-      if (camposFaltando.length > 0) {
-        const camposTraduzidos = camposFaltando.map(campo => {
-          switch (campo) {
-            case 'nome': return t("nome");
-            case 'descricao': return t("descricao");
-            case 'quantidadeMin': return t("quantidadeMinima");
-            default: return campo;
-          }
-        });
+    if (response.ok) {
+      const data = await response.json();
+      return data.fotoUrl;
+    } else {
+      console.error("Erro no upload da foto:", await response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error("Erro no upload:", error);
+    return null;
+  } finally {
+    setIsUploading(false);
+  }
+};
 
-        Swal.fire({
-          icon: 'error',
-          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
-          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
-          confirmButtonColor: '#EF4444'
-        });
+const handleUpdate = async () => {
+  handleAcaoProtegida(async () => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+    if (!modalVisualizar) return;
+
+    const camposObrigatorios = {
+      nome: form.nome.trim(),
+      descricao: form.descricao.trim(),
+      quantidadeMin: form.quantidadeMin !== 0
+    };
+
+    const camposFaltando = Object.entries(camposObrigatorios)
+      .filter(([, value]) => !value)
+      .map(([campo]) => campo);
+
+    if (camposFaltando.length > 0) {
+      const camposTraduzidos = camposFaltando.map(campo => {
+        switch (campo) {
+          case 'nome': return t("nome");
+          case 'descricao': return t("descricao");
+          case 'quantidadeMin': return t("quantidadeMinima");
+          default: return campo;
+        }
+      });
+
+      Swal.fire({
+        icon: 'error',
+        title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
+        html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
+        confirmButtonColor: '#EF4444'
+      });
+      return;
+    }
+
+    if (empresaId) {
+      const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
+      if (!empresaAtivada) {
+        mostrarAlertaNaoAtivada();
         return;
       }
+    }
 
-      if (empresaId) {
-        const empresaAtivada = await verificarAtivacaoEmpresa(empresaId);
-        if (!empresaAtivada) {
-          mostrarAlertaNaoAtivada();
-          return;
+    try {
+      let fotoUrl = form.foto;
+
+      if (file) {
+        const uploadedUrl = await uploadFotoUpdate(file, modalVisualizar.id);
+        if (uploadedUrl) {
+          fotoUrl = uploadedUrl;
+        } else {
+          Swal.fire("Aviso", "Upload da foto falhou, mantendo imagem anterior", "warning");
         }
       }
 
-      try {
-        const formData = new FormData();
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          'user-id': usuarioValor
+        },
+        body: JSON.stringify({
+          nome: form.nome,
+          descricao: form.descricao,
+          preco: form.preco,
+          quantidadeMin: form.quantidadeMin,
+          noCatalogo: form.noCatalogo,
+          fornecedorId: form.fornecedorId,
+          categoriaId: form.categoriaId,
+          usuarioId: usuarioValor,
+          fotoUrl: fotoUrl
+        })
+      });
 
-        if (file) {
-          formData.append("foto", file);
-        }
+      if (response.ok) {
+        const updatedProduto = await response.json();
 
-        formData.append("nome", form.nome);
-        formData.append("descricao", form.descricao);
-        formData.append("preco", form.preco.toString());
-        formData.append("quantidadeMin", form.quantidadeMin.toString());
-        formData.append("noCatalogo", form.noCatalogo.toString());
-        formData.append("usuarioId", usuarioValor);
+        setModalVisualizar(null);
+        setFile(null);
+        setPreview(null);
 
-        if (form.fornecedorId) formData.append("fornecedorId", form.fornecedorId);
-        if (form.categoriaId) formData.append("categoriaId", form.categoriaId);
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
-          method: "PUT",
-          body: formData,
-          headers: {
-            'user-id': usuarioValor
-          }
+        setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: t("produtoAtualizadoSucesso.titulo"),
+          showConfirmButton: false,
+          timer: 1500,
         });
-
-        if (response.ok) {
-          const updatedProduto = await response.json();
-
-          setModalVisualizar(null);
-          setFile(null);
-          setPreview(null);
-
-          setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: t("produtoAtualizadoSucesso.titulo"),
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          setTimeout(() => window.location.reload(), 1600);
-        } else {
-          const errorText = await response.text();
-          Swal.fire({
-            icon: "error",
-            title: "Erro!",
-            text: `Erro ao atualizar produto: ${errorText}`
-          });
-        }
-      } catch (err) {
-        console.error("Erro ao atualizar produto:", err);
+        setTimeout(() => window.location.reload(), 1600);
+      } else {
+        const errorText = await response.text();
         Swal.fire({
           icon: "error",
           title: "Erro!",
-          text: "Erro inesperado ao tentar atualizar."
+          text: `Erro ao atualizar produto: ${errorText}`
         });
       }
-    });
-  };
+    } catch (err) {
+      console.error("Erro ao atualizar produto:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: "Erro inesperado ao tentar atualizar."
+      });
+    }
+  });
+};
 
   const handleDelete = async () => {
     handleAcaoProtegida(async () => {
@@ -1134,6 +1214,12 @@ export default function Produtos() {
                 {modalVisualizar ? t("editarProduto") : t("novoProduto")}
               </h2>
 
+              {isUploading && (
+                <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded text-center">
+                  {t("fazendoUpload")}...
+                </div>
+              )}
+
               <div className="mb-3">
                 <label className="block mb-1 text-sm">
                   {t("nome")} <span className="text-red-500">*</span>
@@ -1185,6 +1271,7 @@ export default function Produtos() {
                     placeholder={t("preco")}
                     type="number"
                     min={0}
+                    step="0.01"
                     value={form.preco || ""}
                     onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
                     className="w-full rounded p-2 mb-3"
@@ -1217,6 +1304,7 @@ export default function Produtos() {
                         color: "#FFFFFF",
                         borderColor: temaAtual.primario,
                       }}
+                      disabled={isUploading}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -1252,52 +1340,52 @@ export default function Produtos() {
                         }}
                       />
 
-                        <div
-                          className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                          style={{
+                      <div
+                        className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                        style={{
                           backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
                           color: modoDark ? "#FFFFFF" : "#1E293B",
                           border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
                           top: "auto",
                           bottom: "100%",
                           marginBottom: "8px"
-                          }}
-                        >
-                          <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
-                          <div className="text-xs leading-tight text-center">
+                        }}
+                      >
+                        <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
+                        <div className="text-xs leading-tight text-center">
                           {t("quantidadeMinimaTooltip")}
-                          </div>
                         </div>
+                      </div>
                     </div>
                   </div>
 
-                    {showTooltip && window.innerWidth < 768 && (
+                  {showTooltip && window.innerWidth < 768 && (
                     <div
                       className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
                       style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
                       onClick={() => setShowTooltip(false)}
                     >
                       <div
-                      className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
-                      onClick={(e) => e.stopPropagation()}
+                        className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                      <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
-                        💡 {t("quantidadeMinima")}
-                      </div>
-                      <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
-                        {t("quantidadeMinimaTooltip")}
-                      </div>
-                      <div className="flex justify-center">
-                        <button
-                          onClick={() => setShowTooltip(false)}
-                          className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
-                        >
-                          Fechar
-                        </button>
-                      </div>
+                        <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
+                          💡 {t("quantidadeMinima")}
+                        </div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
+                          {t("quantidadeMinimaTooltip")}
+                        </div>
+                        <div className="flex justify-center">
+                          <button
+                            onClick={() => setShowTooltip(false)}
+                            className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                          >
+                            Fechar
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    )}
+                  )}
 
                   <input
                     placeholder={t("quantidadeMinima")}
@@ -1422,8 +1510,9 @@ export default function Produtos() {
                       onClick={handleSubmit}
                       className="px-4 py-2 cursor-pointer rounded text-white"
                       style={{ backgroundColor: temaAtual.primario }}
+                      disabled={isUploading}
                     >
-                      {t("salvar")}
+                      {isUploading ? t("enviando") : t("salvar")}
                     </button>
                   )}
 
@@ -1432,8 +1521,9 @@ export default function Produtos() {
                       onClick={handleUpdate}
                       className="px-4 py-2 rounded cursor-pointer text-white"
                       style={{ backgroundColor: temaAtual.primario }}
+                      disabled={isUploading}
                     >
-                      {t("atualizar")}
+                      {isUploading ? t("enviando") : t("atualizar")}
                     </button>
                   )}
                 </div>
