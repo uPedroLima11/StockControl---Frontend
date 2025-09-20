@@ -22,9 +22,9 @@ interface ProdutoVenda {
 
 export default function Dashboard() {
   const [contagemProduto, setContagemProduto] = useState(0);
-  const [_contagemEstoque, setContagemEstoque] = useState(0);
-  const [_contagemValor, setContagemValor] = useState(0);
-  const [_contagemLucro, setContagemLucro] = useState(0);
+  const [, setContagemEstoque] = useState(0);
+  const [, setContagemValor] = useState(0);
+  const [, setContagemLucro] = useState(0);
   const [contagemVendas, setContagemVendas] = useState(0);
   const [contagemFornecedores, setContagemFornecedores] = useState(0);
   const [contagemFuncionarios, setContagemFuncionarios] = useState(0);
@@ -387,7 +387,7 @@ export default function Dashboard() {
         const categoriasOrdenadas = Object.entries(distribuicao)
           .sort((a, b) => b[1] - a[1]);
 
-        const categoriasComProdutos = categoriasOrdenadas.filter(([_, quantidade]) => quantidade > 0);
+        const categoriasComProdutos = categoriasOrdenadas.filter(([, quantidade]) => quantidade > 0);
 
         const distribuicaoFinal: CategoriaDistribuicao[] = categoriasComProdutos.map(([categoria, quantidade], index) => ({
           categoria,
