@@ -1251,458 +1251,459 @@ export default function Produtos() {
           )}
         </div>
 
-      {(modalAberto || modalVisualizar) && (
-  <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-    <div
-      className="p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-      style={{
-        backgroundColor: temaAtual.card,
-        color: temaAtual.texto,
-        border: `1px solid ${temaAtual.borda}`
-      }}
-    >
-      <h2 className="text-xl font-bold mb-4">
-        {modalVisualizar ? t("editarProduto") : t("novoProduto")}
-      </h2>
-
-      <div className="mb-3">
-        <label className="block mb-1 text-sm">
-          {t("nome")} <span className="text-red-500">*</span>
-        </label>
-        <input
-          placeholder={t("nome")}
-          value={form.nome || ""}
-          onChange={handleNomeChange}
-          className="w-full rounded p-2 mb-3"
-          style={{
-            backgroundColor: temaAtual.card,
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}
-          disabled={Boolean(!podeEditar && modalVisualizar)}
-          maxLength={60}
-        />
-        <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-          {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <label className="block mb-1 text-sm">
-          {t("descricao")} <span className="text-red-500">*</span>
-        </label>
-        <input
-          placeholder={t("descricao")}
-          value={form.descricao || ""}
-          onChange={handleDescricaoChange}
-          className="w-full rounded p-2 mb-3"
-          style={{
-            backgroundColor: temaAtual.card,
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}
-          disabled={Boolean(!podeEditar && modalVisualizar)}
-          maxLength={255}
-        />
-        <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-          {descricaoCaracteres}/255 {descricaoCaracteres === 255 && " - Limite atingido"}
-        </div>
-      </div>
-
-      <div className="flex gap-2 w-full">
-        <div className="flex-1">
-          <label className="block mb-1 text-sm">{t("preco")}</label>
-          <input
-            placeholder={t("preco")}
-            type="number"
-            min={0}
-            step="0.01"
-            value={form.preco || ""}
-            onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-            className="w-full rounded p-2 mb-3"
-            style={{
-              backgroundColor: temaAtual.card,
-              color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
-            }}
-            disabled={Boolean(!podeEditar && modalVisualizar)}
-          />
-        </div>
-      </div>
-
-      {modalVisualizar ? (
-        <>
-          <div className="flex gap-2 w-full items-end">
-            {podeGerenciarEstoque && (
-              <div className="flex-1">
-                <label className="block mb-1 text-sm">{t("estoque")}</label>
-                <div className="w-full">
-                  <MovimentacaoEstoqueModal
-                    produto={{
-                      id: modalVisualizar.id,
-                      nome: modalVisualizar.nome,
-                      quantidade: modalVisualizar.quantidade
-                    }}
-                    modoDark={modoDark}
-                    empresaId={empresaId!}
-                    onMovimentacaoConcluida={recarregarListaProdutos}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex-1">
-              <div className="flex items-center gap-1 mb-1">
-                <label className="text-sm">
-                  {t("quantidadeMinima")} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative inline-flex items-center group">
-                  <FaQuestionCircle
-                    className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
-                    size={14}
-                    onClick={() => {
-                      if (window.innerWidth < 768) {
-                        setShowTooltip(!showTooltip);
-                      }
-                    }}
-                  />
-
-                  <div
-                    className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                    style={{
-                      backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
-                      color: modoDark ? "#FFFFFF" : "#1E293B",
-                      border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
-                      top: "auto",
-                      bottom: "100%",
-                      marginBottom: "8px"
-                    }}
-                  >
-                    <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
-                    <div className="text-xs leading-tight text-center">
-                      {t("quantidadeMinimaTooltip")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {showTooltip && window.innerWidth < 768 && (
-                <div
-                  className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
-                  style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-                  onClick={() => setShowTooltip(false)}
-                >
-                  <div
-                    className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
-                      💡 {t("quantidadeMinima")}
-                    </div>
-                    <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
-                      {t("quantidadeMinimaTooltip")}
-                    </div>
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => setShowTooltip(false)}
-                        className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
-                      >
-                        Fechar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <input
-                placeholder={t("quantidadeMinima")}
-                type="number"
-                min={0}
-                value={form.quantidadeMin || ""}
-                onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                className="rounded p-2"
-                style={{
-                  backgroundColor: temaAtual.card,
-                  color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
-                }}
-                disabled={Boolean(!podeEditar && modalVisualizar)}
-              />
-            </div>
-          </div>
-
-          {podeEditar && (
-            <div className="mt-3">
-              <label className="block mb-1 text-sm">{t("foto")}</label>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*"
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className=" px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
-                style={{
-                  backgroundColor: temaAtual.primario,
-                  color: "#FFFFFF",
-                  borderColor: temaAtual.primario,
-                }}
-                disabled={isUploading}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                  />
-                </svg>
-                {t("selecionarImagem")}
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex gap-2 w-full items-end">
-          <div className="flex-1">
-            {podeEditar && (
-              <>
-                <label className="block mb-1 text-sm">{t("foto")}</label>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
-                  style={{
-                    backgroundColor: temaAtual.primario,
-                    color: "#FFFFFF",
-                    borderColor: temaAtual.primario,
-                  }}
-                  disabled={isUploading}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="#FFFFFF"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                    />
-                  </svg>
-                  {t("selecionarImagem")}
-                </button>
-              </>
-            )}
-          </div>
-
-          <div className="flex-1">
-            <div className="flex items-center gap-1 mb-1">
-              <label className="text-sm">
-                {t("quantidadeMinima")} <span className="text-red-500">*</span>
-              </label>
-              <div className="relative inline-flex items-center group">
-                <FaQuestionCircle
-                  className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
-                  size={14}
-                  onClick={() => {
-                    if (window.innerWidth < 768) {
-                      setShowTooltip(!showTooltip);
-                    }
-                  }}
-                />
-
-                <div
-                  className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                  style={{
-                    backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
-                    color: modoDark ? "#FFFFFF" : "#1E293B",
-                    border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
-                    top: "auto",
-                    bottom: "100%",
-                    marginBottom: "8px"
-                  }}
-                >
-                  <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
-                  <div className="text-xs leading-tight text-center">
-                    {t("quantidadeMinimaTooltip")}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {showTooltip && window.innerWidth < 768 && (
-              <div
-                className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
-                style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-                onClick={() => setShowTooltip(false)}
-              >
-                <div
-                  className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
-                    💡 {t("quantidadeMinima")}
-                  </div>
-                  <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
-                    {t("quantidadeMinimaTooltip")}
-                  </div>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setShowTooltip(false)}
-                      className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
-                    >
-                      Fechar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <input
-              placeholder={t("quantidadeMinima")}
-              type="number"
-              min={0}
-              value={form.quantidadeMin || ""}
-              onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-              className="w-full rounded p-2"
+        {(modalAberto || modalVisualizar) && (
+          <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+            <div
+              className="p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
               style={{
                 backgroundColor: temaAtual.card,
                 color: temaAtual.texto,
                 border: `1px solid ${temaAtual.borda}`
               }}
-            />
+            >
+              <h2 className="text-xl font-bold mb-4">
+                {modalVisualizar ? t("editarProduto") : t("novoProduto")}
+              </h2>
+
+              <div className="mb-3">
+                <label className="block mb-1 text-sm">
+                  {t("nome")} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  placeholder={t("nome")}
+                  value={form.nome || ""}
+                  onChange={handleNomeChange}
+                  className="w-full rounded p-2 mb-3"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={60}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {nomeCaracteres}/60 {nomeCaracteres === 60 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label className="block mb-1 text-sm">
+                  {t("descricao")} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  placeholder={t("descricao")}
+                  value={form.descricao || ""}
+                  onChange={handleDescricaoChange}
+                  className="w-full rounded p-2 mb-3"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                  maxLength={255}
+                />
+                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                  {descricaoCaracteres}/255 {descricaoCaracteres === 255 && " - Limite atingido"}
+                </div>
+              </div>
+
+              <div className="flex gap-2 w-full">
+                <div className="flex-1">
+                  <label className="block mb-1 text-sm">{t("preco")}</label>
+                  <input
+                    placeholder={t("preco")}
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.preco || ""}
+                    onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
+                    className="w-full rounded p-2 mb-3"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
+                    }}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                  />
+                </div>
+              </div>
+
+              {modalVisualizar ? (
+                <>
+                  <div className="flex gap-2 w-full items-end">
+                    {podeGerenciarEstoque && (
+                      <div className="flex-1">
+                        <label className="block mb-1 text-sm">{t("estoque")}</label>
+                        <div className="w-full">
+                          <MovimentacaoEstoqueModal
+                            produto={{
+                              id: modalVisualizar.id,
+                              nome: modalVisualizar.nome,
+                              quantidade: modalVisualizar.quantidade
+                            }}
+                            modoDark={modoDark}
+                            empresaId={empresaId!}
+                            onMovimentacaoConcluida={recarregarListaProdutos}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1 mb-1">
+                        <label className="text-sm">
+                          {t("quantidadeMinima")} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative inline-flex items-center group">
+                          <FaQuestionCircle
+                            className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
+                            size={14}
+                            onClick={() => {
+                              if (window.innerWidth < 768) {
+                                setShowTooltip(!showTooltip);
+                              }
+                            }}
+                          />
+
+                          <div
+                            className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                            style={{
+                              backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
+                              color: modoDark ? "#FFFFFF" : "#1E293B",
+                              border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
+                              top: "auto",
+                              bottom: "100%",
+                              marginBottom: "8px"
+                            }}
+                          >
+                            <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
+                            <div className="text-xs leading-tight text-center">
+                              {t("quantidadeMinimaTooltip")}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {showTooltip && window.innerWidth < 768 && (
+                        <div
+                          className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
+                          style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+                          onClick={() => setShowTooltip(false)}
+                        >
+                          <div
+                            className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
+                              💡 {t("quantidadeMinima")}
+                            </div>
+                            <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
+                              {t("quantidadeMinimaTooltip")}
+                            </div>
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => setShowTooltip(false)}
+                                className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                              >
+                                Fechar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <input
+                        placeholder={t("quantidadeMinima")}
+                        type="number"
+                        min={0}
+                        value={form.quantidadeMin || ""}
+                        onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                        className="rounded p-2"
+                        style={{
+                          backgroundColor: temaAtual.card,
+                          color: temaAtual.texto,
+                          border: `1px solid ${temaAtual.borda}`
+                        }}
+                        disabled={Boolean(!podeEditar && modalVisualizar)}
+                      />
+                    </div>
+                  </div>
+
+                  {podeEditar && (
+                    <div className="mt-3">
+                      <label className="block mb-1 text-sm">{t("foto")}</label>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                        style={{
+                          backgroundColor: temaAtual.primario,
+                          color: "#FFFFFF",
+                          borderColor: temaAtual.primario,
+                          maxWidth: '400px' 
+                        }}
+                        disabled={isUploading}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="#FFFFFF"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                          />
+                        </svg>
+                        {t("selecionarImagem")}
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex gap-2 w-full items-end">
+                  <div className="flex-1">
+                    {podeEditar && (
+                      <>
+                        <label className="block mb-1 text-sm">{t("foto")}</label>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                          style={{
+                            backgroundColor: temaAtual.primario,
+                            color: "#FFFFFF",
+                            borderColor: temaAtual.primario,
+                          }}
+                          disabled={isUploading}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="#FFFFFF"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                            />
+                          </svg>
+                          {t("selecionarImagem")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1 mb-1">
+                      <label className="text-sm">
+                        {t("quantidadeMinima")} <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative inline-flex items-center group">
+                        <FaQuestionCircle
+                          className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
+                          size={14}
+                          onClick={() => {
+                            if (window.innerWidth < 768) {
+                              setShowTooltip(!showTooltip);
+                            }
+                          }}
+                        />
+
+                        <div
+                          className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                          style={{
+                            backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
+                            color: modoDark ? "#FFFFFF" : "#1E293B",
+                            border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
+                            top: "auto",
+                            bottom: "100%",
+                            marginBottom: "8px"
+                          }}
+                        >
+                          <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
+                          <div className="text-xs leading-tight text-center">
+                            {t("quantidadeMinimaTooltip")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {showTooltip && window.innerWidth < 768 && (
+                      <div
+                        className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
+                        style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+                        onClick={() => setShowTooltip(false)}
+                      >
+                        <div
+                          className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
+                            💡 {t("quantidadeMinima")}
+                          </div>
+                          <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
+                            {t("quantidadeMinimaTooltip")}
+                          </div>
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => setShowTooltip(false)}
+                              className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                            >
+                              Fechar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <input
+                      placeholder={t("quantidadeMinima")}
+                      type="number"
+                      min={0}
+                      value={form.quantidadeMin || ""}
+                      onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                      className="w-full rounded p-2"
+                      style={{
+                        backgroundColor: temaAtual.card,
+                        color: temaAtual.texto,
+                        border: `1px solid ${temaAtual.borda}`
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {(preview || form.foto) && (
+                <div className="mt-4 mb-4">
+                  <img
+                    src={preview || form.foto || ""}
+                    alt="Preview"
+                    className="w-20 h-20 md:w-44 md:h-44 object-cover rounded"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/out.jpg";
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-2 mb-3 mt-4">
+                <select
+                  value={form.fornecedorId || ""}
+                  onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                  className="w-full rounded cursor-pointer p-2"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                >
+                  <option value="">{t("selecionarFornecedor")}</option>
+                  {fornecedores.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.nome}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={form.categoriaId || ""}
+                  onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                  className="w-full cursor-pointer rounded p-2"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    color: temaAtual.texto,
+                    border: `1px solid ${temaAtual.borda}`
+                  }}
+                  disabled={Boolean(!podeEditar && modalVisualizar)}
+                >
+                  <option value="">{t("selecionarCategoria")}</option>
+                  {categorias.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <div>
+                  {modalVisualizar && podeExcluir && (
+                    <button
+                      onClick={handleDelete}
+                      className="px-5 py-2 cursor-pointer rounded border"
+                      style={{
+                        backgroundColor: "#F87171",
+                        borderColor: "#F87171",
+                        color: "#fff"
+                      }}
+                    >
+                      {t("excluir")}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setModalAberto(false);
+                      setModalVisualizar(null);
+                    }}
+                    className="px-4 cursor-pointer  py-2 rounded border"
+                    style={{
+                      borderColor: temaAtual.borda,
+                      color: temaAtual.texto,
+                    }}
+                  >
+                    {t("cancelar")}
+                  </button>
+
+                  {(podeCriar && !modalVisualizar) && (
+                    <button
+                      onClick={handleSubmit}
+                      className="px-4 py-2 cursor-pointer rounded text-white"
+                      style={{ backgroundColor: temaAtual.primario }}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? t("enviando") : t("salvar")}
+                    </button>
+                  )}
+
+                  {(podeEditar && modalVisualizar) && (
+                    <button
+                      onClick={handleUpdate}
+                      className="px-4 py-2 rounded cursor-pointer text-white"
+                      style={{ backgroundColor: temaAtual.primario }}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? t("enviando") : t("atualizar")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-
-      {(preview || form.foto) && (
-        <div className="mt-4 mb-4">
-          <img
-            src={preview || form.foto || ""}
-            alt="Preview"
-            className="w-20 h-20 md:w-44 md:h-44 object-cover rounded"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/out.jpg";
-            }}
-          />
-        </div>
-      )}
-
-      <div className="flex gap-2 mb-3">
-        <select
-          value={form.fornecedorId || ""}
-          onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-          className="w-full rounded cursor-pointer p-2"
-          style={{
-            backgroundColor: temaAtual.card,
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}
-          disabled={Boolean(!podeEditar && modalVisualizar)}
-        >
-          <option value="">{t("selecionarFornecedor")}</option>
-          {fornecedores.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.nome}
-            </option>
-          ))}
-        </select>
-        <select
-          value={form.categoriaId || ""}
-          onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-          className="w-full cursor-pointer rounded p-2"
-          style={{
-            backgroundColor: temaAtual.card,
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}
-          disabled={Boolean(!podeEditar && modalVisualizar)}
-        >
-          <option value="">{t("selecionarCategoria")}</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex justify-between mt-4">
-        <div>
-          {modalVisualizar && podeExcluir && (
-            <button
-              onClick={handleDelete}
-              className="px-5 py-2 cursor-pointer rounded border"
-              style={{
-                backgroundColor: "#F87171",
-                borderColor: "#F87171",
-                color: "#fff"
-              }}
-            >
-              {t("excluir")}
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              setModalAberto(false);
-              setModalVisualizar(null);
-            }}
-            className="px-4 cursor-pointer  py-2 rounded border"
-            style={{
-              borderColor: temaAtual.borda,
-              color: temaAtual.texto,
-            }}
-          >
-            {t("cancelar")}
-          </button>
-
-          {(podeCriar && !modalVisualizar) && (
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 cursor-pointer rounded text-white"
-              style={{ backgroundColor: temaAtual.primario }}
-              disabled={isUploading}
-            >
-              {isUploading ? t("enviando") : t("salvar")}
-            </button>
-          )}
-
-          {(podeEditar && modalVisualizar) && (
-            <button
-              onClick={handleUpdate}
-              className="px-4 py-2 rounded cursor-pointer text-white"
-              style={{ backgroundColor: temaAtual.primario }}
-              disabled={isUploading}
-            >
-              {isUploading ? t("enviando") : t("atualizar")}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+        )}
       </div>
     </div>
   );
