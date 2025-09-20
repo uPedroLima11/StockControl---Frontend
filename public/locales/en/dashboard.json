@@ -1,8 +1,8 @@
 {
-  "estoqueBaixo.nenhumProduto": "No products with low stock",
   "Estado": "State",
+  "estoqueBaixo.nenhumProduto": "No products with low stock",
   "intro": {
-    "linha1": "Manage your inventory",
+    "linha1": "Manage your stock",
     "linha2": "in a simple and smart way"
   },
   "dashboardTitulo": "Dashboard",
@@ -10,13 +10,21 @@
     "titulo": "Inventory Summary",
     "lucroTotal": "Total Sales Profit",
     "custoItens": "Item Cost",
-    "itensDisponiveis":"Available Items"
+    "itensDisponiveis": "Items in Stock"
+  },
+  "financeiro": {
+    "titulo": "Financial Dashboard",
+    "topProdutos": "Top 5 Best-Selling Products",
+    "unidades": "units",
+    "semDados": "No sales data available",
+    "categorias": "Distribution by Category",
+    "itens": "items"
   },
   "atividades": {
     "titulo": "Activities",
-    "itensDisponiveis": "Available Items",
-    "lucroMensal": "Monthly Sales Profit",
-    "contagemVendas": "Sales Count",
+    "itensDisponiveis": "Items in stock",
+    "lucroMensal": "Profit in the last 30 days",
+    "contagemVendas": "Total Sales",
     "contagemFornecedores": "Suppliers",
     "contagemItens": "Registered Items",
     "contagemFuncionarios": "Employees"
@@ -24,11 +32,11 @@
   "estoqueBaixo": {
     "estadoCritico": "Critical",
     "estadoAtencao": "Attention",
-    "titulo": "Low Stock Products",
+    "titulo": "Products with Low Stock",
     "colunas": {
       "produto": "Product",
       "estoqueAtual": "Current Stock",
-      "estoqueIdeal": "Minimal Stock",
+      "estoqueIdeal": "Minimum Stock",
       "valorAtual": "Current Value",
       "valorIdeal": "Ideal Value"
     }

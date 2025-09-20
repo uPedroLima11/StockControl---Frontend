@@ -12,17 +12,25 @@
     "custoItens": "Custo Itens",
     "itensDisponiveis": "Quantidade em Estoque"
   },
+  "financeiro": {
+    "titulo": "Dashboard Financeira",
+    "topProdutos": "Top 5 Produtos Mais Vendidos",
+    "unidades": "unid.",
+    "semDados": "Nenhum dado de vendas disponível",
+    "categorias": "Distribuição por Categoria",
+    "itens": "itens"
+  },
   "atividades": {
     "titulo": "Atividades",
     "itensDisponiveis": "Quantidade em estoque",
-    "lucroMensal": "Lucro de Venda Mensal",
-    "contagemVendas": "Contagem de Vendas",
+    "lucroMensal": "Lucro dos últimos 30 dias",
+    "contagemVendas": "Total de Vendas",
     "contagemFornecedores": "Fornecedores",
     "contagemItens": "Itens cadastrados",
     "contagemFuncionarios": "Funcionários"
   },
   "estoqueBaixo": {
-    "estadoCritico": "Critico",
+    "estadoCritico": "Crítico",
     "estadoAtencao": "Atenção",
     "titulo": "Produtos com Estoque Baixo",
     "colunas": {
