@@ -567,7 +567,6 @@ export default function Dashboard() {
                         {distribuicaoCategorias.map((item, index) => {
                           const porcentagem = totalItens > 0 ? (item.quantidade / totalItens) * 100 : 0;
                           const anguloInicio = angulosPizza[index];
-                          const anguloFim = anguloInicio + (porcentagem / 100) * 360;
 
                           return (
                             <circle

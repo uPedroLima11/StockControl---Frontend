@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { CriarModal } from "./../../components/CriarModal";
-import { Tema, Fornecedor, Produto, ItemPedido, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
+import { Tema, Fornecedor, Produto, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
