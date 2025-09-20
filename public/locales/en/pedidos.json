@@ -4,6 +4,7 @@
     "todosStatus": "All Status",
     "novoPedido": "New Order",
     "nenhumPedidoEncontrado": "No orders found",
+    "semPermissaoVisualizar": "You do not have permission to view Order.",
     "carregando": "Loading...",
     "pedidoCancelado": "Order Canceled",
     "cancelarPedido": "Cancel Order",

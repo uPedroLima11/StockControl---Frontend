@@ -39,7 +39,22 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation("dashboard");
 
   const produtosPorPagina = 5;
-  const coresCategorias = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#6A0572", "#9EE6CF"];
+  const coresCategorias = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6", "#E74C3C", "#2ECC71"];
+
+  const calcularAngulosPizza = (categorias: CategoriaDistribuicao[]) => {
+    const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
+    if (total === 0) return categorias.map(() => 0);
+
+    let anguloAcumulado = 0;
+    return categorias.map(cat => {
+      const porcentagem = (cat.quantidade / total) * 100;
+      const anguloInicio = anguloAcumulado;
+      anguloAcumulado += (porcentagem / 100) * 360;
+      return anguloInicio;
+    });
+  };
+
+  const angulosPizza = calcularAngulosPizza(distribuicaoCategorias);
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -84,7 +99,6 @@ export default function Dashboard() {
     }
     document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
   };
-
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -546,26 +560,58 @@ export default function Dashboard() {
                 <h3 className="font-medium mb-3 flex items-center gap-2">
                   <span>📦</span> {t("financeiro.categorias")}
                 </h3>
-                <div className="space-y-3">
-                  {distribuicaoCategorias.map((item, index) => {
-                    const porcentagem = totalItens > 0 ? ((item.quantidade / totalItens) * 100).toFixed(0) : "0";
-                    return (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.cor }} />
-                          <span className="font-medium">{item.categoria}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>{item.quantidade} {t("financeiro.itens")}</span>
-                          <span className="text-gray-500">({porcentagem}%)</span>
-                        </div>
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex items-center justify-center">
+                    <div className="relative w-32 h-32">
+                      <svg width="128" height="128" viewBox="0 0 100 100" className="transform -rotate-90">
+                        {distribuicaoCategorias.map((item, index) => {
+                          const porcentagem = totalItens > 0 ? (item.quantidade / totalItens) * 100 : 0;
+                          const anguloInicio = angulosPizza[index];
+                          const anguloFim = anguloInicio + (porcentagem / 100) * 360;
+
+                          return (
+                            <circle
+                              key={index}
+                              cx="50"
+                              cy="50"
+                              r="45"
+                              fill="transparent"
+                              stroke={item.cor}
+                              strokeWidth="10"
+                              strokeDasharray={`${porcentagem} ${100 - porcentagem}`}
+                              strokeDashoffset={100 - anguloInicio}
+                              className="transition-all duration-500"
+                            />
+                          );
+                        })}
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-bold text-center">
+                          {totalItens}
+                          <br />
+                          <span className="text-xs">{t("financeiro.itens")}</span>
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 relative w-32 h-32 mx-auto">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-sm font-bold">{totalItens} {t("financeiro.itens")}</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    {distribuicaoCategorias.map((item, index) => {
+                      const porcentagem = totalItens > 0 ? ((item.quantidade / totalItens) * 100).toFixed(0) : "0";
+                      return (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.cor }} />
+                            <span className="font-medium truncate max-w-[80px]" title={item.categoria}>
+                              {item.categoria}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>{item.quantidade}</span>
+                            <span className="text-gray-500">({porcentagem}%)</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -726,7 +772,6 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </div>
-
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

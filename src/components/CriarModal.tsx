@@ -2,22 +2,22 @@
 
 import { useState } from "react";
 import { FaSearch, FaPlus, FaMinus, FaTimes } from "react-icons/fa";
+import { Tema, Fornecedor, Produto, ItemPedidoCriacao as ItemPedidoCriacaoType } from "../utils/types/index";
 
 interface CriarModalProps {
-  temaAtual: any;
-  t: any;
-  fornecedores: any[];
-  produtos: any[];
+  temaAtual: Tema;
+  t: (key: string) => string;
+  fornecedores: Fornecedor[];
+  produtos: Produto[];
   fornecedorSelecionado: string;
-  itensCriacao: any[];
+  itensCriacao: ItemPedidoCriacaoType[];
   observacoesCriacao: string;
   buscaProduto: string;
   carregandoCriacao: boolean;
   setFornecedorSelecionado: (fornecedor: string) => void;
   setBuscaProduto: (busca: string) => void;
-  setItensCriacao: (itens: any[]) => void;
   setObservacoesCriacao: (observacoes: string) => void;
-  adicionarItem: (produto: any) => void;
+  adicionarItem: (produto: Produto) => void;
   removerItem: (produtoId: number) => void;
   atualizarQuantidade: (produtoId: number, quantidade: number) => void;
   atualizarObservacao: (produtoId: number, observacao: string) => void;
@@ -38,7 +38,6 @@ export function CriarModal({
   carregandoCriacao,
   setFornecedorSelecionado,
   setBuscaProduto,
-  setItensCriacao,
   setObservacoesCriacao,
   adicionarItem,
   removerItem,
@@ -56,11 +55,11 @@ export function CriarModal({
   const formatarNomeFornecedor = (nome: string, email: string) => {
     const maxLength = 25;
     let nomeFormatado = nome;
-    
+
     if (nome.length > maxLength) {
       nomeFormatado = nome.substring(0, maxLength - 3) + '...';
     }
-    
+
     return `${nomeFormatado} - ${email}`;
   };
 
@@ -218,13 +217,30 @@ export function CriarModal({
   );
 }
 
-function ItemPedidoCriacao({ item, temaAtual, t, onRemove, onUpdateQuantity, onUpdateObservation }: any) {
+interface ItemPedidoCriacaoProps {
+  item: ItemPedidoCriacaoType;
+  temaAtual: Tema;
+  t: (key: string) => string;
+  onRemove: () => void;
+  onUpdateQuantity: (quantidade: number) => void;
+  onUpdateObservation: (observacao: string) => void;
+}
+
+function ItemPedidoCriacao({
+  item,
+  temaAtual,
+  t,
+  onRemove,
+  onUpdateQuantity,
+  onUpdateObservation
+}: ItemPedidoCriacaoProps) {
   const [observacao, setObservacao] = useState(item.observacao || "");
 
   const handleObservacaoChange = (value: string) => {
     setObservacao(value);
     onUpdateObservation(value);
   };
+
 
   return (
     <div className="p-3 border rounded" style={{ borderColor: temaAtual.borda }}>

@@ -67,7 +67,7 @@ export default function Navbar() {
             Assinatura
           </Link>
           {fotoEmpresa ? (
-            <Link href="/conta">
+            <Link href="/dashboard">
               <img
                 src={fotoEmpresa || '/contadefault.png'}
                 alt="Empresa"

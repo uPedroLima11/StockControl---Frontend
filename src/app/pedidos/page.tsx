@@ -1,125 +1,65 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { CriarModal } from "./../../components/CriarModal";
-
-interface Produto {
-    foto: any;
-    id: number;
-    nome: string;
-    preco: number;
-    quantidade: number;
-    fornecedorId: string;
-    fornecedor?: {
-        id: string;
-        nome: string;
-    };
-}
-
-interface Fornecedor {
-    id: string;
-    nome: string;
-    email: string;
-}
-
-interface ItemPedido {
-    id: string;
-    produtoId: number;
-    produto: {
-        nome: string;
-        foto?: string;
-    };
-    quantidadeSolicitada: number;
-    quantidadeAtendida: number;
-    precoUnitario: number;
-    observacao?: string;
-}
-
-interface Pedido {
-    empresaId: any;
-    id: string;
-    numero: string;
-    fornecedorId: string;
-    fornecedor: {
-        id: string;
-        nome: string;
-        email: string;
-    };
-    itens: ItemPedido[];
-    observacoes: string;
-    status: 'PENDENTE' | 'PROCESSANDO' | 'CONCLUIDO' | 'CANCELADO';
-    total: number;
-    dataSolicitacao: Date | string;
-    dataAtualizacao: Date | string;
-    usuario: {
-        nome: string;
-    };
-}
-
-interface ItemPedidoCriacao {
-    produtoId: number;
-    produto: Produto;
-    quantidade: number;
-    precoUnitario: number;
-    observacao: string;
-}
+import { Tema, Fornecedor, Produto, ItemPedido, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
 
 export default function PedidosPage() {
-    const [pedidos, setPedidos] = useState<Pedido[]>([]);
-    const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
-    const [empresaId, setEmpresaId] = useState<string | null>(null);
-    const [modalAberto, setModalAberto] = useState(false);
-    const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
-    const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
-    const [busca, setBusca] = useState("");
-    const [filtroStatus, setFiltroStatus] = useState<string>("TODOS");
-    const [modoDark, setModoDark] = useState(false);
-    const [carregando, setCarregando] = useState(true);
-    const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-    const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
-    const { t } = useTranslation("pedidos");
-    const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
-    const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
-    const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
+  const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<string>("TODOS");
+  const [modoDark, setModoDark] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
+  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation("pedidos");
+  const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
+  const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+  const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
 
-    const [paginaAtual, setPaginaAtual] = useState(1);
-    const [itensPorPagina, setItensPorPagina] = useState(3);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 3;
 
-    const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
-    const [produtos, setProdutos] = useState<Produto[]>([]);
-    const [fornecedorSelecionado, setFornecedorSelecionado] = useState<string>("");
-    const [itensCriacao, setItensCriacao] = useState<ItemPedidoCriacao[]>([]);
-    const [observacoesCriacao, setObservacoesCriacao] = useState("");
-    const [buscaProduto, setBuscaProduto] = useState("");
-    const [carregandoCriacao, setCarregandoCriacao] = useState(false);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [fornecedorSelecionado, setFornecedorSelecionado] = useState<string>("");
+  const [itensCriacao, setItensCriacao] = useState<ItemPedidoCriacao[]>([]);
+  const [observacoesCriacao, setObservacoesCriacao] = useState("");
+  const [buscaProduto, setBuscaProduto] = useState("");
+  const [carregandoCriacao, setCarregandoCriacao] = useState(false);
 
-    const [observacoesEmail, setObservacoesEmail] = useState("");
+  const [observacoesEmail, setObservacoesEmail] = useState("");
 
-    const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
+  const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
 
-    const temas = {
-        dark: {
-            fundo: "#0A1929",
-            texto: "#FFFFFF",
-            card: "#132F4C",
-            borda: "#1E4976",
-            primario: "#1976D2",
-            secundario: "#00B4D8",
-        },
-        light: {
-            fundo: "#F8FAFC",
-            texto: "#0F172A",
-            card: "#FFFFFF",
-            borda: "#E2E8F0",
-            primario: "#1976D2",
-            secundario: "#0284C7",
-        }
-    };
+  const temas: { dark: Tema; light: Tema } = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+    },
+    light: {
+      fundo: "#F8FAFC",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+    }
+  };
 
-    const temaAtual = modoDark ? temas.dark : temas.light;
+  const temaAtual = modoDark ? temas.dark : temas.light;
 
     const formatarData = (data: Date | string): string => {
         if (!data) return 'Data inválida';
@@ -148,82 +88,7 @@ export default function PedidosPage() {
         setPaginaAtual(numeroPagina);
     };
 
-    const gerarNumerosPaginas = () => {
-        const paginas = [];
-        const maxPaginasVisiveis = 5;
-
-        let inicio = Math.max(1, paginaAtual - Math.floor(maxPaginasVisiveis / 2));
-        let fim = Math.min(totalPaginas, inicio + maxPaginasVisiveis - 1);
-
-        if (fim - inicio + 1 < maxPaginasVisiveis) {
-            inicio = Math.max(1, fim - maxPaginasVisiveis + 1);
-        }
-
-        for (let i = inicio; i <= fim; i++) {
-            paginas.push(i);
-        }
-
-        return paginas;
-    };
-
-    useEffect(() => {
-        const temaSalvo = localStorage.getItem("modoDark");
-        setModoDark(temaSalvo === "true");
-        carregarDadosUsuario();
-    }, []);
-
-    useEffect(() => {
-        const style = document.createElement('style');
-        style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-        document.head.appendChild(style);
-
-        return () => {
-            document.head.removeChild(style);
-        };
-    }, [modoDark]);
-    useEffect(() => {
-        filtrarPedidos();
-    }, [busca, filtroStatus, pedidos]);
-
-    useEffect(() => {
-        setPaginaAtual(1);
-    }, [pedidosFiltrados]);
-
-    const carregarDadosUsuario = async () => {
+    const carregarDadosUsuario = useCallback(async () => {
         try {
             const usuarioSalvo = localStorage.getItem("client_key");
             if (!usuarioSalvo) return;
@@ -247,7 +112,7 @@ export default function PedidosPage() {
         } catch (error) {
             console.error("Erro ao carregar dados do usuário:", error);
         }
-    };
+    }, []);
 
     const carregarPermissoes = async (usuarioId: string) => {
         try {
@@ -256,7 +121,7 @@ export default function PedidosPage() {
             if (response.ok) {
                 const dados = await response.json();
                 const permissoesObj: Record<string, boolean> = {};
-                dados.permissoes.forEach((permissao: any) => {
+                dados.permissoes.forEach((permissao: Permissao) => {
                     permissoesObj[permissao.chave] = permissao.concedida;
                 });
                 setPermissoesUsuario(permissoesObj);
@@ -314,7 +179,7 @@ export default function PedidosPage() {
         }
     };
 
-    const filtrarPedidos = () => {
+    const filtrarPedidos = useCallback(() => {
         let filtrados = pedidos;
 
         if (filtroStatus !== "TODOS") {
@@ -331,12 +196,70 @@ export default function PedidosPage() {
         }
 
         setPedidosFiltrados(filtrados);
-    };
+    }, [busca, filtroStatus, pedidos]);
+
+    useEffect(() => {
+        const temaSalvo = localStorage.getItem("modoDark");
+        setModoDark(temaSalvo === "true");
+        carregarDadosUsuario();
+    }, [carregarDadosUsuario]);
+
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, [modoDark]);
+
+    useEffect(() => {
+        filtrarPedidos();
+    }, [filtrarPedidos]);
+
+    useEffect(() => {
+        setPaginaAtual(1);
+    }, [pedidosFiltrados]);
 
     const podeCriarPedido = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
     const podeEditarPedido = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar;
-    const podeVisualizarPedidos = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar;
     const podeGerenciarStatus = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status;
+    const podeVisualizarPedidos = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar;
 
     const getStatusInfo = (status: string) => {
         switch (status) {
@@ -384,7 +307,7 @@ export default function PedidosPage() {
     const handleConcluirPedidoComEstoque = async (pedidoId: string) => {
         try {
             const usuarioId = localStorage.getItem("client_key")?.replace(/"/g, "") || '';
-            
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoId}/concluir-com-estoque`, {
                 method: 'POST',
                 headers: {
@@ -716,14 +639,14 @@ export default function PedidosPage() {
 
     const handlePreencherQuantidadesSolicitadas = () => {
         if (!pedidoSelecionado) return;
-        
+
         const novasQuantidades: Record<string, number> = {};
         pedidoSelecionado.itens.forEach(item => {
             novasQuantidades[item.id] = item.quantidadeSolicitada;
         });
-        
+
         setQuantidadesAtendidas(novasQuantidades);
-        
+
         Swal.fire({
             icon: 'success',
             title: t("quantidadesPreenchidas"),
@@ -731,6 +654,21 @@ export default function PedidosPage() {
             timer: 1500
         });
     };
+
+     if (!podeVisualizarPedidos) {
+    return (
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+            {t("semPermissaoVisualizar")}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
     if (carregando) {
         return (
@@ -1072,7 +1010,6 @@ export default function PedidosPage() {
                     carregandoCriacao={carregandoCriacao}
                     setFornecedorSelecionado={setFornecedorSelecionado}
                     setBuscaProduto={setBuscaProduto}
-                    setItensCriacao={setItensCriacao}
                     setObservacoesCriacao={setObservacoesCriacao}
                     adicionarItem={adicionarItem}
                     removerItem={removerItem}
@@ -1187,7 +1124,7 @@ export default function PedidosPage() {
                                                     }}
                                                 />
                                                 <span className="text-sm text-gray-500">/{item.quantidadeSolicitada}</span>
-                                                
+
                                                 <button
                                                     onClick={() => setQuantidadesAtendidas({
                                                         ...quantidadesAtendidas,
@@ -1227,7 +1164,7 @@ export default function PedidosPage() {
                                         <FaTimes className="inline mr-2" />
                                         {t("cancelarPedido")}
                                     </button>
-                                    
+
                                     <button
                                         onClick={handlePreencherQuantidadesSolicitadas}
                                         className="px-4 py-2 rounded text-white"
@@ -1237,7 +1174,7 @@ export default function PedidosPage() {
                                     >
                                         {t("preencherTodasQuantidades")}
                                     </button>
-                                    
+
                                     <button
                                         onClick={handleAtualizarQuantidades}
                                         className="px-4 py-2 rounded text-white"
@@ -1247,7 +1184,7 @@ export default function PedidosPage() {
                                     >
                                         {t("salvarQuantidades")}
                                     </button>
-                                    
+
                                     <button
                                         onClick={() => handleConcluirPedidoComEstoque(pedidoSelecionado.id)}
                                         className="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-700"
