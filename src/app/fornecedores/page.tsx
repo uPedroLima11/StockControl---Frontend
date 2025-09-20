@@ -1065,7 +1065,6 @@ export default function Fornecedores() {
                 </table>
               </div>
 
-              {/* Layout para mobile (< 768px) */}
               <div className="md:hidden space-y-3 p-3">
                 {fornecedoresAtuais.map((fornecedor) => (
                   <div
@@ -1195,7 +1194,6 @@ export default function Fornecedores() {
           )}
         </div>
 
-        {/* Controles de paginação para mobile */}
         {totalPaginas > 1 && (
           <div className="md:hidden flex justify-between items-center mt-4 p-3 rounded-lg" style={{
             backgroundColor: temaAtual.card,

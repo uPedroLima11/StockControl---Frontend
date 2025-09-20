@@ -255,6 +255,57 @@ export const permissionTranslations = {
       pt: "Permite Visualizar inventário do estoque",
       en: "Allows viewing inventory stock"
     }
+  },
+  // Pedidos de Estoque
+    "pedidos_criar": {
+    nome: {
+      pt: "Criar Pedidos",
+      en: "Create Orders"
+    },
+    descricao: {
+      pt: "Permite criar novos pedidos de compra",
+      en: "Allows creating new purchase orders"
+    }
+  },
+  "pedidos_editar": {
+    nome: {
+      pt: "Editar Pedidos",
+      en: "Edit Orders"
+    },
+    descricao: {
+      pt: "Permite editar pedidos existentes",
+      en: "Allows editing existing orders"
+    }
+  },
+  "pedidos_visualizar": {
+    nome: {
+      pt: "Visualizar Pedidos",
+      en: "View Orders"
+    },
+    descricao: {
+      pt: "Permite visualizar a lista de pedidos",
+      en: "Allows viewing the orders list"
+    }
+  },
+  "pedidos_excluir": {
+    nome: {
+      pt: "Excluir Pedidos",
+      en: "Delete Orders"
+    },
+    descricao: {
+      pt: "Permite excluir pedidos do sistema",
+      en: "Allows deleting orders from the system"
+    }
+  },
+  "pedidos_gerenciar_status": {
+    nome: {
+      pt: "Gerenciar Status de Pedidos",
+      en: "Manage Order Status"
+    },
+    descricao: {
+      pt: "Permite alterar o status dos pedidos",
+      en: "Allows changing order status"
+    }
   }
 };
 
@@ -266,7 +317,8 @@ export const categoryTranslations = {
   "VENDAS": { pt: "Vendas", en: "Sales" },
   "RELATORIOS": { pt: "Relatórios", en: "Reports" },
   "CONFIGURACOES": { pt: "Configurações", en: "Settings" },
-  "ESTOQUE": { pt: "Estoque", en: "Inventory" }
+  "ESTOQUE": { pt: "Estoque", en: "Inventory" },
+  "PEDIDOS": { pt: "Pedidos", en: "Orders" }
 };
 
 export const getTranslatedPermission = (chave: string, field: 'nome' | 'descricao', language: string = 'pt') => {

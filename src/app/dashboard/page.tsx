@@ -128,7 +128,7 @@ export default function Dashboard() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
       if (response.ok) {
         const categorias = await response.json();
-        return categorias.map((cat: any) => cat.nome);
+        return categorias.map((cat: { nome: string }) => cat.nome);
       }
       return [];
     } catch (error) {
@@ -388,7 +388,7 @@ export default function Dashboard() {
             !categoriasExistentes.has(categoria) && !distribuicao[categoria]
           );
 
-          categoriasDisponiveis.slice(0, 5 - distribuicaoFinal.length).forEach((categoria: any, index: any) => {
+          categoriasDisponiveis.slice(0, 5 - distribuicaoFinal.length).forEach((categoria: string) => {
             distribuicaoFinal.push({
               categoria,
               quantidade: 0,
@@ -447,20 +447,6 @@ export default function Dashboard() {
     setProdutoExpandido(null);
   };
 
-  const calcularAngulosPizza = (categorias: CategoriaDistribuicao[]) => {
-    const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
-    if (total === 0) return categorias.map(() => 0);
-
-    let anguloAcumulado = 0;
-    return categorias.map(cat => {
-      const porcentagem = (cat.quantidade / total) * 100;
-      const anguloInicio = anguloAcumulado;
-      anguloAcumulado += (porcentagem / 100) * 360;
-      return anguloInicio;
-    });
-  };
-
-  const angulosPizza = calcularAngulosPizza(distribuicaoCategorias);
   const totalItens = distribuicaoCategorias.reduce((sum, cat) => sum + cat.quantidade, 0);
 
   return (

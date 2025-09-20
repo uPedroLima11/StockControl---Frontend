@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
-
+import { FaClipboardList } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
@@ -313,7 +313,8 @@ export default function Sidebar() {
           "fornecedores_visualizar",
           "logs_visualizar",
           "exportar_dados",
-          "inventario_visualizar"
+          "inventario_visualizar",
+          "pedidos_visualizar"
         ];
 
         const permissoes: Record<string, boolean> = {};
@@ -526,7 +527,8 @@ export default function Sidebar() {
             {permissoesUsuario.inventario_visualizar && (
               <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} />
             )}
-
+           {permissoesUsuario.pedidos_visualizar &&( <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />
+            )}
             <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
 
             {permissoesUsuario.clientes_visualizar && (
@@ -745,7 +747,7 @@ function PainelNotificacoes({ estaVisivel, aoFechar, nomeEmpresa, cores, onMarca
       document.head.removeChild(style);
     };
   }, [cores.azulClaro, cores.azulBrilhante]);
-  
+
   const marcarTodasComoLidas = useCallback(async () => {
     if (!usuario?.id) return;
 
