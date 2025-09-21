@@ -29,13 +29,20 @@
         "ajuste": "Ajuste",
         "devolucao": "Devolução",
         "perda": "Perda",
-        "inventario": "Inventário"
+        "inventario": "Inventário",
+        "pedido_concluido": "Pedido Concluído",
+        "pedido_cancelado": "Pedido Cancelado",
+        "entrada_manual": "Entrada Manual",
+        "saida_manual": "Saída Manual",
+        "transferencia": "Transferência",
+        "danificado": "Danificado",
+        "vencido": "Vencido"
     },
     "mensagens": {
-        "sucessoTitulo": "Movimentação realizada!",
+        "sucessoTitulo": "Transação concluída!",
         "sucessoTexto": "{{tipo}} de {{quantidade}} unidades registrada.",
         "erroTitulo": "Erro",
-        "erroGenerico": "Erro ao realizar movimentação",
+        "erroGenerico": "Erro ao processar transação",
         "erroConexao": "Erro de conexão com o servidor"
     }
 }

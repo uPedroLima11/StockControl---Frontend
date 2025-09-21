@@ -8,6 +8,13 @@
     "placeholder_busca": "Buscar Logs",
     "usuario": "Usuário",
     "tipo": "Tipo",
+    "pedido": "Pedido",
+    "fornecedor": "Fornecedor",
+    "itens": "Itens",
+    "itens_atualizados": "Itens Atualizados",
+    "status_anterior": "Status Anterior",
+    "status_novo": "Status Novo",
+    "email": "Email",
     "descricao": "Descrição",
     "datacriacao": "Data de Criação",
     "exportacao_de": "Exportação de",
@@ -26,7 +33,8 @@
       "CRIACAO": "Criação",
       "ATUALIZACAO": "Atualização",
       "EXCLUSAO": "Exclusão",
-      "BAIXA": "Baixa"
+      "BAIXA": "Baixa",
+      "EMAIL_ENVIADO": "Email Enviado"
     },
     "entidades": {
       "produtos": "Produtos",
@@ -34,7 +42,8 @@
       "clientes": "Clientes",
       "fornecedores": "Fornecedores",
       "usuarios": "Usuários",
-      "movimentacoes": "Movimentações"
+      "movimentacoes": "Movimentações",
+      "pedidos": "Pedidos"
     },
     "descricoes": {
       "produto_exportado": "Produto Exportado: {{nome}} (Período: {{periodo}})",
@@ -43,7 +52,12 @@
       "produto_atualizado": "Produto Atualizado: {{nome}}",
       "produto_criado": "Produto Criado: {{nome}}",
       "vendas_excluidas_automaticamente": "Vendas excluídas automaticamente para o produto: {{nome}} ({{quantidade}} vendas)",
-      "movimentacoes_excluidas_automaticamente": "Movimentações de estoque excluídas automaticamente para o produto: {{nome}} ({{quantidade}} movimentações)"
+      "movimentacoes_excluidas_automaticamente": "Movimentações de estoque excluídas automaticamente para o produto: {{nome}} ({{quantidade}} movimentações)",
+      "pedido_criado": "Pedido {{pedidoNumero}} criado para {{fornecedorNome}} com {{quantidadeItens}} itens",
+      "status_atualizado": "Status do pedido {{pedidoNumero}} alterado de {{statusAnterior}} para {{statusNovo}}",
+      "itens_atualizados": "{{quantidadeItensAtualizados}} itens atualizados no pedido {{pedidoNumero}}",
+      "pedido_concluido_estoque": "Pedido {{pedidoNumero}} concluído e estoque atualizado",
+      "email_enviado_fornecedor": "Email enviado para {{fornecedorNome}} ({{fornecedorEmail}}) sobre pedido {{pedidoNumero}}"
     }
   }
 }

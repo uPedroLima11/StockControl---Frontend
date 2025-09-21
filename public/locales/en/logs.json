@@ -11,6 +11,13 @@
     "descricao": "Description",
     "datacriacao": "Creation Date",
     "exportacao_de": "Export of",
+    "pedido": "Order",
+    "fornecedor": "Supplier",
+    "itens": "Items",
+    "itens_atualizados": "Items Updated",
+    "status_anterior": "Previous Status",
+    "status_novo": "New Status",
+    "email": "Email",
     "periodo": "Period",
     "periodo_todos": "All data",
     "nenhum_log_encontrado": "No logs found",
@@ -26,7 +33,8 @@
       "CRIACAO": "Creation",
       "ATUALIZACAO": "Update",
       "EXCLUSAO": "Deletion",
-      "BAIXA": "Sale"
+      "BAIXA": "Sale",
+      "EMAIL_ENVIADO": "Email Sent"
     },
     "entidades": {
       "produtos": "Products",
@@ -34,7 +42,8 @@
       "clientes": "Customers",
       "fornecedores": "Suppliers",
       "usuarios": "Users",
-      "movimentacoes": "Movements"
+      "movimentacoes": "Movements",
+      "pedidos": "Orders"
     },
     "descricoes": {
       "produto_exportado": "Product Exported: {{nome}} (Period: {{periodo}})",
@@ -43,7 +52,12 @@
       "produto_atualizado": "Product Updated: {{nome}}",
       "produto_criado": "Product Created: {{nome}}",
       "vendas_excluidas_automaticamente": "Sales automatically deleted for product: {{nome}} ({{quantidade}} sales)",
-      "movimentacoes_excluidas_automaticamente": "Stock movements automatically deleted for product: {{nome}} ({{quantidade}} movements)"
+      "movimentacoes_excluidas_automaticamente": "Stock movements automatically deleted for product: {{nome}} ({{quantidade}} movements)",
+      "pedido_criado": "Order {{pedidoNumero}} created for {{fornecedorNome}} with {{quantidadeItens}} items",
+      "status_atualizado": "Order {{pedidoNumero}} status changed from {{statusAnterior}} to {{statusNovo}}",
+      "itens_atualizados": "{{quantidadeItensAtualizados}} items updated in order {{pedidoNumero}}",
+      "pedido_concluido_estoque": "Order {{pedidoNumero}} completed and stock updated",
+      "email_enviado_fornecedor": "Email sent to {{fornecedorNome}} ({{fornecedorEmail}}) about order {{pedidoNumero}}"
     }
   }
 }

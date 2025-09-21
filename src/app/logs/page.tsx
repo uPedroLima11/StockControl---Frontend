@@ -5,7 +5,7 @@ import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
 
-type TipoLog = "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA";
+type TipoLog = "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA" | "EMAIL_ENVIADO";
 
 export default function Logs() {
   const { t } = useTranslation("logs");
@@ -154,7 +154,7 @@ export default function Logs() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
+  }, [modoDark]);
 
   const indexUltimoLog = paginaAtual * logsPorPagina;
   const indexPrimeiroLog = indexUltimoLog - logsPorPagina;
@@ -177,7 +177,7 @@ export default function Logs() {
   }
 
   const traduzirTipoLog = (tipo: string): string => {
-    const tiposValidos: TipoLog[] = ["CRIACAO", "ATUALIZACAO", "EXCLUSAO", "BAIXA"];
+    const tiposValidos: TipoLog[] = ["CRIACAO", "ATUALIZACAO", "EXCLUSAO", "BAIXA", "EMAIL_ENVIADO"];
     if (tiposValidos.includes(tipo as TipoLog)) {
       return t(`logs.tipos_logs.${tipo as TipoLog}`);
     }
@@ -209,6 +209,44 @@ export default function Logs() {
           nome: parsed.produtoNome,
           quantidade: parsed.quantidade
         }) + (parsed.clienteNome ? ` | ${t("logs.cliente")}: ${parsed.clienteNome}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`);
+      }
+
+      if (parsed.entityType === "pedidos") {
+        switch (parsed.action) {
+          case "pedido_criado":
+            return t("logs.descricoes.pedido_criado", {
+              pedidoNumero: parsed.pedidoNumero,
+              fornecedorNome: parsed.fornecedorNome,
+              quantidadeItens: parsed.quantidadeItens
+            });
+          case "status_atualizado":
+            return t("logs.descricoes.status_atualizado", {
+              pedidoNumero: parsed.pedidoNumero,
+              statusAnterior: parsed.statusAnterior,
+              statusNovo: parsed.statusNovo,
+              fornecedorNome: parsed.fornecedorNome
+            });
+          case "itens_atualizados":
+            return t("logs.descricoes.itens_atualizados", {
+              pedidoNumero: parsed.pedidoNumero,
+              quantidadeItensAtualizados: parsed.quantidadeItensAtualizados,
+              fornecedorNome: parsed.fornecedorNome
+            });
+          case "pedido_concluido_estoque":
+            return t("logs.descricoes.pedido_concluido_estoque", {
+              pedidoNumero: parsed.pedidoNumero,
+              fornecedorNome: parsed.fornecedorNome,
+              statusFinal: parsed.statusFinal
+            });
+          case "email_enviado_fornecedor":
+            return t("logs.descricoes.email_enviado_fornecedor", {
+              pedidoNumero: parsed.pedidoNumero,
+              fornecedorNome: parsed.fornecedorNome,
+              fornecedorEmail: parsed.fornecedorEmail
+            });
+          default:
+            return descricao;
+        }
       }
 
       if (parsed.entityType) {
@@ -320,6 +358,51 @@ export default function Logs() {
               <span className="font-semibold min-w-[70px]">{t("logs.cliente")}:</span>
               <span>{parsed.clienteNome || t("logs.cliente_nao_informado")}</span>
             </div>
+          </div>
+        );
+      }
+
+      if (parsed.entityType === "pedidos") {
+        return (
+          <div className="space-y-1">
+            <div className="flex">
+              <span className="font-semibold min-w-[70px]">{t("logs.pedido")}:</span>
+              <span>{parsed.pedidoNumero}</span>
+            </div>
+            <div className="flex">
+              <span className="font-semibold min-w-[70px]">{t("logs.fornecedor")}:</span>
+              <span>{parsed.fornecedorNome}</span>
+            </div>
+            {parsed.action === "pedido_criado" && (
+              <div className="flex">
+                <span className="font-semibold min-w-[70px]">{t("logs.itens")}:</span>
+                <span>{parsed.quantidadeItens}</span>
+              </div>
+            )}
+            {parsed.action === "status_atualizado" && (
+              <>
+                <div className="flex">
+                  <span className="font-semibold min-w-[70px]">{t("logs.status_anterior")}:</span>
+                  <span>{parsed.statusAnterior}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold min-w-[70px]">{t("logs.status_novo")}:</span>
+                  <span>{parsed.statusNovo}</span>
+                </div>
+              </>
+            )}
+            {parsed.action === "itens_atualizados" && (
+              <div className="flex">
+                <span className="font-semibold min-w-[70px]">{t("logs.itens_atualizados")}:</span>
+                <span>{parsed.quantidadeItensAtualizados}</span>
+              </div>
+            )}
+            {parsed.action === "email_enviado_fornecedor" && (
+              <div className="flex">
+                <span className="font-semibold min-w-[70px]">{t("logs.email")}:</span>
+                <span>{parsed.fornecedorEmail}</span>
+              </div>
+            )}
           </div>
         );
       }

@@ -6,7 +6,7 @@ export interface LogsI {
     };
     empresaId: string; 
     descricao: string;
-    tipo: "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA";
+    tipo: "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA" | "EMAIL_ENVIADO";
     createdAt: Date;
     updatedAt: Date;
 }
