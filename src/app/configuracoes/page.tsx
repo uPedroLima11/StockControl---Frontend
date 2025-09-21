@@ -32,9 +32,9 @@ export default function Configuracoes() {
       document.body.style.color = "#FFFFFF";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#F8FAFC");
+      root.style.setProperty("--cor-fundo", "#cccccc");
       root.style.setProperty("--cor-texto", "#0F172A");
-      document.body.style.backgroundColor = "#F8FAFC";
+      document.body.style.backgroundColor = "#cccccc";
       document.body.style.color = "#0F172A";
     }
   };
@@ -106,10 +106,10 @@ export default function Configuracoes() {
     };
   }, [modoDark]);
   const temaAtual = {
-    fundo: modoDark ? "#0A1929" : "#F8FAFC",
+    fundo: modoDark ? "#0A1929" : "#cccccc",
     texto: modoDark ? "#FFFFFF" : "#0F172A",
-    card: modoDark ? "#132F4C" : "#FFFFFF",
-    borda: modoDark ? "#1E4976" : "#E2E8F0",
+    card: modoDark ? "#132F4C" : "#ecececec",
+    borda: modoDark ? "#1E4976" : "#cccccc",
     primario: modoDark ? "#FFFFFF" : "#000000",
     secundario: modoDark ? "#00B4D8" : "#0284C7"
   };

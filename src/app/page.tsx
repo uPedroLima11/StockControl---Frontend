@@ -99,7 +99,7 @@ export default function Home() {
             <div className="flex-1 flex flex-col items-center justify-center mt-8 lg:mt-0">
               <h1 className="text-lg md:text-xl xl:text-xl text-black font-bold indent-6 max-w-2xl text-center">Gerencie seus produtos com total praticidade e eficiência.</h1>
               <br />
-              <p className="text-gray-600 mt-20 text-center text-xl indent-6 max-w-2xl">A tela de Produtos foi pensada para oferecer um controle completo dos seus itens em estoque. Cadastre, edite ou remova produtos com poucos cliques. Visualize rapidamente informações como nome, quantidade, código, preço e status. Ideal para manter sua operação organizada e eficiente.</p>
+              <p className="text-gray-600 mt-14 text-center text-xl indent-6 max-w-2xl">A tela de Produtos foi pensada para oferecer um controle completo dos seus itens em estoque. Cadastre, edite ou remova produtos com poucos cliques. Visualize rapidamente informações como nome, quantidade, código, preço e status. Ideal para manter sua operação organizada e eficiente.</p>
             </div>
           </div>
 
@@ -190,7 +190,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 px-6 sm:px-12 lg:px-20 bg-gray-50 -mt-10">
+        <section className="py-16 px-6 sm:px-12 lg:px-20 -mt-10">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
             Desenvolvedores
           </h2>
@@ -281,7 +281,7 @@ export default function Home() {
             Assinatura
           </h2>
 
-          <div className="bg-white px-8 py-10 rounded-xl shadow-md inline-block border border-gray-300">
+          <div className="bg-[#ecececec] px-8 py-10 rounded-xl shadow-md inline-block border border-gray-300">
             <h3 className="text-2xl font-semibold mb-2">R$ 79/mês</h3>
             <p className="text-gray-600 mb-6">
               Entre em contato para assinar <br />e receber sua chave de ativação

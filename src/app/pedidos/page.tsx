@@ -50,7 +50,7 @@ export default function PedidosPage() {
             secundario: "#00B4D8",
         },
         light: {
-            fundo: "#F8FAFC",
+            fundo: "#cccccc",
             texto: "#0F172A",
             card: "#FFFFFF",
             borda: "#E2E8F0",

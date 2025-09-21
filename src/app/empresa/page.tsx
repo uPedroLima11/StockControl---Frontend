@@ -68,10 +68,10 @@ export default function Empresa() {
       sucesso: "#10B981"
     },
     light: {
-      fundo: "#F8FAFC",
+      fundo: "#cccccc",
       texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
+      card: "#ecececec",
+      borda: "#cccccc",
       primario: "#1976D2",
       secundario: "#0284C7",
       placeholder: "#6B7280",
@@ -1062,9 +1062,6 @@ export default function Empresa() {
                       color: temaAtual.placeholder
                     }}>
                     <span>{t("escolherArquivo")}</span>
-                    <span>
-                      {t("nenhumArquivoEscolhido")}
-                    </span>
                   </div>
                 </div>
 

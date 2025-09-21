@@ -60,10 +60,10 @@ export default function Fornecedores() {
       hover: "#1E4976"
     },
     light: {
-      fundo: "#F8FAFC",
+      fundo: "#cccccc",
       texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
+      card: "#ecececec",
+      borda: "#cccccc",
       primario: "#1976D2",
       secundario: "#0284C7",
       placeholder: "#6B7280",

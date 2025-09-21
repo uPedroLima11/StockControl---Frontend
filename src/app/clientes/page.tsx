@@ -54,10 +54,10 @@ export default function Clientes() {
       hover: "#1E4976"
     },
     light: {
-      fundo: "#F8FAFC",
-      texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
+      fundo: "#cccccc",
+      texto: "#000000",
+      card: "#ececec",
+      borda: "#cccccc",
       primario: "#1976D2",
       secundario: "#0284C7",
       placeholder: "#6B7280",

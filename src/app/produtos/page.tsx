@@ -83,9 +83,9 @@ export default function Produtos() {
       hover: "#1E4976"
     },
     light: {
-      fundo: "#F8FAFC",
-      texto: "#0F172A",
-      card: "#FFFFFF",
+      fundo: "#cccccc",
+      texto: "#000000",
+      card: "#cccccc",
       borda: "#E2E8F0",
       primario: "#1976D2",
       secundario: "#0284C7",

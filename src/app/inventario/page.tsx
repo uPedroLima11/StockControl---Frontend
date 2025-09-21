@@ -146,13 +146,13 @@ export default function EstoquePage() {
     }
     
     html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+      background: ${modoDark ? "#132F4C" : "#ececec"};
     }
     
     html::-webkit-scrollbar-thumb {
       background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
       border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      border: 2px solid ${modoDark ? "#132F4C" : "#cccccc"};
     }
     
     html::-webkit-scrollbar-thumb:hover {
@@ -161,7 +161,7 @@ export default function EstoquePage() {
     
     html {
       scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#cccccc"};
     }
     
     @media (max-width: 768px) {
@@ -170,7 +170,7 @@ export default function EstoquePage() {
       }
       
       html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border: 1px solid ${modoDark ? "#132F4C" : "#cccccc"};
         border-radius: 3px;
       }
     }
@@ -190,8 +190,8 @@ export default function EstoquePage() {
   if (carregando) {
   return (
     <div className="min-h-screen p-4 md:p-8 flex items-center justify-center" style={{
-      backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
-      color: modoDark ? "#FFFFFF" : "#0F172A",
+      backgroundColor: modoDark ? "#0A1929" : "#cccccc",
+      color: modoDark ? "#cccccc" : "#0F172A",
     }}>
       <p>{t("carregando", { ns: "vendas" })}</p>
     </div>
@@ -203,8 +203,8 @@ export default function EstoquePage() {
       <div
         className="min-h-screen p-4 md:p-8 flex flex-col items-center"
         style={{
-          backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
-          color: modoDark ? "#FFFFFF" : "#0F172A",
+          backgroundColor: modoDark ? "#0A1929" : "#cccccc",
+          color: modoDark ? "#cccccc" : "#0F172A",
         }}
       >
         <div className="max-w-7xl mx-auto w-full">
@@ -215,7 +215,7 @@ export default function EstoquePage() {
         <div
           className="p-6 rounded-lg shadow-md mt-4"
           style={{
-        backgroundColor: modoDark ? "#132F4C" : "#FFFFFF",
+        backgroundColor: modoDark ? "#132F4C" : "#cccccc",
         border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
         width: "100%",
         maxWidth: 480,
@@ -233,8 +233,8 @@ export default function EstoquePage() {
     <div
       className="min-h-screen p-4 md:p-8"
       style={{
-        backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
-        color: modoDark ? "#FFFFFF" : "#0F172A",
+        backgroundColor: modoDark ? "#0A1929" : "#cccccc",
+        color: modoDark ? "#cccccc" : "#0F172A",
       }}
     >
       <div className="max-w-7xl mx-auto">
@@ -247,7 +247,7 @@ export default function EstoquePage() {
             <div
               className="p-4 rounded-lg shadow-md"
               style={{
-                backgroundColor: modoDark ? "#132F4C" : "#FFFFFF",
+                backgroundColor: modoDark ? "#132F4C" : "#ececec",
                 border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
               }}
             >
@@ -255,7 +255,7 @@ export default function EstoquePage() {
                 <div
                   className="flex items-center border rounded-full px-3 py-2"
                   style={{
-                    backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
+                    backgroundColor: modoDark ? "#0A1929" : "#ececec",
                     borderColor: modoDark ? "#1E4976" : "#E2E8F0",
                   }}
                 >
@@ -265,7 +265,7 @@ export default function EstoquePage() {
                     className="outline-none bg-transparent placeholder-gray-400 flex-1"
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    style={{ color: modoDark ? "#FFFFFF" : "#0F172A" }}
+                    style={{ color: modoDark ? "#ececec" : "#0F172A" }}
                   />
                   <FaSearch className="ml-2" style={{ color: modoDark ? "#1976D2" : "#0284C7" }} />
                 </div>
@@ -275,9 +275,9 @@ export default function EstoquePage() {
                   onChange={(e) => setFiltroTipo(e.target.value as "TODOS" | "BAIXO")}
                   className="p-2 rounded border"
                   style={{
-                    backgroundColor: modoDark ? "#0A1929" : "#F8FAFC",
+                    backgroundColor: modoDark ? "#0A1929" : "#ececec",
                     borderColor: modoDark ? "#1E4976" : "#E2E8F0",
-                    color: modoDark ? "#FFFFFF" : "#0F172A",
+                    color: modoDark ? "#ececec" : "#0F172A",
                   }}
                 >
                   <option value="TODOS">{t("todosProdutos")}</option>
@@ -330,7 +330,7 @@ export default function EstoquePage() {
             <div
               className="p-4 rounded-lg shadow-md h-full flex flex-col"
               style={{
-                backgroundColor: modoDark ? "#132F4C" : "#FFFFFF",
+                backgroundColor: modoDark ? "#132F4C" : "#ececec",
                 border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
               }}
             >

@@ -54,12 +54,12 @@ export default function Sidebar() {
       root.style.setProperty("--cor-fundo", "#0A1929");
       root.style.setProperty("--cor-texto", "#FFFFFF");
       document.body.style.backgroundColor = "#0A1929";
-      document.body.style.color = "#FFFFFF";
+      document.body.style.color = "#cccccc";
     } else {
       root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#F8FAFC");
+      root.style.setProperty("--cor-fundo", "#cccccc");
       root.style.setProperty("--cor-texto", "#0F172A");
-      document.body.style.backgroundColor = "#F8FAFC";
+      document.body.style.backgroundColor = "#cccccc";
       document.body.style.color = "#0F172A";
     }
   };

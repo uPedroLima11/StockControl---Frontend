@@ -17,6 +17,7 @@
   "catalogoDesativado": "Catálogo desativado",
   "catalogoAgoraPublico": "O catálogo agora está público.",
   "catalogoNaoPublico": "O catálogo não está mais público.",
+  "fotoAtual": "Foto atual",
   "campos": {
     "nome": "Nome",
     "email": "E-mail",

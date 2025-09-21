@@ -41,7 +41,7 @@ export default function Vendas() {
       hover: "#1E4976"
     },
     light: {
-      fundo: "#F8FAFC",
+      fundo: "#cccccc",
       texto: "#0F172A",
       card: "#FFFFFF",
       borda: "#E2E8F0",
@@ -129,7 +129,7 @@ export default function Vendas() {
     carregarPermissoes();
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
     html::-webkit-scrollbar {
@@ -171,7 +171,7 @@ useEffect(() => {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
+  }, [modoDark]);
 
   const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
     permissoesUsuario.vendas_visualizar;
@@ -452,7 +452,7 @@ useEffect(() => {
               valorCompra: item.produto.preco * 0.8 * item.quantidade,
               usuarioId: usuarioValor,
               clienteId: clienteSelecionado,
-               clienteNome: clientes.find(c => c.id === clienteSelecionado)?.nome || null 
+              clienteNome: clientes.find(c => c.id === clienteSelecionado)?.nome || null
             }),
           })
         );
@@ -659,11 +659,19 @@ useEffect(() => {
                     {produtosAtuais.map((produto) => (
                       <tr
                         key={produto.id}
-                        className="border-b hover:bg-opacity-50 transition"
+                        className="border-b transition cursor-pointer"
                         style={{
                           color: temaAtual.texto,
                           borderColor: temaAtual.borda,
-                          backgroundColor: temaAtual.hover + "20"
+                          backgroundColor: temaAtual.card
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = modoDark
+                            ? cores.dark.hover
+                            : cores.light.hover
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = temaAtual.card
                         }}
                       >
                         <td className="py-3 px-4 flex items-center gap-2">
@@ -717,6 +725,14 @@ useEffect(() => {
                     style={{
                       backgroundColor: temaAtual.card,
                       borderColor: temaAtual.borda,
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor = modoDark
+                        ? `${cores.dark.hover}40`
+                        : `${cores.light.hover}`;
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor = temaAtual.card;
                     }}
                   >
                     <div className="flex justify-between items-start gap-2">

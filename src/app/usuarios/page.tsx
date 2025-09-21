@@ -81,9 +81,9 @@ export default function Usuarios() {
       hover: "#1E4976"
     },
     light: {
-      fundo: "#F8FAFC",
+      fundo: "#cccccc",
       texto: "#0F172A",
-      card: "#FFFFFF",
+      card: "#ececec",
       borda: "#E2E8F0",
       primario: "#1976D2",
       secundario: "#0284C7",
@@ -1201,15 +1201,15 @@ export default function Usuarios() {
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.emailUsuario")}</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded p-2 border"
-                style={{
-                  backgroundColor: temaAtual.card,
-                  color: temaAtual.texto,
-                  borderColor: temaAtual.borda
-                }}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded p-2 border"
+              style={{
+                backgroundColor: temaAtual.card,
+                color: temaAtual.texto,
+                borderColor: "#202021" 
+              }}
               />
             </div>
             <div className="flex justify-end gap-2">

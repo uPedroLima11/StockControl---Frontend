@@ -22,9 +22,9 @@ export default function Logs() {
   const logsPorPagina = 14;
 
   const temaAtual = {
-    fundo: modoDark ? "#0A1929" : "#F8FAFC",
+    fundo: modoDark ? "#0A1929" : "#cccccc",
     texto: modoDark ? "#FFFFFF" : "#0F172A",
-    card: modoDark ? "#132F4C" : "#FFFFFF",
+    card: modoDark ? "#132F4C" : "#ecececec",
     borda: modoDark ? "#1E4976" : "#E2E8F0",
     primario: modoDark ? "#1976D2" : "#1976D2",
     secundario: modoDark ? "#00B4D8" : "#0284C7",
@@ -39,7 +39,7 @@ export default function Logs() {
       const ativado = temaSalvo === "true";
       setModoDark(ativado);
 
-      document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
+      document.body.style.backgroundColor = ativado ? "#0A1929" : "#cccccc";
 
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
