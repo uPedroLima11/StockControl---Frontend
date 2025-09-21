@@ -92,7 +92,6 @@ export default function Empresa() {
   const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
   const [cepCaracteres, setCepCaracteres] = useState(0);
 
-
   useEffect(() => {
     if (modalEdicaoAberto && empresaEditada) {
       setNomeCaracteres(empresaEditada.nome?.length || 0);
@@ -159,9 +158,8 @@ export default function Empresa() {
       setEmailStatus(prev => ({ ...prev, carregando: true }));
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email-edicao/${encodeURIComponent(empresaEditada.email)}/${empresaEditada.id}`
-        );
+        const url = `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(empresaEditada.email)}?empresaId=${empresaEditada.id}`;
+        const response = await fetch(url);
 
         if (response.ok) {
           const data = await response.json();
@@ -504,6 +502,7 @@ export default function Empresa() {
       });
     }
   };
+
   const excluirOuSairDaEmpresa = async () => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
@@ -885,7 +884,7 @@ export default function Empresa() {
                 <div className="relative">
                   <input
                     type="email"
-                    className="w-full px-3 py-2 rounded border"
+                    className="w-full px-3 py-2 rounded border pr-10"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
@@ -1104,6 +1103,7 @@ export default function Empresa() {
                   setModalEdicaoAberto(false);
                   setFotoFile(null);
                   setFotoPreview(null);
+                  setEmailStatus({ existe: false, carregando: false, mensagem: "" });
                 }}
                 className="px-4 py-2 cursor-pointer rounded transition"
                 style={{
@@ -1122,16 +1122,21 @@ export default function Empresa() {
               </button>
               <button
                 onClick={editarDadosEmpresa}
-                className="px-4 py-2 cursor-pointer rounded transition"
+                disabled={emailStatus.existe || emailStatus.carregando}
+                className="px-4 py-2 cursor-pointer rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: temaAtual.primario,
                   color: "#FFFFFF",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "0.9";
+                  if (!emailStatus.existe && !emailStatus.carregando) {
+                    e.currentTarget.style.opacity = "0.9";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "1";
+                  if (!emailStatus.existe && !emailStatus.carregando) {
+                    e.currentTarget.style.opacity = "1";
+                  }
                 }}
               >
                 {t("modal.salvar")}

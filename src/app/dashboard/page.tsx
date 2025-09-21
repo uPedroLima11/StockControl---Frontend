@@ -332,13 +332,15 @@ export default function Dashboard() {
 
           todasVendas.forEach(venda => {
             if (venda.produtoId && venda.produto) {
-              if (!vendasPorProduto[venda.produtoId]) {
-                vendasPorProduto[venda.produtoId] = {
+              const produtoId = venda.produtoId.toString();
+
+              if (!vendasPorProduto[produtoId]) {
+                vendasPorProduto[produtoId] = {
                   vendas: 0,
                   nome: venda.produto.nome
                 };
               }
-              vendasPorProduto[venda.produtoId].vendas += 1;
+              vendasPorProduto[produtoId].vendas += venda.quantidade || 1;
             }
           });
 
@@ -708,7 +710,6 @@ export default function Dashboard() {
                       }}
                     >
                       <td className="py-3 px-4 text-start">{produto.nome}</td>
-                      <td className="py-3 px-4 text-center">{produto.quantidade}</td>
                       <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td>
                       <td className="flex items-center justify-center py-3 px-4 text-center">
                         {produto.quantidade < (produto.quantidadeMin || 0) ? (
