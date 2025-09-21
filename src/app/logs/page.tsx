@@ -1,7 +1,7 @@
 "use client";
 import { LogsI } from "@/utils/types/logs";
 import { useEffect, useState } from "react";
-import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
+import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
 
