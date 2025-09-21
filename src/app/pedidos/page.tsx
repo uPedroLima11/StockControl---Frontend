@@ -8,58 +8,58 @@ import { CriarModal } from "./../../components/CriarModal";
 import { Tema, Fornecedor, Produto, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
 
 export default function PedidosPage() {
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
-  const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
-  const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
-  const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<string>("TODOS");
-  const [modoDark, setModoDark] = useState(false);
-  const [carregando, setCarregando] = useState(true);
-  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-  const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
-  const { t } = useTranslation("pedidos");
-  const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
-  const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
-  const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
+    const [pedidos, setPedidos] = useState<Pedido[]>([]);
+    const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
+    const [empresaId, setEmpresaId] = useState<string | null>(null);
+    const [modalAberto, setModalAberto] = useState(false);
+    const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
+    const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+    const [busca, setBusca] = useState("");
+    const [filtroStatus, setFiltroStatus] = useState<string>("TODOS");
+    const [modoDark, setModoDark] = useState(false);
+    const [carregando, setCarregando] = useState(true);
+    const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
+    const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
+    const { t } = useTranslation("pedidos");
+    const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
+    const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+    const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
 
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const itensPorPagina = 3;
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const itensPorPagina = 3;
 
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [fornecedorSelecionado, setFornecedorSelecionado] = useState<string>("");
-  const [itensCriacao, setItensCriacao] = useState<ItemPedidoCriacao[]>([]);
-  const [observacoesCriacao, setObservacoesCriacao] = useState("");
-  const [buscaProduto, setBuscaProduto] = useState("");
-  const [carregandoCriacao, setCarregandoCriacao] = useState(false);
+    const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+    const [produtos, setProdutos] = useState<Produto[]>([]);
+    const [fornecedorSelecionado, setFornecedorSelecionado] = useState<string>("");
+    const [itensCriacao, setItensCriacao] = useState<ItemPedidoCriacao[]>([]);
+    const [observacoesCriacao, setObservacoesCriacao] = useState("");
+    const [buscaProduto, setBuscaProduto] = useState("");
+    const [carregandoCriacao, setCarregandoCriacao] = useState(false);
 
-  const [observacoesEmail, setObservacoesEmail] = useState("");
+    const [observacoesEmail, setObservacoesEmail] = useState("");
 
-  const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
+    const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
 
-  const temas: { dark: Tema; light: Tema } = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-    },
-    light: {
-      fundo: "#F8FAFC",
-      texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-    }
-  };
+    const temas: { dark: Tema; light: Tema } = {
+        dark: {
+            fundo: "#0A1929",
+            texto: "#FFFFFF",
+            card: "#132F4C",
+            borda: "#1E4976",
+            primario: "#1976D2",
+            secundario: "#00B4D8",
+        },
+        light: {
+            fundo: "#F8FAFC",
+            texto: "#0F172A",
+            card: "#FFFFFF",
+            borda: "#E2E8F0",
+            primario: "#1976D2",
+            secundario: "#0284C7",
+        }
+    };
 
-  const temaAtual = modoDark ? temas.dark : temas.light;
+    const temaAtual = modoDark ? temas.dark : temas.light;
 
     const formatarData = (data: Date | string): string => {
         if (!data) return 'Data inválida';
@@ -260,6 +260,8 @@ export default function PedidosPage() {
     const podeEditarPedido = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar;
     const podeGerenciarStatus = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status;
     const podeVisualizarPedidos = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar;
+    const podeEnviarEmail = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
+
 
     const getStatusInfo = (status: string) => {
         switch (status) {
@@ -655,20 +657,20 @@ export default function PedidosPage() {
         });
     };
 
-     if (!podeVisualizarPedidos) {
-    return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="w-full max-w-6xl">
-          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-            {t("titulo")}
-          </h1>
-          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-            {t("semPermissaoVisualizar")}
-          </div>
-        </div>
-      </div>
-    );
-  }
+    if (!podeVisualizarPedidos) {
+        return (
+            <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+                <div className="w-full max-w-6xl">
+                    <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+                        {t("titulo")}
+                    </h1>
+                    <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
+                        {t("semPermissaoVisualizar")}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (carregando) {
         return (
@@ -875,13 +877,14 @@ export default function PedidosPage() {
 
                                             <button
                                                 onClick={() => handleAbrirModalEmail(pedido)}
-                                                disabled={pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id]}
+                                                disabled={pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail}
                                                 className="px-3 py-1 rounded flex items-center gap-1 text-sm"
                                                 style={{
                                                     backgroundColor: temaAtual.secundario,
                                                     color: "#FFFFFF",
-                                                    opacity: (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id]) ? 0.6 : 1
+                                                    opacity: (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail) ? 0.6 : 1
                                                 }}
+                                                title={!podeEnviarEmail ? t("semPermissaoEnviarEmail") : undefined}
                                             >
                                                 {enviandoEmail[pedido.id] ? (
                                                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
