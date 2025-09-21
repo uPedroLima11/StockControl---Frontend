@@ -314,7 +314,8 @@ export default function Sidebar() {
           "logs_visualizar",
           "exportar_dados",
           "inventario_visualizar",
-          "pedidos_visualizar"
+          "pedidos_visualizar",
+          
         ];
 
         const permissoes: Record<string, boolean> = {};
@@ -529,7 +530,9 @@ export default function Sidebar() {
             )}
            {permissoesUsuario.pedidos_visualizar &&( <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />
             )}
-            <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+            
+            {permissoesUsuario.vendas_visualizar &&( <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+            )}
 
             {permissoesUsuario.clientes_visualizar && (
               <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />

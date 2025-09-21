@@ -882,9 +882,16 @@ export default function PedidosPage() {
                                                 style={{
                                                     backgroundColor: temaAtual.secundario,
                                                     color: "#FFFFFF",
-                                                    opacity: (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail) ? 0.6 : 1
+                                                    opacity: (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail) ? 0.6 : 1,
+                                                    cursor: !podeEnviarEmail ? "not-allowed" : undefined
                                                 }}
-                                                title={!podeEnviarEmail ? t("semPermissaoEnviarEmail") : undefined}
+                                                title={
+                                                    !podeEnviarEmail
+                                                        ? t("semPermissaoEnviarEmail") || "Você não tem permissão para Enviar Email"
+                                                        : (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO')
+                                                            ? t("naoPodeEnviarEmailStatus") || "Não é possível enviar email para pedidos concluídos ou cancelados"
+                                                            : undefined
+                                                }
                                             >
                                                 {enviandoEmail[pedido.id] ? (
                                                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>

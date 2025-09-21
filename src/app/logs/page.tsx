@@ -544,20 +544,14 @@ export default function Logs() {
 
   if (temPermissao === false) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen px-4" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="text-center p-6 rounded-lg" style={{ backgroundColor: temaAtual.card, border: `1px solid ${temaAtual.borda}` }}>
-          <div className="flex justify-center mb-4">
-            <FaLock className="text-4xl" style={{ color: "#EF4444" }} />
-          </div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: temaAtual.texto }}>
-            {t("logs.acesso_negado.titulo")}
-          </h2>
-          <p className="mb-4" style={{ color: temaAtual.texto }}>
+      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-6xl">
+          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+            {t("logs.titulo")}
+          </h1>
+          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
             {t("logs.acesso_negado.mensagem")}
-          </p>
-          <p className="text-sm" style={{ color: temaAtual.placeholder }}>
-            {t("logs.acesso_negado.permissao_necessaria")}: <strong>logs_visualizar</strong>
-          </p>
+          </div>
         </div>
       </div>
     );

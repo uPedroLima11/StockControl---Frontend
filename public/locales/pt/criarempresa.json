@@ -10,7 +10,8 @@
   "sucesso": {
     "titulo": "Empresa criada com sucesso!",
     "mensagem": "A empresa foi criada e adicionada ao sistema.",
-    "catalogoTitulo": "Seu catálogo:"
+    "catalogoTitulo": "Seu catálogo:",
+    "botaoConfirmar": "Ir para Empresa"
   },
   "modal": {
     "convite.Enviado.titulo": "Convite Enviado",

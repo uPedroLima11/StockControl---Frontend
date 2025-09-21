@@ -10,7 +10,8 @@
   "sucesso": {
     "titulo": "Company created successfully!",
     "mensagem": "The company has been created and added to the system.",
-    "catalogoTitulo": "Your catalog:"
+    "catalogoTitulo": "Your catalog:",
+    "botaoConfirmar": "Go to Company"
   },
   "modal": {
     "convite.Enviado.titulo": "Invitation Sent",

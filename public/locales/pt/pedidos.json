@@ -8,6 +8,7 @@
     "semPermissaoVisualizar": "Você não possui permissão para visualizar Pedidos.",
     "pedidoCancelado": "Pedido Cancelado",
     "cancelarPedido": "Cancelar Pedido",
+   "semPermissaoEnviarEmail": "Você não possui permissão para enviar email.",
     "preencherSolicitado": "Preencher com solicitado",
     "preencherTodasQuantidades": "Preencher Todas",
     "concluirComEstoque": "Concluir e Atualizar Estoque",

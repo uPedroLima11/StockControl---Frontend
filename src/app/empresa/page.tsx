@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
@@ -9,6 +9,11 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
 
+type EmailStatus = {
+  existe: boolean;
+  carregando: boolean;
+  mensagem: string;
+};
 interface Empresa {
   slug: string;
   id: string;
@@ -43,6 +48,12 @@ export default function Empresa() {
   const [carregandoPermissao, setCarregandoPermissao] = useState(true);
   const [, setIsUploading] = useState(false);
 
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>({
+    existe: false,
+    carregando: false,
+    mensagem: ""
+  });
+
   const cores = {
     dark: {
       fundo: "#0A1929",
@@ -52,7 +63,9 @@ export default function Empresa() {
       primario: "#1976D2",
       secundario: "#00B4D8",
       placeholder: "#9CA3AF",
-      hover: "#1E4976"
+      hover: "#1E4976",
+      erro: "#EF4444",
+      sucesso: "#10B981"
     },
     light: {
       fundo: "#F8FAFC",
@@ -62,7 +75,9 @@ export default function Empresa() {
       primario: "#1976D2",
       secundario: "#0284C7",
       placeholder: "#6B7280",
-      hover: "#EFF6FF"
+      hover: "#EFF6FF",
+      erro: "#EF4444",
+      sucesso: "#10B981"
     }
   };
 
@@ -93,6 +108,10 @@ export default function Empresa() {
 
   const handleInputChange = (field: keyof Empresa, value: string, maxLength: number, setCaracteres: React.Dispatch<React.SetStateAction<number>>) => {
     if (value.length <= maxLength) {
+      if (field === 'email') {
+        value = value.toLowerCase();
+      }
+
       setEmpresaEditada(prev => prev ? { ...prev, [field]: value } : null);
       setCaracteres(value.length);
     }
@@ -115,6 +134,61 @@ export default function Empresa() {
       setCarregandoPermissao(false);
     }
   };
+
+  useEffect(() => {
+    const verificarEmailEdicao = async () => {
+      if (!empresaEditada || !empresaEditada.email || empresaEditada.email === empresa?.email) {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: ""
+        });
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(empresaEditada.email)) {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: ""
+        });
+        return;
+      }
+
+      setEmailStatus(prev => ({ ...prev, carregando: true }));
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email-edicao/${encodeURIComponent(empresaEditada.email)}/${empresaEditada.id}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setEmailStatus({
+            existe: data.existe,
+            carregando: false,
+            mensagem: data.mensagem
+          });
+        } else {
+          setEmailStatus({
+            existe: false,
+            carregando: false,
+            mensagem: t("erros.verificacaoEmail")
+          });
+        }
+      } catch {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: t("erros.verificacaoEmail")
+        });
+      }
+    };
+
+    const timeoutId = setTimeout(verificarEmailEdicao, 500);
+    return () => clearTimeout(timeoutId);
+  }, [empresaEditada?.email, empresaEditada?.id, empresa?.email, t]);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -341,6 +415,18 @@ export default function Empresa() {
   const editarDadosEmpresa = async () => {
     if (!empresaEditada || !temPermissaoGerenciar) return;
 
+    if (emailStatus.existe) {
+      Swal.fire({
+        icon: "error",
+        title: t("erros.emailExistenteTitulo"),
+        text: t("erros.emailExistenteTexto"),
+        background: temaAtual.card,
+        color: temaAtual.texto,
+        confirmButtonColor: temaAtual.primario
+      });
+      return;
+    }
+
     try {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
@@ -372,7 +458,7 @@ export default function Empresa() {
         },
         body: JSON.stringify({
           nome: empresaEditada.nome?.trim(),
-          email: empresaEditada.email?.trim(),
+          email: empresaEditada.email?.trim().toLowerCase(),
           telefone: empresaEditada.telefone?.trim(),
           endereco: empresaEditada.endereco?.trim(),
           pais: empresaEditada.pais?.trim(),
@@ -390,6 +476,7 @@ export default function Empresa() {
       setModalEdicaoAberto(false);
       setFotoFile(null);
       setFotoPreview(null);
+      setEmailStatus({ existe: false, carregando: false, mensagem: "" });
 
       Swal.fire({
         icon: "success",
@@ -417,7 +504,6 @@ export default function Empresa() {
       });
     }
   };
-
   const excluirOuSairDaEmpresa = async () => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key") as string;
@@ -796,21 +882,46 @@ export default function Empresa() {
 
               <div>
                 <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.email")}</label>
-                <input
-                  type="email"
-                  className="w-full px-3 py-2 rounded border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
-                  }}
-                  value={empresaEditada.email || ""}
-                  onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
-                  maxLength={60}
-                />
+                <div className="relative">
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 rounded border"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${emailStatus.existe ? temaAtual.erro : temaAtual.borda}`
+                    }}
+                    value={empresaEditada.email || ""}
+                    onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
+                    maxLength={60}
+                  />
+                  {emailStatus.carregando && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
+                    </div>
+                  )}
+                  {!emailStatus.carregando && empresaEditada.email && empresaEditada.email !== empresa?.email && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {emailStatus.existe ? (
+                        <FaTimes className="text-red-500" />
+                      ) : (
+                        <FaCheck className="text-green-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
                 <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {emailCaracteres}/60 {emailCaracteres === 60 && " - Limite atingido"}
                 </div>
+
+                {emailStatus.mensagem && (
+                  <div
+                    className={`text-xs mt-1 ${emailStatus.existe ? 'text-red-600' : 'text-green-600'}`}
+                    style={{ color: emailStatus.existe ? temaAtual.erro : temaAtual.sucesso }}
+                  >
+                    {emailStatus.mensagem}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2">
