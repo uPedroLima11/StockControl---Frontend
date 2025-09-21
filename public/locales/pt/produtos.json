@@ -14,6 +14,10 @@
   "catalogo": "Catálogo",
   "sim": "Sim",
   "nao": "Não",
+  "filtroAtivo": "Filtro ativo",
+  "removerFiltro": "Remover filtro",
+  "nenhumaCategoria": "Nenhuma categoria disponível",
+  "nenhumProdutoCategoria": "Nenhum produto encontrado para esta categoria",
   "editar": "Editar",
   "excluir": "Excluir",
   "cancelar": "Cancelar",
@@ -29,7 +33,6 @@
   "novoProduto": "Novo Produto",
   "nenhumProdutoEncontrado": "Nenhum produto encontrado",
   "semPermissaoVisualizar": "Você não tem permissão para visualizar produtos",
-  
   "empresaNaoAtivada": {
     "titulo": "Empresa Não Ativada",
     "mensagem": "Sua empresa precisa ser ativada para gerenciar produtos.",
@@ -37,41 +40,32 @@
     "alertaTitulo": "Empresa não ativada",
     "alertaMensagem": "Algumas funcionalidades podem estar limitadas."
   },
-  
   "erroCamposObrigatorios": {
     "titulo": "Campos Obrigatórios",
     "mensagem": "Por favor, preencha todos os campos obrigatórios:"
   },
-  
   "produtoCriadoSucesso": {
     "titulo": "Produto criado com sucesso!"
   },
-  
   "produtoAtualizadoSucesso": {
     "titulo": "Produto atualizado com sucesso!"
   },
-  
   "produtoExcluidoSucesso": {
     "titulo": "Produto excluído",
     "mensagem": "O produto foi excluído com sucesso."
   },
-  
   "confirmacaoExclusao": {
     "titulo": "Tem certeza?",
     "mensagem": "Esta ação não pode ser desfeita!",
     "botaoConfirmar": "Sim, excluir!",
     "botaoCancelar": "Cancelar"
   },
-  
   "produtoAdicionadoCatalogo": {
     "titulo": "Produto adicionado ao catálogo!"
   },
-  
   "produtoRemovidoCatalogo": {
     "titulo": "Produto removido do catálogo!"
   },
-  
   "quantidadeMinimaTooltip": "Quantidade mínima em estoque para alertas de reabastecimento. O sistema irá notificar quando o estoque atingir este nível.",
-  
   "fazendoUpload": "Fazendo upload..."
 }

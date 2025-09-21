@@ -5,7 +5,7 @@ import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle, FaTimes, FaFilter } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -34,6 +34,9 @@ export default function Produtos() {
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
   const [totalProdutos, setTotalProdutos] = useState<number>(0);
+
+  const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
+  const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
 
   const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao>('none');
   const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
@@ -66,6 +69,7 @@ export default function Produtos() {
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const menuCategoriasRef = useRef<HTMLDivElement>(null);
 
   const cores = {
     dark: {
@@ -91,6 +95,19 @@ export default function Produtos() {
   };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuCategoriasRef.current && !menuCategoriasRef.current.contains(event.target as Node)) {
+        setMenuCategoriasAberto(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const recarregarListaProdutos = () => {
     setRecarregarProdutos(prev => prev + 1);
@@ -877,9 +894,22 @@ export default function Produtos() {
     });
   };
 
-  const produtosFiltrados = produtos.filter((produto) =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const aplicarFiltroCategoria = (categoriaId: string | null) => {
+    setFiltroCategoria(categoriaId);
+    setPaginaAtual(1);
+    setMenuCategoriasAberto(false);
+  };
+
+  const removerFiltro = () => {
+    setFiltroCategoria(null);
+    setPaginaAtual(1);
+  };
+
+  const produtosFiltrados = produtos.filter((produto) => {
+    const buscaMatch = produto.nome.toLowerCase().includes(busca.toLowerCase());
+    const categoriaMatch = filtroCategoria ? produto.categoriaId === filtroCategoria : true;
+    return buscaMatch && categoriaMatch;
+  });
 
   const indexUltimoProduto = paginaAtual * produtosPorPagina;
   const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
@@ -899,6 +929,10 @@ export default function Produtos() {
     setProdutoExpandido(null);
   };
 
+  const nomeCategoriaSelecionada = filtroCategoria 
+    ? categorias.find(c => String(c.id) === filtroCategoria)?.nome 
+    : null;
+
   if (!podeVisualizar) {
     return (
       <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
@@ -913,7 +947,6 @@ export default function Produtos() {
       </div>
     );
   }
-
   return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-7xl">
@@ -936,29 +969,94 @@ export default function Produtos() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-1">
             <div
-              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
+              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm"
               style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
+              backgroundColor: temaAtual.card,
+              borderColor: temaAtual.borda,
+              minWidth: "180px",
+              maxWidth: "260px",
+              width: "100%",
               }}
             >
               <input
-                type="text"
-                placeholder={t("buscar")}
-                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
-                style={{
-                  color: temaAtual.texto,
-                }}
-                value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setPaginaAtual(1);
-                }}
+              type="text"
+              placeholder={t("buscar")}
+              className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
+              style={{
+                color: temaAtual.texto,
+                width: "100%",
+              }}
+              value={busca}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                setPaginaAtual(1);
+              }}
               />
               <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
+            
+            <div className="relative" ref={menuCategoriasRef}>
+              <button
+                onClick={() => setMenuCategoriasAberto(!menuCategoriasAberto)}
+                className="flex items-center gap-2 px-3 md:px-4 py-1 md:py-2 border rounded-full shadow-sm"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  borderColor: temaAtual.borda,
+                  color: temaAtual.texto,
+                }}
+              >
+                <FaFilter className="text-sm" />
+                <span className="text-sm font-mono">
+                  {filtroCategoria ? nomeCategoriaSelecionada : t("categoria")}
+                </span>
+                {menuCategoriasAberto ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+              </button>
+
+              {menuCategoriasAberto && (
+                <div
+                  className="absolute top-full left-0 mt-2 w-48 max-h-60 overflow-y-auto z-50 rounded-lg shadow-lg border"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    borderColor: temaAtual.borda,
+                  }}
+                >
+                  <div className="p-2">
+                    {categorias.map((categoria) => (
+                      <div
+                        key={categoria.id}
+                        className="p-2 rounded-md cursor-pointer hover:opacity-80 transition"
+                        style={{
+                          backgroundColor: filtroCategoria === String(categoria.id) ? temaAtual.primario + "40" : "transparent",
+                          color: temaAtual.texto,
+                        }}
+                        onClick={() => aplicarFiltroCategoria(String(categoria.id))}
+                      >
+                        {categoria.nome}
+                      </div>
+                    ))}
+                    {categorias.length === 0 && (
+                      <div className="p-2 text-center text-sm" style={{ color: temaAtual.texto }}>
+                        {t("nenhumaCategoria")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {filtroCategoria && (
+              <button
+                onClick={removerFiltro}
+                className="p-2 rounded-full hover:opacity-80 transition"
+                style={{ color: temaAtual.texto }}
+                title={t("removerFiltro")}
+              >
+                <FaTimes />
+              </button>
+            )}
+
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
                 <button
@@ -1006,6 +1104,25 @@ export default function Produtos() {
           </div>
         </div>
 
+        {filtroCategoria && (
+          <div className="mb-4 flex items-center gap-2 p-3 rounded-lg" style={{
+            backgroundColor: temaAtual.primario + "20",
+            border: `1px solid ${temaAtual.borda}`
+          }}>
+            <span className="text-sm" style={{ color: temaAtual.texto }}>
+              {t("filtroAtivo")}: <strong>{nomeCategoriaSelecionada}</strong>
+            </span>
+            <button
+              onClick={removerFiltro}
+              className="text-sm flex items-center gap-1 hover:opacity-80 transition"
+              style={{ color: temaAtual.primario }}
+            >
+              <FaTimes className="text-xs" />
+              {t("removerFiltro")}
+            </button>
+          </div>
+        )}
+
         <div
           className="border rounded-xl shadow-lg"
           style={{
@@ -1015,7 +1132,7 @@ export default function Produtos() {
         >
           {produtosFiltrados.length === 0 ? (
             <div className="p-6 text-center" style={{ color: temaAtual.texto }}>
-              {t("nenhumProdutoEncontrado")}
+              {filtroCategoria ? t("nenhumProdutoCategoria") : t("nenhumProdutoEncontrado")}
             </div>
           ) : (
             <>
@@ -1409,30 +1526,73 @@ export default function Produtos() {
                               >
                                 Fechar
                               </button>
-                            </div>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      <input
-                        placeholder={t("quantidadeMinima")}
-                        type="number"
-                        min={0}
-                        value={form.quantidadeMin || ""}
-                        onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                        className="rounded p-2"
-                        style={{
-                          backgroundColor: temaAtual.card,
-                          color: temaAtual.texto,
-                          border: `1px solid ${temaAtual.borda}`
-                        }}
-                        disabled={Boolean(!podeEditar && modalVisualizar)}
-                      />
-                    </div>
+                    <input
+                      placeholder={t("quantidadeMinima")}
+                      type="number"
+                      min={0}
+                      value={form.quantidadeMin || ""}
+                      onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                      className="rounded p-2"
+                      style={{
+                        backgroundColor: temaAtual.card,
+                        color: temaAtual.texto,
+                        border: `1px solid ${temaAtual.borda}`
+                      }}
+                      disabled={Boolean(!podeEditar && modalVisualizar)}
+                    />
                   </div>
+                </div>
 
+                {podeEditar && (
+                  <div className="mt-3">
+                    <label className="block mb-1 text-sm">{t("foto")}</label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                      style={{
+                        backgroundColor: temaAtual.primario,
+                        color: "#FFFFFF",
+                        borderColor: temaAtual.primario,
+                        maxWidth: '400px' 
+                      }}
+                      disabled={isUploading}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#FFFFFF"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                        />
+                      </svg>
+                      {t("selecionarImagem")}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex gap-2 w-full items-end">
+                <div className="flex-1">
                   {podeEditar && (
-                    <div className="mt-3">
+                    <>
                       <label className="block mb-1 text-sm">{t("foto")}</label>
                       <input
                         type="file"
@@ -1443,12 +1603,11 @@ export default function Produtos() {
                       />
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                        className="w-full px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
                         style={{
                           backgroundColor: temaAtual.primario,
                           color: "#FFFFFF",
                           borderColor: temaAtual.primario,
-                          maxWidth: '400px' 
                         }}
                         disabled={isUploading}
                       >
@@ -1468,243 +1627,201 @@ export default function Produtos() {
                         </svg>
                         {t("selecionarImagem")}
                       </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-1 mb-1">
+                    <label className="text-sm">
+                      {t("quantidadeMinima")} <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative inline-flex items-center group">
+                      <FaQuestionCircle
+                        className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
+                        size={14}
+                        onClick={() => {
+                          if (window.innerWidth < 768) {
+                            setShowTooltip(!showTooltip);
+                          }
+                        }}
+                      />
+
+                      <div
+                        className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                        style={{
+                          backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
+                          color: modoDark ? "#FFFFFF" : "#1E293B",
+                          border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
+                          top: "auto",
+                          bottom: "100%",
+                          marginBottom: "8px"
+                        }}
+                      >
+                        <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
+                        <div className="text-xs leading-tight text-center">
+                          {t("quantidadeMinimaTooltip")}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {showTooltip && window.innerWidth < 768 && (
+                    <div
+                      className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
+                      style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+                      onClick={() => setShowTooltip(false)}
+                    >
+                      <div
+                        className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
+                          💡 {t("quantidadeMinima")}
+                        </div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
+                          {t("quantidadeMinimaTooltip")}
+                        </div>
+                        <div className="flex justify-center">
+                          <button
+                            onClick={() => setShowTooltip(false)}
+                            className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                          >
+                            Fechar
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
-                </>
-              ) : (
-                <div className="flex gap-2 w-full items-end">
-                  <div className="flex-1">
-                    {podeEditar && (
-                      <>
-                        <label className="block mb-1 text-sm">{t("foto")}</label>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleFileChange}
-                          accept="image/*"
-                          className="hidden"
-                        />
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full px-4 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
-                          style={{
-                            backgroundColor: temaAtual.primario,
-                            color: "#FFFFFF",
-                            borderColor: temaAtual.primario,
-                          }}
-                          disabled={isUploading}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="#FFFFFF"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                            />
-                          </svg>
-                          {t("selecionarImagem")}
-                        </button>
-                      </>
-                    )}
-                  </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1 mb-1">
-                      <label className="text-sm">
-                        {t("quantidadeMinima")} <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative inline-flex items-center group">
-                        <FaQuestionCircle
-                          className="text-gray-400 hover:text-blue-500 cursor-help transition-colors"
-                          size={14}
-                          onClick={() => {
-                            if (window.innerWidth < 768) {
-                              setShowTooltip(!showTooltip);
-                            }
-                          }}
-                        />
-
-                        <div
-                          className="hidden md:block absolute invisible group-hover:visible right-full -top-3 mr-3 w-64 p-4 rounded shadow-lg z-[60] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                          style={{
-                            backgroundColor: modoDark ? "#1E293B" : "#FFFFFF",
-                            color: modoDark ? "#FFFFFF" : "#1E293B",
-                            border: `1px solid ${modoDark ? "#334155" : "#E2E8F0"}`,
-                            top: "auto",
-                            bottom: "100%",
-                            marginBottom: "8px"
-                          }}
-                        >
-                          <div className="text-sm font-medium mb-1 text-center">💡 {t("quantidadeMinima")}</div>
-                          <div className="text-xs leading-tight text-center">
-                            {t("quantidadeMinimaTooltip")}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {showTooltip && window.innerWidth < 768 && (
-                      <div
-                        className="fixed inset-0 flex items-center justify-center z-[70] md:hidden"
-                        style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-                        onClick={() => setShowTooltip(false)}
-                      >
-                        <div
-                          className="bg-white dark:bg-gray-800 rounded-lg p-4 mx-4 max-w-sm"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="text-sm font-medium mb-2 text-center text-gray-900 dark:text-white">
-                            💡 {t("quantidadeMinima")}
-                          </div>
-                          <div className="text-xs text-gray-700 dark:text-gray-300 text-center mb-3">
-                            {t("quantidadeMinimaTooltip")}
-                          </div>
-                          <div className="flex justify-center">
-                            <button
-                              onClick={() => setShowTooltip(false)}
-                              className="w-30 items-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
-                            >
-                              Fechar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <input
-                      placeholder={t("quantidadeMinima")}
-                      type="number"
-                      min={0}
-                      value={form.quantidadeMin || ""}
-                      onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                      className="w-full rounded p-2"
-                      style={{
-                        backgroundColor: temaAtual.card,
-                        color: temaAtual.texto,
-                        border: `1px solid ${temaAtual.borda}`
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {(preview || form.foto) && (
-                <div className="mt-4 mb-4">
-                  <img
-                    src={preview || form.foto || ""}
-                    alt="Preview"
-                    className="w-20 h-20 md:w-44 md:h-44 object-cover rounded"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/out.jpg";
+                  <input
+                    placeholder={t("quantidadeMinima")}
+                    type="number"
+                    min={0}
+                    value={form.quantidadeMin || ""}
+                    onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                    className="w-full rounded p-2"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`
                     }}
                   />
                 </div>
-              )}
-
-              <div className="flex gap-2 mb-3 mt-4">
-                <select
-                  value={form.fornecedorId || ""}
-                  onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                  className="w-full rounded cursor-pointer p-2"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                >
-                  <option value="">{t("selecionarFornecedor")}</option>
-                  {fornecedores.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.nome}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={form.categoriaId || ""}
-                  onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                  className="w-full cursor-pointer rounded p-2"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                >
-                  <option value="">{t("selecionarCategoria")}</option>
-                  {categorias.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
               </div>
+            )}
 
-              <div className="flex justify-between mt-4">
-                <div>
-                  {modalVisualizar && podeExcluir && (
-                    <button
-                      onClick={handleDelete}
-                      className="px-5 py-2 cursor-pointer rounded border"
-                      style={{
-                        backgroundColor: "#F87171",
-                        borderColor: "#F87171",
-                        color: "#fff"
-                      }}
-                    >
-                      {t("excluir")}
-                    </button>
-                  )}
-                </div>
+            {(preview || form.foto) && (
+              <div className="mt-4 mb-4">
+                <img
+                  src={preview || form.foto || ""}
+                  alt="Preview"
+                  className="w-20 h-20 md:w-44 md:h-44 object-cover rounded"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/out.jpg";
+                  }}
+                />
+              </div>
+            )}
 
-                <div className="flex gap-3">
+            <div className="flex gap-2 mb-3 mt-4">
+              <select
+                value={form.fornecedorId || ""}
+                onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                className="w-full rounded cursor-pointer p-2"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+              >
+                <option value="">{t("selecionarFornecedor")}</option>
+                {fornecedores.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.nome}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={form.categoriaId || ""}
+                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                className="w-full cursor-pointer rounded p-2"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  border: `1px solid ${temaAtual.borda}`
+                }}
+                disabled={Boolean(!podeEditar && modalVisualizar)}
+              >
+                <option value="">{t("selecionarCategoria")}</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-between mt-4">
+              <div>
+                {modalVisualizar && podeExcluir && (
                   <button
-                    onClick={() => {
-                      setModalAberto(false);
-                      setModalVisualizar(null);
-                    }}
-                    className="px-4 cursor-pointer  py-2 rounded border"
+                    onClick={handleDelete}
+                    className="px-5 py-2 cursor-pointer rounded border"
                     style={{
-                      borderColor: temaAtual.borda,
-                      color: temaAtual.texto,
+                      backgroundColor: "#F87171",
+                      borderColor: "#F87171",
+                      color: "#fff"
                     }}
                   >
-                    {t("cancelar")}
+                    {t("excluir")}
                   </button>
+                )}
+              </div>
 
-                  {(podeCriar && !modalVisualizar) && (
-                    <button
-                      onClick={handleSubmit}
-                      className="px-4 py-2 cursor-pointer rounded text-white"
-                      style={{ backgroundColor: temaAtual.primario }}
-                      disabled={isUploading}
-                    >
-                      {isUploading ? t("enviando") : t("salvar")}
-                    </button>
-                  )}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setModalAberto(false);
+                    setModalVisualizar(null);
+                  }}
+                  className="px-4 cursor-pointer  py-2 rounded border"
+                  style={{
+                    borderColor: temaAtual.borda,
+                    color: temaAtual.texto,
+                  }}
+                >
+                  {t("cancelar")}
+                </button>
 
-                  {(podeEditar && modalVisualizar) && (
-                    <button
-                      onClick={handleUpdate}
-                      className="px-4 py-2 rounded cursor-pointer text-white"
-                      style={{ backgroundColor: temaAtual.primario }}
-                      disabled={isUploading}
-                    >
-                      {isUploading ? t("enviando") : t("atualizar")}
-                    </button>
-                  )}
-                </div>
+                {(podeCriar && !modalVisualizar) && (
+                  <button
+                    onClick={handleSubmit}
+                    className="px-4 py-2 cursor-pointer rounded text-white"
+                    style={{ backgroundColor: temaAtual.primario }}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? t("enviando") : t("salvar")}
+                  </button>
+                )}
+
+                {(podeEditar && modalVisualizar) && (
+                  <button
+                    onClick={handleUpdate}
+                    className="px-4 py-2 rounded cursor-pointer text-white"
+                    style={{ backgroundColor: temaAtual.primario }}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? t("enviando") : t("atualizar")}
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+  )
+}     </div>
     </div>
   );
 }

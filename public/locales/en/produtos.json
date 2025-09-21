@@ -13,6 +13,10 @@
   "catalogo": "Catalog",
   "produtosCadastrados": "Registered Products",
   "sim": "Yes",
+  "filtroAtivo": "Active filter",
+  "removerFiltro": "Remove filter",
+  "nenhumaCategoria": "No category available",
+  "nenhumProdutoCategoria": "No products found for this category",
   "nao": "No",
   "editar": "Edit",
   "excluir": "Delete",
@@ -29,7 +33,6 @@
   "novoProduto": "New Product",
   "nenhumProdutoEncontrado": "No products found",
   "semPermissaoVisualizar": "You don't have permission to view products",
-  
   "empresaNaoAtivada": {
     "titulo": "Company Not Activated",
     "mensagem": "Your company needs to be activated to manage products.",
@@ -37,41 +40,32 @@
     "alertaTitulo": "Company not activated",
     "alertaMensagem": "Some features may be limited."
   },
-  
   "erroCamposObrigatorios": {
     "titulo": "Required Fields",
     "mensagem": "Please fill in all required fields:"
   },
-  
   "produtoCriadoSucesso": {
     "titulo": "Product created successfully!"
   },
-  
   "produtoAtualizadoSucesso": {
     "titulo": "Product updated successfully!"
   },
-  
   "produtoExcluidoSucesso": {
     "titulo": "Product deleted",
     "mensagem": "The product has been successfully deleted."
   },
-  
   "confirmacaoExclusao": {
     "titulo": "Are you sure?",
     "mensagem": "This action cannot be undone!",
     "botaoConfirmar": "Yes, delete it!",
     "botaoCancelar": "Cancel"
   },
-  
   "produtoAdicionadoCatalogo": {
     "titulo": "Product added to catalog!"
   },
-  
   "produtoRemovidoCatalogo": {
     "titulo": "Product removed from catalog!"
   },
-  
   "quantidadeMinimaTooltip": "Minimum stock quantity for replenishment alerts. The system will notify when stock reaches this level.",
-  
   "fazendoUpload": "Uploading..."
 }
