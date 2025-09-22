@@ -479,10 +479,22 @@ export default function Sidebar() {
           backgroundColor: cores.azulEscuro,
           borderRight: `3px solid transparent`,
           backgroundImage: `linear-gradient(${cores.azulEscuro}, ${cores.azulEscuro}), 
-                      linear-gradient(135deg, ${cores.azulBrilhante}, ${cores.azulNeon})`,
+              linear-gradient(135deg, ${cores.azulBrilhante}, ${cores.azulNeon})`,
           backgroundOrigin: 'border-box',
           backgroundClip: 'content-box, border-box',
           boxShadow: "8px 0 20px rgba(0, 0, 0, 0.4)"
+        }}
+        onClick={(e) => {
+          if (window.innerWidth < 768) {
+        let target = e.target as HTMLElement | null;
+        while (target) {
+          if (target.tagName === "A") {
+            setEstaAberto(false);
+            break;
+          }
+          target = target.parentElement;
+        }
+          }
         }}
       >
         <div>

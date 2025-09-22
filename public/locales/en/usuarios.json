@@ -23,10 +23,18 @@
   "semPermissaoVisualizarUsuarios": "You don't have permission to view users.",
   "acessoNegado": "Access Denied",
   "buscarUsuario": "Search User",
+  "carregandoPermissoes": "Loading permissions...",
   "editarUsuario": "Edit User",
   "gerenciarPermissoes": "Manage Permissions",
   "semPermissaoGerenciar": "No permission to manage",
   "modal": {
+    "preenchaCamposObrigatorios": {
+    "titulo": "Required fields",
+    "texto": "Please fill the following required fields: {{campos}}",
+    "usuario": "User",
+    "tituloMensagem": "Message title",
+    "descricaoMensagem": "Message description"
+  },
     "permissaoNegada": {
       "titulo": "Permission Denied",
       "textoConvite": "You don't have permission to perform this action",

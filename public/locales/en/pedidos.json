@@ -16,6 +16,10 @@
     "erroConcluirPedidoEstoque": "Error completing order with stock",
     "quantidadesPreenchidas": "Quantities Filled",
     "quantidadesPreenchidasTexto": "All quantities have been filled with the requested values",
+    "empresaNaoAtivada": {
+        "titulo": "Company Not Activated",
+        "mensagem": "Activate your company to use Order Management"
+    },
     "status": {
         "pendente": "Pending",
         "processando": "Processing",
@@ -74,6 +78,7 @@
     "statusAtualizadoSucesso": "Status updated successfully!",
     "erroAtualizarStatus": "Error updating status",
     "emailEnviadoSucesso": "Email sent successfully!",
+    "emailEnviadoPara": "Email sent to: <strong>{{email}}</strong>",
     "erroEnviarEmail": "Error sending email",
     "erroFornecedorNaoSelecionado": "Select a supplier",
     "erroNenhumItem": "Add at least one item to the order",

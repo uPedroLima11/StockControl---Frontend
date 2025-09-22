@@ -553,21 +553,21 @@ export default function Usuarios() {
       let mensagemErro = "";
 
       if (!usuarioSelecionado) {
-        mensagemErro += "• Selecione um usuário destinatário\n";
+      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.usuario")}\n`;
       }
 
       if (!titulo.trim()) {
-        mensagemErro += "• Título da mensagem é obrigatório\n";
+      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.tituloMensagem")}\n`;
       }
 
       if (!descricao.trim()) {
-        mensagemErro += "• Descrição da mensagem é obrigatória\n";
+      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.descricaoMensagem")}\n`;
       }
 
       if (mensagemErro) {
         Swal.fire({
-          title: "Preencha os campos obrigatórios",
-          html: `Por favor, preencha os seguintes campos:<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          title: t("modal.preenchaCamposObrigatorios.titulo"),
+          html: t("modal.preenchaCamposObrigatorios.texto", { campos: mensagemErro.replace(/\n/g, ' ') }),
           icon: "warning",
           confirmButtonColor: "#013C3C",
         });
@@ -899,7 +899,7 @@ export default function Usuarios() {
   if (temPermissaoExcluir === null || Object.keys(usuariosExcluiveis).length === 0) {
     return (
       <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
-        <p style={{ color: temaAtual.texto }}>Carregando permissões...</p>
+        <p style={{ color: temaAtual.texto }}>{t("carregandoPermissoes")}</p>
       </div>
     );
   }
@@ -1275,7 +1275,7 @@ export default function Usuarios() {
                   borderColor: temaAtual.borda
                 }}
               >
-                <option value="">Selecione um usuário</option>
+                <option value="">{t("selecioneUsuario")}</option>
                 {usuarios
                   .filter(usuario => usuario.id !== usuarioLogado?.id)
                   .map((usuario) => (

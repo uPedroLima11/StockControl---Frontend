@@ -24,6 +24,7 @@
     "usuario_nao_encontrado": "User not found",
     "usuario_nao_informado": "Not Informed",
     "carregando": "Loading...",
+     "status": "Status",
     "acesso_negado": {
       "titulo": "Access Denied",
       "mensagem": "You don't have permission to access this page",
@@ -44,6 +45,12 @@
       "usuarios": "Users",
       "movimentacoes": "Movements",
       "pedidos": "Orders"
+    },
+    "status_pedido": {
+      "PENDENTE": "Pending",
+      "PROCESSANDO": "Processing",
+      "CONCLUIDO": "Completed",
+      "CANCELADO": "Cancelled"
     },
     "descricoes": {
       "produto_exportado": "Product Exported: {{nome}} (Period: {{periodo}})",

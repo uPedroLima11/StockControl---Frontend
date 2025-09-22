@@ -8,7 +8,7 @@
     "semPermissaoVisualizar": "Você não possui permissão para visualizar Pedidos.",
     "pedidoCancelado": "Pedido Cancelado",
     "cancelarPedido": "Cancelar Pedido",
-   "semPermissaoEnviarEmail": "Você não possui permissão para enviar email.",
+    "semPermissaoEnviarEmail": "Você não possui permissão para enviar email.",
     "preencherSolicitado": "Preencher com solicitado",
     "preencherTodasQuantidades": "Preencher Todas",
     "concluirComEstoque": "Concluir e Atualizar Estoque",
@@ -17,6 +17,10 @@
     "erroConcluirPedidoEstoque": "Erro ao concluir pedido com estoque",
     "quantidadesPreenchidas": "Quantidades Preenchidas",
     "quantidadesPreenchidasTexto": "Todas as quantidades foram preenchidas com os valores solicitados",
+    "empresaNaoAtivada": {
+        "titulo": "Empresa Não Ativada",
+        "mensagem": "Sua empresa precisa ser ativada para gerenciar pedidos."
+    },
     "status": {
         "pendente": "Pendente",
         "processando": "Processando",
@@ -55,6 +59,7 @@
     "pedidoConcluido": "Pedido Concluído",
     "selecionarFornecedor": "Selecionar Fornecedor",
     "adicionarProdutos": "Adicionar Produtos",
+    "emailEnviadoPara": "Email enviado para: <strong>{{email}}</strong>",
     "buscarProdutos": "Buscar produtos...",
     "estoque": "Estoque",
     "codigo": "Cód",

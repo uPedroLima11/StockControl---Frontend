@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight, FaLock } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { CriarModal } from "./../../components/CriarModal";
 import { Tema, Fornecedor, Produto, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
+import { useRouter } from "next/navigation";
 
 export default function PedidosPage() {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
     const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
     const [empresaId, setEmpresaId] = useState<string | null>(null);
+    const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
     const [modalAberto, setModalAberto] = useState(false);
     const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
     const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
@@ -24,6 +26,7 @@ export default function PedidosPage() {
     const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
     const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
     const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
+    const router = useRouter();
 
     const [paginaAtual, setPaginaAtual] = useState(1);
     const itensPorPagina = 3;
@@ -60,6 +63,41 @@ export default function PedidosPage() {
     };
 
     const temaAtual = modoDark ? temas.dark : temas.light;
+
+    const verificarAtivacaoEmpresa = async (empresaId: string) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+            if (!response.ok) return false;
+
+            const empresaData = await response.json();
+            return empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+        } catch (error) {
+            console.error("Erro ao verificar ativação:", error);
+            return false;
+        }
+    };
+
+    const mostrarAlertaNaoAtivada = () => {
+        Swal.fire({
+            title: t("alerta.titulo") || "Empresa Não Ativada",
+            text: t("alerta.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade.",
+            icon: "warning",
+            confirmButtonText: t("alerta.botao") || "Ativar Empresa",
+            confirmButtonColor: "#3085d6",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.push("/ativacao");
+            }
+        });
+    };
+
+    const handleAcaoProtegida = (acao: () => void) => {
+        if (!empresaAtivada) {
+            mostrarAlertaNaoAtivada();
+            return;
+        }
+        acao();
+    };
 
     const formatarData = (data: Date | string): string => {
         if (!data) return 'Data inválida';
@@ -101,7 +139,14 @@ export default function PedidosPage() {
                 setEmpresaId(usuario.empresaId);
                 setTipoUsuario(usuario.tipo);
                 carregarPermissoes(usuarioValor);
-                carregarPedidos(usuario.empresaId);
+
+                if (usuario.empresaId) {
+                    const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+                    setEmpresaAtivada(ativada);
+                    if (ativada) {
+                        carregarPedidos(usuario.empresaId);
+                    }
+                }
 
                 const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuario.empresaId}`);
                 if (responseEmpresa.ok) {
@@ -134,11 +179,14 @@ export default function PedidosPage() {
     const carregarPedidos = async (empresaId: string) => {
         try {
             setCarregando(true);
-            const usuarioId = localStorage.getItem("client_key")?.replace(/"/g, "") || '';
+            const usuarioSalvo = localStorage.getItem("client_key");
+            if (!usuarioSalvo) return;
+
+            const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/empresa/${empresaId}`, {
                 headers: {
-                    'user-id': usuarioId
+                    'user-id': usuarioValor
                 }
             });
 
@@ -157,7 +205,9 @@ export default function PedidosPage() {
 
     const carregarFornecedores = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`);
+            if (!empresaId) return;
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/empresa/${empresaId}`);
             if (response.ok) {
                 const fornecedoresData = await response.json();
                 setFornecedores(fornecedoresData);
@@ -169,7 +219,9 @@ export default function PedidosPage() {
 
     const carregarProdutos = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+            if (!empresaId) return;
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/empresa/${empresaId}`);
             if (response.ok) {
                 const produtosData = await response.json();
                 setProdutos(produtosData);
@@ -256,12 +308,11 @@ export default function PedidosPage() {
         setPaginaAtual(1);
     }, [pedidosFiltrados]);
 
-    const podeCriarPedido = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
-    const podeEditarPedido = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar;
-    const podeGerenciarStatus = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status;
-    const podeVisualizarPedidos = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar;
-    const podeEnviarEmail = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
-
+    const podeCriarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar) && empresaAtivada;
+    const podeEditarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar) && empresaAtivada;
+    const podeGerenciarStatus = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status) && empresaAtivada;
+    const podeVisualizarPedidos = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar) && empresaAtivada;
+    const podeEnviarEmail = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar) && empresaAtivada;
 
     const getStatusInfo = (status: string) => {
         switch (status) {
@@ -279,154 +330,162 @@ export default function PedidosPage() {
     };
 
     const handleAtualizarStatus = async (pedidoId: string, novoStatus: string) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
-                },
-                body: JSON.stringify({ status: novoStatus })
-            });
-
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: t("statusAtualizadoSucesso"),
-                    timer: 1500
+        handleAcaoProtegida(async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
+                    },
+                    body: JSON.stringify({ status: novoStatus })
                 });
-                carregarPedidos(empresaId!);
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: t("statusAtualizadoSucesso"),
+                        timer: 1500
+                    });
+                    carregarPedidos(empresaId!);
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar status:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroAtualizarStatus")
+                });
             }
-        } catch (error) {
-            console.error("Erro ao atualizar status:", error);
-            Swal.fire({
-                icon: 'error',
-                title: t("erroAtualizarStatus")
-            });
-        }
+        });
     };
 
     const handleConcluirPedidoComEstoque = async (pedidoId: string) => {
-        try {
-            const usuarioId = localStorage.getItem("client_key")?.replace(/"/g, "") || '';
+        handleAcaoProtegida(async () => {
+            try {
+                const usuarioId = localStorage.getItem("client_key")?.replace(/"/g, "") || '';
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoId}/concluir-com-estoque`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': usuarioId
-                },
-                body: JSON.stringify({
-                    quantidadesRecebidas: quantidadesAtendidas
-                })
-            });
-
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: t("pedidoConcluidoComEstoque"),
-                    text: t("estoqueAtualizadoSucesso"),
-                    timer: 2000
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoId}/concluir-com-estoque`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': usuarioId
+                    },
+                    body: JSON.stringify({
+                        quantidadesRecebidas: quantidadesAtendidas
+                    })
                 });
-                setQuantidadesAtendidas({});
-                carregarPedidos(empresaId!);
-                setModalAberto(false);
-            } else {
-                throw new Error('Erro ao concluir pedido com estoque');
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: t("pedidoConcluidoComEstoque"),
+                        text: t("estoqueAtualizadoSucesso"),
+                        timer: 2000
+                    });
+                    setQuantidadesAtendidas({});
+                    carregarPedidos(empresaId!);
+                    setModalAberto(false);
+                } else {
+                    throw new Error('Erro ao concluir pedido com estoque');
+                }
+            } catch (error) {
+                console.error("Erro ao concluir pedido com estoque:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroConcluirPedidoEstoque")
+                });
             }
-        } catch (error) {
-            console.error("Erro ao concluir pedido com estoque:", error);
-            Swal.fire({
-                icon: 'error',
-                title: t("erroConcluirPedidoEstoque")
-            });
-        }
+        });
     };
 
     const handleEnviarEmail = async (pedido: Pedido, observacoesPersonalizadas?: string) => {
-        setEnviandoEmail(prev => ({ ...prev, [pedido.id]: true }));
-
-        try {
-            if (!N8N_WEBHOOK_URL) {
-                throw new Error('Serviço de email não configurado');
-            }
-
-            const dataFormatada = formatarData(pedido.dataSolicitacao);
-
-            const emailData = {
-                action: "enviar_email_pedido",
-                remetente_nome: empresa?.nome || "Sua Empresa",
-                remetente_email: empresa?.email || "empresa@email.com",
-                empresa_nome: empresa?.nome || "Nome da Empresa",
-                empresa_telefone: empresa?.telefone || "(00) 00000-0000",
-
-                destinatario: pedido.fornecedor.email,
-                fornecedor_nome: pedido.fornecedor.nome,
-
-                pedido_id: pedido.id,
-                pedido_numero: pedido.numero,
-                assunto: `Pedido ${pedido.numero} - ${pedido.fornecedor.nome}`,
-                total: pedido.total,
-                data: dataFormatada,
-                observacoes: observacoesPersonalizadas || pedido.observacoes || 'Nenhuma',
-
-                itens: pedido.itens.map(item => ({
-                    produto: item.produto.nome,
-                    quantidade: item.quantidadeSolicitada,
-                    preco_unitario: item.precoUnitario,
-                    total_item: (item.quantidadeSolicitada * item.precoUnitario),
-                    observacao: item.observacao || ''
-                }))
-            };
-
-            const response = await fetch(N8N_WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(emailData)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Erro no serviço de email: ${response.status} - ${errorText}`);
-            }
+        handleAcaoProtegida(async () => {
+            setEnviandoEmail(prev => ({ ...prev, [pedido.id]: true }));
 
             try {
-                await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedido.id}/registrar-email`, {
+                if (!N8N_WEBHOOK_URL) {
+                    throw new Error('Serviço de email não configurado');
+                }
+
+                const dataFormatada = formatarData(pedido.dataSolicitacao);
+
+                const emailData = {
+                    action: "enviar_email_pedido",
+                    remetente_nome: empresa?.nome || "Sua Empresa",
+                    remetente_email: empresa?.email || "empresa@email.com",
+                    empresa_nome: empresa?.nome || "Nome da Empresa",
+                    empresa_telefone: empresa?.telefone || "(00) 00000-0000",
+
+                    destinatario: pedido.fornecedor.email,
+                    fornecedor_nome: pedido.fornecedor.nome,
+
+                    pedido_id: pedido.id,
+                    pedido_numero: pedido.numero,
+                    assunto: `Pedido ${pedido.numero} - ${pedido.fornecedor.nome}`,
+                    total: pedido.total,
+                    data: dataFormatada,
+                    observacoes: observacoesPersonalizadas || pedido.observacoes || 'Nenhuma',
+
+                    itens: pedido.itens.map(item => ({
+                        produto: item.produto.nome,
+                        quantidade: item.quantidadeSolicitada,
+                        preco_unitario: item.precoUnitario,
+                        total_item: (item.quantidadeSolicitada * item.precoUnitario),
+                        observacao: item.observacao || ''
+                    }))
+                };
+
+                const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
-                        'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
-                    }
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(emailData)
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro no serviço de email: ${response.status} - ${errorText}`);
+                }
+
+                try {
+                    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedido.id}/registrar-email`, {
+                        method: 'POST',
+                        headers: {
+                            'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
+                        }
+                    });
+                } catch (error) {
+                    console.warn("Erro ao registrar email no log:", error);
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: t("emailEnviadoSucesso"),
+                    html: t("emailEnviadoPara", { email: pedido.fornecedor.email }),
+                    timer: 3000
+                });
+
             } catch (error) {
-                console.warn("Erro ao registrar email no log:", error);
+                console.error("Erro ao enviar email:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroEnviarEmail"),
+                    text: error instanceof Error ? error.message : 'Erro ao enviar email'
+                });
+            } finally {
+                setEnviandoEmail(prev => ({ ...prev, [pedido.id]: false }));
             }
-
-            Swal.fire({
-                icon: 'success',
-                title: t("emailEnviadoSucesso"),
-                html: `Email enviado para: <strong>${pedido.fornecedor.email}</strong>`,
-                timer: 3000
-            });
-
-        } catch (error) {
-            console.error("Erro ao enviar email:", error);
-            Swal.fire({
-                icon: 'error',
-                title: t("erroEnviarEmail"),
-                text: error instanceof Error ? error.message : 'Erro ao enviar email'
-            });
-        } finally {
-            setEnviandoEmail(prev => ({ ...prev, [pedido.id]: false }));
-        }
+        });
     };
 
     const handleAbrirModalEmail = (pedido: Pedido) => {
-        setPedidoSelecionado(pedido);
-        setObservacoesEmail(pedido.observacoes || "");
-        setModalTipo('enviarEmail');
-        setModalAberto(true);
+        handleAcaoProtegida(() => {
+            setPedidoSelecionado(pedido);
+            setObservacoesEmail(pedido.observacoes || "");
+            setModalTipo('enviarEmail');
+            setModalAberto(true);
+        });
     };
 
     const handleEnviarEmailComObservacoes = async () => {
@@ -449,14 +508,16 @@ export default function PedidosPage() {
     };
 
     const handleAbrirModalCriacao = () => {
-        setModalTipo('criar');
-        setModalAberto(true);
-        carregarFornecedores();
-        carregarProdutos();
-        setFornecedorSelecionado("");
-        setItensCriacao([]);
-        setObservacoesCriacao("");
-        setBuscaProduto("");
+        handleAcaoProtegida(() => {
+            setModalTipo('criar');
+            setModalAberto(true);
+            carregarFornecedores();
+            carregarProdutos();
+            setFornecedorSelecionado("");
+            setItensCriacao([]);
+            setObservacoesCriacao("");
+            setBuscaProduto("");
+        });
     };
 
     const adicionarItem = (produto: Produto) => {
@@ -509,134 +570,141 @@ export default function PedidosPage() {
     };
 
     const handleCriarPedido = async () => {
-        if (!fornecedorSelecionado) {
-            Swal.fire({
-                icon: 'error',
-                title: t("erroFornecedorNaoSelecionado")
-            });
-            return;
-        }
+        handleAcaoProtegida(async () => {
+            if (!fornecedorSelecionado) {
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroFornecedorNaoSelecionado")
+                });
+                return;
+            }
 
-        if (itensCriacao.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: t("erroNenhumItem")
-            });
-            return;
-        }
+            if (itensCriacao.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroNenhumItem")
+                });
+                return;
+            }
 
-        setCarregandoCriacao(true);
+            setCarregandoCriacao(true);
 
-        try {
-            const usuarioId = localStorage.getItem("client_key")?.replace(/"/g, "") || '';
+            try {
+                const usuarioSalvo = localStorage.getItem("client_key");
+                if (!usuarioSalvo) return;
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': usuarioId
-                },
-                body: JSON.stringify({
-                    fornecedorId: fornecedorSelecionado,
-                    itens: itensCriacao.map(item => ({
-                        produtoId: item.produtoId,
-                        quantidade: item.quantidade,
-                        precoUnitario: item.precoUnitario,
-                        observacao: item.observacao
-                    })),
-                    observacoes: observacoesCriacao,
-                    empresaId: empresaId
-                })
-            });
+                const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-            if (response.ok) {
-                const pedidoCriado = await response.json();
-
-                const fornecedor = fornecedores.find(f => f.id === fornecedorSelecionado);
-                if (fornecedor) {
-                    await handleEnviarEmail({
-                        ...pedidoCriado.pedido,
-                        fornecedor: {
-                            id: fornecedor.id,
-                            nome: fornecedor.nome,
-                            email: fornecedor.email
-                        },
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': usuarioValor
+                    },
+                    body: JSON.stringify({
+                        fornecedorId: fornecedorSelecionado,
                         itens: itensCriacao.map(item => ({
-                            id: `temp-${item.produtoId}`,
                             produtoId: item.produtoId,
-                            produto: {
-                                nome: item.produto.nome,
-                                foto: item.produto.foto
-                            },
-                            quantidadeSolicitada: item.quantidade,
-                            quantidadeAtendida: 0,
+                            quantidade: item.quantidade,
                             precoUnitario: item.precoUnitario,
                             observacao: item.observacao
                         })),
-                        usuario: {
-                            nome: "Usuário atual"
-                        },
-                        dataSolicitacao: new Date().toISOString(),
-                        observacoes: observacoesCriacao
-                    } as Pedido, observacoesCriacao);
-                }
-
-                Swal.fire({
-                    icon: 'success',
-                    title: t("pedidoCriadoSucesso"),
-                    timer: 1500
+                        observacoes: observacoesCriacao,
+                        empresaId: empresaId
+                    })
                 });
 
-                setModalAberto(false);
-                carregarPedidos(empresaId!);
-            } else {
-                throw new Error('Erro ao criar pedido');
+                if (response.ok) {
+                    const pedidoCriado = await response.json();
+
+                    const fornecedor = fornecedores.find(f => f.id === fornecedorSelecionado);
+                    if (fornecedor) {
+                        await handleEnviarEmail({
+                            ...pedidoCriado.pedido,
+                            fornecedor: {
+                                id: fornecedor.id,
+                                nome: fornecedor.nome,
+                                email: fornecedor.email
+                            },
+                            itens: itensCriacao.map(item => ({
+                                id: `temp-${item.produtoId}`,
+                                produtoId: item.produtoId,
+                                produto: {
+                                    nome: item.produto.nome,
+                                    foto: item.produto.foto
+                                },
+                                quantidadeSolicitada: item.quantidade,
+                                quantidadeAtendida: 0,
+                                precoUnitario: item.precoUnitario,
+                                observacao: item.observacao
+                            })),
+                            usuario: {
+                                nome: "Usuário atual"
+                            },
+                            dataSolicitacao: new Date().toISOString(),
+                            observacoes: observacoesCriacao
+                        } as Pedido, observacoesCriacao);
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: t("pedidoCriadoSucesso"),
+                        timer: 1500
+                    });
+
+                    setModalAberto(false);
+                    carregarPedidos(empresaId!);
+                } else {
+                    throw new Error('Erro ao criar pedido');
+                }
+            } catch (error) {
+                console.error("Erro ao criar pedido:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroCriarPedido")
+                });
+            } finally {
+                setCarregandoCriacao(false);
             }
-        } catch (error) {
-            console.error("Erro ao criar pedido:", error);
-            Swal.fire({
-                icon: 'error',
-                title: t("erroCriarPedido")
-            });
-        } finally {
-            setCarregandoCriacao(false);
-        }
+        });
     };
 
     const handleAtualizarQuantidades = async () => {
         if (!pedidoSelecionado) return;
 
-        try {
-            const itensParaAtualizar = Object.entries(quantidadesAtendidas).map(([itemId, quantidade]) => ({
-                itemId,
-                quantidadeAtendida: quantidade
-            }));
+        handleAcaoProtegida(async () => {
+            try {
+                const itensParaAtualizar = Object.entries(quantidadesAtendidas).map(([itemId, quantidade]) => ({
+                    itemId,
+                    quantidadeAtendida: quantidade
+                }));
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoSelecionado.id}/itens`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
-                },
-                body: JSON.stringify({ itens: itensParaAtualizar })
-            });
-
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: t("quantidadesAtualizadasSucesso"),
-                    timer: 1500
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/pedidos/${pedidoSelecionado.id}/itens`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': localStorage.getItem("client_key")?.replace(/"/g, "") || ''
+                    },
+                    body: JSON.stringify({ itens: itensParaAtualizar })
                 });
-                setQuantidadesAtendidas({});
-                carregarPedidos(empresaId!);
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: t("quantidadesAtualizadasSucesso"),
+                        timer: 1500
+                    });
+                    setQuantidadesAtendidas({});
+                    carregarPedidos(empresaId!);
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar quantidades:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t("erroAtualizarQuantidades")
+                });
             }
-        } catch (error) {
-            console.error("Erro ao atualizar quantidades:", error);
-            Swal.fire({
-                icon: 'error',
-                title: t("erroAtualizarQuantidades")
-            });
-        }
+        });
     };
 
     const handlePreencherQuantidadesSolicitadas = () => {
@@ -656,6 +724,29 @@ export default function PedidosPage() {
             timer: 1500
         });
     };
+
+    if (!podeVisualizarPedidos && empresaId && !empresaAtivada) {
+        return (
+            <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+                <div className="w-full max-w-6xl">
+                    <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
+                        {t("titulo")}
+                    </h1>
+                    <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+                        backgroundColor: temaAtual.primario + "20",
+                        color: temaAtual.texto,
+                        border: `1px solid ${temaAtual.borda}`
+                    }}>
+                        <FaLock className="text-xl" />
+                        <div>
+                            <p className="font-bold">{t("empresaNaoAtivada.titulo") || "Empresa Não Ativada"}</p>
+                            <p>{t("empresaNaoAtivada.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade."}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!podeVisualizarPedidos) {
         return (
@@ -686,6 +777,20 @@ export default function PedidosPage() {
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-left" style={{ color: temaAtual.texto }}>
                     {t("titulo")}
                 </h1>
+
+                {empresaId && !empresaAtivada && (
+                    <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
+                        backgroundColor: temaAtual.primario + "20",
+                        color: temaAtual.texto,
+                        border: `1px solid ${temaAtual.borda}`
+                    }}>
+                        <FaLock className="text-xl" />
+                        <div>
+                            <p className="font-bold">{t("empresaNaoAtivada.titulo") || "Empresa Não Ativada"}</p>
+                            <p>{t("empresaNaoAtivada.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade."}</p>
+                        </div>
+                    </div>
+                )}
 
                 <div
                     className="flex flex-col md:flex-row gap-2 md:gap-1 mb-4 p-3 rounded-lg relative w-full md:w-auto"

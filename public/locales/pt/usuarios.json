@@ -20,6 +20,7 @@
   "selecioneUsuario": "Selecione um usuário",
   "nenhumUsuario": "Nenhum usuário encontrado",
   "nenhumaEmpresa": "Você não pertence a nenhuma empresa",
+  "carregandoPermissoes": "Carregando permissões...",
   "semPermissaoVisualizarUsuarios": "Você não tem permissão para visualizar usuários.",
   "acessoNegado": "Acesso Negado",
   "buscarUsuario": "Buscar Usuário",
@@ -27,6 +28,13 @@
   "gerenciarPermissoes": "Gerenciar Permissões",
   "semPermissaoGerenciar": "Sem permissão para gerenciar",
   "modal": {
+    "preenchaCamposObrigatorios": {
+      "titulo": "Campos obrigatórios",
+      "texto": "Por favor, preencha os seguintes campos obrigatórios: {{campos}}",
+      "usuario": "Usuário",
+      "tituloMensagem": "Título da mensagem",
+      "descricaoMensagem": "Descrição da mensagem"
+    },
     "permissaoNegada": {
       "titulo": "Permissão Negada",
       "textoConvite": "Você não tem permissão para realizar esta ação",

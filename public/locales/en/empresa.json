@@ -21,6 +21,7 @@
   "sucessoTituloDesativado": "Catalog disabled",
   "sucessoTextoAtivado": "The catalog is now public.",
   "sucessoTextoDesativado": "The catalog is no longer public.",
+  "semLogo": "No Photo",
   "erroTitulo": "Error",
   "erroTexto": "Could not change the catalog state.",
   "fotoAtual": "Current photo",

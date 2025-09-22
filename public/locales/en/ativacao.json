@@ -5,6 +5,7 @@
 "codigoPlaceholder": "XXXX-XXXX-XXXX",
 "codigoHelp": "The code will be provided after payment confirmation",
 "botaoAtivar": "Activate Company",
+"empresaAtivadaMensagem":" Your company has been successfully activated.",
 "botaoAtivando": "Activating...",
 "empresaAtivada": "Company successfully activated!",
 "erroBuscarUsuario": "Error fetching user data",

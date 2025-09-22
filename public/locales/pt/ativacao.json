@@ -2,6 +2,7 @@
     "titulo": "Ativação da Empresa",
     "subtitulo": "Insira o código de ativação fornecido após o pagamento para liberar todas as funcionalidades do sistema",
     "codigoAtivacao": "Código de Ativação",
+    "empresaAtivadaMensagem": "Sua empresa foi ativada com sucesso.",
     "codigoPlaceholder": "XXXX-XXXX-XXXX",
     "codigoHelp": "O código será fornecido após a confirmação do pagamento",
     "botaoAtivar": "Ativar Empresa",

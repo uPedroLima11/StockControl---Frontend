@@ -427,8 +427,6 @@ export default function CriarEmpresa() {
           html: `
           <div>
             <p>${t("sucesso.mensagem")}</p>
-            <p class="mt-2 text-sm">${t("sucesso.dominioCriado")}: ${result.dominio}</p>
-            <p class="text-sm">${t("sucesso.urlCatalogo")}: ${result.urlCatalogo}</p>
           </div>
         `,
           confirmButtonColor: temaAtual.primario,

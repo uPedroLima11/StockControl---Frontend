@@ -17,6 +17,11 @@
   "catalogoDesativado": "Catálogo desativado",
   "catalogoAgoraPublico": "O catálogo agora está público.",
   "catalogoNaoPublico": "O catálogo não está mais público.",
+  "empresaNaoAtivada": {
+    "titulo": "Empresa Não Ativada",
+    "mensagem": "Ative sua empresa para utilizar a exportação de dados"
+  },
+  "semLogo": "Sem Foto",
   "fotoAtual": "Foto atual",
   "campos": {
     "nome": "Nome",

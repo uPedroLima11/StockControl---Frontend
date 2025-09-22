@@ -24,6 +24,7 @@
     "usuario_nao_encontrado": "Usuário não encontrado",
     "usuario_nao_informado": "Não Informado",
     "carregando": "Carregando...",
+    "status": "Status",
     "acesso_negado": {
       "titulo": "Acesso Negado",
       "mensagem": "Você não tem permissão para acessar esta página",
@@ -35,6 +36,12 @@
       "EXCLUSAO": "Exclusão",
       "BAIXA": "Baixa",
       "EMAIL_ENVIADO": "Email Enviado"
+    },
+    "status_pedido": {
+      "PENDENTE": "Pending",
+      "PROCESSANDO": "Processing",
+      "CONCLUIDO": "Completed",
+      "CANCELADO": "Cancelled"
     },
     "entidades": {
       "produtos": "Produtos",

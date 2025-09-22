@@ -178,7 +178,7 @@ useEffect(() => {
       Swal.fire({
         icon: 'success',
         title: t('empresaAtivada') || 'Empresa ativada!',
-        text: 'Sua empresa foi ativada com sucesso.',
+        text: t('empresaAtivadaMensagem') || 'Sua empresa foi ativada com sucesso.',
         confirmButtonColor: temaAtual.primario,
       });
 

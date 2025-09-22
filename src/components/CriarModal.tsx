@@ -241,7 +241,6 @@ function ItemPedidoCriacao({
     onUpdateObservation(value);
   };
 
-
   return (
     <div className="p-3 border rounded" style={{ borderColor: temaAtual.borda }}>
       <div className="flex justify-between items-start mb-2">

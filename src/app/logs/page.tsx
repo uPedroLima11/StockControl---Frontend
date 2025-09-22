@@ -176,6 +176,15 @@ export default function Logs() {
     });
   }
 
+  const traduzirStatusPedido = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'PENDENTE': t('logs.status_pedido.PENDENTE'),
+      'PROCESSANDO': t('logs.status_pedido.PROCESSANDO'),
+      'CONCLUIDO': t('logs.status_pedido.CONCLUIDO'),
+      'CANCELADO': t('logs.status_pedido.CANCELADO')
+    };
+    return statusMap[status] || status;
+  };
   const traduzirTipoLog = (tipo: string): string => {
     const tiposValidos: TipoLog[] = ["CRIACAO", "ATUALIZACAO", "EXCLUSAO", "BAIXA", "EMAIL_ENVIADO"];
     if (tiposValidos.includes(tipo as TipoLog)) {
@@ -210,7 +219,6 @@ export default function Logs() {
           quantidade: parsed.quantidade
         }) + (parsed.clienteNome ? ` | ${t("logs.cliente")}: ${parsed.clienteNome}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`);
       }
-
       if (parsed.entityType === "pedidos") {
         switch (parsed.action) {
           case "pedido_criado":
@@ -222,8 +230,8 @@ export default function Logs() {
           case "status_atualizado":
             return t("logs.descricoes.status_atualizado", {
               pedidoNumero: parsed.pedidoNumero,
-              statusAnterior: parsed.statusAnterior,
-              statusNovo: parsed.statusNovo,
+              statusAnterior: traduzirStatusPedido(parsed.statusAnterior),
+              statusNovo: traduzirStatusPedido(parsed.statusNovo),
               fornecedorNome: parsed.fornecedorNome
             });
           case "itens_atualizados":
@@ -236,7 +244,7 @@ export default function Logs() {
             return t("logs.descricoes.pedido_concluido_estoque", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
-              statusFinal: parsed.statusFinal
+              statusFinal: traduzirStatusPedido(parsed.statusFinal)
             });
           case "email_enviado_fornecedor":
             return t("logs.descricoes.email_enviado_fornecedor", {
@@ -383,11 +391,11 @@ export default function Logs() {
               <>
                 <div className="flex">
                   <span className="font-semibold min-w-[70px]">{t("logs.status_anterior")}:</span>
-                  <span>{parsed.statusAnterior}</span>
+                  <span>{traduzirStatusPedido(parsed.statusAnterior)}</span>
                 </div>
                 <div className="flex">
                   <span className="font-semibold min-w-[70px]">{t("logs.status_novo")}:</span>
-                  <span>{parsed.statusNovo}</span>
+                  <span>{traduzirStatusPedido(parsed.statusNovo)}</span>
                 </div>
               </>
             )}
@@ -395,6 +403,12 @@ export default function Logs() {
               <div className="flex">
                 <span className="font-semibold min-w-[70px]">{t("logs.itens_atualizados")}:</span>
                 <span>{parsed.quantidadeItensAtualizados}</span>
+              </div>
+            )}
+            {parsed.action === "pedido_concluido_estoque" && (
+              <div className="flex">
+                <span className="font-semibold min-w-[70px]">{t("logs.status")}:</span>
+                <span>{traduzirStatusPedido(parsed.statusFinal)}</span>
               </div>
             )}
             {parsed.action === "email_enviado_fornecedor" && (
