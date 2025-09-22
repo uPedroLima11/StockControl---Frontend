@@ -419,7 +419,7 @@ export default function CriarEmpresa() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
 
         Swal.fire({
           icon: "success",
