@@ -75,7 +75,7 @@ export function CriarModal({
       >
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-xl font-bold">{t("novoPedido")}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className=" cursor-pointer text-gray-500 hover:text-gray-700">
             <FaTimes />
           </button>
         </div>
@@ -125,7 +125,7 @@ export function CriarModal({
             <select
               value={fornecedorSelecionado}
               onChange={(e) => setFornecedorSelecionado(e.target.value)}
-              className="w-full p-2 rounded border text-sm"
+              className="w-full cursor-pointer p-2 rounded border text-sm"
               style={{
                 backgroundColor: temaAtual.card,
                 borderColor: temaAtual.borda,
@@ -191,7 +191,7 @@ export function CriarModal({
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded border text-sm"
+            className="px-4 py-2 cursor-pointer rounded border text-sm"
             style={{
               borderColor: temaAtual.borda,
               color: temaAtual.texto
@@ -200,17 +200,21 @@ export function CriarModal({
             {t("cancelar")}
           </button>
 
-          <button
+            <button
             onClick={handleCriarPedido}
             disabled={carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado}
-            className="px-4 py-2 rounded text-white text-sm"
+            className={`px-4 py-2 rounded text-white text-sm ${
+              (carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado)
+              ? ""
+              : "cursor-pointer"
+            }`}
             style={{
               backgroundColor: temaAtual.primario,
               opacity: (carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado) ? 0.6 : 1
             }}
-          >
+            >
             {carregandoCriacao ? t("criandoPedido") : t("criarPedido")}
-          </button>
+            </button>
         </div>
       </div>
     </div>
@@ -260,7 +264,7 @@ function ItemPedidoCriacao({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onUpdateQuantity(item.quantidade - 1)}
-            className="p-1 rounded border"
+            className="p-1 cursor-pointer rounded border"
             style={{ borderColor: temaAtual.borda }}
           >
             <FaMinus size={10} />
@@ -268,7 +272,7 @@ function ItemPedidoCriacao({
           <span className="w-8 text-center text-sm">{item.quantidade}</span>
           <button
             onClick={() => onUpdateQuantity(item.quantidade + 1)}
-            className="p-1 rounded border"
+            className="p-1 cursor-pointer rounded border"
             style={{ borderColor: temaAtual.borda }}
           >
             <FaPlus size={10} />

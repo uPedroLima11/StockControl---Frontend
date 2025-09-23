@@ -814,7 +814,7 @@ export default function PedidosPage() {
                     <select
                         value={filtroStatus}
                         onChange={(e) => setFiltroStatus(e.target.value)}
-                        className="p-1.5 rounded border text-sm mr-2 min-w-[140px]"
+                        className="p-1.5 cursor-pointer rounded border text-sm mr-2 min-w-[140px]"
                         style={{
                             backgroundColor: temaAtual.card,
                             borderColor: temaAtual.borda,
@@ -830,7 +830,7 @@ export default function PedidosPage() {
                     {podeCriarPedido && (
                         <button
                             onClick={handleAbrirModalCriacao}
-                            className="px-2 py-1 rounded-lg flex items-center gap-2 text-sm whitespace-nowrap"
+                            className="px-2 py-1 cursor-pointer rounded-lg flex items-center gap-2 text-sm whitespace-nowrap transition-transform duration-150 hover:scale-105 hover:brightness-110"
                             style={{
                                 backgroundColor: temaAtual.primario,
                                 color: "#FFFFFF"
@@ -845,7 +845,7 @@ export default function PedidosPage() {
                                 <button
                                     onClick={() => mudarPagina(paginaAtual - 1)}
                                     disabled={paginaAtual === 1}
-                                    className={`p-1 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                                    className={`p-1 rounded-full cursor-pointer ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
                                     style={{ color: temaAtual.texto }}
                                 >
                                     <FaChevronLeft />
@@ -858,7 +858,7 @@ export default function PedidosPage() {
                                 <button
                                     onClick={() => mudarPagina(paginaAtual + 1)}
                                     disabled={paginaAtual === totalPaginas}
-                                    className={`p-1 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                                    className={`p-1 rounded-full cursor-pointer ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
                                     style={{ color: temaAtual.texto }}
                                 >
                                     <FaChevronRight />
@@ -971,7 +971,7 @@ export default function PedidosPage() {
                                         <div className="flex flex-col gap-2">
                                             <button
                                                 onClick={() => handleAbrirModalDetalhes(pedido)}
-                                                className="px-3 py-1 rounded flex items-center gap-1 text-sm"
+                                                className="px-3 py-1 cursor-pointer rounded flex items-center gap-1 text-sm"
                                                 style={{
                                                     backgroundColor: temaAtual.primario,
                                                     color: "#FFFFFF"
@@ -983,12 +983,16 @@ export default function PedidosPage() {
                                             <button
                                                 onClick={() => handleAbrirModalEmail(pedido)}
                                                 disabled={pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail}
-                                                className="px-3 py-1 rounded flex items-center gap-1 text-sm"
+                                                className={`px-3 py-1 rounded flex items-center gap-1 text-sm ${
+                                                    (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail)
+                                                        ? ''
+                                                        : 'cursor-pointer'
+                                                }`}
                                                 style={{
                                                     backgroundColor: temaAtual.secundario,
                                                     color: "#FFFFFF",
                                                     opacity: (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail) ? 0.6 : 1,
-                                                    cursor: !podeEnviarEmail ? "not-allowed" : undefined
+                                                    cursor: !podeEnviarEmail || pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] ? "not-allowed" : "pointer"
                                                 }}
                                                 title={
                                                     !podeEnviarEmail
@@ -1012,7 +1016,7 @@ export default function PedidosPage() {
                                                         <button
                                                             key={status}
                                                             onClick={() => handleAtualizarStatus(pedido.id, status)}
-                                                            className={`px-2 py-1 rounded text-xs ${pedido.status === status
+                                                            className={`px-2 cursor-pointer py-1 rounded text-xs ${pedido.status === status
                                                                 ? status === 'CANCELADO'
                                                                     ? 'bg-red-500 text-white'
                                                                     : 'bg-gray-500 text-white'
@@ -1053,7 +1057,7 @@ export default function PedidosPage() {
                     >
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="text-xl font-bold">{t("enviarEmail")} - {pedidoSelecionado.numero}</h2>
-                            <button onClick={() => setModalAberto(false)} className="text-gray-500 hover:text-gray-700">
+                            <button onClick={() => setModalAberto(false)} className="text-gray-500 cursor-pointer hover:text-gray-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -1077,7 +1081,7 @@ export default function PedidosPage() {
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setModalAberto(false)}
-                                className="px-4 py-2 rounded border"
+                                className="px-4 cursor-pointer py-2 rounded border"
                                 style={{
                                     borderColor: temaAtual.borda,
                                     color: temaAtual.texto
@@ -1089,7 +1093,7 @@ export default function PedidosPage() {
                             <button
                                 onClick={handleEnviarEmailComObservacoes}
                                 disabled={enviandoEmail[pedidoSelecionado.id]}
-                                className="px-4 py-2 rounded text-white flex items-center gap-2"
+                                className="px-4 cursor-pointer py-2 rounded text-white flex items-center gap-2"
                                 style={{
                                     backgroundColor: temaAtual.primario,
                                     opacity: enviandoEmail[pedidoSelecionado.id] ? 0.6 : 1
@@ -1245,7 +1249,7 @@ export default function PedidosPage() {
                                                         ...quantidadesAtendidas,
                                                         [item.id]: item.quantidadeSolicitada
                                                     })}
-                                                    className="text-sm text-blue-500 hover:text-blue-700"
+                                                    className="text-sm cursor-pointer text-blue-500 hover:text-blue-700"
                                                 >
                                                     {t("preencherSolicitado")}
                                                 </button>
@@ -1261,7 +1265,7 @@ export default function PedidosPage() {
                                 onClick={() => {
                                     setModalAberto(false);
                                 }}
-                                className="px-4 py-2 rounded border"
+                                className="px-4 py-2 cursor-pointer rounded border"
                                 style={{
                                     borderColor: temaAtual.borda,
                                     color: temaAtual.texto
@@ -1274,7 +1278,7 @@ export default function PedidosPage() {
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => handleAtualizarStatus(pedidoSelecionado.id, 'CANCELADO')}
-                                        className="px-4 py-2 rounded text-white bg-red-500 hover:bg-red-600"
+                                        className="px-4 py-2 cursor-pointer rounded text-white bg-red-500 hover:bg-red-600"
                                     >
                                         <FaTimes className="inline mr-2" />
                                         {t("cancelarPedido")}
@@ -1282,7 +1286,7 @@ export default function PedidosPage() {
 
                                     <button
                                         onClick={handlePreencherQuantidadesSolicitadas}
-                                        className="px-4 py-2 rounded text-white"
+                                        className="px-4 cursor-pointer py-2 rounded text-white"
                                         style={{
                                             backgroundColor: temaAtual.secundario
                                         }}
@@ -1292,7 +1296,7 @@ export default function PedidosPage() {
 
                                     <button
                                         onClick={handleAtualizarQuantidades}
-                                        className="px-4 py-2 rounded text-white"
+                                        className="px-4 py-2 cursor-pointer rounded text-white"
                                         style={{
                                             backgroundColor: temaAtual.primario
                                         }}
@@ -1302,7 +1306,7 @@ export default function PedidosPage() {
 
                                     <button
                                         onClick={() => handleConcluirPedidoComEstoque(pedidoSelecionado.id)}
-                                        className="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-700"
+                                        className="px-4 py-2 rounded cursor-pointer text-white bg-green-600 hover:bg-green-700"
                                     >
                                         <FaCheck className="inline mr-2" />
                                         {t("concluirComEstoque")}
