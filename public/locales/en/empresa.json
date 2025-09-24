@@ -74,7 +74,9 @@
     "erroSairEmpresa": "Error leaving company.",
     "erroProcessarExclusao": "Error processing deletion.",
     "erroAlterarCatalogo": "Could not change the catalog state.",
-    "erro": "Error"
+    "erro": "Error",
+    "emailUsuarioExistenteTitulo": "Email already in use",
+    "emailUsuarioExistenteTexto": "This email is already being used by a user. Please use another email."
   },
   "modal": {
     "salvar": "Save",

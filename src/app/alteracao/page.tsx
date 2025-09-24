@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 
 type Inputs = {
@@ -17,7 +16,6 @@ type Inputs = {
 
 export default function Alteracao() {
   const { register, handleSubmit, control } = useForm<Inputs>();
-  const { t } = useTranslation("alteracao");
   const router = useRouter();
   const [passwordValid, setPasswordValid] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(false);
@@ -25,6 +23,67 @@ export default function Alteracao() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const senha = useWatch({ control, name: "senha" });
   const confirmaSenha = useWatch({ control, name: "confirmaSenha" });
+
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976",
+      sucesso: "#10B981",
+      erro: "#EF4444"
+    }
+  };
+
+  const temaAtual = cores.dark;
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      html::-webkit-scrollbar {
+        width: 10px;
+      }
+      
+      html::-webkit-scrollbar-track {
+        background: ${temaAtual.card};
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        background: ${temaAtual.borda}; 
+        border-radius: 5px;
+        border: 2px solid ${temaAtual.card};
+      }
+      
+      html::-webkit-scrollbar-thumb:hover {
+        background: ${temaAtual.primario}; 
+      }
+      
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: ${temaAtual.borda} ${temaAtual.card};
+      }
+      
+      @media (max-width: 768px) {
+        html::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        html::-webkit-scrollbar-thumb {
+          border: 1px solid ${temaAtual.card};
+          border-radius: 3px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [temaAtual]);
 
   function validarSenha(senha: string) {
     if (!senha) return false;
@@ -49,18 +108,22 @@ export default function Alteracao() {
       if (!passwordValid) {
         Swal.fire({
           icon: "error",
-          title: t("senhaInvalidaTitulo"),
-          text: t("senhaInvalidaMensagem"),
-          confirmButtonColor: "#013C3C",
+          title: "Senha inválida",
+          text: "A senha deve conter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.",
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
         });
         return;
       }
       if (data.senha !== data.confirmaSenha) {
         Swal.fire({
           icon: "error",
-          title: t("erroTitulo"),
-          text: t("erroSenhasNaoCoincidem"),
-          confirmButtonColor: "#013C3C",
+          title: "Erro",
+          text: "As senhas não coincidem.",
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
         });
         return;
       }
@@ -80,159 +143,228 @@ export default function Alteracao() {
       if (response.status === 200) {
         Swal.fire({
           icon: "success",
-          title: t("sucessoTitulo"),
-          text: t("sucessoMensagem"),
-          confirmButtonColor: "#013C3C",
+          title: "Senha alterada com sucesso!",
+          text: "Você pode acessar sua conta com a nova senha.",
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
         }).then(() => {
           router.push("/login");
         });
       } else {
         Swal.fire({
           icon: "error",
-          title: t("erroTituloGenerico"),
-          text: t("erroMensagemGenerica"),
-          confirmButtonColor: "#013C3C",
+          title: "Erro",
+          text: "Ocorreu um erro ao alterar a senha. Tente novamente.",
+          confirmButtonColor: temaAtual.primario,
+          background: temaAtual.card,
+          color: temaAtual.texto
         });
       }
     } catch (err) {
       console.error("Erro na requisição:", err);
       Swal.fire({
         icon: "error",
-        title: t("erroTituloGenerico"),
-        text: t("erroMensagemGenerica"),
-        confirmButtonColor: "#013C3C",
+        title: "Erro",
+        text: "Ocorreu um erro ao alterar a senha. Tente novamente.",
+        confirmButtonColor: temaAtual.primario,
+        background: temaAtual.card,
+        color: temaAtual.texto
       });
     }
   }
 
   return (
-    <div className="flex justify-center items-center flex-col gap-5 bg-[#20252C] min-h-screen w-full px-4 py-8">
-      <div>
-        <Link href={"/"} className="bg-[#2F2C2C] p-8 rounded-4xl flex flex-col items-center justify-center shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]">
-          <img src="../../icone.png" alt="Logo" />
-          <span className="p-0 pr-2 text-white text-center text-2xl font-semibold whitespace-nowrap">StockControl</span>
+    <div 
+      className="flex justify-center items-center flex-col gap-5 min-h-screen w-full px-4 py-8"
+      style={{ backgroundColor: temaAtual.fundo }}
+    >
+      <div className="w-full flex justify-center">
+        <Link 
+          href={"/"} 
+          className="p-8 rounded-4xl flex flex-col items-center justify-center shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]"
+          style={{ backgroundColor: temaAtual.card }}
+        >
+          <img src="/icone.png" alt="Logo" className="w-16 h-16 md:w-20 md:h-20 mb-2 brightness-0 invert" />
+          <span 
+            className="text-center text-xl md:text-2xl font-semibold whitespace-nowrap"
+            style={{ color: temaAtual.texto }}
+          >
+            StockControl
+          </span>
         </Link>
       </div>
-      <form onSubmit={handleSubmit(verificaAlteracao)} className="w-full max-w-md">
-        <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
-          {t("emailRegistrado")}
+      
+      <form 
+        onSubmit={handleSubmit(verificaAlteracao)} 
+        className="w-full max-w-md rounded-xl shadow-lg p-6 md:p-8"
+        style={{ backgroundColor: temaAtual.card }}
+      >
+        <h2 
+          className="text-xl md:text-2xl font-semibold mb-6 text-center"
+          style={{ color: temaAtual.texto }}
+        >
+          Alterar senha
+        </h2>
+
+        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
+          E-mail cadastrado
         </label>
         <div className="relative mb-6">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiEnvelope className="text-gray-400" />
+            <HiEnvelope style={{ color: temaAtual.placeholder }} />
           </div>
           <input 
             type="email" 
             {...register("email")} 
-            className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" 
-            placeholder={t("digiteEmail")} 
+            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="Digite seu e-mail" 
             required 
+            style={{
+              backgroundColor: temaAtual.fundo,
+              color: temaAtual.texto,
+              borderColor: temaAtual.borda
+            }}
           />
         </div>
 
-        <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
-          {t("codigoVerificacao")}
+        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
+          Código de verificação
         </label>
         <div className="relative mb-6">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiLockClosed className="text-gray-400" />
+            <HiLockClosed style={{ color: temaAtual.placeholder }} />
           </div>
           <input 
             type="text" 
             {...register("codigoVerificacao")} 
-            className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" 
-            placeholder={t("digiteCodigo")} 
+            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="Digite o código de verificação" 
             required 
+            style={{
+              backgroundColor: temaAtual.fundo,
+              color: temaAtual.texto,
+              borderColor: temaAtual.borda
+            }}
           />
         </div>
 
-        <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
-          {t("novaSenha")}
+        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
+          Nova senha
         </label>
         <div className="relative mb-3">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiMiniIdentification className="text-gray-400" />
+            <HiMiniIdentification style={{ color: temaAtual.placeholder }} />
           </div>
           <input 
             type={showPassword ? "text" : "password"} 
             {...register("senha")} 
-            className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" 
-            placeholder={t("digiteNovaSenha")} 
+            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="Digite a nova senha" 
             required 
+            style={{
+              backgroundColor: temaAtual.fundo,
+              color: temaAtual.texto,
+              borderColor: temaAtual.borda
+            }}
           />
           <div 
             className="absolute inset-y-0 end-0 flex items-center pe-3.5 cursor-pointer"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
-              <FaEyeSlash className="text-gray-400" />
+              <FaEyeSlash style={{ color: temaAtual.placeholder }} />
             ) : (
-              <FaEye className="text-gray-400" />
+              <FaEye style={{ color: temaAtual.placeholder }} />
             )}
           </div>
           {senha && (
             <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">
               {passwordValid ? (
-                <HiCheckCircle className="text-green-500" />
+                <HiCheckCircle style={{ color: temaAtual.sucesso }} />
               ) : (
-                <HiExclamationCircle className="text-red-500" />
+                <HiExclamationCircle style={{ color: temaAtual.erro }} />
               )}
             </div>
           )}
         </div>
 
-        <label htmlFor="input-group-1" className="block mb-2 text-sm font-medium text-white">
-          {t("confirmeSenha")}
+        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
+          Confirme a nova senha
         </label>
         <div className="relative mb-6">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiMiniIdentification className="text-gray-400" />
+            <HiMiniIdentification style={{ color: temaAtual.placeholder }} />
           </div>
           <input 
             type={showConfirmPassword ? "text" : "password"} 
             {...register("confirmaSenha")} 
-            className="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" 
-            placeholder={t("confirmeSenhaPlaceholder")} 
+            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="Confirme a nova senha" 
             required 
+            style={{
+              backgroundColor: temaAtual.fundo,
+              color: temaAtual.texto,
+              borderColor: temaAtual.borda
+            }}
           />
           <div 
             className="absolute inset-y-0 end-0 flex items-center pe-3.5 cursor-pointer"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {showConfirmPassword ? (
-              <FaEyeSlash className="text-gray-400" />
+              <FaEyeSlash style={{ color: temaAtual.placeholder }} />
             ) : (
-              <FaEye className="text-gray-400" />
+              <FaEye style={{ color: temaAtual.placeholder }} />
             )}
           </div>
           {confirmaSenha && (
             <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">
               {passwordsMatch ? (
-                <HiCheckCircle className="text-green-500" />
+                <HiCheckCircle style={{ color: temaAtual.sucesso }} />
               ) : (
-                <HiExclamationCircle className="text-red-500" />
+                <HiExclamationCircle style={{ color: temaAtual.erro }} />
               )}
             </div>
           )}
         </div>
 
         <div className="mb-6">
-          <p className="text-sm text-gray-400">{t("senhaRequisitos")}</p>
-          <ul className="text-xs text-gray-400 list-disc pl-5">
-            <li className={senha?.length >= 8 ? "text-green-500" : "text-red-500"}>{t("minimoCaracteres")}</li>
-            <li className={senha && /[a-z]/.test(senha) ? "text-green-500" : "text-red-500"}>{t("letraMinuscula")}</li>
-            <li className={senha && /[A-Z]/.test(senha) ? "text-green-500" : "text-red-500"}>{t("letraMaiuscula")}</li>
-            <li className={senha && /[0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>{t("numero")}</li>
-            <li className={senha && /[^a-zA-Z0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>{t("simbolo")}</li>
+          <p className="text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
+            A senha deve conter:
+          </p>
+          <ul className="text-xs md:text-sm list-disc pl-5 mt-2" style={{ color: temaAtual.placeholder }}>
+            <li className={senha?.length >= 8 ? "text-green-500" : "text-red-500"}>No mínimo 8 caracteres</li>
+            <li className={senha && /[a-z]/.test(senha) ? "text-green-500" : "text-red-500"}>Letra minúscula</li>
+            <li className={senha && /[A-Z]/.test(senha) ? "text-green-500" : "text-red-500"}>Letra maiúscula</li>
+            <li className={senha && /[0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>Número</li>
+            <li className={senha && /[^a-zA-Z0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>Símbolo</li>
           </ul>
         </div>
 
         <button 
           type="submit" 
-          className="text-white cursor-pointer bg-[#00332C] font-bold hover:bg-[#00332c5b] focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm w-full px-5 py-2.5 text-center"
+          className="text-white cursor-pointer font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg w-full px-5 py-2.5 text-center text-sm md:text-base transition-all duration-200 hover:scale-105"
+          style={{ backgroundColor: temaAtual.primario }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = "0.9";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = "1";
+          }}
         >
-          {t("alterarSenha")}
+          Alterar senha
         </button>
+
+        <div className="text-center mt-6">
+          <Link 
+            href="/login" 
+            className="text-sm md:text-base hover:opacity-80 cursor-pointer transition-all"
+            style={{ color: temaAtual.texto }}
+          >
+            Voltar para o login
+          </Link>
+        </div>
       </form>
     </div>
   );
