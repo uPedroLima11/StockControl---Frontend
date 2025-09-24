@@ -710,7 +710,8 @@ export default function Dashboard() {
                       }}
                     >
                       <td className="py-3 px-4 text-start">{produto.nome}</td>
-                      <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td>
+                      <td className="py-3 px-4 text-center">{produto.quantidade}</td> 
+                      <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td> 
                       <td className="flex items-center justify-center py-3 px-4 text-center">
                         {produto.quantidade < (produto.quantidadeMin || 0) ? (
                           <div className="flex items-center gap-1 text-red-400">

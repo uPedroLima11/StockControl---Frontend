@@ -112,7 +112,7 @@ export default function Esqueci() {
         return;
       }
       setEnviado(true);
-    } catch (error) {
+    } catch {
       Swal.fire({
         title: "Erro ao enviar",
         text: "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.",

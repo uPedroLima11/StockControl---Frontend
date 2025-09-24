@@ -153,7 +153,7 @@ export default function Registro() {
             mensagem: "Erro ao verificar email"
           });
         }
-      } catch (error) {
+      } catch {
         setEmailStatus({
           existe: false,
           carregando: false,
