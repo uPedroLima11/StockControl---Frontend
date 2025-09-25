@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun } from "react-icons/fa";
+import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 import { FaClipboardList } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
@@ -315,7 +315,7 @@ export default function Sidebar() {
           "exportar_dados",
           "inventario_visualizar",
           "pedidos_visualizar",
-          
+
         ];
 
         const permissoes: Record<string, boolean> = {};
@@ -486,14 +486,14 @@ export default function Sidebar() {
         }}
         onClick={(e) => {
           if (window.innerWidth < 768) {
-        let target = e.target as HTMLElement | null;
-        while (target) {
-          if (target.tagName === "A") {
-            setEstaAberto(false);
-            break;
-          }
-          target = target.parentElement;
-        }
+            let target = e.target as HTMLElement | null;
+            while (target) {
+              if (target.tagName === "A") {
+                setEstaAberto(false);
+                break;
+              }
+              target = target.parentElement;
+            }
           }
         }}
       >
@@ -540,10 +540,10 @@ export default function Sidebar() {
             {permissoesUsuario.inventario_visualizar && (
               <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} />
             )}
-           {permissoesUsuario.pedidos_visualizar &&( <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />
+            {permissoesUsuario.pedidos_visualizar && (<LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />
             )}
-            
-            {permissoesUsuario.vendas_visualizar &&( <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
+
+            {permissoesUsuario.vendas_visualizar && (<LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />
             )}
 
             {permissoesUsuario.clientes_visualizar && (
@@ -588,6 +588,12 @@ export default function Sidebar() {
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
+            <LinkSidebar
+              href="/ajuda"
+              icon={<FaBook />}
+              label="Central de Ajuda"
+              cores={cores}
+            />
           </nav>
         </div>
 
