@@ -136,7 +136,7 @@ export default function Ajuda() {
                     'Na tela Empresa, você edita informações e gerencia seu catálogo público, sua vitrine online. O link é gerado a partir do domínio.',
                 render: () => (
                     <>
-                        Na tela <strong>"Empresa"</strong>, você edita informações e gerencia seu catálogo público, sua vitrine online. O link é gerado a partir do domínio.
+                        Na tela <strong>&quot;Empresa&quot;</strong>, você edita informações e gerencia seu catálogo público, sua vitrine online. O link é gerado a partir do domínio.
                     </>
                 ),
             },
@@ -149,7 +149,7 @@ export default function Ajuda() {
                     'Na tela Usuários, convide membros para sua equipe. Cargos: Proprietário, Admin, Funcionário. Defina permissões personalizadas para cada um.',
                 render: () => (
                     <>
-                        Na tela <strong>"Usuários"</strong>, convide membros para sua equipe. Cargos: <strong>Proprietário</strong>, <strong>Admin</strong>, <strong>Funcionário</strong>. Defina <strong>permissões personalizadas</strong> para cada um.
+                        Na tela <strong>&quot;Usuários&quot;</strong>, convide membros para sua equipe. Cargos: <strong>Proprietário</strong>, <strong>Admin</strong>, <strong>Funcionário</strong>. Defina <strong>permissões personalizadas</strong> para cada um.
                     </>
                 ),
             },
@@ -391,12 +391,12 @@ export default function Ajuda() {
                                 <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
                                 Acessar Produtos
                             </strong>
-                            <p className="text-sm mt-2 ml-8">Navegue até o menu "Produtos".</p>
+                            <p className="text-sm mt-2 ml-8">Navegue até o menu &quot;Produtos&quot;.</p>
                         </div>
                         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1A365D' : '#F0FDF4', border: `1px solid ${modoDark ? '#2D4B75' : '#BBF7D0'}` }}>
                             <strong className="text-green-600 flex items-center gap-2">
                                 <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-                                Clicar em "Novo Produto"
+                                Clicar em &quot;Novo Produto&quot;
                             </strong>
                             <p className="text-sm mt-2 ml-8">Localize o botão no canto superior direito.</p>
                         </div>
@@ -466,7 +466,7 @@ export default function Ajuda() {
             <section id="produtos-movimentacoes">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><FaBox className="text-blue-500" />Realizando Movimentações de Estoque</h3>
                 <div className="mb-6">
-                    <p className="mb-4">Após criar um produto, acesse-o e clique em "Estoque" para fazer movimentações.</p>
+                    <p className="mb-4">Após criar um produto, acesse-o e clique em &quot;Estoque&quot; para fazer movimentações.</p>
                     <div className="space-y-4">
                         <div className="p-4 rounded-lg"
                             style={{ backgroundColor: modoDark ? '#1A365D' : '#F0FDF4', border: `1px solid ${modoDark ? '#2D4B75' : '#BBF7D0'}` }}>
@@ -479,7 +479,7 @@ export default function Ajuda() {
                             style={{ backgroundColor: modoDark ? '#1A365D' : '#F0FDF4', border: `1px solid ${modoDark ? '#2D4B75' : '#BBF7D0'}` }}>
                             <strong className="text-blue-600 flex items-center gap-2">
                                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-                                Clique em "Estoque"
+                                Clique em &quot;Estoque&quot;
                             </strong>
                             <p className="text-sm mt-2 ml-8">Acesse a tela de movimentações.</p>
                         </div>
@@ -506,8 +506,8 @@ export default function Ajuda() {
                         <ol className="list-decimal list-inside text-sm space-y-2 pl-2">
                             <li>Acesse a tela <strong>Produtos</strong>.</li>
                             <li>Selecione o produto desejado.</li>
-                            <li>Clique em <strong>"Estoque"</strong>.</li>
-                            <li>Na janela, clique em <strong>"Histórico"</strong>.</li>
+                            <li>Clique em <strong>&quot;Estoque&quot;</strong>.</li>
+                            <li>Na janela, clique em <strong>&quot;Histórico&quot;</strong>.</li>
                         </ol>
                     </div>
                     <div className="p-4 rounded-lg"
@@ -561,7 +561,7 @@ export default function Ajuda() {
                     O primeiro passo é registrar sua empresa. Quem cria se torna <strong>Proprietário</strong>, com acesso total.
                 </p>
                 <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1A365D' : '#F0FDF4', border: `1px solid ${modoDark ? '#2D4B75' : '#BBF7D0'}` }}>
-                    <strong className="flex items-center gap-2 mb-2"><FaLink className="text-green-500" />O Campo "Domínio"</strong>
+                    <strong className="flex items-center gap-2 mb-2"><FaLink className="text-green-500" />O Campo &quot;Domínio&quot;</strong>
                     <p className="text-sm mt-1">Este campo define o link único do seu catálogo público (ex: <code>.../catalogo/sua-empresa</code>).</p>
                 </div>
             </section>
@@ -580,7 +580,7 @@ export default function Ajuda() {
             <section id="empresa-catalogo">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><FaStore className="text-blue-500" />3. Catálogo e Dados da Empresa</h3>
                 <p className="mb-4">
-                    Na tela <strong>"Empresa"</strong>, edite informações do seu negócio e gerencie seu catálogo público.
+                    Na tela <strong>&quot;Empresa&quot;</strong>, edite informações do seu negócio e gerencie seu catálogo público.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1A365D' : '#F8FAFC', border: `1px solid ${modoDark ? '#2D4B75' : '#E2E8F0'}` }}>
@@ -597,7 +597,7 @@ export default function Ajuda() {
             <section id="empresa-usuarios">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><FaUserShield className="text-green-500" />4. Gerenciamento de Usuários</h3>
                 <p className="mb-4">
-                    Na tela <strong>"Usuários"</strong>, convide membros para sua equipe e gerencie o que cada um pode fazer.
+                    Na tela <strong>&quot;Usuários&quot;</strong>, convide membros para sua equipe e gerencie o que cada um pode fazer.
                 </p>
                 <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1E4976' : '#EFF6FF' }}>
                     <strong className="flex items-center gap-2 mb-2"><FaUsers className="text-blue-500" />Cargos e Hierarquia</strong>
