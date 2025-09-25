@@ -44,14 +44,45 @@ export default function Ajuda() {
     useEffect(() => {
         const style = document.createElement('style');
         style.textContent = `
-          html { scroll-behavior: smooth; scroll-padding-top: 100px; }
-          html::-webkit-scrollbar { width: 10px; }
-          html::-webkit-scrollbar-track { background: ${modoDark ? "#132F4C" : "#F8FAFC"}; }
-          html::-webkit-scrollbar-thumb { background: ${modoDark ? "#1E4976" : "#CBD5E1"}; border-radius: 5px; border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"}; }
-          html::-webkit-scrollbar-thumb:hover { background: ${modoDark ? "#1976D2" : "#94A3B8"}; }
-        `;
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
         document.head.appendChild(style);
-        return () => { document.head.removeChild(style); };
+
+        return () => {
+            document.head.removeChild(style);
+        };
     }, [modoDark]);
 
     useEffect(() => {
@@ -608,7 +639,7 @@ export default function Ajuda() {
                     </ul>
                     <div className="mt-4 pt-3 border-t" style={{ borderColor: temaAtual.borda }}>
                         <strong className="flex items-center gap-2 mb-2"><FaLock className="text-blue-500" />Permissões Personalizadas</strong>
-                        <p className="text-sm">Defina permissões específicas para cada usuário, como "criar produtos", para um controle mais fino.</p>
+                        <p className="text-sm">Defina permissões específicas para cada usuário, como &quot;criar produtos&quot;, para um controle mais fino.</p>
                     </div>
                 </div>
             </section>
@@ -633,7 +664,7 @@ export default function Ajuda() {
                     <ul className="list-disc list-inside text-sm space-y-2 mt-2">
                         <li>Apenas produtos com estoque são listados para venda.</li>
                         <li>A venda cria uma movimentação de <strong>saída</strong> no estoque.</li>
-                        <li>O registro fica no histórico do produto com o motivo <strong>"Venda"</strong>.</li>
+                        <li>O registro fica no histórico do produto com o motivo <strong>&quot;Venda&quot;</strong>.</li>
                     </ul>
                 </div>
             </section>
@@ -646,7 +677,7 @@ export default function Ajuda() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1A365D' : '#F8FAFC', border: `1px solid ${modoDark ? '#2D4B75' : '#E2E8F0'}` }}>
                         <strong className="text-blue-600 flex items-center gap-2 mb-3">Cadastrando um Cliente</strong>
-                        <p className="text-sm">Em "Clientes", clique em "Novo Cliente" e preencha as informações.</p>
+                        <p className="text-sm">Em &quot;Clientes&quot;, clique em &quot;Novo Cliente&quot; e preencha as informações.</p>
                     </div>
                     <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? '#1A365D' : '#F8FAFC', border: `1px solid ${modoDark ? '#2D4B75' : '#E2E8F0'}` }}>
                         <strong className="text-blue-600 flex items-center gap-2 mb-3">Associando a uma Venda</strong>
