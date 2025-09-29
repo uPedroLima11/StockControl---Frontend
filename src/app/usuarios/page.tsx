@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { FaCog, FaSearch, FaChevronDown, FaChevronUp, FaEnvelope, FaUserPlus, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
-import Swal from "sweetalert2";
+import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 import { getTranslatedPermission, getTranslatedCategory } from '@/utils/permissoeTranslations';
+import Swal from "sweetalert2";
 interface PermissaoI {
   id: string;
   nome: string;
@@ -68,29 +69,6 @@ export default function Usuarios() {
   const [todasMarcadas, setTodasMarcadas] = useState(false);
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#ececec",
-      borda: "#E2E8F0",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

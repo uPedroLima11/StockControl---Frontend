@@ -4,10 +4,11 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUsuarioStore } from "@/context/usuario";
-import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
+import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 type Inputs = {
   nome: string;
@@ -60,35 +61,6 @@ export default function CriarEmpresa() {
     carregando: false,
     mensagem: ""
   });
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976",
-      sucesso: "#22C55E",
-      erro: "#EF4444",
-      alerta: "#F59E0B"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#ecececec",
-      borda: "#cccccc",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF",
-      sucesso: "#22C55E",
-      erro: "#EF4444",
-      alerta: "#F59E0B"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

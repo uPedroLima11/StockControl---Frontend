@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useUsuarioStore } from "@/context/usuario";
-import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { EmpresaI } from "@/utils/types/empresa";
+import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 import { FaEdit, FaTrash, FaLock } from "react-icons/fa";
+import Link from "next/link";
+import Swal from "sweetalert2";
 
 export default function MinhaConta() {
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -20,29 +21,6 @@ export default function MinhaConta() {
   });
   const [modoDark, setModoDark] = useState(false);
   const { t } = useTranslation("conta");
-  
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#ecececec",
-      borda: "#cccccc",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

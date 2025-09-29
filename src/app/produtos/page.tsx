@@ -3,13 +3,14 @@
 import { ProdutoI } from "@/utils/types/produtos";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
-import Image from "next/image";
+import { cores } from "@/utils/cores";
 import { useEffect, useState, useRef } from "react";
 import { FaSearch, FaCog, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle, FaTimes, FaFilter } from "react-icons/fa";
-import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
+import Image from "next/image";
+import Swal from "sweetalert2";
 
 type CampoOrdenacao = 'nome' | 'estoque' | 'preco' | 'none';
 type DirecaoOrdenacao = 'asc' | 'desc';
@@ -70,29 +71,6 @@ export default function Produtos() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuCategoriasRef = useRef<HTMLDivElement>(null);
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#000000",
-      card: "#cccccc",
-      borda: "#E2E8F0",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

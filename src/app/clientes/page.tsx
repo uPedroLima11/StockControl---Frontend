@@ -1,10 +1,11 @@
 "use client";
+import { cores } from "@/utils/cores";
 import { ClienteI } from "@/utils/types/clientes";
 import { useEffect, useState } from "react";
 import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronUp, FaEdit, FaEye, FaAngleLeft, FaAngleRight } from "react-icons/fa";
-import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function Clientes() {
   const [modoDark, setModoDark] = useState(false);
@@ -41,29 +42,6 @@ export default function Clientes() {
   const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
   const [estadoCaracteres, setEstadoCaracteres] = useState(0);
   const [cepCaracteres, setCepCaracteres] = useState(0);
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#000000",
-      card: "#ececec",
-      borda: "#cccccc",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

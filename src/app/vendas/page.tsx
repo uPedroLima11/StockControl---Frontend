@@ -2,13 +2,14 @@
 
 import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
-import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { VendaI } from "@/utils/types/vendas";
+import { cores } from "@/utils/cores";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Swal from "sweetalert2";
 
 export default function Vendas() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
@@ -28,29 +29,6 @@ export default function Vendas() {
   const produtosPorPagina = 10;
   const { t } = useTranslation("vendas");
   const router = useRouter();
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

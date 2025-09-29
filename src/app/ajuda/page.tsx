@@ -1,8 +1,9 @@
 "use client";
 
-import Image from 'next/image';
-import { useState, useEffect, useRef, useMemo } from "react";
 import { FaSearch, FaBook, FaLightbulb, FaExclamationTriangle, FaHome, FaPlus, FaBox, FaBell, FaBuilding, FaUsers, FaDollarSign, FaCheck, FaInfo, FaHistory, FaShoppingCart, FaKey, FaLink, FaUserShield, FaStore, FaLock, FaUserTag, FaTruck } from "react-icons/fa";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { cores } from "@/utils/cores";
+import Image from 'next/image';
 import Fuse from 'fuse.js';
 import React from 'react';
 
@@ -30,10 +31,6 @@ export default function Ajuda() {
     const searchRef = useRef<HTMLDivElement>(null);
     const topicRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    const cores = {
-        dark: { fundo: "#0A1929", texto: "#FFFFFF", card: "#132F4C", borda: "#1E4976", primario: "#1976D2", secundario: "#00B4D8", placeholder: "#9CA3AF", hover: "#1E4976", ativo: "#1976D2" },
-        light: { fundo: "#F8FAFC", texto: "#000000", card: "#FFFFFF", borda: "#E2E8F0", primario: "#1976D2", secundario: "#0284C7", placeholder: "#6B7280", hover: "#F1F5F9", ativo: "#0284C7" }
-    };
     const temaAtual = modoDark ? cores.dark : cores.light;
 
     useEffect(() => {

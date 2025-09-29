@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheckCircle, FaLock, FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { cores } from "@/utils/cores";
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 
@@ -16,40 +17,13 @@ export default function AtivacaoPage() {
   const [loading, setLoading] = useState(false);
   const [modoDark, setModoDark] = useState(false);
   const [empresaAtivada, setEmpresaAtivada] = useState(false);
-  const router = useRouter();
   const { t } = useTranslation("ativacao");
   const [, setStatusAtivacao] = useState<{
     ativada: boolean;
     chave: string | null;
     dataAtivacao: Date | null;
   }>({ ativada: false, chave: null, dataAtivacao: null });
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976",
-      sucesso: "#10B981",
-      erro: "#EF4444"
-    },
-    light: {
-      fundo: "#F8FAFC",
-      texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF",
-      sucesso: "#10B981",
-      erro: "#EF4444"
-    }
-  };
+  const router = useRouter();
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

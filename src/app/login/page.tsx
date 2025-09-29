@@ -7,6 +7,7 @@ import { HiEnvelope, HiLockClosed } from "react-icons/hi2";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useUsuarioStore } from "@/context/usuario";
+import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 
 type Inputs = {
@@ -19,19 +20,6 @@ export default function Login() {
   const { logar } = useUsuarioStore();
   const [visivel, setVisivel] = useState(false);
   const router = useRouter();
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    }
-  };
 
   const temaAtual = cores.dark;
 

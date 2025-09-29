@@ -6,6 +6,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { HiEnvelope, HiLockClosed, HiMiniUserCircle, HiCheckCircle, HiExclamationCircle } from "react-icons/hi2";
 import { FaEye, FaEyeSlash, FaCheck, FaTimes } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 
 type Inputs = {
@@ -37,20 +38,6 @@ export default function Registro() {
     mensagem: ""
   });
 
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976",
-      erro: "#EF4444",
-      sucesso: "#10B981"
-    }
-  };
 
   const temaAtual = cores.dark;
 

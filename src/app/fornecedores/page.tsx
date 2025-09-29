@@ -2,9 +2,10 @@
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { useEffect, useState, useRef } from "react";
 import { FaSearch, FaPhoneAlt, FaLock, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
-import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
+import { cores } from "@/utils/cores";
+import Swal from "sweetalert2";
 import Image from "next/image";
 
 export default function Fornecedores() {
@@ -46,30 +47,6 @@ export default function Fornecedores() {
   const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
   const [, setIsUploading] = useState(false);
-
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#ecececec",
-      borda: "#cccccc",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 import { FaClipboardList } from "react-icons/fa";
@@ -11,6 +9,8 @@ import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");

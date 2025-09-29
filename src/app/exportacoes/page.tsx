@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
 import { FaFileExcel, FaDownload, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { cores } from "@/utils/cores";
+import Swal from "sweetalert2";
 
 interface ExportHistory {
     id: string;
@@ -31,29 +32,6 @@ export default function Exportacoes() {
     const { t, i18n } = useTranslation("exportacoes");
 
     const itensPorPagina = 6;
-
-    const cores = {
-        dark: {
-            fundo: "#0A1929",
-            texto: "#FFFFFF",
-            card: "#132F4C",
-            borda: "#1E4976",
-            primario: "#1976D2",
-            secundario: "#00B4D8",
-            placeholder: "#9CA3AF",
-            hover: "#1E4976"
-        },
-        light: {
-            fundo: "#cccccc",
-            texto: "#0F172A",
-            card: "#ecececec",
-            borda: "#cccccc",
-            primario: "#1976D2",
-            secundario: "#0284C7",
-            placeholder: "#6B7280",
-            hover: "#EFF6FF"
-        }
-    };
 
     const temaAtual = modoDark ? cores.dark : cores.light;
 

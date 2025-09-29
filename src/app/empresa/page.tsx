@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
-import Swal from "sweetalert2";
-import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
+import { cores } from "@/utils/cores";
+import Swal from "sweetalert2";
+import Image from "next/image";
 
 type EmailStatus = {
   existe: boolean;
@@ -53,33 +54,6 @@ export default function Empresa() {
     carregando: false,
     mensagem: ""
   });
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976",
-      erro: "#EF4444",
-      sucesso: "#10B981"
-    },
-    light: {
-      fundo: "#cccccc",
-      texto: "#0F172A",
-      card: "#ecececec",
-      borda: "#cccccc",
-      primario: "#1976D2",
-      secundario: "#0284C7",
-      placeholder: "#6B7280",
-      hover: "#EFF6FF",
-      erro: "#EF4444",
-      sucesso: "#10B981"
-    }
-  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 

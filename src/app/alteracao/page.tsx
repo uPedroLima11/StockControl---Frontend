@@ -3,9 +3,10 @@ import { HiEnvelope, HiLockClosed, HiMiniIdentification, HiCheckCircle, HiExclam
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 
 type Inputs = {
   email: string;
@@ -23,21 +24,6 @@ export default function Alteracao() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const senha = useWatch({ control, name: "senha" });
   const confirmaSenha = useWatch({ control, name: "confirmaSenha" });
-
-  const cores = {
-    dark: {
-      fundo: "#0A1929",
-      texto: "#FFFFFF",
-      card: "#132F4C",
-      borda: "#1E4976",
-      primario: "#1976D2",
-      secundario: "#00B4D8",
-      placeholder: "#9CA3AF",
-      hover: "#1E4976",
-      sucesso: "#10B981",
-      erro: "#EF4444"
-    }
-  };
 
   const temaAtual = cores.dark;
 
