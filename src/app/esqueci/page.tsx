@@ -18,50 +18,6 @@ export default function Esqueci() {
 
   const temaAtual = cores.dark;
 
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      
-      html::-webkit-scrollbar-track {
-        background: ${temaAtual.card};
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        background: ${temaAtual.borda}; 
-        border-radius: 5px;
-        border: 2px solid ${temaAtual.card};
-      }
-      
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${temaAtual.primario}; 
-      }
-      
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${temaAtual.borda} ${temaAtual.card};
-      }
-      
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${temaAtual.card};
-          border-radius: 3px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [temaAtual]);
-
   async function enviaRecuperacao(data: Inputs) {
     setCarregando(true);
     try {

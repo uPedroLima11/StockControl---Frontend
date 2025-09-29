@@ -253,6 +253,7 @@ export default function PedidosPage() {
     useEffect(() => {
         const temaSalvo = localStorage.getItem("modoDark");
         setModoDark(temaSalvo === "true");
+
         carregarDadosUsuario();
     }, [carregarDadosUsuario]);
 
@@ -295,18 +296,14 @@ export default function PedidosPage() {
   `;
         document.head.appendChild(style);
 
+        filtrarPedidos();
+
+        setPaginaAtual(1);
+
         return () => {
             document.head.removeChild(style);
         };
-    }, [modoDark]);
-
-    useEffect(() => {
-        filtrarPedidos();
-    }, [filtrarPedidos]);
-
-    useEffect(() => {
-        setPaginaAtual(1);
-    }, [pedidosFiltrados]);
+    }, [modoDark, filtrarPedidos, pedidosFiltrados]);
 
     const podeCriarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar) && empresaAtivada;
     const podeEditarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar) && empresaAtivada;

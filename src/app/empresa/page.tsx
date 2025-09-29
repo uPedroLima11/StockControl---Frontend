@@ -52,7 +52,7 @@ export default function Empresa() {
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
     carregando: false,
-    mensagem: ""
+    mensagem: "",
   });
 
   const temaAtual = modoDark ? cores.dark : cores.light;
@@ -81,11 +81,11 @@ export default function Empresa() {
 
   const handleInputChange = (field: keyof Empresa, value: string, maxLength: number, setCaracteres: React.Dispatch<React.SetStateAction<number>>) => {
     if (value.length <= maxLength) {
-      if (field === 'email') {
+      if (field === "email") {
         value = value.toLowerCase();
       }
 
-      setEmpresaEditada(prev => prev ? { ...prev, [field]: value } : null);
+      setEmpresaEditada((prev) => (prev ? { ...prev, [field]: value } : null));
       setCaracteres(value.length);
     }
   };
@@ -94,119 +94,19 @@ export default function Empresa() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-  }, []);
 
-  const verificarPermissaoGerenciar = async (userId: string) => {
-    try {
-      const temPermissao = await usuarioTemPermissao(userId, "empresa_gerenciar");
-      setTemPermissaoGerenciar(temPermissao);
-    } catch (error) {
-      console.error("Erro ao verificar permissão:", error);
-      setTemPermissaoGerenciar(false);
-    } finally {
-      setCarregandoPermissao(false);
-    }
-  };
-
-  useEffect(() => {
-    const verificarEmailEdicao = async () => {
-      if (!empresaEditada || !empresaEditada.email || empresaEditada.email === empresa?.email) {
-        setEmailStatus({
-          existe: false,
-          carregando: false,
-          mensagem: ""
-        });
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(empresaEditada.email)) {
-        setEmailStatus({
-          existe: false,
-          carregando: false,
-          mensagem: ""
-        });
-        return;
-      }
-
-      setEmailStatus(prev => ({ ...prev, carregando: true }));
-
+    const verificarPermissaoGerenciar = async (userId: string) => {
       try {
-        const url = `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(empresaEditada.email)}?empresaId=${empresaEditada.id}`;
-        const response = await fetch(url);
-
-        if (response.ok) {
-          const data = await response.json();
-          setEmailStatus({
-            existe: data.existe,
-            carregando: false,
-            mensagem: data.mensagem
-          });
-        } else {
-          setEmailStatus({
-            existe: false,
-            carregando: false,
-            mensagem: t("erros.verificacaoEmail")
-          });
-        }
-      } catch {
-        setEmailStatus({
-          existe: false,
-          carregando: false,
-          mensagem: t("erros.verificacaoEmail")
-        });
+        const temPermissao = await usuarioTemPermissao(userId, "empresa_gerenciar");
+        setTemPermissaoGerenciar(temPermissao);
+      } catch (error) {
+        console.error("Erro ao verificar permissão:", error);
+        setTemPermissaoGerenciar(false);
+      } finally {
+        setCarregandoPermissao(false);
       }
     };
 
-    const timeoutId = setTimeout(verificarEmailEdicao, 500);
-    return () => clearTimeout(timeoutId);
-  }, [empresaEditada?.email, empresaEditada?.id, empresa?.email, t]);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
-
-  useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (response.status === 200) {
@@ -271,18 +171,121 @@ export default function Empresa() {
 
     fetchEmpresa();
 
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    const style = document.createElement("style");
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    html::-webkit-scrollbar-track {
+      background: ${ativo ? "#132F4C" : "#F8FAFC"};
+    }
+    html::-webkit-scrollbar-thumb {
+      background: ${ativo ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${ativo ? "#132F4C" : "#F8FAFC"};
+    }
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${ativo ? "#132F4C" : "#64B5F6"}; 
+    }
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${ativo ? "#132F4C" : "#90CAF9"} ${ativo ? "#0A1830" : "#F8FAFC"};
+    }
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${ativo ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+    `;
+    document.head.appendChild(style);
+
+    const fileInput = document.getElementById("fileInput") as HTMLInputElement;
     if (fileInput) {
-      fileInput.addEventListener('change', (e) => {
+      fileInput.addEventListener("change", (e) => {
         const target = e.target as HTMLInputElement;
         const fileName = target.files?.[0]?.name || t("nenhumArquivoEscolhido");
-        const displayElement = fileInput.nextElementSibling?.querySelector('.text-gray-500');
+        const displayElement = fileInput.nextElementSibling?.querySelector(".text-gray-500");
         if (displayElement) {
           displayElement.textContent = fileName;
         }
       });
     }
+
+    return () => {
+      document.head.removeChild(style);
+    };
   }, [logar, router, t]);
+
+  useEffect(() => {
+    if (modalEdicaoAberto && empresaEditada) {
+      setNomeCaracteres(empresaEditada.nome?.length || 0);
+      setEmailCaracteres(empresaEditada.email?.length || 0);
+      setTelefoneCaracteres(empresaEditada.telefone?.length || 0);
+      setPaisCaracteres(empresaEditada.pais?.length || 0);
+      setEnderecoCaracteres(empresaEditada.endereco?.length || 0);
+      setEstadoCaracteres(empresaEditada.estado?.length || 0);
+      setCidadeCaracteres(empresaEditada.cidade?.length || 0);
+      setCepCaracteres(empresaEditada.cep?.length || 0);
+    }
+  }, [modalEdicaoAberto, empresaEditada]);
+
+  useEffect(() => {
+    const verificarEmailEdicao = async () => {
+      if (!empresaEditada || !empresaEditada.email || empresaEditada.email === empresa?.email) {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: "",
+        });
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(empresaEditada.email)) {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: "",
+        });
+        return;
+      }
+
+      setEmailStatus((prev) => ({ ...prev, carregando: true }));
+
+      try {
+        const url = `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(empresaEditada.email)}?empresaId=${empresaEditada.id}`;
+        const response = await fetch(url);
+
+        if (response.ok) {
+          const data = await response.json();
+          setEmailStatus({
+            existe: data.existe,
+            carregando: false,
+            mensagem: data.mensagem,
+          });
+        } else {
+          setEmailStatus({
+            existe: false,
+            carregando: false,
+            mensagem: t("erros.verificacaoEmail"),
+          });
+        }
+      } catch {
+        setEmailStatus({
+          existe: false,
+          carregando: false,
+          mensagem: t("erros.verificacaoEmail"),
+        });
+      }
+    };
+
+    const timeoutId = setTimeout(verificarEmailEdicao, 500);
+    return () => clearTimeout(timeoutId);
+  }, [empresaEditada?.email, empresaEditada?.id, empresa?.email, t]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -310,10 +313,10 @@ export default function Empresa() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "user-id": usuarioValor
+          "user-id": usuarioValor,
         },
         body: JSON.stringify({
-          catalogoPublico: novoEstado
+          catalogoPublico: novoEstado,
         }),
       });
 
@@ -327,13 +330,11 @@ export default function Empresa() {
       Swal.fire({
         icon: "success",
         title: novoEstado ? t("catalogoAtivado") : t("catalogoDesativado"),
-        text: novoEstado
-          ? t("catalogoAgoraPublico")
-          : t("catalogoNaoPublico"),
+        text: novoEstado ? t("catalogoAgoraPublico") : t("catalogoNaoPublico"),
         timer: 2000,
         showConfirmButton: false,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
       });
     } catch (error) {
       console.error("Erro ao alterar estado do catálogo:", error);
@@ -343,7 +344,7 @@ export default function Empresa() {
         text: t("erroAlterarCatalogo"),
         background: temaAtual.card,
         color: temaAtual.texto,
-        confirmButtonColor: temaAtual.primario
+        confirmButtonColor: temaAtual.primario,
       });
     } finally {
       setAtualizandoCatalogo(false);
@@ -365,8 +366,8 @@ export default function Empresa() {
         method: "PUT",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+        },
       });
 
       if (response.ok) {
@@ -394,7 +395,7 @@ export default function Empresa() {
         text: t("erros.emailExistenteTexto"),
         background: temaAtual.card,
         color: temaAtual.texto,
-        confirmButtonColor: temaAtual.primario
+        confirmButtonColor: temaAtual.primario,
       });
       return;
     }
@@ -417,7 +418,7 @@ export default function Empresa() {
             text: t("avisos.uploadFotoFalhouTexto"),
             background: temaAtual.card,
             color: temaAtual.texto,
-            confirmButtonColor: temaAtual.primario
+            confirmButtonColor: temaAtual.primario,
           });
         }
       }
@@ -426,7 +427,7 @@ export default function Empresa() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          'user-id': usuarioValor
+          "user-id": usuarioValor,
         },
         body: JSON.stringify({
           nome: empresaEditada.nome?.trim(),
@@ -437,8 +438,8 @@ export default function Empresa() {
           estado: empresaEditada.estado?.trim(),
           cidade: empresaEditada.cidade?.trim(),
           cep: empresaEditada.cep?.trim(),
-          fotoUrl: fotoUrl
-        })
+          fotoUrl: fotoUrl,
+        }),
       });
 
       if (!res.ok) throw new Error(t("erros.erroAtualizarEmpresa"));
@@ -458,7 +459,7 @@ export default function Empresa() {
         color: temaAtual.texto,
         confirmButtonColor: temaAtual.primario,
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
 
       setTimeout(() => {
@@ -472,7 +473,7 @@ export default function Empresa() {
         text: t("erros.erroEditarEmpresa"),
         background: temaAtual.card,
         color: temaAtual.texto,
-        confirmButtonColor: temaAtual.primario
+        confirmButtonColor: temaAtual.primario,
       });
     }
   };
@@ -494,7 +495,7 @@ export default function Empresa() {
           background: temaAtual.card,
           color: temaAtual.texto,
           confirmButtonColor: temaAtual.primario,
-          cancelButtonColor: temaAtual.placeholder
+          cancelButtonColor: temaAtual.placeholder,
         });
 
         if (confirm.isConfirmed) {
@@ -518,7 +519,7 @@ export default function Empresa() {
           background: temaAtual.card,
           color: temaAtual.texto,
           confirmButtonColor: temaAtual.primario,
-          cancelButtonColor: temaAtual.placeholder
+          cancelButtonColor: temaAtual.placeholder,
         });
 
         if (confirm.isConfirmed) {
@@ -547,7 +548,7 @@ export default function Empresa() {
         text: t("erros.erroProcessarExclusao"),
         background: temaAtual.card,
         color: temaAtual.texto,
-        confirmButtonColor: temaAtual.primario
+        confirmButtonColor: temaAtual.primario,
       });
     }
   };
@@ -571,15 +572,9 @@ export default function Empresa() {
   }
 
   return (
-    <div
-      className="flex flex-col items-center justify-center px-4 py-6 md:px-6 md:py-8"
-      style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}
-    >
+    <div className="flex flex-col items-center justify-center px-4 py-6 md:px-6 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
       <div className="w-full max-w-4xl">
-        <h1
-          className="text-center text-xl md:text-2xl font-semibold mb-6"
-          style={{ color: temaAtual.texto }}
-        >
+        <h1 className="text-center text-xl md:text-2xl font-semibold mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
@@ -590,20 +585,12 @@ export default function Empresa() {
             border: `1px solid ${temaAtual.borda}`,
           }}
         >
-          <div
-            className="border-b mb-5 pb-5"
-            style={{ borderColor: temaAtual.borda }}
-          >
-            <h2
-              className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-2"
-              style={{ color: temaAtual.texto }}
-            >
+          <div className="border-b mb-5 pb-5" style={{ borderColor: temaAtual.borda }}>
+            <h2 className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-2" style={{ color: temaAtual.texto }}>
               <FaGlobe className="text-lg" />
               {t("dadosEmpresa")}
             </h2>
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base"
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base">
               {[
                 { label: t("campos.nome"), value: empresa.nome, key: "nome" },
                 { label: t("campos.email"), value: empresa.email, key: "email" },
@@ -620,22 +607,26 @@ export default function Empresa() {
                   style={{
                     backgroundColor: modoDark ? temaAtual.fundo : "#F8FAFC",
                     border: modoDark ? "none" : `1px solid ${temaAtual.borda}`,
-                    boxShadow: modoDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)"
+                    boxShadow: modoDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)",
                   }}
                 >
-                  <p style={{
-                    color: modoDark ? temaAtual.placeholder : "#64748B",
-                    fontSize: '0.875rem',
-                    marginBottom: '0.5rem',
-                    fontWeight: modoDark ? "normal" : "500"
-                  }}>
+                  <p
+                    style={{
+                      color: modoDark ? temaAtual.placeholder : "#64748B",
+                      fontSize: "0.875rem",
+                      marginBottom: "0.5rem",
+                      fontWeight: modoDark ? "normal" : "500",
+                    }}
+                  >
                     {field.label}
                   </p>
-                  <p style={{
-                    color: temaAtual.texto,
-                    fontSize: '0.95rem',
-                    fontWeight: field.key === "nome" ? '500' : 'normal'
-                  }}>
+                  <p
+                    style={{
+                      color: temaAtual.texto,
+                      fontSize: "0.95rem",
+                      fontWeight: field.key === "nome" ? "500" : "normal",
+                    }}
+                  >
                     {field.value}
                   </p>
                 </div>
@@ -644,7 +635,6 @@ export default function Empresa() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-6 items-start">
-
             <div className="md:w-2/5">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: temaAtual.texto }}>
@@ -652,20 +642,13 @@ export default function Empresa() {
                 </h2>
                 <div className="flex justify-start">
                   {empresa.foto ? (
-                    <Image
-                      src={empresa.foto}
-                      alt={t("altLogoEmpresa")}
-                      width={120}
-                      height={120}
-                      className="rounded-lg border-2 object-contain"
-                      style={{ borderColor: temaAtual.borda }}
-                    />
+                    <Image src={empresa.foto} alt={t("altLogoEmpresa")} width={120} height={120} className="rounded-lg border-2 object-contain" style={{ borderColor: temaAtual.borda }} />
                   ) : (
                     <div
                       className="w-32 h-32 rounded-lg border-2 flex items-center justify-center"
                       style={{
                         borderColor: temaAtual.borda,
-                        backgroundColor: temaAtual.fundo
+                        backgroundColor: temaAtual.fundo,
                       }}
                     >
                       <span style={{ color: temaAtual.placeholder }}>{t("semLogo")}</span>
@@ -688,7 +671,7 @@ export default function Empresa() {
                       minWidth: "unset",
                       width: "fit-content",
                       paddingLeft: "10px",
-                      paddingRight: "10px"
+                      paddingRight: "10px",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.opacity = "0.9";
@@ -712,7 +695,7 @@ export default function Empresa() {
                       minWidth: "unset",
                       width: "fit-content",
                       paddingLeft: "10px",
-                      paddingRight: "10px"
+                      paddingRight: "10px",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.opacity = "0.9";
@@ -721,11 +704,7 @@ export default function Empresa() {
                       e.currentTarget.style.opacity = "1";
                     }}
                   >
-                    {tipoUsuario === "PROPRIETARIO" ? (
-                      <FaTrash className="text-xs" style={{ color: "#FFFFFF" }} />
-                    ) : (
-                      <FaSignOutAlt className="text-xs" style={{ color: "#FFFFFF" }} />
-                    )}
+                    {tipoUsuario === "PROPRIETARIO" ? <FaTrash className="text-xs" style={{ color: "#FFFFFF" }} /> : <FaSignOutAlt className="text-xs" style={{ color: "#FFFFFF" }} />}
                     {t(tipoUsuario === "PROPRIETARIO" ? "deletarEmpresa" : "sairEmpresa")}
                   </button>
                 )}
@@ -737,58 +716,40 @@ export default function Empresa() {
                 className="p-5 rounded-xl"
                 style={{
                   backgroundColor: temaAtual.card,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
               >
                 <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg" style={{ color: temaAtual.texto }}>
-                  {empresa.catalogoPublico ?
-                    <FaEye className="text-xl" style={{ color: "#10B981" }} /> :
-                    <FaEyeSlash className="text-xl" style={{ color: "#EF4444" }} />
-                  }
+                  {empresa.catalogoPublico ? <FaEye className="text-xl" style={{ color: "#10B981" }} /> : <FaEyeSlash className="text-xl" style={{ color: "#EF4444" }} />}
                   {t("catalogo.publico")}
                 </h3>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                   <div>
                     <span className="text-sm font-medium" style={{ color: temaAtual.texto }}>
-                      {t("catalogo.status")}:{" "}
-                      <strong style={{ color: empresa.catalogoPublico ? "#10B981" : "#EF4444" }}>
-                        {empresa.catalogoPublico
-                          ? t("catalogo.ativado")
-                          : t("catalogo.desativado")}
-                      </strong>
+                      {t("catalogo.status")}: <strong style={{ color: empresa.catalogoPublico ? "#10B981" : "#EF4444" }}>{empresa.catalogoPublico ? t("catalogo.ativado") : t("catalogo.desativado")}</strong>
                     </span>
                   </div>
                   {temPermissaoGerenciar && (
-                    <button
-                      onClick={toggleCatalogoPublico}
-                      disabled={atualizandoCatalogo}
-                      className={`px-4 py-2 transition-all duration-200 hover:scale-105 cursor-pointer rounded-lg text-sm font-medium ${empresa.catalogoPublico
-                        ? "bg-red-500 text-white hover:bg-red-600"
-                        : "bg-green-500 text-white hover:bg-green-600"
-                        } disabled:opacity-50 w-full md:w-auto`}
-                    >
-                      {atualizandoCatalogo
-                        ? t("catalogo.processando")
-                        : empresa.catalogoPublico
-                          ? t("catalogo.desativar")
-                          : t("catalogo.ativar")}
+                    <button onClick={toggleCatalogoPublico} disabled={atualizandoCatalogo} className={`px-4 py-2 transition-all duration-200 hover:scale-105 cursor-pointer rounded-lg text-sm font-medium ${empresa.catalogoPublico ? "bg-red-500 text-white hover:bg-red-600" : "bg-green-500 text-white hover:bg-green-600"} disabled:opacity-50 w-full md:w-auto`}>
+                      {atualizandoCatalogo ? t("catalogo.processando") : empresa.catalogoPublico ? t("catalogo.desativar") : t("catalogo.ativar")}
                     </button>
                   )}
                 </div>
 
-                <p className="text-sm mb-3 font-medium" style={{ color: temaAtual.texto }}>{t("catalogo.disponivelEm")}</p>
-                <div className="flex items-center gap-2 p-3 rounded-lg mb-3" style={{
-                  backgroundColor: temaAtual.fundo,
-                  border: `1px solid ${temaAtual.borda}`
-                }}>
+                <p className="text-sm mb-3 font-medium" style={{ color: temaAtual.texto }}>
+                  {t("catalogo.disponivelEm")}
+                </p>
+                <div
+                  className="flex items-center gap-2 p-3 rounded-lg mb-3"
+                  style={{
+                    backgroundColor: temaAtual.fundo,
+                    border: `1px solid ${temaAtual.borda}`,
+                  }}
+                >
                   <FaLink className="flex-shrink-0" style={{ color: temaAtual.primario }} />
                   <a
-                    href={`${process.env.NEXT_PUBLIC_APP_URL ||
-                      (typeof window !== "undefined"
-                        ? window.location.origin
-                        : "https://stockcontrol-six.vercel.app")
-                      }/catalogo/${empresa.slug}`}
+                    href={`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm break-all font-mono transition hover:opacity-80"
@@ -796,22 +757,23 @@ export default function Empresa() {
                       color: temaAtual.primario,
                     }}
                   >
-                    {`${process.env.NEXT_PUBLIC_APP_URL ||
-                      (typeof window !== "undefined"
-                        ? window.location.origin
-                        : "https://stockcontrol-six.vercel.app")
-                      }/catalogo/${empresa.slug}`}
+                    {`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
                   </a>
                 </div>
 
-                <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>{t("catalogo.avisoClientes")}</p>
+                <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>
+                  {t("catalogo.avisoClientes")}
+                </p>
 
                 {!empresa.catalogoPublico && (
-                  <p className="text-sm mt-2 p-3 rounded-lg" style={{
-                    backgroundColor: modoDark ? "#422727" : "#FEF2F2",
-                    color: modoDark ? "#FCA5A5" : "#DC2626",
-                    border: modoDark ? "none" : "1px solid #FECACA"
-                  }}>
+                  <p
+                    className="text-sm mt-2 p-3 rounded-lg"
+                    style={{
+                      backgroundColor: modoDark ? "#422727" : "#FEF2F2",
+                      color: modoDark ? "#FCA5A5" : "#DC2626",
+                      border: modoDark ? "none" : "1px solid #FECACA",
+                    }}
+                  >
                     {t("catalogo.desativadoAviso")}
                   </p>
                 )}
@@ -828,21 +790,25 @@ export default function Empresa() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
-            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("modal.editarEmpresa.titulo")}</h2>
+            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>
+              {t("modal.editarEmpresa.titulo")}
+            </h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.nome")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.nome")}
+                </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 rounded border"
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.nome || ""}
                   onChange={(e) => handleInputChange("nome", e.target.value, 20, setNomeCaracteres)}
@@ -854,7 +820,9 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.email")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.email")}
+                </label>
                 <div className="relative">
                   <input
                     type="email"
@@ -862,7 +830,7 @@ export default function Empresa() {
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${emailStatus.existe ? temaAtual.erro : temaAtual.borda}`
+                      border: `1px solid ${emailStatus.existe ? temaAtual.erro : temaAtual.borda}`,
                     }}
                     value={empresaEditada.email || ""}
                     onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
@@ -873,25 +841,14 @@ export default function Empresa() {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
                     </div>
                   )}
-                  {!emailStatus.carregando && empresaEditada.email && empresaEditada.email !== empresa?.email && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      {emailStatus.existe ? (
-                        <FaTimes className="text-red-500" />
-                      ) : (
-                        <FaCheck className="text-green-500" />
-                      )}
-                    </div>
-                  )}
+                  {!emailStatus.carregando && empresaEditada.email && empresaEditada.email !== empresa?.email && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">{emailStatus.existe ? <FaTimes className="text-red-500" /> : <FaCheck className="text-green-500" />}</div>}
                 </div>
                 <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {emailCaracteres}/60 {emailCaracteres === 60 && " - Limite atingido"}
                 </div>
 
                 {emailStatus.mensagem && (
-                  <div
-                    className={`text-xs mt-1 ${emailStatus.existe ? 'text-red-600' : 'text-green-600'}`}
-                    style={{ color: emailStatus.existe ? temaAtual.erro : temaAtual.sucesso }}
-                  >
+                  <div className={`text-xs mt-1 ${emailStatus.existe ? "text-red-600" : "text-green-600"}`} style={{ color: emailStatus.existe ? temaAtual.erro : temaAtual.sucesso }}>
                     {emailStatus.mensagem}
                   </div>
                 )}
@@ -899,14 +856,16 @@ export default function Empresa() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.telefone")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                    {t("campos.telefone")}
+                  </label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 rounded border"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`
+                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.telefone || ""}
                     onChange={(e) => handleInputChange("telefone", e.target.value, 15, setTelefoneCaracteres)}
@@ -918,14 +877,16 @@ export default function Empresa() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.pais")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                    {t("campos.pais")}
+                  </label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 rounded border"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`
+                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.pais || ""}
                     onChange={(e) => handleInputChange("pais", e.target.value, 20, setPaisCaracteres)}
@@ -938,14 +899,16 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.endereco")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.endereco")}
+                </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 rounded border"
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.endereco || ""}
                   onChange={(e) => handleInputChange("endereco", e.target.value, 50, setEnderecoCaracteres)}
@@ -958,14 +921,16 @@ export default function Empresa() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.cidade")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                    {t("campos.cidade")}
+                  </label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 rounded border"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`
+                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.cidade || ""}
                     onChange={(e) => handleInputChange("cidade", e.target.value, 20, setCidadeCaracteres)}
@@ -977,14 +942,16 @@ export default function Empresa() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.estado")}</label>
+                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                    {t("campos.estado")}
+                  </label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 rounded border"
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`
+                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.estado || ""}
                     onChange={(e) => handleInputChange("estado", e.target.value, 2, setEstadoCaracteres)}
@@ -997,14 +964,16 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("campos.cep")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("campos.cep")}
+                </label>
                 <input
                   type="text"
                   className="w-full px-3 py-2 rounded border"
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.cep || ""}
                   onChange={(e) => handleInputChange("cep", e.target.value, 10, setCepCaracteres)}
@@ -1016,7 +985,9 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("logoEmpresa")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("logoEmpresa")}
+                </label>
                 <div className="relative">
                   <input
                     type="file"
@@ -1025,44 +996,36 @@ export default function Empresa() {
                     className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer"
                     style={{
                       backgroundColor: temaAtual.card,
-                      border: `1px solid ${temaAtual.borda}`
+                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     id="fileInput"
                   />
-                  <div className="flex items-center justify-between p-2 rounded border text-sm"
+                  <div
+                    className="flex items-center justify-between p-2 rounded border text-sm"
                     style={{
                       backgroundColor: temaAtual.card,
                       border: `1px solid ${temaAtual.borda}`,
-                      color: temaAtual.placeholder
-                    }}>
+                      color: temaAtual.placeholder,
+                    }}
+                  >
                     <span>{t("escolherArquivo")}</span>
                   </div>
                 </div>
 
                 {fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("preVisualizacao")}:</p>
-                    <Image
-                      src={fotoPreview}
-                      alt="Preview"
-                      width={80}
-                      height={80}
-                      className="rounded border"
-                      style={{ borderColor: temaAtual.borda }}
-                    />
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
+                      {t("preVisualizacao")}:
+                    </p>
+                    <Image src={fotoPreview} alt="Preview" width={80} height={80} className="rounded border" style={{ borderColor: temaAtual.borda }} />
                   </div>
                 )}
                 {empresa.foto && !fotoPreview && (
                   <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>{t("fotoAtual")}:</p>
-                    <Image
-                      src={empresa.foto}
-                      alt="Foto atual"
-                      width={80}
-                      height={80}
-                      className="rounded border"
-                      style={{ borderColor: temaAtual.borda }}
-                    />
+                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
+                      {t("fotoAtual")}:
+                    </p>
+                    <Image src={empresa.foto} alt="Foto atual" width={80} height={80} className="rounded border" style={{ borderColor: temaAtual.borda }} />
                   </div>
                 )}
               </div>
@@ -1080,7 +1043,7 @@ export default function Empresa() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = temaAtual.hover;
@@ -1118,4 +1081,4 @@ export default function Empresa() {
       )}
     </div>
   );
-};
+}

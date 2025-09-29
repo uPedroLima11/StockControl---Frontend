@@ -51,14 +51,11 @@ export default function Clientes() {
       if (!usuarioSalvo) return false;
 
       const usuarioId = usuarioSalvo.replace(/"/g, "");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
-        {
-          headers: {
-            'user-id': usuarioId
-          }
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
+        headers: {
+          "user-id": usuarioId,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -72,7 +69,7 @@ export default function Clientes() {
   };
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -110,43 +107,33 @@ export default function Clientes() {
   `;
     document.head.appendChild(style);
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]); 
-  useEffect(() => {
-    const carregarPermissoes = async () => {
+    const carregarDados = async () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
-
-      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-          {
-            headers: {
-              'user-id': usuarioId
-            }
-          }
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, {
+          headers: {
+            "user-id": usuarioValor,
+          },
+        });
 
         if (response.ok) {
           const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
 
           const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
+          dados.permissoes.forEach((permissao) => {
             permissoesUsuarioObj[permissao.chave] = permissao.concedida;
           });
 
           setPermissoesUsuario(permissoesUsuarioObj);
         } else {
-          const permissoesParaVerificar = [
-            "clientes_criar",
-            "clientes_editar",
-            "clientes_excluir",
-            "clientes_visualizar"
-          ];
+          const permissoesParaVerificar = ["clientes_criar", "clientes_editar", "clientes_excluir", "clientes_visualizar"];
 
           const permissoes: Record<string, boolean> = {};
 
@@ -160,22 +147,57 @@ export default function Clientes() {
       } catch (error) {
         console.error("Erro ao carregar permissões:", error);
       }
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const usuario = await responseUsuario.json();
+      setEmpresaId(usuario.empresaId);
+      setTipoUsuario(usuario.tipo);
+
+      if (usuario.empresaId) {
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
+      }
+
+      const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
+      const clientesData = await responseClientes.json();
+      const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setClientes(clientesOrdenados);
     };
 
-    carregarPermissoes();
-  }, []);
+    carregarDados();
 
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.clientes_visualizar;
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
 
-  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.clientes_criar;
+  useEffect(() => {
+    if (modalVisualizar) {
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setEmailCaracteres(modalVisualizar.email?.length || 0);
+      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
+      setEnderecoCaracteres(modalVisualizar.endereco?.length || 0);
+      setCidadeCaracteres(modalVisualizar.cidade?.length || 0);
+      setEstadoCaracteres(modalVisualizar.estado?.length || 0);
+      setCepCaracteres(modalVisualizar.cep?.length || 0);
+    }
+  }, [modalVisualizar]);
 
-  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.clientes_editar;
+  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= 20) {
+      setForm({ ...form, nome: value });
+      setNomeCaracteres(value.length);
+    }
+  };
 
-  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.clientes_excluir;
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.clientes_visualizar;
+
+  const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.clientes_criar;
+
+  const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.clientes_editar;
+
+  const podeExcluir = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.clientes_excluir;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -217,26 +239,6 @@ export default function Clientes() {
     acao();
   };
 
-  useEffect(() => {
-    if (modalVisualizar) {
-      setNomeCaracteres(modalVisualizar.nome?.length || 0);
-      setEmailCaracteres(modalVisualizar.email?.length || 0);
-      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
-      setEnderecoCaracteres(modalVisualizar.endereco?.length || 0);
-      setCidadeCaracteres(modalVisualizar.cidade?.length || 0);
-      setEstadoCaracteres(modalVisualizar.estado?.length || 0);
-      setCepCaracteres(modalVisualizar.cep?.length || 0);
-    }
-  }, [modalVisualizar]);
-
-  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 20) {
-      setForm({ ...form, nome: value });
-      setNomeCaracteres(value.length);
-    }
-  };
-
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value.length <= 45) {
@@ -246,7 +248,7 @@ export default function Clientes() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 11) {
       setForm({ ...form, telefone: value });
       setTelefoneCaracteres(value.length);
@@ -284,37 +286,6 @@ export default function Clientes() {
     }
   };
 
-  useEffect(() => {
-    const initialize = async () => {
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
-      const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
-      setTipoUsuario(usuario.tipo);
-
-      if (usuario.empresaId) {
-        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
-        setEmpresaAtivada(ativada);
-      }
-
-      const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
-      const clientesData = await responseClientes.json();
-      const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setClientes(clientesOrdenados);
-    };
-
-    initialize();
-  }, []);
-
   if (!podeVisualizar) {
     return (
       <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
@@ -330,16 +301,9 @@ export default function Clientes() {
     );
   }
 
-  const clientesDaEmpresa = empresaId
-    ? clientes.filter(cliente => cliente.empresaId === empresaId)
-    : [];
+  const clientesDaEmpresa = empresaId ? clientes.filter((cliente) => cliente.empresaId === empresaId) : [];
 
-  const clientesFiltrados = clientesDaEmpresa.filter(
-    (cliente) =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.email?.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone?.includes(busca)
-  );
+  const clientesFiltrados = clientesDaEmpresa.filter((cliente) => cliente.nome.toLowerCase().includes(busca.toLowerCase()) || cliente.email?.toLowerCase().includes(busca.toLowerCase()) || cliente.telefone?.includes(busca));
 
   const indexUltimoCliente = paginaAtual * clientesPorPagina;
   const indexPrimeiroCliente = indexUltimoCliente - clientesPorPagina;
@@ -489,23 +453,15 @@ export default function Clientes() {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes/${modalVisualizar.id}`, {
             method: "DELETE",
             headers: {
-              'user-id': usuarioValor
-            }
+              "user-id": usuarioValor,
+            },
           });
-          Swal.fire(
-            t("sucesso.excluir.titulo"),
-            t("sucesso.excluir.mensagem"),
-            "success"
-          );
+          Swal.fire(t("sucesso.excluir.titulo"), t("sucesso.excluir.mensagem"), "success");
           setModalVisualizar(null);
           window.location.reload();
         } catch (err) {
           console.error("Erro ao excluir cliente:", err);
-          Swal.fire(
-            t("erro.excluir.titulo"),
-            t("erro.excluir.mensagem"),
-            "error"
-          );
+          Swal.fire(t("erro.excluir.titulo"), t("erro.excluir.mensagem"), "error");
         }
       }
     });
@@ -543,7 +499,7 @@ export default function Clientes() {
   function formatarTelefone(telefone: string) {
     if (!telefone) return "-";
 
-    const numeros = telefone.replace(/\D/g, '');
+    const numeros = telefone.replace(/\D/g, "");
 
     if (numeros.length === 11) {
       return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
@@ -575,11 +531,14 @@ export default function Clientes() {
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-            backgroundColor: temaAtual.primario + "20",
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}>
+          <div
+            className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: temaAtual.primario + "20",
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
             <FaLock className="text-xl" />
             <div>
               <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
@@ -602,7 +561,7 @@ export default function Clientes() {
                 placeholder={t("buscar")}
                 className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
                 style={{
-                  color: temaAtual.texto
+                  color: temaAtual.texto,
                 }}
                 value={busca}
                 onChange={(e) => {
@@ -614,12 +573,7 @@ export default function Clientes() {
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleLeft />
                 </button>
 
@@ -627,12 +581,7 @@ export default function Clientes() {
                   {paginaAtual}/{totalPaginas}
                 </span>
 
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleRight />
                 </button>
               </div>
@@ -696,9 +645,7 @@ export default function Clientes() {
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.hover;
                           e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow = modoDark
-                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                          e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.card;
@@ -743,9 +690,7 @@ export default function Clientes() {
                         >
                           <div className="flex items-center justify-center gap-1">
                             <FaMapMarkerAlt />
-                            <span className="truncate">
-                              {formatarEndereco(cliente) || "-"}
-                            </span>
+                            <span className="truncate">{formatarEndereco(cliente) || "-"}</span>
                           </div>
                         </td>
                         <td
@@ -758,12 +703,7 @@ export default function Clientes() {
                           {formatarData(cliente.createdAt)}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <FaPhoneAlt
-                            onClick={() => handleEntrarContato(cliente)}
-                            color="#25D366"
-                            size={32}
-                            className="cursor-pointer m-auto border-2 p-1 rounded-2xl transition hover:scale-110"
-                          />
+                          <FaPhoneAlt onClick={() => handleEntrarContato(cliente)} color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl transition hover:scale-110" />
                         </td>
                       </tr>
                     ))}
@@ -783,9 +723,7 @@ export default function Clientes() {
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = temaAtual.hover;
                       e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = modoDark
-                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                      e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = temaAtual.card;
@@ -831,11 +769,7 @@ export default function Clientes() {
                       </div>
                     </div>
 
-                    <div
-                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${clienteExpandido === cliente.id ? "max-h-96" : "max-h-0"
-                        }`}
-                      style={{ color: temaAtual.texto }}
-                    >
+                    <div className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${clienteExpandido === cliente.id ? "max-h-96" : "max-h-0"}`} style={{ color: temaAtual.texto }}>
                       <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex">
                           <span className="font-semibold min-w-[80px]">{t("email")}:</span>
@@ -903,7 +837,7 @@ export default function Clientes() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
             <h2 className="text-lg md:text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
@@ -921,7 +855,7 @@ export default function Clientes() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    borderColor: temaAtual.borda
+                    borderColor: temaAtual.borda,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={20}
@@ -941,7 +875,7 @@ export default function Clientes() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    borderColor: temaAtual.borda
+                    borderColor: temaAtual.borda,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={45}
@@ -961,7 +895,7 @@ export default function Clientes() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    borderColor: temaAtual.borda
+                    borderColor: temaAtual.borda,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={11}
@@ -981,7 +915,7 @@ export default function Clientes() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    borderColor: temaAtual.borda
+                    borderColor: temaAtual.borda,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={50}
@@ -1002,7 +936,7 @@ export default function Clientes() {
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      borderColor: temaAtual.borda
+                      borderColor: temaAtual.borda,
                     }}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
                     maxLength={20}
@@ -1022,7 +956,7 @@ export default function Clientes() {
                     style={{
                       backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      borderColor: temaAtual.borda
+                      borderColor: temaAtual.borda,
                     }}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
                     maxLength={2}
@@ -1043,7 +977,7 @@ export default function Clientes() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    borderColor: temaAtual.borda
+                    borderColor: temaAtual.borda,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={10}

@@ -59,12 +59,7 @@ export default function Vendas() {
   };
 
   useEffect(() => {
-    const carregarPermissoes = async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-
-      const usuarioId = usuarioSalvo.replace(/"/g, "");
-
+    const carregarPermissoes = async (usuarioId: string) => {
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
@@ -104,126 +99,34 @@ export default function Vendas() {
       }
     };
 
-    carregarPermissoes();
-  }, []);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
-
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.vendas_visualizar;
-
-  const podeRealizarVendas = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.vendas_realizar;
-
-  const verificarAtivacaoEmpresa = async (empresaId: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
-      if (!response.ok) {
-        throw new Error("Erro ao buscar dados da empresa");
-      }
-      const empresaData = await response.json();
-
-      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
-
-      setEmpresaAtivada(ativada);
-      return ativada;
-    } catch (error) {
-      console.error("Erro ao verificar ativação da empresa:", error);
-      return false;
-    }
-  };
-
-  const mostrarAlertaNaoAtivada = () => {
-    Swal.fire({
-      title: t("empresaNaoAtivada.titulo"),
-      text: t("empresaNaoAtivada.mensagem"),
-      icon: "warning",
-      confirmButtonText: t("empresaNaoAtivada.botao"),
-      confirmButtonColor: "#3085d6",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        router.push("/ativacao");
-      }
-    });
-  };
-
-  const handleAcaoProtegida = (acao: () => void) => {
-    if (!empresaAtivada) {
-      mostrarAlertaNaoAtivada();
-      return;
-    }
-    acao();
-  };
-
-  useEffect(() => {
-    const carrinhoSalvo = localStorage.getItem('carrinhoVendas');
-    if (carrinhoSalvo) {
-      try {
-        const carrinhoParseado = JSON.parse(carrinhoSalvo);
-        setCarrinho(carrinhoParseado);
-      } catch (err) {
-        console.error('Erro ao parsear carrinho do localStorage', err);
-        localStorage.removeItem('carrinhoVendas');
-      }
-    }
-
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativado = temaSalvo === "true";
-    setModoDark(ativado);
-
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) {
-      setCarregando(false);
-      return;
-    }
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
     const initialize = async () => {
-      try {
-        setCarregando(true);
+      const carrinhoSalvo = localStorage.getItem('carrinhoVendas');
+      if (carrinhoSalvo) {
+        try {
+          const carrinhoParseado = JSON.parse(carrinhoSalvo);
+          setCarrinho(carrinhoParseado);
+        } catch (err) {
+          console.error('Erro ao parsear carrinho do localStorage', err);
+          localStorage.removeItem('carrinhoVendas');
+        }
+      }
 
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) {
+        setCarregando(false);
+        return;
+      }
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      setCarregando(true);
+
+      await carregarPermissoes(usuarioValor);
+
+      try {
         const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
         const usuario = await responseUsuario.json();
 
@@ -295,7 +198,49 @@ export default function Vendas() {
     };
 
     initialize();
-  }, [t]);
+
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [t, modoDark]);
 
   useEffect(() => {
     if (carrinho.length > 0) {
@@ -304,6 +249,53 @@ export default function Vendas() {
       localStorage.removeItem('carrinhoVendas');
     }
   }, [carrinho]);
+
+  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.vendas_visualizar;
+
+  const podeRealizarVendas = (tipoUsuario === "PROPRIETARIO") ||
+    permissoesUsuario.vendas_realizar;
+
+  const verificarAtivacaoEmpresa = async (empresaId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da empresa");
+      }
+      const empresaData = await response.json();
+
+      const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+
+      setEmpresaAtivada(ativada);
+      return ativada;
+    } catch (error) {
+      console.error("Erro ao verificar ativação da empresa:", error);
+      return false;
+    }
+  };
+
+  const mostrarAlertaNaoAtivada = () => {
+    Swal.fire({
+      title: t("empresaNaoAtivada.titulo"),
+      text: t("empresaNaoAtivada.mensagem"),
+      icon: "warning",
+      confirmButtonText: t("empresaNaoAtivada.botao"),
+      confirmButtonColor: "#3085d6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/ativacao");
+      }
+    });
+  };
+
+  const handleAcaoProtegida = (acao: () => void) => {
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
+    acao();
+  };
+
 
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     if (!podeRealizarVendas) return;

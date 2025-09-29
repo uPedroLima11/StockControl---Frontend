@@ -110,9 +110,7 @@ export default function Logs() {
     };
 
     initialize();
-  }, [t]);
 
-  useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
     html::-webkit-scrollbar {
@@ -154,7 +152,7 @@ export default function Logs() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]);
+  }, [t, modoDark]);
 
   const indexUltimoLog = paginaAtual * logsPorPagina;
   const indexPrimeiroLog = indexUltimoLog - logsPorPagina;

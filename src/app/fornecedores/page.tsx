@@ -77,55 +77,135 @@ export default function Fornecedores() {
   };
 
   useEffect(() => {
-    const carregarPermissoes = async () => {
+    const carregarDadosIniciais = async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
+      if (usuarioSalvo) {
+        const usuarioId = usuarioSalvo.replace(/"/g, "");
 
-      const usuarioId = usuarioSalvo.replace(/"/g, "");
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-          {
-            headers: {
-              'user-id': usuarioId
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+            {
+              headers: {
+                'user-id': usuarioId
+              }
             }
+          );
+
+          if (response.ok) {
+            const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
+
+            const permissoesUsuarioObj: Record<string, boolean> = {};
+            dados.permissoes.forEach(permissao => {
+              permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+            });
+
+            setPermissoesUsuario(permissoesUsuarioObj);
+          } else {
+            const permissoesParaVerificar = [
+              "fornecedores_criar",
+              "fornecedores_editar",
+              "fornecedores_excluir",
+              "fornecedores_visualizar"
+            ];
+
+            const permissoes: Record<string, boolean> = {};
+
+            for (const permissao of permissoesParaVerificar) {
+              const temPermissao = await usuarioTemPermissao(permissao);
+              permissoes[permissao] = temPermissao;
+            }
+
+            setPermissoesUsuario(permissoes);
           }
-        );
-
-        if (response.ok) {
-          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
-
-          const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
-            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
-          });
-
-          setPermissoesUsuario(permissoesUsuarioObj);
-        } else {
-          const permissoesParaVerificar = [
-            "fornecedores_criar",
-            "fornecedores_editar",
-            "fornecedores_excluir",
-            "fornecedores_visualizar"
-          ];
-
-          const permissoes: Record<string, boolean> = {};
-
-          for (const permissao of permissoesParaVerificar) {
-            const temPermissao = await usuarioTemPermissao(permissao);
-            permissoes[permissao] = temPermissao;
-          }
-
-          setPermissoesUsuario(permissoes);
+        } catch (error) {
+          console.error("Erro ao carregar permissões:", error);
         }
-      } catch (error) {
-        console.error("Erro ao carregar permissões:", error);
       }
+
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const usuario = await responseUsuario.json();
+      setEmpresaId(usuario.empresaId);
+      setTipoUsuario(usuario.tipo);
+
+      if (usuario.empresaId) {
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
+      }
+
+      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        headers: {
+          'user-id': usuarioValor
+        }
+      });
+      const fornecedoresData = await responseFornecedores.json();
+      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setFornecedores(fornecedoresOrdenados);
     };
 
-    carregarPermissoes();
-  }, []);
+    carregarDadosIniciais();
+
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
+
+  useEffect(() => {
+    if (modalVisualizar) {
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setCategoriaCaracteres(modalVisualizar.categoria?.length || 0);
+      setEmailCaracteres(modalVisualizar.email?.length || 0);
+      setCnpjCaracteres(modalVisualizar.cnpj?.length || 0);
+      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
+    }
+  }, [modalVisualizar]);
 
 
   const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
@@ -179,95 +259,6 @@ export default function Fornecedores() {
     }
     acao();
   };
-
-  useEffect(() => {
-    const initialize = async () => {
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
-      const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
-      setTipoUsuario(usuario.tipo);
-
-      if (usuario.empresaId) {
-        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
-        setEmpresaAtivada(ativada);
-      }
-
-      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-      const fornecedoresData = await responseFornecedores.json();
-      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setFornecedores(fornecedoresOrdenados);
-    };
-
-    initialize();
-  }, []);
-
-  useEffect(() => {
-    if (modalVisualizar) {
-      setNomeCaracteres(modalVisualizar.nome?.length || 0);
-      setCategoriaCaracteres(modalVisualizar.categoria?.length || 0);
-      setEmailCaracteres(modalVisualizar.email?.length || 0);
-      setCnpjCaracteres(modalVisualizar.cnpj?.length || 0);
-      setTelefoneCaracteres(modalVisualizar.telefone?.length || 0);
-    }
-  }, [modalVisualizar]);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]); 
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

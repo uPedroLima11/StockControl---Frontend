@@ -32,9 +32,7 @@ export default function MinhaConta() {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
-  }, []);
 
-  useEffect(() => {
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
       if (response.status === 200) {
@@ -63,32 +61,30 @@ export default function MinhaConta() {
       buscaUsuarios(usuarioValor);
       buscarDados(usuarioValor);
     }
-  }, []);
 
-  useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
     }
     
     html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+      background: ${ativo ? "#132F4C" : "#F8FAFC"};
     }
     
     html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      background: ${ativo ? "#132F4C" : "#90CAF9"}; 
       border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      border: 2px solid ${ativo ? "#132F4C" : "#F8FAFC"};
     }
     
     html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+      background: ${ativo ? "#132F4C" : "#64B5F6"}; 
     }
     
     html {
       scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+      scrollbar-color: ${ativo ? "#132F4C" : "#90CAF9"} ${ativo ? "#0A1830" : "#F8FAFC"};
     }
     
     @media (max-width: 768px) {
@@ -97,18 +93,18 @@ export default function MinhaConta() {
       }
       
       html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border: 1px solid ${ativo ? "#132F4C" : "#F8FAFC"};
         border-radius: 3px;
       }
     }
-  `;
+    `;
     document.head.appendChild(style);
 
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
-  
+  }, []);
+
   const abrirModal = () => {
     setForm({
       nome: usuario?.nome || "",
@@ -185,27 +181,34 @@ export default function MinhaConta() {
     });
   };
 
- return (
+  return (
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
       <div className="w-full max-w-2xl">
         <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 
-        <div className="p-6 rounded-lg mb-6" style={{
-          backgroundColor: temaAtual.card,
-          border: `1px solid ${temaAtual.borda}`
-        }}>
+        <div
+          className="p-6 rounded-lg mb-6"
+          style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`,
+          }}
+        >
           <div className="border-b mb-4 pb-4" style={{ borderColor: temaAtual.borda }}>
             <h2 className="text-lg font-semibold mb-2 flex items-center gap-2" style={{ color: temaAtual.texto }}>
               <FaLock style={{ color: temaAtual.texto }} />
               {t("email")}
             </h2>
-            <p className="mt-1" style={{ color: temaAtual.texto }}>{usuarioLogado?.email || "..."}</p>
+            <p className="mt-1" style={{ color: temaAtual.texto }}>
+              {usuarioLogado?.email || "..."}
+            </p>
           </div>
 
           <div className="mb-6 pb-4" style={{ borderColor: temaAtual.borda }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("senha")}</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
+              {t("senha")}
+            </h2>
             <Link
               href="/esqueci"
               className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105 font-mono text-sm w-fit"
@@ -225,15 +228,21 @@ export default function MinhaConta() {
           </div>
 
           <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{t("informacoesConta")}</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
+              {t("informacoesConta")}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <p style={{ color: temaAtual.placeholder }}>{t("empresa.nome")}</p>
-                <p style={{ color: temaAtual.texto }}><strong>{empresa?.nome || t("adicionar")}</strong></p>
+                <p style={{ color: temaAtual.texto }}>
+                  <strong>{empresa?.nome || t("adicionar")}</strong>
+                </p>
               </div>
               <div>
                 <p style={{ color: temaAtual.placeholder }}>{t("empresa.cargo")}</p>
-                <p style={{ color: temaAtual.texto }}><strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong></p>
+                <p style={{ color: temaAtual.texto }}>
+                  <strong>{translateRole(usuarioLogado?.tipo || t("adicionar"))}</strong>
+                </p>
               </div>
               <div>
                 <p style={{ color: temaAtual.placeholder }}>{t("nome")}</p>
@@ -316,14 +325,18 @@ export default function MinhaConta() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
-            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>{t("modal.editarTitulo")}</h2>
+            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>
+              {t("modal.editarTitulo")}
+            </h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("modal.nome")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("modal.nome")}
+                </label>
                 <input
                   type="text"
                   value={form.nome}
@@ -332,13 +345,15 @@ export default function MinhaConta() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                 />
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>{t("modal.email")}</label>
+                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  {t("modal.email")}
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -347,7 +362,7 @@ export default function MinhaConta() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                 />
               </div>
@@ -360,7 +375,7 @@ export default function MinhaConta() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = temaAtual.hover;

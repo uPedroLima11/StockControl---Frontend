@@ -97,16 +97,10 @@ export default function EstoquePage() {
       }
     };
 
-    carregarPermissoes();
-  }, []);
+    const carregarTemaEProdutos = async () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      setModoDark(temaSalvo === "true");
 
-
-  useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    setModoDark(temaSalvo === "true");
-
-    
-    const carregarProdutos = async () => {
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (!usuarioSalvo) return;
@@ -135,7 +129,8 @@ export default function EstoquePage() {
       }
     };
 
-    carregarProdutos();
+    carregarPermissoes();
+    carregarTemaEProdutos();
   }, []);
 
   useEffect(() => {
@@ -180,7 +175,7 @@ export default function EstoquePage() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
+  }, [modoDark]);
   const produtosFiltrados = produtos.filter(
     (produto) =>
       produto.nome.toLowerCase().includes(busca.toLowerCase()) &&

@@ -5,7 +5,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import { UsuarioI } from "@/utils/types/usuario";
 import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
-import { getTranslatedPermission, getTranslatedCategory } from '@/utils/permissoeTranslations';
+import { getTranslatedPermission, getTranslatedCategory } from "@/utils/permissoeTranslations";
 import Swal from "sweetalert2";
 interface PermissaoI {
   id: string;
@@ -26,9 +26,9 @@ interface PermissoesUsuarioResponse {
 
 const ordenarUsuariosPorFuncao = (usuarios: UsuarioI[]) => {
   const ordemFuncoes = {
-    "PROPRIETARIO": 1,
-    "ADMIN": 2,
-    "FUNCIONARIO": 3
+    PROPRIETARIO: 1,
+    ADMIN: 2,
+    FUNCIONARIO: 3,
   };
 
   return [...usuarios].sort((a, b) => {
@@ -78,83 +78,44 @@ export default function Usuarios() {
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-  }, []);
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
+    document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
 
-  const toggleTodasPermissoes = () => {
-    const novoEstado = !todasMarcadas;
-    setTodasMarcadas(novoEstado);
-
-    setPermissoesUsuario(prev =>
-      prev.map(p => ({ ...p, concedida: novoEstado }))
-    );
-
-    setPermissoesAgrupadas(prev => {
-      const novoAgrupado = { ...prev };
-      Object.keys(novoAgrupado).forEach(categoria => {
-        novoAgrupado[categoria] = novoAgrupado[categoria].map(p =>
-          ({ ...p, concedida: novoEstado })
-        );
-      });
-      return novoAgrupado;
-    });
-  };
-
-  useEffect(() => {
-    if (permissoesUsuario.length > 0) {
-      const todasConcedidas = permissoesUsuario.every(p => p.concedida);
-      const nenhumaConcedida = permissoesUsuario.every(p => !p.concedida);
-
-      if (todasConcedidas) {
-        setTodasMarcadas(true);
-      } else if (nenhumaConcedida) {
-        setTodasMarcadas(false);
+    const style = document.createElement("style");
+    style.textContent = `
+      html::-webkit-scrollbar {
+        width: 10px;
       }
-    }
-  }, [permissoesUsuario]);
-  const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        return data.temPermissao;
+      html::-webkit-scrollbar-track {
+        background: ${ativado ? "#132F4C" : "#F8FAFC"};
       }
-      return false;
-    } catch (error) {
-      console.error("Erro ao verificar permissão:", error);
-      return false;
-    }
-  };
-
-  const verificarPermissaoExcluir = async () => {
-    try {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) {
-        setTemPermissaoExcluir(false);
-        return;
+      html::-webkit-scrollbar-thumb {
+        background: ${ativado ? "#132F4C" : "#90CAF9"}; 
+        border-radius: 5px;
+        border: 2px solid ${ativado ? "#132F4C" : "#F8FAFC"};
       }
+      html::-webkit-scrollbar-thumb:hover {
+        background: ${ativado ? "#132F4C" : "#64B5F6"}; 
+      }
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: ${ativado ? "#132F4C" : "#90CAF9"} ${ativado ? "#0A1830" : "#F8FAFC"};
+      }
+      @media (max-width: 768px) {
+        html::-webkit-scrollbar {
+          width: 6px;
+        }
+        html::-webkit-scrollbar-thumb {
+          border: 1px solid ${ativado ? "#132F4C" : "#F8FAFC"};
+          border-radius: 3px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
 
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      const temPermissao = await usuarioTemPermissao(usuarioValor, "usuarios_excluir");
-      setTemPermissaoExcluir(temPermissao);
-    } catch (error) {
-      console.error("Erro ao verificar permissão de exclusão:", error);
-      setTemPermissaoExcluir(false);
-    }
-  };
-
-  useEffect(() => {
     const initialize = async () => {
       setLoading(true);
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
-      document.body.style.backgroundColor = ativado ? "#0A1929" : "#F8FAFC";
-
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (!usuarioSalvo) {
@@ -162,7 +123,6 @@ export default function Usuarios() {
           setLoading(false);
           return;
         }
-
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
         setUsuarioLogado(null);
 
@@ -193,8 +153,7 @@ export default function Usuarios() {
         if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
-        const usuariosDaEmpresa = todosUsuarios
-          .filter((usuario) => usuario.empresaId === empresaIdRecebido);
+        const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
         const usuariosOrdenados = ordenarUsuariosPorFuncao(usuariosDaEmpresa);
 
@@ -208,54 +167,6 @@ export default function Usuarios() {
       }
     };
 
-    initialize();
-  }, [t, logar]);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]); 
-  
-  useEffect(() => {
     async function carregarPermissoes() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/permissoes`);
@@ -272,14 +183,98 @@ export default function Usuarios() {
       }
     }
 
+    initialize();
     carregarPermissoes();
-  }, []);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [t, logar]);
+
+  useEffect(() => {
+    const carregarTodasPermissoes = async () => {
+      const editaveis: Record<string, boolean> = {};
+      const gerenciáveis: Record<string, boolean> = {};
+      const excluiveis: Record<string, boolean> = {};
+
+      for (const usuario of usuarios) {
+        editaveis[usuario.id] = await podeEditar(usuario);
+        gerenciáveis[usuario.id] = await podeGerenciarPermissoesUsuario(usuario);
+        excluiveis[usuario.id] = await podeExcluir(usuario);
+      }
+
+      setUsuariosEditaveis(editaveis);
+      setUsuariosGerenciáveis(gerenciáveis);
+      setUsuariosExcluiveis(excluiveis);
+    };
+
+    if (usuarios.length > 0 && usuarioLogado) {
+      carregarTodasPermissoes();
+    }
+  }, [usuarios, usuarioLogado]);
+
+  useEffect(() => {
+    if (permissoesUsuario.length > 0) {
+      const todasConcedidas = permissoesUsuario.every((p) => p.concedida);
+      const nenhumaConcedida = permissoesUsuario.every((p) => !p.concedida);
+
+      if (todasConcedidas) {
+        setTodasMarcadas(true);
+      } else if (nenhumaConcedida) {
+        setTodasMarcadas(false);
+      }
+    }
+  }, [permissoesUsuario]);
+
+  const toggleTodasPermissoes = () => {
+    const novoEstado = !todasMarcadas;
+    setTodasMarcadas(novoEstado);
+
+    setPermissoesUsuario((prev) => prev.map((p) => ({ ...p, concedida: novoEstado })));
+
+    setPermissoesAgrupadas((prev) => {
+      const novoAgrupado = { ...prev };
+      Object.keys(novoAgrupado).forEach((categoria) => {
+        novoAgrupado[categoria] = novoAgrupado[categoria].map((p) => ({ ...p, concedida: novoEstado }));
+      });
+      return novoAgrupado;
+    });
+  };
+
+  const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+    const verificarPermissaoExcluir = async () => {
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) {
+        setTemPermissaoExcluir(false);
+        return;
+      }
+
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      const temPermissao = await usuarioTemPermissao(usuarioValor, "usuarios_excluir");
+      setTemPermissaoExcluir(temPermissao);
+    } catch (error) {
+      console.error("Erro ao verificar permissão de exclusão:", error);
+      setTemPermissaoExcluir(false);
+    }
+  };
 
   const carregarPermissoesUsuario = async (usuarioId: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`);
       if (response.ok) {
         const dados: PermissoesUsuarioResponse = await response.json();
         setPermissoesUsuario(dados.permissoes);
@@ -306,38 +301,49 @@ export default function Usuarios() {
 
   const renderizarPermissoesPorCategoria = () => {
     if (Object.keys(permissoesAgrupadas).length === 0) {
-      return <p className="text-center py-4" style={{ color: temaAtual.placeholder }}>Nenhuma permissão encontrada</p>;
+      return (
+        <p className="text-center py-4" style={{ color: temaAtual.placeholder }}>
+          Nenhuma permissão encontrada
+        </p>
+      );
     }
 
     return Object.entries(permissoesAgrupadas).map(([categoria, permissoesDaCategoria]) => (
       <div key={categoria} className="mb-6">
-        <h3 className="text-lg font-semibold mb-3 border-b pb-2" style={{
-          color: temaAtual.texto,
-          borderColor: temaAtual.borda
-        }}>
+        <h3
+          className="text-lg font-semibold mb-3 border-b pb-2"
+          style={{
+            color: temaAtual.texto,
+            borderColor: temaAtual.borda,
+          }}
+        >
           {traduzirCategoria(categoria)}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {permissoesDaCategoria.map(permissao => (
-            <div key={permissao.id} className="flex items-start gap-3 p-3 border rounded-lg" style={{
-              backgroundColor: temaAtual.card,
-              borderColor: temaAtual.borda,
-            }}>
+          {permissoesDaCategoria.map((permissao) => (
+            <div
+              key={permissao.id}
+              className="flex items-start gap-3 p-3 border rounded-lg"
+              style={{
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
+              }}
+            >
               <input
                 type="checkbox"
                 checked={permissao.concedida}
                 onChange={(e) => atualizarPermissao(permissao.id, e.target.checked)}
                 className="mt-1 rounded cursor-pointer"
                 style={{
-                  accentColor: temaAtual.primario
+                  accentColor: temaAtual.primario,
                 }}
               />
               <div className="flex-1">
                 <div className="font-medium" style={{ color: temaAtual.texto }}>
-                  {getTranslatedPermission(permissao.chave, 'nome', currentLanguage)}
+                  {getTranslatedPermission(permissao.chave, "nome", currentLanguage)}
                 </div>
                 <div className="text-xs mt-1" style={{ color: temaAtual.placeholder }}>
-                  {getTranslatedPermission(permissao.chave, 'descricao', currentLanguage)}
+                  {getTranslatedPermission(permissao.chave, "descricao", currentLanguage)}
                 </div>
               </div>
             </div>
@@ -348,16 +354,12 @@ export default function Usuarios() {
   };
 
   const atualizarPermissao = (permissaoId: string, concedida: boolean) => {
-    setPermissoesUsuario(prev =>
-      prev.map(p => p.id === permissaoId ? { ...p, concedida } : p)
-    );
+    setPermissoesUsuario((prev) => prev.map((p) => (p.id === permissaoId ? { ...p, concedida } : p)));
 
-    setPermissoesAgrupadas(prev => {
+    setPermissoesAgrupadas((prev) => {
       const novoAgrupado = { ...prev };
-      Object.keys(novoAgrupado).forEach(categoria => {
-        novoAgrupado[categoria] = novoAgrupado[categoria].map(p =>
-          p.id === permissaoId ? { ...p, concedida } : p
-        );
+      Object.keys(novoAgrupado).forEach((categoria) => {
+        novoAgrupado[categoria] = novoAgrupado[categoria].map((p) => (p.id === permissaoId ? { ...p, concedida } : p));
       });
       return novoAgrupado;
     });
@@ -382,22 +384,19 @@ export default function Usuarios() {
     if (!modalPermissoes) return;
 
     try {
-      const permissoesParaSalvar = permissoesUsuario.map(p => ({
+      const permissoesParaSalvar = permissoesUsuario.map((p) => ({
         permissaoId: p.id,
-        concedida: p.concedida
+        concedida: p.concedida,
       }));
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            permissoes: permissoesParaSalvar,
-            ativarPersonalizacao: true
-          })
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          permissoes: permissoesParaSalvar,
+          ativarPersonalizacao: true,
+        }),
+      });
 
       if (response.ok) {
         Swal.fire({
@@ -417,22 +416,18 @@ export default function Usuarios() {
     }
   };
 
-
   const redefinirPermissoesPadrao = async () => {
     if (!modalPermissoes) return;
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            permissoes: [],
-            ativarPersonalizacao: false
-          })
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${modalPermissoes.id}/permissoes`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          permissoes: [],
+          ativarPersonalizacao: false,
+        }),
+      });
 
       if (response.ok) {
         Swal.fire({
@@ -483,8 +478,7 @@ export default function Usuarios() {
         if (!resUsuarios.ok) throw new Error(t("erroBuscarUsuarios"));
 
         const todosUsuarios: UsuarioI[] = await resUsuarios.json();
-        const usuariosDaEmpresa = todosUsuarios
-          .filter((usuario) => usuario.empresaId === empresaIdRecebido);
+        const usuariosDaEmpresa = todosUsuarios.filter((usuario) => usuario.empresaId === empresaIdRecebido);
 
         const usuariosOrdenados = ordenarUsuariosPorFuncao(usuariosDaEmpresa);
 
@@ -509,10 +503,7 @@ export default function Usuarios() {
     }
   }, [t, logar]);
 
-  const usuariosFiltrados = usuarios.filter((usuario) =>
-    usuario.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    usuario.email.toLowerCase().includes(busca.toLowerCase())
-  );
+  const usuariosFiltrados = usuarios.filter((usuario) => usuario.nome.toLowerCase().includes(busca.toLowerCase()) || usuario.email.toLowerCase().includes(busca.toLowerCase()));
 
   const indexUltimoUsuario = paginaAtual * usuariosPorPagina;
   const indexPrimeiroUsuario = indexUltimoUsuario - usuariosPorPagina;
@@ -524,28 +515,27 @@ export default function Usuarios() {
     setUsuarioExpandido(null);
   };
 
-
   async function enviarNotificacao() {
     setIsEnviando(true);
     try {
       let mensagemErro = "";
 
       if (!usuarioSelecionado) {
-      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.usuario")}\n`;
+        mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.usuario")}\n`;
       }
 
       if (!titulo.trim()) {
-      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.tituloMensagem")}\n`;
+        mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.tituloMensagem")}\n`;
       }
 
       if (!descricao.trim()) {
-      mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.descricaoMensagem")}\n`;
+        mensagemErro += `• ${t("modal.preenchaCamposObrigatorios.descricaoMensagem")}\n`;
       }
 
       if (mensagemErro) {
         Swal.fire({
           title: t("modal.preenchaCamposObrigatorios.titulo"),
-          html: t("modal.preenchaCamposObrigatorios.texto", { campos: mensagemErro.replace(/\n/g, ' ') }),
+          html: t("modal.preenchaCamposObrigatorios.texto", { campos: mensagemErro.replace(/\n/g, " ") }),
           icon: "warning",
           confirmButtonColor: "#013C3C",
         });
@@ -625,22 +615,22 @@ export default function Usuarios() {
           text: t("modal.permissaoNegada.textoConvite") || "Você não tem permissão para convidar usuários.",
           icon: "warning",
           confirmButtonColor: "#013C3C",
-          confirmButtonText: t("modal.botaoOk") || "OK"
+          confirmButtonText: t("modal.botaoOk") || "OK",
         });
         return;
       }
 
       const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
         headers: {
-          'user-id': usuarioId
-        }
+          "user-id": usuarioId,
+        },
       });
       const empresa = await resEmpresa.json();
 
       const resTodosUsuarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario`, {
         headers: {
-          'user-id': usuarioId
-        }
+          "user-id": usuarioId,
+        },
       });
       const todosUsuarios: UsuarioI[] = await resTodosUsuarios.json();
 
@@ -732,41 +722,25 @@ export default function Usuarios() {
           const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuario.id}/remover-empresa`, {
             method: "PUT",
             headers: {
-              "user-id": usuarioId || ""
+              "user-id": usuarioId || "",
             },
           });
 
           if (res.ok) {
-            Swal.fire(
-              t("modal.removido"),
-              t("modal.confirmacaoRemocao.sucesso", { nome: usuario.nome }),
-              "success"
-            );
+            Swal.fire(t("modal.removido"), t("modal.confirmacaoRemocao.sucesso", { nome: usuario.nome }), "success");
             setModalEditarUsuario(null);
-            setUsuarios(prev => prev.filter(u => u.id !== usuario.id));
+            setUsuarios((prev) => prev.filter((u) => u.id !== usuario.id));
           } else {
             try {
               const errorData = await res.json();
-              Swal.fire(
-                t("modal.erro.titulo"),
-                errorData.mensagem || t("modal.confirmacaoRemocao.erro"),
-                "error"
-              );
+              Swal.fire(t("modal.erro.titulo"), errorData.mensagem || t("modal.confirmacaoRemocao.erro"), "error");
             } catch {
-              Swal.fire(
-                t("modal.erro.titulo"),
-                t("modal.confirmacaoRemocao.erro"),
-                "error"
-              );
+              Swal.fire(t("modal.erro.titulo"), t("modal.confirmacaoRemocao.erro"), "error");
             }
           }
         } catch (err) {
           console.error("Erro ao remover usuário:", err);
-          Swal.fire(
-            t("modal.erro.titulo"),
-            t("modal.erro.removerUsuario"),
-            "error"
-          );
+          Swal.fire(t("modal.erro.titulo"), t("modal.erro.removerUsuario"), "error");
         }
       }
     });
@@ -848,7 +822,6 @@ export default function Usuarios() {
     setUsuarioExpandido(usuarioExpandido === id ? null : id);
   };
 
-
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
     return data.toLocaleDateString("pt-BR", {
@@ -869,7 +842,9 @@ export default function Usuarios() {
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
-        <p style={{ color: "#EF4444" }}>{t("erro")}: {error}</p>
+        <p style={{ color: "#EF4444" }}>
+          {t("erro")}: {error}
+        </p>
       </div>
     );
   }
@@ -918,7 +893,7 @@ export default function Usuarios() {
                 placeholder={t("buscarUsuario")}
                 className="outline-none font-mono placeholder-gray-400 text-sm bg-transparent"
                 style={{
-                  color: temaAtual.texto
+                  color: temaAtual.texto,
                 }}
                 value={busca}
                 onChange={(e) => {
@@ -930,12 +905,7 @@ export default function Usuarios() {
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleLeft />
                 </button>
 
@@ -943,12 +913,7 @@ export default function Usuarios() {
                   {paginaAtual}/{totalPaginas}
                 </span>
 
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleRight />
                 </button>
               </div>
@@ -1018,9 +983,7 @@ export default function Usuarios() {
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.hover;
                           e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow = modoDark
-                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                          e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = temaAtual.card;
@@ -1034,7 +997,6 @@ export default function Usuarios() {
                         <td className="py-3 px-4">{formatarData(usuario.updatedAt)}</td>
                         <td className="py-3 px-4">
                           {usuariosEditaveis[usuario.id] && (
-
                             <FaCog
                               className="cursor-pointer transition hover:rotate-90"
                               onClick={() => {
@@ -1063,9 +1025,7 @@ export default function Usuarios() {
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = temaAtual.hover;
                       e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = modoDark
-                        ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                        : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                      e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = temaAtual.card;
@@ -1108,8 +1068,7 @@ export default function Usuarios() {
                               title={t("editarUsuario")}
                             />
                             <FaLock
-                              className={`cursor-pointer transition mx-1 ${usuariosGerenciáveis[usuario.id] ? "hover:text-green-500" : "opacity-50 cursor-not-allowed"
-                                }`}
+                              className={`cursor-pointer transition mx-1 ${usuariosGerenciáveis[usuario.id] ? "hover:text-green-500" : "opacity-50 cursor-not-allowed"}`}
                               onClick={async (e) => {
                                 e.stopPropagation();
 
@@ -1137,11 +1096,7 @@ export default function Usuarios() {
                       </div>
                     </div>
 
-                    <div
-                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"
-                        }`}
-                      style={{ color: temaAtual.texto }}
-                    >
+                    <div className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${usuarioExpandido === usuario.id ? "max-h-96" : "max-h-0"}`} style={{ color: temaAtual.texto }}>
                       <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex">
                           <span className="font-semibold min-w-[80px]">{t("email")}:</span>
@@ -1172,22 +1127,22 @@ export default function Usuarios() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
             <h2 className="text-xl font-bold mb-4">{t("modal.convidarUsuario")}</h2>
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.emailUsuario")}</label>
               <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded p-2 border"
-              style={{
-                backgroundColor: temaAtual.card,
-                color: temaAtual.texto,
-                borderColor: "#202021" 
-              }}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded p-2 border"
+                style={{
+                  backgroundColor: temaAtual.card,
+                  color: temaAtual.texto,
+                  borderColor: "#202021",
+                }}
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -1224,7 +1179,7 @@ export default function Usuarios() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
             <h2 className="text-xl font-bold mb-4">{t("modal.enviarMensagem")}</h2>
@@ -1238,7 +1193,7 @@ export default function Usuarios() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  borderColor: temaAtual.borda
+                  borderColor: temaAtual.borda,
                 }}
               />
             </div>
@@ -1246,16 +1201,16 @@ export default function Usuarios() {
               <label className="block mb-1 text-sm">{t("modal.para")}</label>
               <select
                 className="w-full cursor-pointer rounded p-2 border"
-                onChange={(e) => setUsuarioSelecionado(usuarios.find(u => u.id === e.target.value) || null)}
+                onChange={(e) => setUsuarioSelecionado(usuarios.find((u) => u.id === e.target.value) || null)}
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  borderColor: temaAtual.borda
+                  borderColor: temaAtual.borda,
                 }}
               >
                 <option value="">{t("selecioneUsuario")}</option>
                 {usuarios
-                  .filter(usuario => usuario.id !== usuarioLogado?.id)
+                  .filter((usuario) => usuario.id !== usuarioLogado?.id)
                   .map((usuario) => (
                     <option key={usuario.id} value={usuario.id}>
                       {usuario.nome}
@@ -1274,7 +1229,7 @@ export default function Usuarios() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  borderColor: temaAtual.borda
+                  borderColor: temaAtual.borda,
                 }}
               />
             </div>
@@ -1288,7 +1243,7 @@ export default function Usuarios() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  borderColor: temaAtual.borda
+                  borderColor: temaAtual.borda,
                 }}
               />
             </div>
@@ -1326,11 +1281,13 @@ export default function Usuarios() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
             <h2 className="text-xl font-bold mb-4">{t("modal.editarUsuario")}</h2>
-            <p className="mb-3">{t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong></p>
+            <p className="mb-3">
+              {t("modal.usuario")}: <strong>{modalEditarUsuario.nome}</strong>
+            </p>
 
             <div className="mb-3">
               <label className="block mb-1 text-sm">{t("modal.alterarCargo")}</label>
@@ -1403,11 +1360,7 @@ export default function Usuarios() {
 
                   const podeAlterar = await podeAlterarCargo(modalEditarUsuario, novoTipo);
                   if (!podeAlterar) {
-                    Swal.fire(
-                      t("modal.erroPermissao.titulo"),
-                      t("modal.erroPermissao.texto"),
-                      "warning"
-                    );
+                    Swal.fire(t("modal.erroPermissao.titulo"), t("modal.erroPermissao.texto"), "warning");
                     return;
                   }
                   const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${modalEditarUsuario.id}`, {
@@ -1416,19 +1369,11 @@ export default function Usuarios() {
                     body: JSON.stringify({ tipo: novoTipo }),
                   });
                   if (res.ok) {
-                    Swal.fire(
-                      t("modal.cargoAtualizado"),
-                      t("modal.cargoAtualizadoSucesso"),
-                      "success"
-                    );
+                    Swal.fire(t("modal.cargoAtualizado"), t("modal.cargoAtualizadoSucesso"), "success");
                     setModalEditarUsuario(null);
                     window.location.reload();
                   } else {
-                    Swal.fire(
-                      t("modal.erro.titulo"),
-                      t("modal.erro.alterarCargo"),
-                      "error"
-                    );
+                    Swal.fire(t("modal.erro.titulo"), t("modal.erro.alterarCargo"), "error");
                   }
                 }}
               >
@@ -1444,11 +1389,7 @@ export default function Usuarios() {
                   if (!modalEditarUsuario) return;
                   const podeGerenciar = await podeGerenciarPermissoesUsuario(modalEditarUsuario);
                   if (!podeGerenciar) {
-                    Swal.fire(
-                      t("modal.erroPermissao.titulo"),
-                      t("modal.erroPermissao.texto"),
-                      "warning"
-                    );
+                    Swal.fire(t("modal.erroPermissao.titulo"), t("modal.erroPermissao.texto"), "warning");
                     return;
                   }
                   setModalPermissoes(modalEditarUsuario);
@@ -1481,14 +1422,10 @@ export default function Usuarios() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
-            <button
-              onClick={() => setModalPermissoes(null)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg"
-              style={{ color: temaAtual.texto }}
-            >
+            <button onClick={() => setModalPermissoes(null)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg" style={{ color: temaAtual.texto }}>
               ✕
             </button>
 
@@ -1504,7 +1441,7 @@ export default function Usuarios() {
                   onChange={(e) => setPermissoesPersonalizadas(e.target.checked)}
                   className="rounded cursor-pointer"
                   style={{
-                    accentColor: temaAtual.primario
+                    accentColor: temaAtual.primario,
                   }}
                 />
                 <span>{t("modal.permissoesPersonalizadas")}</span>
@@ -1515,18 +1452,18 @@ export default function Usuarios() {
                   onClick={toggleTodasPermissoes}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm rounded cursor-pointer transition"
                   style={{
-                  backgroundColor: todasMarcadas ? temaAtual.primario : temaAtual.hover,
-                  color: todasMarcadas ? "#FFFFFF" : temaAtual.texto,
+                    backgroundColor: todasMarcadas ? temaAtual.primario : temaAtual.hover,
+                    color: todasMarcadas ? "#FFFFFF" : temaAtual.texto,
                   }}
                 >
                   <input
-                  type="checkbox"
-                  checked={todasMarcadas}
-                  onChange={toggleTodasPermissoes}
-                  className="rounded cursor-pointer"
-                  style={{
-                    accentColor: temaAtual.primario
-                  }}
+                    type="checkbox"
+                    checked={todasMarcadas}
+                    onChange={toggleTodasPermissoes}
+                    className="rounded cursor-pointer"
+                    style={{
+                      accentColor: temaAtual.primario,
+                    }}
                   />
                   {todasMarcadas ? t("modal.desmarcarTodas") : t("modal.marcarTodas")}
                 </button>
@@ -1539,9 +1476,7 @@ export default function Usuarios() {
 
             {permissoesPersonalizadas ? (
               <>
-                <div className="mb-6 max-h-96 overflow-y-auto pr-2">
-                  {renderizarPermissoesPorCategoria()}
-                </div>
+                <div className="mb-6 max-h-96 overflow-y-auto pr-2">{renderizarPermissoesPorCategoria()}</div>
 
                 <div className="flex justify-between gap-2">
                   <button
@@ -1610,6 +1545,5 @@ export default function Usuarios() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

@@ -66,10 +66,13 @@ export default function Alteracao() {
     `;
     document.head.appendChild(style);
 
+    setPasswordValid(validarSenha(senha));
+    setPasswordsMatch(senha === confirmaSenha && senha !== '');
+
     return () => {
       document.head.removeChild(style);
     };
-  }, [temaAtual]);
+  }, [temaAtual, senha, confirmaSenha]);
 
   function validarSenha(senha: string) {
     if (!senha) return false;
@@ -84,10 +87,6 @@ export default function Alteracao() {
     return minusculas > 0 && maiusculas > 0 && numeros > 0 && simbolos > 0;
   }
 
-  useEffect(() => {
-    setPasswordValid(validarSenha(senha));
-    setPasswordsMatch(senha === confirmaSenha && senha !== '');
-  }, [senha, confirmaSenha]);
 
   async function verificaAlteracao(data: Inputs) {
     try {

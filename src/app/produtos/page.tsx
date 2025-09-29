@@ -80,12 +80,195 @@ export default function Produtos() {
         setMenuCategoriasAberto(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
+
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+    `;
+    document.head.appendChild(style);
+
+    const carregarPermissoes = async () => {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`,
+          { headers: { 'user-id': usuarioValor } }
+        );
+        if (response.ok) {
+          const dados: { permissoes: { chave: string; concedida: boolean }[] } = await response.json();
+          const permissoesUsuarioObj: Record<string, boolean> = {};
+          dados.permissoes.forEach(permissao => {
+            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+          });
+          setPermissoesUsuario(permissoesUsuarioObj);
+        } else {
+          const permissoesParaVerificar = [
+            "produtos_criar",
+            "produtos_editar",
+            "produtos_excluir",
+            "produtos_visualizar",
+            "estoque_gerenciar"
+          ];
+          const permissoes: Record<string, boolean> = {};
+          for (const permissao of permissoesParaVerificar) {
+            const temPermissao = await usuarioTemPermissao(permissao);
+            permissoes[permissao] = temPermissao;
+          }
+          setPermissoesUsuario(permissoes);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar permissões:", error);
+      }
+    };
+
+    const initialize = async () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+        headers: { 'user-id': usuarioValor }
+      });
+      if (!responseUsuario.ok) {
+        console.error("Erro ao buscar os dados do usuário");
+        return;
+      }
+      const usuario = await responseUsuario.json();
+      setEmpresaId(usuario.empresaId);
+      setTipoUsuario(usuario.tipo);
+
+      if (usuario.empresaId) {
+        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+        setEmpresaAtivada(ativada);
+        if (ativada) {
+          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+          if (responseProdutos.ok) {
+            const todosProdutos = await responseProdutos.json();
+            const produtosDaEmpresa = todosProdutos
+              .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
+              .sort((a: ProdutoI, b: ProdutoI) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
+            setProdutos(produtosDaEmpresa);
+            setProdutosOriginais(produtosDaEmpresa);
+            setTotalProdutos(produtosDaEmpresa.length);
+          }
+        }
+      }
+
+      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+        headers: { 'user-id': usuarioValor }
+      });
+      if (responseFornecedores.ok) {
+        const fornecedoresData = await responseFornecedores.json();
+        setFornecedores(fornecedoresData);
+      }
+
+      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
+        headers: { 'user-id': usuarioValor }
+      });
+      if (responseCategorias.ok) {
+        const categoriasData = await responseCategorias.json();
+        setCategorias(categoriasData);
+      }
+    };
+
+    carregarPermissoes();
+    initialize();
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.head.removeChild(style);
     };
-  }, []);
+  }, [modoDark]);
+
+  useEffect(() => {
+    const usuarioSalvo = localStorage.getItem("client_key");
+    if (!usuarioSalvo) return;
+    const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+    const carregarProdutos = async () => {
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+        headers: { 'user-id': usuarioValor }
+      });
+      if (!responseUsuario.ok) {
+        console.error("Erro ao buscar os dados do usuário");
+        return;
+      }
+      const usuario = await responseUsuario.json();
+
+      if (usuario?.empresaId && empresaAtivada) {
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        if (responseProdutos.ok) {
+          const todosProdutos = await responseProdutos.json();
+          const produtosDaEmpresa = todosProdutos
+            .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
+            .sort((a: ProdutoI, b: ProdutoI) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          setProdutos(produtosDaEmpresa);
+          setProdutosOriginais(produtosDaEmpresa);
+          setTotalProdutos(produtosDaEmpresa.length);
+        }
+      }
+    };
+
+    carregarProdutos();
+  }, [recarregarProdutos, empresaAtivada]);
+
+  useEffect(() => {
+    if (produtosOriginais.length > 0) {
+      const produtosOrdenados = ordenarProdutos(produtosOriginais, campoOrdenacao, direcaoOrdenacao);
+      setProdutos(produtosOrdenados);
+    }
+  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao]);
+
+  useEffect(() => {
+    if (modalVisualizar) {
+      setForm({
+        ...modalVisualizar,
+        preco: parseFloat(modalVisualizar.preco.toFixed(2)),
+        quantidade: modalVisualizar.quantidade,
+        quantidadeMin: modalVisualizar.quantidadeMin || 0,
+      });
+      setPreview(modalVisualizar.foto || null);
+      setNomeCaracteres(modalVisualizar.nome?.length || 0);
+      setDescricaoCaracteres(modalVisualizar.descricao?.length || 0);
+    }
+  }, [modalVisualizar]);
 
   const recarregarListaProdutos = () => {
     setRecarregarProdutos(prev => prev + 1);
@@ -167,58 +350,6 @@ export default function Produtos() {
     }
   };
 
-  useEffect(() => {
-    const carregarPermissoes = async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      if (!usuarioSalvo) return;
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`,
-          {
-            headers: {
-              'user-id': usuarioValor
-            }
-          }
-        );
-
-        if (response.ok) {
-          const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
-
-          const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
-            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
-          });
-
-          setPermissoesUsuario(permissoesUsuarioObj);
-        } else {
-          const permissoesParaVerificar = [
-            "produtos_criar",
-            "produtos_editar",
-            "produtos_excluir",
-            "produtos_visualizar",
-            "estoque_gerenciar"
-          ];
-
-          const permissoes: Record<string, boolean> = {};
-
-          for (const permissao of permissoesParaVerificar) {
-            const temPermissao = await usuarioTemPermissao(permissao);
-            permissoes[permissao] = temPermissao;
-          }
-
-          setPermissoesUsuario(permissoes);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar permissões:", error);
-      }
-    };
-
-    carregarPermissoes();
-  }, []);
-
   const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
     permissoesUsuario.produtos_visualizar;
 
@@ -237,49 +368,6 @@ export default function Produtos() {
   const podeGerenciarEstoque = (tipoUsuario === "PROPRIETARIO") ||
     permissoesUsuario.estoque_gerenciar;
 
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
@@ -319,130 +407,6 @@ export default function Produtos() {
     }
     acao();
   };
-
-  useEffect(() => {
-    const initialize = async () => {
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-      if (!responseUsuario.ok) {
-        console.error("Erro ao buscar os dados do usuário");
-        return;
-      }
-      const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
-      setTipoUsuario(usuario.tipo);
-
-      if (usuario.empresaId) {
-        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
-        setEmpresaAtivada(ativada);
-
-        if (ativada) {
-          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-          if (responseProdutos.ok) {
-            const todosProdutos = await responseProdutos.json();
-            const produtosDaEmpresa = todosProdutos
-              .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
-              .sort((a: ProdutoI, b: ProdutoI) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-              );
-            setProdutos(produtosDaEmpresa);
-            setProdutosOriginais(produtosDaEmpresa);
-            setTotalProdutos(produtosDaEmpresa.length);
-          }
-        }
-      }
-
-      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-      if (responseFornecedores.ok) {
-        const fornecedoresData = await responseFornecedores.json();
-        setFornecedores(fornecedoresData);
-      }
-
-      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-      if (responseCategorias.ok) {
-        const categoriasData = await responseCategorias.json();
-        setCategorias(categoriasData);
-      }
-    };
-
-    initialize();
-  }, []);
-
-  useEffect(() => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-    const carregarProdutos = async () => {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: {
-          'user-id': usuarioValor
-        }
-      });
-      if (!responseUsuario.ok) {
-        console.error("Erro ao buscar os dados do usuário");
-        return;
-      }
-      const usuario = await responseUsuario.json();
-
-      if (usuario?.empresaId && empresaAtivada) {
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-        if (responseProdutos.ok) {
-          const todosProdutos = await responseProdutos.json();
-          const produtosDaEmpresa = todosProdutos
-            .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
-            .sort((a: ProdutoI, b: ProdutoI) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-          setProdutos(produtosDaEmpresa);
-          setProdutosOriginais(produtosDaEmpresa);
-          setTotalProdutos(produtosDaEmpresa.length);
-        }
-      }
-    };
-
-    carregarProdutos();
-  }, [recarregarProdutos, empresaAtivada]);
-
-  useEffect(() => {
-    if (produtosOriginais.length > 0) {
-      const produtosOrdenados = ordenarProdutos(produtosOriginais, campoOrdenacao, direcaoOrdenacao);
-      setProdutos(produtosOrdenados);
-    }
-  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao]);
-
-  useEffect(() => {
-    if (modalVisualizar) {
-      setForm({
-        ...modalVisualizar,
-        preco: parseFloat(modalVisualizar.preco.toFixed(2)),
-        quantidade: modalVisualizar.quantidade,
-        quantidadeMin: modalVisualizar.quantidadeMin || 0,
-      });
-      setPreview(modalVisualizar.foto || null);
-      setNomeCaracteres(modalVisualizar.nome?.length || 0);
-      setDescricaoCaracteres(modalVisualizar.descricao?.length || 0);
-    }
-  }, [modalVisualizar]);
 
   const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
