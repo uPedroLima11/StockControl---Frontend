@@ -159,17 +159,17 @@ export default function CriarEmpresa() {
       }
     };
 
-    const handleCharCounts = (value: any) => {
+    const handleCharCounts = (value: Inputs) => {
       setCharCounts({
-        nome: value.nome?.length || 0,
-        email: value.email?.length || 0,
-        telefone: value.telefone?.length || 0,
-        endereco: value.endereco?.length || 0,
-        pais: value.pais?.length || 0,
-        estado: value.estado?.length || 0,
-        cidade: value.cidade?.length || 0,
-        cep: value.cep?.length || 0,
-        dominio: value.dominio?.length || 0,
+      nome: value.nome?.length || 0,
+      email: value.email?.length || 0,
+      telefone: value.telefone?.length || 0,
+      endereco: value.endereco?.length || 0,
+      pais: value.pais?.length || 0,
+      estado: value.estado?.length || 0,
+      cidade: value.cidade?.length || 0,
+      cep: value.cep?.length || 0,
+      dominio: value.dominio?.length || 0,
       });
     };
 

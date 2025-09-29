@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiEnvelope } from "react-icons/hi2";
-import { useEffect } from "react";
 import { cores } from "@/utils/cores";
 import Link from "next/link";
 import Swal from "sweetalert2";
