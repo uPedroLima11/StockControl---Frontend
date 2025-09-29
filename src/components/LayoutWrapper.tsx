@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
-import Footer from "./footer";
 import Sidebar from "./sidebar";
 import { useEffect, useState } from "react";
 
@@ -58,7 +57,6 @@ export default function LayoutWrapper({
       <>
         <Navbar />
         <main>{children}</main>
-        <Footer />
       </>
     );
   }
