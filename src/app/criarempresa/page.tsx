@@ -4,11 +4,10 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUsuarioStore } from "@/context/usuario";
+import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
-import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink } from "react-icons/fa";
-import Swal from "sweetalert2";
 
 type Inputs = {
   nome: string;
@@ -61,6 +60,35 @@ export default function CriarEmpresa() {
     carregando: false,
     mensagem: ""
   });
+
+  const cores = {
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976",
+      sucesso: "#22C55E",
+      erro: "#EF4444",
+      alerta: "#F59E0B"
+    },
+    light: {
+      fundo: "#cccccc",
+      texto: "#0F172A",
+      card: "#ecececec",
+      borda: "#cccccc",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#EFF6FF",
+      sucesso: "#22C55E",
+      erro: "#EF4444",
+      alerta: "#F59E0B"
+    }
+  };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
 
@@ -117,6 +145,11 @@ export default function CriarEmpresa() {
       }
     };
 
+    const timeoutId = setTimeout(verificarDominio, 500);
+    return () => clearTimeout(timeoutId);
+  }, [dominioWatch, t]);
+
+  useEffect(() => {
     const verificarEmail = async () => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -159,24 +192,34 @@ export default function CriarEmpresa() {
       }
     };
 
-    const handleCharCounts = (value: Inputs) => {
-      setCharCounts({
-      nome: value.nome?.length || 0,
-      email: value.email?.length || 0,
-      telefone: value.telefone?.length || 0,
-      endereco: value.endereco?.length || 0,
-      pais: value.pais?.length || 0,
-      estado: value.estado?.length || 0,
-      cidade: value.cidade?.length || 0,
-      cep: value.cep?.length || 0,
-      dominio: value.dominio?.length || 0,
-      });
-    };
+    const timeoutId = setTimeout(verificarEmail, 500);
+    return () => clearTimeout(timeoutId);
+  }, [emailWatch, t]);
 
+  useEffect(() => {
+    const subscription = watch((value) => {
+      setCharCounts({
+        nome: value.nome?.length || 0,
+        email: value.email?.length || 0,
+        telefone: value.telefone?.length || 0,
+        endereco: value.endereco?.length || 0,
+        pais: value.pais?.length || 0,
+        estado: value.estado?.length || 0,
+        cidade: value.cidade?.length || 0,
+        cep: value.cep?.length || 0,
+        dominio: value.dominio?.length || 0,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
+  }, []);
 
+  useEffect(() => {
     async function init() {
       try {
         const clientKey = localStorage.getItem("client_key");
@@ -214,60 +257,8 @@ export default function CriarEmpresa() {
       }
     }
 
-    const style = document.createElement('style');
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${ativo ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${ativo ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${ativo ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${ativo ? "#132F4C" : "#90CAF9"} ${ativo ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-    `;
-    document.head.appendChild(style);
-
-    const dominioTimeoutId = setTimeout(verificarDominio, 500);
-    const emailTimeoutId = setTimeout(verificarEmail, 500);
-
-    const subscription = watch(handleCharCounts);
-
     init();
-
-    return () => {
-      clearTimeout(dominioTimeoutId);
-      clearTimeout(emailTimeoutId);
-      subscription.unsubscribe();
-      document.head.removeChild(style);
-    };
-
-  }, [dominioWatch, emailWatch, t, watch, router, logar]);
-
+  }, [router, logar]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -316,6 +307,49 @@ export default function CriarEmpresa() {
     }
   };
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]); 
   
   async function onSubmit(data: Inputs) {
     if (!data.dominio || data.dominio.trim().length < 4) {
