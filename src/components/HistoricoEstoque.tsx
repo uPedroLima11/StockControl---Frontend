@@ -37,11 +37,24 @@ interface EventoUnificado {
 }
 
 export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoqueProps) {
-  const { t, i18n } = useTranslation("estoque");
+  const { t: tEstoque } = useTranslation("estoque");
+  const { t: tLogs } = useTranslation("logs");
   const [eventos, setEventos] = useState<EventoUnificado[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 6;
+
+  const traduzirStatusPedido = (status: string): string => {
+    const mapeamentoStatus: Record<string, string> = {
+      'PENDENTE': 'status_pedido.PENDENTE',
+      'PROCESSANDO': 'status_pedido.PROCESSANDO',
+      'CONCLUIDO': 'status_pedido.CONCLUIDO',
+      'CANCELADO': 'status_pedido.CANCELADO'
+    };
+
+    const chaveTraducao = mapeamentoStatus[status];
+    return chaveTraducao ? tLogs(chaveTraducao) : status;
+  };
 
   const traduzirObservacao = (observacao: string) => {
     const padroesTraducao: Record<string, { pt: string; en: string }> = {
@@ -60,7 +73,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
       if (observacao.includes(pt)) {
         observacaoTraduzida = observacao.replace(
           pt,
-          traducoes[i18n.language as 'pt' | 'en'] || pt
+          traducoes['pt'] || pt
         );
       }
     });
@@ -83,14 +96,14 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
         if (responseMovimentacoes.ok) {
           const movimentacoes: MovimentacaoEstoque[] = await responseMovimentacoes.json();
-          
+
           movimentacoes.forEach(mov => {
             eventosUnificados.push({
               id: mov.id,
               tipo: "MOVIMENTACAO",
               data: mov.createdAt,
               usuario: mov.usuario.nome,
-              descricao: `${mov.tipo === "ENTRADA" ? "+" : "-"}${mov.quantidade} ${t("unidades")}`,
+              descricao: `${mov.tipo === "ENTRADA" ? "+" : "-"}${mov.quantidade} ${tEstoque("unidades")}`,
               quantidade: mov.quantidade,
               motivo: mov.motivo,
               observacao: mov.observacao
@@ -100,7 +113,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
         if (responseLogs.ok) {
           const logs: LogPedido[] = await responseLogs.json();
-          
+
           const logsFiltrados = logs.filter(log => {
             try {
               const descricaoParsed = JSON.parse(log.descricao);
@@ -121,7 +134,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
           });
         }
 
-        const ordenado = eventosUnificados.sort((a, b) => 
+        const ordenado = eventosUnificados.sort((a, b) =>
           new Date(b.data).getTime() - new Date(a.data).getTime()
         );
 
@@ -135,9 +148,9 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
     };
 
     carregarHistoricoCompleto();
-  }, [produtoId, t]);
+  }, [produtoId, tEstoque]);
 
-  if (carregando) return <div className="p-4 text-center">{t("carregando")}</div>;
+  if (carregando) return <div className="p-4 text-center">{tEstoque("carregando")}</div>;
 
   const totalPaginas = Math.max(1, Math.ceil(eventos.length / itensPorPagina));
   const indexInicial = (paginaAtual - 1) * itensPorPagina;
@@ -146,36 +159,36 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
   const formatarDescricaoLog = (descricao: string) => {
     try {
       const parsed = JSON.parse(descricao);
-      
+
       if (parsed.entityType === "pedidos") {
         switch (parsed.action) {
           case "pedido_criado":
-            return t("logs.descricoes.pedido_criado", {
+            return tLogs("descricoes.pedido_criado", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
               quantidadeItens: parsed.quantidadeItens
             });
           case "status_atualizado":
-            return t("logs.descricoes.status_atualizado", {
+            return tLogs("descricoes.status_atualizado", {
               pedidoNumero: parsed.pedidoNumero,
-              statusAnterior: parsed.statusAnterior,
-              statusNovo: parsed.statusNovo,
+              statusAnterior: traduzirStatusPedido(parsed.statusAnterior),
+              statusNovo: traduzirStatusPedido(parsed.statusNovo),
               fornecedorNome: parsed.fornecedorNome
             });
           case "itens_atualizados":
-            return t("logs.descricoes.itens_atualizados", {
+            return tLogs("descricoes.itens_atualizados", {
               pedidoNumero: parsed.pedidoNumero,
               quantidadeItensAtualizados: parsed.quantidadeItensAtualizados,
               fornecedorNome: parsed.fornecedorNome
             });
           case "pedido_concluido_estoque":
-            return t("logs.descricoes.pedido_concluido_estoque", {
+            return tLogs("descricoes.pedido_concluido_estoque", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
-              statusFinal: parsed.statusFinal
+              statusFinal: traduzirStatusPedido(parsed.statusFinal)
             });
           case "email_enviado_fornecedor":
-            return t("logs.descricoes.email_enviado_fornecedor", {
+            return tLogs("descricoes.email_enviado_fornecedor", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
               fornecedorEmail: parsed.fornecedorEmail
@@ -208,7 +221,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
   return (
     <div className="mt-4">
-      <h3 className="font-semibold mb-3 text-lg">{t("historicoTitulo")}</h3>
+      <h3 className="font-semibold mb-3 text-lg">{tEstoque("historicoTitulo")}</h3>
 
       <div className="flex flex-col gap-3 overflow-visible min-h-[8rem]">
         {paginaItens.map((evento) => (
@@ -222,13 +235,12 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
           >
             <div className="flex justify-between items-start mb-2">
               <span
-                className={`font-medium ${
-                  evento.tipo === "MOVIMENTACAO" 
+                className={`font-medium ${evento.tipo === "MOVIMENTACAO"
                     ? (evento.descricao.includes("+") ? "text-green-600" : "text-red-600")
-                    : "text-blue-600"
-                }`}
+                    : "text-blue-400"
+                  }`}
               >
-                {evento.tipo === "MOVIMENTACAO" 
+                {evento.tipo === "MOVIMENTACAO"
                   ? evento.descricao
                   : formatarDescricaoLog(evento.descricao)
                 }
@@ -241,12 +253,12 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
             {evento.tipo === "MOVIMENTACAO" && (
               <>
                 <div className={`text-xs mb-1 ${modoDark ? "text-white" : "text-gray-600"}`}>
-                  <strong>{t("motivo")}:</strong>{" "}
-                  {t(`motivos.${evento.motivo?.toLowerCase()}`, { defaultValue: evento.motivo })}
+                  <strong>{tEstoque("motivo")}:</strong>{" "}
+                  {tEstoque(`motivos.${evento.motivo?.toLowerCase()}`, { defaultValue: evento.motivo })}
                 </div>
 
                 <div className={`text-xs ${modoDark ? "text-white" : "text-gray-600"}`}>
-                  <strong>{t("por")}:</strong> {evento.usuario}
+                  <strong>{tEstoque("por")}:</strong> {evento.usuario}
                 </div>
 
                 {evento.observacao && (
@@ -259,14 +271,14 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
             {evento.tipo === "LOG" && (
               <div className={`text-xs ${modoDark ? "text-white" : "text-gray-600"}`}>
-                <strong>{t("por")}:</strong> {evento.usuario}
+                <strong>{tEstoque("por")}:</strong> {evento.usuario}
               </div>
             )}
           </div>
         ))}
 
         {eventos.length === 0 && (
-          <div className="text-center text-gray-500 py-4">{t("nenhumaMovimentacao")}</div>
+          <div className="text-center text-gray-500 py-4">{tEstoque("nenhumaMovimentacao")}</div>
         )}
       </div>
 

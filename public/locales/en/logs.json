@@ -1,70 +1,61 @@
 {
-  "logs": {
-    "produto": "Product",
-    "quantidade": "Quantity",
-    "cliente": "Client",
-    "cliente_nao_informado": "Not Informed",
-    "titulo": "Logs",
-    "placeholder_busca": "Search Logs",
-    "usuario": "User",
-    "tipo": "Type",
-    "descricao": "Description",
-    "datacriacao": "Creation Date",
-    "exportacao_de": "Export of",
-    "pedido": "Order",
-    "fornecedor": "Supplier",
-    "itens": "Items",
-    "itens_atualizados": "Items Updated",
-    "status_anterior": "Previous Status",
-    "status_novo": "New Status",
-    "email": "Email",
-    "periodo": "Period",
-    "periodo_todos": "All data",
-    "nenhum_log_encontrado": "No logs found",
-    "usuario_nao_encontrado": "User not found",
-    "usuario_nao_informado": "Not Informed",
-    "carregando": "Loading...",
-     "status": "Status",
-    "acesso_negado": {
-      "titulo": "Access Denied",
-      "mensagem": "You don't have permission to access this page",
-      "permissao_necessaria": "Required permission"
-    },
-    "tipos_logs": {
-      "CRIACAO": "Creation",
-      "ATUALIZACAO": "Update",
-      "EXCLUSAO": "Deletion",
-      "BAIXA": "Sale",
-      "EMAIL_ENVIADO": "Email Sent"
-    },
-    "entidades": {
-      "produtos": "Products",
-      "vendas": "Sales",
-      "clientes": "Customers",
-      "fornecedores": "Suppliers",
-      "usuarios": "Users",
-      "movimentacoes": "Movements",
-      "pedidos": "Orders"
-    },
-    "status_pedido": {
-      "PENDENTE": "Pending",
-      "PROCESSANDO": "Processing",
-      "CONCLUIDO": "Completed",
-      "CANCELADO": "Cancelled"
-    },
-    "descricoes": {
-      "produto_exportado": "Product Exported: {{nome}} (Period: {{periodo}})",
-      "produto_vendido": "Product Sold: {{nome}} (Quantity: {{quantidade}})",
-      "produto_excluido": "Product Deleted: {{nome}}",
-      "produto_atualizado": "Product Updated: {{nome}}",
-      "produto_criado": "Product Created: {{nome}}",
-      "vendas_excluidas_automaticamente": "Sales automatically deleted for product: {{nome}} ({{quantidade}} sales)",
-      "movimentacoes_excluidas_automaticamente": "Stock movements automatically deleted for product: {{nome}} ({{quantidade}} movements)",
-      "pedido_criado": "Order {{pedidoNumero}} created for {{fornecedorNome}} with {{quantidadeItens}} items",
-      "status_atualizado": "Order {{pedidoNumero}} status changed from {{statusAnterior}} to {{statusNovo}}",
-      "itens_atualizados": "{{quantidadeItensAtualizados}} items updated in order {{pedidoNumero}}",
-      "pedido_concluido_estoque": "Order {{pedidoNumero}} completed and stock updated",
-      "email_enviado_fornecedor": "Email sent to {{fornecedorNome}} ({{fornecedorEmail}}) about order {{pedidoNumero}}"
-    }
+  "produto": "Product",
+  "quantidade": "Quantity",
+  "cliente": "Client",
+  "cliente_nao_informado": "Not Informed",
+  "titulo": "Logs",
+  "placeholder_busca": "Search Logs",
+  "usuario": "User",
+  "tipo": "Type",
+  "descricao": "Description",
+  "datacriacao": "Creation Date",
+  "exportacao_de": "Export of",
+  "pedido": "Order",
+  "fornecedor": "Supplier",
+  "itens": "Items",
+  "itens_atualizados": "Items Updated",
+  "status_anterior": "Previous Status",
+  "status_novo": "New Status",
+  "email": "Email",
+  "periodo": "Period",
+  "periodo_todos": "All data",
+  "nenhum_log_encontrado": "No logs found",
+  "usuario_nao_encontrado": "User not found",
+  "usuario_nao_informado": "Not Informed",
+  "carregando": "Loading...",
+  "status": "Status",
+  "acesso_negado": {
+    "titulo": "Access Denied",
+    "mensagem": "You don't have permission to access this page",
+    "permissao_necessaria": "Required permission"
+  },
+  "tipos_logs": {
+    "CRIACAO": "Creation",
+    "ATUALIZACAO": "Update",
+    "EXCLUSAO": "Deletion",
+    "BAIXA": "Sale",
+    "EMAIL_ENVIADO": "Email Sent"
+  },
+  "entidades": {
+    "produtos": "Products",
+    "vendas": "Sales",
+    "clientes": "Customers",
+    "fornecedores": "Suppliers",
+    "usuarios": "Users",
+    "movimentacoes": "Movements",
+    "pedidos": "Orders"
+  },
+  "status_pedido": {
+    "PENDENTE": "Pending",
+    "PROCESSANDO": "Processing",
+    "CONCLUIDO": "Completed",
+    "CANCELADO": "Cancelled"
+  },
+  "descricoes": {
+    "pedido_criado": "Order {{pedidoNumero}} created for {{fornecedorNome}} with {{quantidadeItens}} items",
+    "status_atualizado": "Order {{pedidoNumero}} status changed from {{statusAnterior}} to {{statusNovo}}",
+    "itens_atualizados": "{{quantidadeItensAtualizados}} items updated in order {{pedidoNumero}}",
+    "pedido_concluido_estoque": "Order {{pedidoNumero}} completed and stock updated",
+    "email_enviado_fornecedor": "Email sent to {{fornecedorNome}} ({{fornecedorEmail}}) about order {{pedidoNumero}}"
   }
 }

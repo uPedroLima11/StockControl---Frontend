@@ -40,6 +40,8 @@ import estoquePt from '../public/locales/pt/estoque.json';
 import estoqueEn from '../public/locales/en/estoque.json';
 import pedidosEn from '../public/locales/en/pedidos.json';
 import pedidosPt from '../public/locales/pt/pedidos.json';
+import ajudaPt from '../public/locales/pt/ajuda.json';
+import ajudaEn from '../public/locales/en/ajuda.json';
 
 
 
@@ -50,7 +52,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'pedidos', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes', 'exportacoes', 'estoque'],
+      ns: ['settings', 'sidebar', 'dashboard', 'ajuda', 'pedidos', 'produtos', 'usuarios','conta','empresa','criarempresa','vendas','ativacao','fornecedores', 'suporte', 'logs', 'esqueci' , 'alteracao' , 'clientes', 'exportacoes', 'estoque'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -72,7 +74,8 @@ if (!i18n.isInitialized) {
           alteracao: alteracaoEn,
           clientes: clientesEn,
           estoque: estoqueEn,
-          pedidos: pedidosEn
+          pedidos: pedidosEn,
+          ajuda: ajudaEn
         },
         pt: {
           settings: settingsPt,
@@ -93,7 +96,8 @@ if (!i18n.isInitialized) {
           alteracao: alteracaoPt,
           clientes: clientesPt,
           estoque: estoquePt,
-          pedidos: pedidosPt
+          pedidos: pedidosPt,
+          ajuda: ajudaPt
         },
       },
       detection: {

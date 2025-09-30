@@ -6,6 +6,7 @@ import { cores } from "@/utils/cores";
 import Image from "next/image";
 import Fuse from "fuse.js";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface SearchableItem {
   id: string;
@@ -23,6 +24,7 @@ interface FuseResult {
 }
 
 export default function Ajuda() {
+  const { t } = useTranslation("ajuda");
   const [modoDark, setModoDark] = useState(false);
   const [busca, setBusca] = useState("");
   const [topicoAtivo, setTopicoAtivo] = useState<string>("empresa");
@@ -36,53 +38,39 @@ export default function Ajuda() {
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     setModoDark(temaSalvo === "true");
-  }, []);
 
-  useEffect(() => {
     const style = document.createElement("style");
     style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
       html::-webkit-scrollbar {
-        width: 6px;
+        width: 10px;
       }
-      
+      html::-webkit-scrollbar-track {
+        background: ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
+      }
       html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
+        background: ${temaSalvo === "true" ? "#132F4C" : "#90CAF9"}; 
+        border-radius: 5px;
+        border: 2px solid ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
       }
-    }
-  `;
+      html::-webkit-scrollbar-thumb:hover {
+        background: ${temaSalvo === "true" ? "#132F4C" : "#64B5F6"}; 
+      }
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: ${temaSalvo === "true" ? "#132F4C" : "#90CAF9"} ${temaSalvo === "true" ? "#0A1830" : "#F8FAFC"};
+      }
+      @media (max-width: 768px) {
+        html::-webkit-scrollbar {
+          width: 6px;
+        }
+        html::-webkit-scrollbar-thumb {
+          border: 1px solid ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
+          border-radius: 3px;
+        }
+      }
+    `;
     document.head.appendChild(style);
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
-
-  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchFocused(false);
@@ -100,188 +88,188 @@ export default function Ajuda() {
       },
       { rootMargin: "-40% 0px -60% 0px" }
     );
-
     const currentRefs = topicRefs.current;
     currentRefs.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
     return () => {
+      document.head.removeChild(style);
       document.removeEventListener("mousedown", handleClickOutside);
       currentRefs.forEach((ref) => {
         if (ref) observer.unobserve(ref);
       });
     };
-  }, [searchRef]);
+  }, []);
 
   const searchIndex: SearchableItem[] = useMemo(
     () => [
       {
         id: "empresa",
-        title: "Gestão da Empresa",
-        parentTitle: "Gestão da Empresa",
+        title: t("empresa.titulo"),
+        parentTitle: t("empresa.titulo"),
         parentTopicId: "empresa",
-        content: "Este módulo é o centro de comando do seu negócio. Define a identidade da empresa, gerencia acesso da equipe e funcionalidades.",
-        render: () => <>Este módulo é o centro de comando do seu negócio. Define a identidade da empresa, gerencia acesso da equipe e funcionalidades.</>,
+        content: t("empresa.descricao"),
+        render: () => <>{t("empresa.descricao")}</>,
       },
       {
         id: "empresa-criacao",
-        title: "Criando sua Empresa",
-        parentTitle: "Gestão da Empresa",
+        title: t("empresa.secoes.criacao.titulo"),
+        parentTitle: t("empresa.titulo"),
         parentTopicId: "empresa",
-        content: "O primeiro passo é registrar sua empresa. O criador se torna Proprietário com acesso total. O campo Domínio define o link do seu catálogo público.",
+        content: t("empresa.secoes.criacao.conteudo"),
         render: () => (
           <>
-            O primeiro passo é registrar sua empresa. O criador se torna <strong>Proprietário</strong> com acesso total. O campo Domínio define o link do seu catálogo público.
+            {t("empresa.secoes.criacao.conteudo")}
           </>
         ),
       },
       {
         id: "empresa-ativacao",
-        title: "Ativação do Sistema",
-        parentTitle: "Gestão da Empresa",
+        title: t("empresa.secoes.ativacao.titulo"),
+        parentTitle: t("empresa.titulo"),
         parentTopicId: "empresa",
-        content: "Para desbloquear funcionalidades, a empresa precisa ser ativada com uma chave de acesso na tela de Ativação.",
+        content: t("empresa.secoes.ativacao.conteudo"),
         render: () => (
           <>
-            Para desbloquear funcionalidades, a empresa precisa ser ativada com uma chave de acesso na tela de <strong>Ativação</strong>.
+            {t("empresa.secoes.ativacao.conteudo")}
           </>
         ),
       },
       {
         id: "empresa-catalogo",
-        title: "Catálogo Público e Dados da Empresa",
-        parentTitle: "Gestão da Empresa",
+        title: t("empresa.secoes.catalogo.titulo"),
+        parentTitle: t("empresa.titulo"),
         parentTopicId: "empresa",
-        content: "Na tela Empresa, você edita informações e gerencia seu catálogo público, sua vitrine online. O link é gerado a partir do domínio.",
+        content: t("empresa.secoes.catalogo.conteudo"),
         render: () => (
           <>
-            Na tela <strong>&quot;Empresa&quot;</strong>, você edita informações e gerencia seu catálogo público, sua vitrine online. O link é gerado a partir do domínio.
+            {t("empresa.secoes.catalogo.conteudo")}
           </>
         ),
       },
       {
         id: "empresa-usuarios",
-        title: "Gerenciamento de Usuários e Permissões",
-        parentTitle: "Gestão da Empresa",
+        title: t("empresa.secoes.usuarios.titulo"),
+        parentTitle: t("empresa.titulo"),
         parentTopicId: "empresa",
-        content: "Na tela Usuários, convide membros para sua equipe. Cargos: Proprietário, Admin, Funcionário. Defina permissões personalizadas para cada um.",
+        content: t("empresa.secoes.usuarios.conteudo"),
         render: () => (
           <>
-            Na tela <strong>&quot;Usuários&quot;</strong>, convide membros para sua equipe. Cargos: <strong>Proprietário</strong>, <strong>Admin</strong>, <strong>Funcionário</strong>. Defina <strong>permissões personalizadas</strong> para cada um.
+            {t("empresa.secoes.usuarios.conteudo")}
           </>
         ),
       },
       {
         id: "produtos",
-        title: "Gestão de Produtos",
-        parentTitle: "Gestão de Produtos",
+        title: t("produtos.titulo"),
+        parentTitle: t("produtos.titulo"),
         parentTopicId: "produtos",
-        content: "O módulo de Gestão de Produtos é o coração do sistema de estoque. Aqui você cadastra e gerencia todos os produtos do seu negócio.",
+        content: t("produtos.descricao"),
         render: () => (
           <>
-            O módulo de <strong>Gestão de Produtos</strong> é o coração do sistema de estoque. Aqui você cadastra e gerencia todos os produtos do seu negócio.
+            {t("produtos.descricao")}
           </>
         ),
       },
       {
         id: "produtos-cadastro",
-        title: "Como Cadastrar um Novo Produto",
-        parentTitle: "Gestão de Produtos",
+        title: t("produtos.secoes.cadastro.titulo"),
+        parentTitle: t("produtos.titulo"),
         parentTopicId: "produtos",
-        content: "Acesse a tela de produtos, clique em Novo Produto e preencha o formulário com dados obrigatórios e opcionais.",
-        render: () => <>Acesse a tela de produtos, clique em Novo Produto e preencha o formulário com dados obrigatórios e opcionais.</>,
+        content: t("produtos.secoes.cadastro.conteudo"),
+        render: () => <>{t("produtos.secoes.cadastro.conteudo")}</>,
       },
       {
         id: "produtos-quantidade-minima",
-        title: "Entendendo a Quantidade Mínima",
-        parentTitle: "Gestão de Produtos",
+        title: t("produtos.secoes.quantidade_minima.titulo"),
+        parentTitle: t("produtos.titulo"),
         parentTopicId: "produtos",
-        content: "Defina uma quantidade mínima para receber alertas automáticos quando o estoque estiver em nível de atenção ou crítico.",
-        render: () => <>Defina uma quantidade mínima para receber alertas automáticos quando o estoque estiver em nível de atenção ou crítico.</>,
+        content: t("produtos.secoes.quantidade_minima.conteudo"),
+        render: () => <>{t("produtos.secoes.quantidade_minima.conteudo")}</>,
       },
       {
         id: "produtos-movimentacoes",
-        title: "Realizando Movimentações de Estoque",
-        parentTitle: "Gestão de Produtos",
+        title: t("produtos.secoes.movimentacoes.titulo"),
+        parentTitle: t("produtos.titulo"),
         parentTopicId: "produtos",
-        content: "Após criar um produto, acesse-o e clique em Estoque para registrar entradas ou saídas, informando quantidade e motivo.",
-        render: () => <>Após criar um produto, acesse-o e clique em Estoque para registrar entradas ou saídas, informando quantidade e motivo.</>,
+        content: t("produtos.secoes.movimentacoes.conteudo"),
+        render: () => <>{t("produtos.secoes.movimentacoes.conteudo")}</>,
       },
       {
         id: "produtos-historico",
-        title: "Visualizando o Histórico de Movimentações",
-        parentTitle: "Gestão de Produtos",
+        title: t("produtos.secoes.historico.titulo"),
+        parentTitle: t("produtos.titulo"),
         parentTopicId: "produtos",
-        content: "Acesse o histórico pela tela de Produtos, clicando em Estoque e depois Histórico, ou diretamente pela tela de Inventário.",
-        render: () => <>Acesse o histórico pela tela de Produtos, clicando em Estoque e depois Histórico, ou diretamente pela tela de Inventário.</>,
+        content: t("produtos.secoes.historico.conteudo"),
+        render: () => <>{t("produtos.secoes.historico.conteudo")}</>,
       },
       {
         id: "vendas",
-        title: "Sistema de Vendas",
-        parentTitle: "Sistema de Vendas",
+        title: t("vendas.titulo"),
+        parentTitle: t("vendas.titulo"),
         parentTopicId: "vendas",
-        content: "Ponto central para registrar saídas de produtos e interagir com sua base de clientes.",
-        render: () => <>Ponto central para registrar saídas de produtos e interagir com sua base de clientes.</>,
+        content: t("vendas.descricao"),
+        render: () => <>{t("vendas.descricao")}</>,
       },
       {
         id: "vendas-realizando",
-        title: "Realizando uma Venda",
-        parentTitle: "Sistema de Vendas",
+        title: t("vendas.secoes.realizando_venda.titulo"),
+        parentTitle: t("vendas.titulo"),
         parentTopicId: "vendas",
-        content: "Adicione produtos com estoque ao carrinho, selecione um cliente (opcional) e finalize. A saída de estoque é automática e registrada como Venda.",
+        content: t("vendas.secoes.realizando_venda.conteudo"),
         render: () => (
           <>
-            Adicione produtos com estoque ao carrinho, selecione um cliente (opcional) e finalize. A saída de estoque é automática e registrada como <strong>Venda</strong>.
+            {t("vendas.secoes.realizando_venda.conteudo")}
           </>
         ),
       },
       {
         id: "clientes",
-        title: "Gerenciando seus Clientes",
-        parentTitle: "Sistema de Vendas",
+        title: t("vendas.secoes.clientes.titulo"),
+        parentTitle: t("vendas.titulo"),
         parentTopicId: "vendas",
-        content: "Cadastre seus clientes na tela de Clientes para associá-los a vendas. Preencha informações como nome, email e telefone.",
+        content: t("vendas.secoes.clientes.conteudo"),
         render: () => (
           <>
-            Cadastre seus clientes na tela de <strong>Clientes</strong> para associá-los a vendas. Preencha informações como nome, email e telefone.
+            {t("vendas.secoes.clientes.conteudo")}
           </>
         ),
       },
       {
         id: "pedidos",
-        title: "Pedido de Estoque",
-        parentTitle: "Pedido de Estoque",
+        title: t("pedidos.titulo"),
+        parentTitle: t("pedidos.titulo"),
         parentTopicId: "pedidos",
-        content: "Ferramenta para formalizar a reposição de produtos com seus Fornecedores, centralizando a comunicação.",
+        content: t("pedidos.descricao"),
         render: () => (
           <>
-            Ferramenta para formalizar a reposição de produtos com seus <strong>Fornecedores</strong>, centralizando a comunicação.
+            {t("pedidos.descricao")}
           </>
         ),
       },
       {
         id: "pedidos-criacao",
-        title: "Como Criar um Novo Pedido",
-        parentTitle: "Pedido de Estoque",
+        title: t("pedidos.secoes.criacao.titulo"),
+        parentTitle: t("pedidos.titulo"),
         parentTopicId: "pedidos",
-        content: "Selecione um fornecedor, adicione os produtos desejados e envie o pedido por e-mail automaticamente.",
-        render: () => <>Selecione um fornecedor, adicione os produtos desejados e envie o pedido por e-mail automaticamente.</>,
+        content: t("pedidos.secoes.criacao.conteudo"),
+        render: () => <>{t("pedidos.secoes.criacao.conteudo")}</>,
       },
       {
         id: "pedidos-status",
-        title: "Gerenciando o Status do Pedido",
-        parentTitle: "Pedido de Estoque",
+        title: t("pedidos.secoes.status.titulo"),
+        parentTitle: t("pedidos.titulo"),
         parentTopicId: "pedidos",
-        content: "Acompanhe o ciclo de vida do pedido: Pendente, Processando, Concluído ou Cancelado. Ao concluir, o sistema dá entrada automática no estoque.",
+        content: t("pedidos.secoes.status.conteudo"),
         render: () => (
           <>
-            Acompanhe o ciclo de vida do pedido: Pendente, Processando, Concluído ou Cancelado. Ao concluir, o sistema dá <strong>entrada automática no estoque</strong>.
+            {t("pedidos.secoes.status.conteudo")}
           </>
         ),
       },
     ],
-    []
+    [t]
   );
 
   const fuse = useMemo(
@@ -357,29 +345,29 @@ export default function Ajuda() {
     <div className="space-y-8" style={{ color: temaAtual.texto }}>
       <section>
         <p className="text-lg mb-6">
-          O módulo de <strong>Gestão de Produtos</strong> é o coração do sistema de estoque. Aqui você cadastra e gerencia todos os produtos do seu negócio.
+          {t("produtos.descricao")}
         </p>
         <div className="p-4 rounded-lg mb-6 border-l-4" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF", borderLeftColor: temaAtual.primario }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaInfo className="text-blue-500" />
-            Fluxo Recomendado:
+            {t("produtos.fluxo.titulo")}
           </strong>
           <ol className="space-y-2 ml-4">
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-              Cadastrar produto
+              {t("produtos.fluxo.passo1")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-              Definir quantidade mínima
+              {t("produtos.fluxo.passo2")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-              Realizar movimentações
+              {t("produtos.fluxo.passo3")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">4</span>
-              Monitorar e vender
+              {t("produtos.fluxo.passo4")}
             </li>
           </ol>
         </div>
@@ -388,47 +376,48 @@ export default function Ajuda() {
       <section id="produtos-cadastro">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaPlus className="text-green-500" />
-          Como Cadastrar um Novo Produto
+          {t("produtos.secoes.cadastro.titulo")}
         </h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="space-y-4">
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-green-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-                Acessar Produtos
+                {t("produtos.secoes.cadastro.passo1")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Navegue até o menu &quot;Produtos&quot;.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.cadastro.descricao1")}</p>
             </div>
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-green-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-                Clicar em &quot;Novo Produto&quot;
+                {t("produtos.secoes.cadastro.passo2")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Localize o botão no canto superior direito.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.cadastro.descricao2")}</p>
             </div>
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-green-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-                Preencher o Formulário
+                {t("produtos.secoes.cadastro.passo3")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Complete os campos obrigatórios.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.cadastro.descricao3")}</p>
             </div>
           </div>
           <div className="border-2 border-dashed rounded-lg flex items-center justify-center p-2" style={{ borderColor: temaAtual.borda }}>
-            <Image src="/ajuda/novoproduto.png" alt="Botão para criar um novo produto" width={400} height={95} quality={100} className="rounded-lg shadow-lg border" style={{ borderColor: temaAtual.borda, objectFit: "contain", maxWidth: "100%", height: "auto" }} />
+            <Image src="/ajuda/novoproduto.png" alt={t("produtos.secoes.cadastro.imagem_alt")} width={400} height={95} quality={100} className="rounded-lg shadow-lg border" style={{ borderColor: temaAtual.borda, objectFit: "contain", maxWidth: "100%", height: "auto" }} />
           </div>
         </div>
       </section>
+
       <section id="produtos-quantidade-minima">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaBell className="text-yellow-500" />
-          Entendendo a Quantidade Mínima
+          {t("produtos.secoes.quantidade_minima.titulo")}
         </h3>
         <div className="mb-6 text-center">
           <div className="inline-flex flex-col items-center gap-3 p-4 border-2 border-dashed rounded-lg" style={{ borderColor: temaAtual.borda }}>
-            <label className="font-semibold text-lg">Quantidade Mínima</label>
+            <label className="font-semibold text-lg">{t("produtos.secoes.quantidade_minima.label")}</label>
             <div className="px-4 py-2 border rounded-lg text-lg font-mono" style={{ borderColor: temaAtual.borda, backgroundColor: temaAtual.card }}>
-              10 unidades
+              {t("produtos.secoes.quantidade_minima.exemplo")}
             </div>
           </div>
         </div>
@@ -436,136 +425,130 @@ export default function Ajuda() {
           <div className="p-4 rounded-lg text-center" style={{ backgroundColor: modoDark ? "#422006" : "#FEFCE8", border: `1px solid ${modoDark ? "#653F12" : "#FDE68A"}` }}>
             <div className="flex items-center justify-center gap-2 mb-2">
               <FaExclamationTriangle className="text-yellow-500" />
-              <strong>Atenção</strong>
+              <strong>{t("produtos.secoes.quantidade_minima.status.atencao")}</strong>
             </div>
-            <p className="text-sm">Estoque próximo do mínimo</p>
+            <p className="text-sm">{t("produtos.secoes.quantidade_minima.status.descricao_atencao")}</p>
             <div className="text-2xl font-bold mt-2 text-yellow-600">15</div>
           </div>
           <div className="p-4 rounded-lg text-center" style={{ backgroundColor: modoDark ? "#450A0A" : "#FEF2F2", border: `1px solid ${modoDark ? "#7F1D1D" : "#FECACA"}` }}>
             <div className="flex items-center justify-center gap-2 mb-2">
               <FaExclamationTriangle className="text-red-500" />
-              <strong>Crítico</strong>
+              <strong>{t("produtos.secoes.quantidade_minima.status.critico")}</strong>
             </div>
-            <p className="text-sm">Estoque abaixo do mínimo</p>
+            <p className="text-sm">{t("produtos.secoes.quantidade_minima.status.descricao_critico")}</p>
             <div className="text-2xl font-bold mt-2 text-red-600">5</div>
           </div>
           <div className="p-4 rounded-lg text-center" style={{ backgroundColor: modoDark ? "#052E16" : "#F0FDF4", border: `1px solid ${modoDark ? "#14532D" : "#BBF7D0"}` }}>
             <div className="flex items-center justify-center gap-2 mb-2">
               <FaCheck className="text-green-500" />
-              <strong>Normal</strong>
+              <strong>{t("produtos.secoes.quantidade_minima.status.normal")}</strong>
             </div>
-            <p className="text-sm">Estoque acima do seguro</p>
+            <p className="text-sm">{t("produtos.secoes.quantidade_minima.status.descricao_normal")}</p>
             <div className="text-2xl font-bold mt-2 text-green-600">25</div>
           </div>
         </div>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF" }}>
           <strong className="flex items-center gap-2">
             <FaBell className="text-blue-500" />
-            Notificações Automáticas
+            {t("produtos.secoes.quantidade_minima.notificacoes.titulo")}
           </strong>
-          <p className="text-sm mt-1">O sistema enviará alertas quando o estoque atingir níveis críticos.</p>
+          <p className="text-sm mt-1">{t("produtos.secoes.quantidade_minima.notificacoes.descricao")}</p>
         </div>
       </section>
 
       <section id="produtos-movimentacoes">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaBox className="text-blue-500" />
-          Realizando Movimentações de Estoque
+          {t("produtos.secoes.movimentacoes.titulo")}
         </h3>
         <div className="mb-6">
-          <p className="mb-4">Após criar um produto, acesse-o e clique em &quot;Estoque&quot; para fazer movimentações.</p>
+          <p className="mb-4">{t("produtos.secoes.movimentacoes.descricao")}</p>
           <div className="space-y-4">
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-blue-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-                Abra o Produto
+                {t("produtos.secoes.movimentacoes.passo1")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Na lista, clique no produto desejado.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.movimentacoes.descricao1")}</p>
             </div>
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-blue-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-                Clique em &quot;Estoque&quot;
+                {t("produtos.secoes.movimentacoes.passo2")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Acesse a tela de movimentações.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.movimentacoes.descricao2")}</p>
             </div>
             <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
               <strong className="text-blue-600 flex items-center gap-2">
                 <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-                Preencha os Dados
+                {t("produtos.secoes.movimentacoes.passo3")}
               </strong>
-              <p className="text-sm mt-2 ml-8">Informe tipo (Entrada/Saída), quantidade e motivo.</p>
+              <p className="text-sm mt-2 ml-8">{t("produtos.secoes.movimentacoes.descricao3")}</p>
             </div>
           </div>
         </div>
       </section>
+
       <section id="produtos-historico">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaHistory className="text-blue-500" />
-          Visualizando o Histórico de Movimentações
+          {t("produtos.secoes.historico.titulo")}
         </h3>
-        <p className="mb-4">Existem duas formas de acessar o histórico de um produto. Ambas levam para a mesma tela de detalhes.</p>
+        <p className="mb-4">{t("produtos.secoes.historico.descricao")}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
             <strong className="text-blue-600 flex items-center gap-2 mb-3">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-              Via Tela de Produtos
+              {t("produtos.secoes.historico.via_produtos")}
             </strong>
             <ol className="list-decimal list-inside text-sm space-y-2 pl-2">
-              <li>
-                Acesse a tela <strong>Produtos</strong>.
-              </li>
-              <li>Selecione o produto desejado.</li>
-              <li>
-                Clique em <strong>&quot;Estoque&quot;</strong>.
-              </li>
-              <li>
-                Na janela, clique em <strong>&quot;Histórico&quot;</strong>.
-              </li>
+              <li>{t("produtos.secoes.historico.passo1_produtos")}</li>
+              <li>{t("produtos.secoes.historico.passo2_produtos")}</li>
+              <li>{t("produtos.secoes.historico.passo3_produtos")}</li>
+              <li>{t("produtos.secoes.historico.passo4_produtos")}</li>
             </ol>
           </div>
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
             <strong className="text-blue-600 flex items-center gap-2 mb-3">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-              Via Inventário
+              {t("produtos.secoes.historico.via_inventario")}
             </strong>
             <ol className="list-decimal list-inside text-sm space-y-2 pl-2">
-              <li>
-                Acesse <strong>Inventário</strong> na barra lateral.
-              </li>
-              <li>Selecione o produto na lista.</li>
-              <li>O histórico será exibido.</li>
+              <li>{t("produtos.secoes.historico.passo1_inventario")}</li>
+              <li>{t("produtos.secoes.historico.passo2_inventario")}</li>
+              <li>{t("produtos.secoes.historico.passo3_inventario")}</li>
             </ol>
           </div>
         </div>
       </section>
     </div>
   );
+
   const ConteudoEmpresa = () => (
     <div className="space-y-8" style={{ color: temaAtual.texto }}>
       <section>
-        <p className="text-lg mb-6">Este módulo é o centro de comando do seu negócio. Aqui você define a identidade da empresa, gerencia o acesso da equipe e controla funcionalidades essenciais.</p>
+        <p className="text-lg mb-6">{t("empresa.descricao")}</p>
         <div className="p-4 rounded-lg mb-6 border-l-4" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF", borderLeftColor: temaAtual.primario }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaInfo className="text-blue-500" />
-            Fluxo de Configuração Inicial:
+            {t("empresa.fluxo.titulo")}
           </strong>
           <ol className="space-y-2 ml-4">
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
-              Criar a empresa e definir domínio
+              {t("empresa.fluxo.passo1")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
-              Ativar o sistema com chave
+              {t("empresa.fluxo.passo2")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
-              Convidar usuários e definir funções
+              {t("empresa.fluxo.passo3")}
             </li>
             <li className="flex items-center gap-2">
               <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm">4</span>
-              Configurar o catálogo público
+              {t("empresa.fluxo.passo4")}
             </li>
           </ol>
         </div>
@@ -574,17 +557,18 @@ export default function Ajuda() {
       <section id="empresa-criacao">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaPlus className="text-green-500" />
-          1. Criando sua Empresa
+          {t("empresa.secoes.criacao.titulo")}
         </h3>
         <p className="mb-4">
-          O primeiro passo é registrar sua empresa. Quem cria se torna <strong>Proprietário</strong>, com acesso total.
+          {t("empresa.secoes.criacao.conteudo")}
         </p>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
           <strong className="flex items-center gap-2 mb-2">
-            <FaLink className="text-green-500" />O Campo &quot;Domínio&quot;
+            <FaLink className="text-green-500" />
+            {t("empresa.secoes.criacao.dominio_titulo")}
           </strong>
           <p className="text-sm mt-1">
-            Este campo define o link único do seu catálogo público (ex: <code>.../catalogo/sua-empresa</code>).
+            {t("empresa.secoes.criacao.dominio_descricao")}
           </p>
         </div>
       </section>
@@ -592,36 +576,36 @@ export default function Ajuda() {
       <section id="empresa-ativacao">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaKey className="text-yellow-500" />
-          2. Ativação do Sistema
+          {t("empresa.secoes.ativacao.titulo")}
         </h3>
         <p className="mb-4">
-          Para desbloquear todas as funcionalidades, sua empresa precisa ser ativada na tela de <strong>Ativação</strong>.
+          {t("empresa.secoes.ativacao.conteudo")}
         </p>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#422006" : "#FEFCE8", border: `1px solid ${modoDark ? "#653F12" : "#FDE68A"}` }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaExclamationTriangle className="text-yellow-500" />
-            Necessário Chave de Ativação
+            {t("empresa.secoes.ativacao.necessario_titulo")}
           </strong>
-          <p className="text-sm mt-1">É preciso inserir uma chave válida para liberar o acesso completo. Sem ela, o uso é limitado.</p>
+          <p className="text-sm mt-1">{t("empresa.secoes.ativacao.necessario_descricao")}</p>
         </div>
       </section>
 
       <section id="empresa-catalogo">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaStore className="text-blue-500" />
-          3. Catálogo e Dados da Empresa
+          {t("empresa.secoes.catalogo.titulo")}
         </h3>
         <p className="mb-4">
-          Na tela <strong>&quot;Empresa&quot;</strong>, edite informações do seu negócio e gerencie seu catálogo público.
+          {t("empresa.secoes.catalogo.conteudo")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
-            <strong className="text-blue-600 flex items-center gap-2 mb-3">Sua Vitrine Online</strong>
-            <p className="text-sm">O catálogo é uma página pública para clientes. Você pode ativá-lo ou desativá-lo a qualquer momento.</p>
+            <strong className="text-blue-600 flex items-center gap-2 mb-3">{t("empresa.secoes.catalogo.vitrine_titulo")}</strong>
+            <p className="text-sm">{t("empresa.secoes.catalogo.vitrine_descricao")}</p>
           </div>
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
-            <strong className="text-blue-600 flex items-center gap-2 mb-3">Link de Acesso</strong>
-            <p className="text-sm">O link do catálogo usa o domínio escolhido e fica visível nesta tela para compartilhar.</p>
+            <strong className="text-blue-600 flex items-center gap-2 mb-3">{t("empresa.secoes.catalogo.link_titulo")}</strong>
+            <p className="text-sm">{t("empresa.secoes.catalogo.link_descricao")}</p>
           </div>
         </div>
       </section>
@@ -629,33 +613,33 @@ export default function Ajuda() {
       <section id="empresa-usuarios">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaUserShield className="text-green-500" />
-          4. Gerenciamento de Usuários
+          {t("empresa.secoes.usuarios.titulo")}
         </h3>
         <p className="mb-4">
-          Na tela <strong>&quot;Usuários&quot;</strong>, convide membros para sua equipe e gerencie o que cada um pode fazer.
+          {t("empresa.secoes.usuarios.conteudo")}
         </p>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF" }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaUsers className="text-blue-500" />
-            Cargos e Hierarquia
+            {t("empresa.secoes.usuarios.cargos_titulo")}
           </strong>
           <ul className="list-disc list-inside text-sm space-y-2 mt-2">
             <li>
-              <strong>Proprietário:</strong> Acesso total.
+              <strong>{t("empresa.secoes.usuarios.cargo_proprietario")}</strong>
             </li>
             <li>
-              <strong>Admin:</strong> Acesso administrativo.
+              <strong>{t("empresa.secoes.usuarios.cargo_admin")}</strong>
             </li>
             <li>
-              <strong>Funcionário:</strong> Acesso básico para operações.
+              <strong>{t("empresa.secoes.usuarios.cargo_funcionario")}</strong>
             </li>
           </ul>
           <div className="mt-4 pt-3 border-t" style={{ borderColor: temaAtual.borda }}>
             <strong className="flex items-center gap-2 mb-2">
               <FaLock className="text-blue-500" />
-              Permissões Personalizadas
+              {t("empresa.secoes.usuarios.permissoes_titulo")}
             </strong>
-            <p className="text-sm">Defina permissões específicas para cada usuário, como &quot;criar produtos&quot;, para um controle mais fino.</p>
+            <p className="text-sm">{t("empresa.secoes.usuarios.permissoes_descricao")}</p>
           </div>
         </div>
       </section>
@@ -666,29 +650,25 @@ export default function Ajuda() {
     <div className="space-y-8" style={{ color: temaAtual.texto }}>
       <section>
         <p className="text-lg mb-6">
-          A tela de <strong>Vendas</strong> é o ponto central para registrar as saídas de produtos e interagir com sua base de clientes.
+          {t("vendas.descricao")}
         </p>
       </section>
 
       <section id="vendas-realizando">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaShoppingCart className="text-green-500" />
-          Realizando uma Venda
+          {t("vendas.secoes.realizando_venda.titulo")}
         </h3>
-        <p className="mb-4">Adicione produtos ao carrinho, selecione o cliente e finalize. O sistema atualiza o estoque automaticamente.</p>
+        <p className="mb-4">{t("vendas.secoes.realizando_venda.descricao")}</p>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF" }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaInfo className="text-blue-500" />
-            Pontos Importantes:
+            {t("vendas.secoes.realizando_venda.pontos_titulo")}
           </strong>
           <ul className="list-disc list-inside text-sm space-y-2 mt-2">
-            <li>Apenas produtos com estoque são listados para venda.</li>
-            <li>
-              A venda cria uma movimentação de <strong>saída</strong> no estoque.
-            </li>
-            <li>
-              O registro fica no histórico do produto com o motivo <strong>&quot;Venda&quot;</strong>.
-            </li>
+            <li>{t("vendas.secoes.realizando_venda.ponto1")}</li>
+            <li>{t("vendas.secoes.realizando_venda.ponto2")}</li>
+            <li>{t("vendas.secoes.realizando_venda.ponto3")}</li>
           </ul>
         </div>
       </section>
@@ -696,19 +676,19 @@ export default function Ajuda() {
       <section id="clientes">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaUserTag className="text-blue-500" />
-          Gerenciando seus Clientes
+          {t("vendas.secoes.clientes.titulo")}
         </h3>
         <p className="mb-4">
-          Associe vendas a clientes para um controle apurado. Cadastre-os primeiro na tela de <strong>Clientes</strong>.
+          {t("vendas.secoes.clientes.descricao")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
-            <strong className="text-blue-600 flex items-center gap-2 mb-3">Cadastrando um Cliente</strong>
-            <p className="text-sm">Em &quot;Clientes&quot;, clique em &quot;Novo Cliente&quot; e preencha as informações.</p>
+            <strong className="text-blue-600 flex items-center gap-2 mb-3">{t("vendas.secoes.clientes.cadastro_titulo")}</strong>
+            <p className="text-sm">{t("vendas.secoes.clientes.cadastro_descricao")}</p>
           </div>
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F8FAFC", border: `1px solid ${modoDark ? "#2D4B75" : "#E2E8F0"}` }}>
-            <strong className="text-blue-600 flex items-center gap-2 mb-3">Associando a uma Venda</strong>
-            <p className="text-sm">Na tela de Vendas, use o campo de seleção para escolher um cliente antes de finalizar a compra.</p>
+            <strong className="text-blue-600 flex items-center gap-2 mb-3">{t("vendas.secoes.clientes.associacao_titulo")}</strong>
+            <p className="text-sm">{t("vendas.secoes.clientes.associacao_descricao")}</p>
           </div>
         </div>
       </section>
@@ -719,34 +699,37 @@ export default function Ajuda() {
     <div className="space-y-8" style={{ color: temaAtual.texto }}>
       <section>
         <p className="text-lg mb-6">
-          O módulo de <strong>Pedidos de Estoque</strong> formaliza a reposição de produtos com seus <strong>Fornecedores</strong>.
+          {t("pedidos.descricao")}
         </p>
       </section>
 
       <section id="pedidos-criacao">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaPlus className="text-green-500" />
-          Como Criar um Novo Pedido
+          {t("pedidos.secoes.criacao.titulo")}
         </h3>
-        <p className="mb-4">Para criar um pedido, você precisa ter produtos e fornecedores já cadastrados. O pedido é sempre vinculado a um fornecedor.</p>
+        <p className="mb-4">{t("pedidos.secoes.criacao.descricao")}</p>
         <div className="space-y-4">
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
             <strong className="text-green-600 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">1</span>Selecione o Fornecedor
+              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">1</span>
+              {t("pedidos.secoes.criacao.passo1")}
             </strong>
-            <p className="text-sm mt-2 ml-8">Escolha o fornecedor para filtrar os produtos associados a ele.</p>
+            <p className="text-sm mt-2 ml-8">{t("pedidos.secoes.criacao.descricao1")}</p>
           </div>
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
             <strong className="text-green-600 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">2</span>Adicione Produtos
+              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">2</span>
+              {t("pedidos.secoes.criacao.passo2")}
             </strong>
-            <p className="text-sm mt-2 ml-8">Adicione itens e ajuste as quantidades.</p>
+            <p className="text-sm mt-2 ml-8">{t("pedidos.secoes.criacao.descricao2")}</p>
           </div>
           <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1A365D" : "#F0FDF4", border: `1px solid ${modoDark ? "#2D4B75" : "#BBF7D0"}` }}>
             <strong className="text-green-600 flex items-center gap-2">
-              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>Envie o Pedido
+              <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm">3</span>
+              {t("pedidos.secoes.criacao.passo3")}
             </strong>
-            <p className="text-sm mt-2 ml-8">Ao criar, o pedido é enviado automaticamente por e-mail.</p>
+            <p className="text-sm mt-2 ml-8">{t("pedidos.secoes.criacao.descricao3")}</p>
           </div>
         </div>
       </section>
@@ -754,20 +737,18 @@ export default function Ajuda() {
       <section id="pedidos-status">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <FaHistory className="text-blue-500" />
-          Gerenciando o Status do Pedido
+          {t("pedidos.secoes.status.titulo")}
         </h3>
-        <p className="mb-4">Acompanhe o pedido através dos seus status para manter o controle.</p>
+        <p className="mb-4">{t("pedidos.secoes.status.descricao")}</p>
         <div className="p-4 rounded-lg" style={{ backgroundColor: modoDark ? "#1E4976" : "#EFF6FF" }}>
           <strong className="flex items-center gap-2 mb-2">
             <FaInfo className="text-blue-500" />
-            Pontos Importantes:
+            {t("pedidos.secoes.status.pontos_titulo")}
           </strong>
           <ul className="list-disc list-inside text-sm space-y-2 mt-2">
-            <li>
-              Status possíveis: <strong>Pendente</strong>, <strong>Processando</strong>, <strong>Concluído</strong>, <strong>Cancelado</strong>.
-            </li>
-            <li>Ao concluir um pedido, o sistema faz a entrada automática no estoque.</li>
-            <li>Você pode acompanhar o histórico de cada pedido na tela de Pedidos.</li>
+            <li>{t("pedidos.secoes.status.ponto1")}</li>
+            <li>{t("pedidos.secoes.status.ponto2")}</li>
+            <li>{t("pedidos.secoes.status.ponto3")}</li>
           </ul>
         </div>
       </section>
@@ -775,18 +756,18 @@ export default function Ajuda() {
   );
 
   const menuItems = [
-    { id: "empresa", titulo: "Gestão da Empresa", icone: <FaBuilding className="text-xl" /> },
-    { id: "produtos", titulo: "Gestão de Produtos", icone: <FaBox className="text-xl" /> },
-    { id: "vendas", titulo: "Sistema de Vendas", icone: <FaDollarSign className="text-xl" /> },
-    { id: "pedidos", titulo: "Pedido de Estoque", icone: <FaTruck className="text-xl" /> },
-    { id: "clientes", anchor: true, targetId: "vendas", titulo: "Gestão de Clientes", icone: <FaUserTag className="text-xl" /> },
+    { id: "empresa", titulo: t("empresa.titulo"), icone: <FaBuilding className="text-xl" /> },
+    { id: "produtos", titulo: t("produtos.titulo"), icone: <FaBox className="text-xl" /> },
+    { id: "vendas", titulo: t("vendas.titulo"), icone: <FaDollarSign className="text-xl" /> },
+    { id: "pedidos", titulo: t("pedidos.titulo"), icone: <FaTruck className="text-xl" /> },
+    { id: "clientes", anchor: true, targetId: "vendas", titulo: t("vendas.secoes.clientes.titulo"), icone: <FaUserTag className="text-xl" /> },
   ];
 
   const topicos = [
-    { id: "empresa", titulo: "Gestão da Empresa", icone: <FaBuilding className="text-xl" />, componente: ConteudoEmpresa, descricao: "Criação, ativação, catálogo e gerenciamento de usuários." },
-    { id: "produtos", titulo: "Gestão de Produtos", icone: <FaBox className="text-xl" />, componente: ConteudoProdutos, descricao: "Guia completo sobre como cadastrar e gerenciar seus produtos." },
-    { id: "vendas", titulo: "Sistema de Vendas", icone: <FaDollarSign className="text-xl" />, componente: ConteudoVendas, descricao: "Guia sobre como registrar vendas e gerenciar clientes." },
-    { id: "pedidos", titulo: "Pedido de Estoque", icone: <FaTruck className="text-xl" />, componente: ConteudoPedidos, descricao: "Aprenda a fazer pedidos de reposição para seus fornecedores." },
+    { id: "empresa", titulo: t("empresa.titulo"), icone: <FaBuilding className="text-xl" />, componente: ConteudoEmpresa, descricao: t("empresa.descricao_curta") },
+    { id: "produtos", titulo: t("produtos.titulo"), icone: <FaBox className="text-xl" />, componente: ConteudoProdutos, descricao: t("produtos.descricao_curta") },
+    { id: "vendas", titulo: t("vendas.titulo"), icone: <FaDollarSign className="text-xl" />, componente: ConteudoVendas, descricao: t("vendas.descricao_curta") },
+    { id: "pedidos", titulo: t("pedidos.titulo"), icone: <FaTruck className="text-xl" />, componente: ConteudoPedidos, descricao: t("pedidos.descricao_curta") },
   ];
 
   return (
@@ -796,18 +777,26 @@ export default function Ajuda() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-4 mb-4">
               <FaBook className="text-4xl" style={{ color: temaAtual.primario }} />
-              <h1 className="text-3xl font-bold">Central de Ajuda</h1>
+              <h1 className="text-3xl font-bold">{t("titulo")}</h1>
               <FaLightbulb className="text-4xl" style={{ color: temaAtual.primario }} />
             </div>
             <p className="text-lg" style={{ color: temaAtual.placeholder }}>
-              Guia completo para usar o StockControl
+              {t("subtitulo")}
             </p>
           </div>
           <div ref={searchRef} className="relative max-w-2xl mx-auto">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FaSearch style={{ color: temaAtual.placeholder }} />
             </div>
-            <input type="text" placeholder="Pesquisar em toda a ajuda..." value={busca} onChange={handleSearchChange} onFocus={() => setIsSearchFocused(true)} className="w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ backgroundColor: temaAtual.card, color: temaAtual.texto, borderColor: temaAtual.borda }} />
+            <input
+              type="text"
+              placeholder={t("pesquisa.placeholder")}
+              value={busca}
+              onChange={handleSearchChange}
+              onFocus={() => setIsSearchFocused(true)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ backgroundColor: temaAtual.card, color: temaAtual.texto, borderColor: temaAtual.borda }}
+            />
             {isSearchFocused && searchResults.length > 0 && (
               <div className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto rounded-lg shadow-lg z-10" style={{ backgroundColor: temaAtual.card, border: `1px solid ${temaAtual.borda}` }}>
                 {searchResults.map((result) => (
@@ -819,7 +808,7 @@ export default function Ajuda() {
                       {generateSnippet(result.item.render, busca)}
                     </div>
                     <div className="text-xs mt-2 font-semibold" style={{ color: temaAtual.placeholder }}>
-                      em {result.item.parentTitle}
+                      {t("pesquisa.em")} {result.item.parentTitle}
                     </div>
                   </div>
                 ))}
@@ -834,7 +823,7 @@ export default function Ajuda() {
             <div className="border rounded-xl p-4 sticky top-4" style={{ backgroundColor: temaAtual.card, borderColor: temaAtual.borda }}>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <FaHome />
-                Tópicos de Ajuda
+                {t("menu.topicos")}
               </h3>
               <nav className="space-y-2">
                 {menuItems.map((item) => (
@@ -893,8 +882,8 @@ export default function Ajuda() {
               ))}
             </div>
             <footer className="mt-12 text-center" style={{ color: temaAtual.placeholder }}>
-              <p className="text-sm">Precisa de mais ajuda? Entre em contato com nosso suporte.</p>
-              <p className="text-xs mt-2">StockControl © {new Date().getFullYear()} - Sistema de Gestão de Estoque</p>
+              <p className="text-sm">{t("footer.contato")}</p>
+              <p className="text-xs mt-2">{t("footer.copyright", { ano: new Date().getFullYear() })}</p>
             </footer>
           </main>
         </div>

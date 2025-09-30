@@ -1,5 +1,5 @@
 {
-  "logs": {
+    "historicoTitulo": "Histórico de Logs",
     "produto": "Produto",
     "quantidade": "Quantidade",
     "cliente": "Cliente",
@@ -38,10 +38,10 @@
       "EMAIL_ENVIADO": "Email Enviado"
     },
     "status_pedido": {
-      "PENDENTE": "Pending",
-      "PROCESSANDO": "Processing",
-      "CONCLUIDO": "Completed",
-      "CANCELADO": "Cancelled"
+      "PENDENTE": "Pendente",
+      "PROCESSANDO": "Processando",
+      "CONCLUIDO": "Concluído",
+      "CANCELADO": "Cancelado"
     },
     "entidades": {
       "produtos": "Produtos",
@@ -67,4 +67,3 @@
       "email_enviado_fornecedor": "Email enviado para {{fornecedorNome}} ({{fornecedorEmail}}) sobre pedido {{pedidoNumero}}"
     }
   }
-}
