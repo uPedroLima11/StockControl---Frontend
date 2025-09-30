@@ -1,4 +1,5 @@
 {
+  "logs": {
   "produto": "Product",
   "quantidade": "Quantity",
   "cliente": "Client",
@@ -58,4 +59,5 @@
     "pedido_concluido_estoque": "Order {{pedidoNumero}} completed and stock updated",
     "email_enviado_fornecedor": "Email sent to {{fornecedorNome}} ({{fornecedorEmail}}) about order {{pedidoNumero}}"
   }
+}
 }

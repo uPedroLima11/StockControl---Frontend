@@ -1,5 +1,6 @@
 {
-    "historicoTitulo": "Histórico de Logs",
+  "logs":{  
+  "historicoTitulo": "Histórico de Logs",
     "produto": "Produto",
     "quantidade": "Quantidade",
     "cliente": "Cliente",
@@ -67,3 +68,4 @@
       "email_enviado_fornecedor": "Email enviado para {{fornecedorNome}} ({{fornecedorEmail}}) sobre pedido {{pedidoNumero}}"
     }
   }
+}

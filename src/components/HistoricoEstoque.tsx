@@ -46,10 +46,10 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
   const traduzirStatusPedido = (status: string): string => {
     const mapeamentoStatus: Record<string, string> = {
-      'PENDENTE': 'status_pedido.PENDENTE',
-      'PROCESSANDO': 'status_pedido.PROCESSANDO',
-      'CONCLUIDO': 'status_pedido.CONCLUIDO',
-      'CANCELADO': 'status_pedido.CANCELADO'
+      'PENDENTE': 'logs.status_pedido.PENDENTE',
+      'PROCESSANDO': 'logs.status_pedido.PROCESSANDO',
+      'CONCLUIDO': 'logs.status_pedido.CONCLUIDO',
+      'CANCELADO': 'logs.status_pedido.CANCELADO'
     };
 
     const chaveTraducao = mapeamentoStatus[status];
@@ -68,12 +68,14 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
       }
     };
 
+    const lang = (typeof window !== "undefined" && window.localStorage.getItem("i18nextLng")) || "pt";
     let observacaoTraduzida = observacao;
+
     Object.entries(padroesTraducao).forEach(([pt, traducoes]) => {
       if (observacao.includes(pt)) {
         observacaoTraduzida = observacao.replace(
           pt,
-          traducoes['pt'] || pt
+          traducoes[lang as "pt" | "en"] || pt
         );
       }
     });
@@ -163,32 +165,32 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
       if (parsed.entityType === "pedidos") {
         switch (parsed.action) {
           case "pedido_criado":
-            return tLogs("descricoes.pedido_criado", {
+            return tLogs("logs.descricoes.pedido_criado", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
               quantidadeItens: parsed.quantidadeItens
             });
           case "status_atualizado":
-            return tLogs("descricoes.status_atualizado", {
+            return tLogs("logs.descricoes.status_atualizado", {
               pedidoNumero: parsed.pedidoNumero,
               statusAnterior: traduzirStatusPedido(parsed.statusAnterior),
               statusNovo: traduzirStatusPedido(parsed.statusNovo),
               fornecedorNome: parsed.fornecedorNome
             });
           case "itens_atualizados":
-            return tLogs("descricoes.itens_atualizados", {
+            return tLogs("logs.descricoes.itens_atualizados", {
               pedidoNumero: parsed.pedidoNumero,
               quantidadeItensAtualizados: parsed.quantidadeItensAtualizados,
               fornecedorNome: parsed.fornecedorNome
             });
           case "pedido_concluido_estoque":
-            return tLogs("descricoes.pedido_concluido_estoque", {
+            return tLogs("logs.descricoes.pedido_concluido_estoque", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
               statusFinal: traduzirStatusPedido(parsed.statusFinal)
             });
           case "email_enviado_fornecedor":
-            return tLogs("descricoes.email_enviado_fornecedor", {
+            return tLogs("logs.descricoes.email_enviado_fornecedor", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
               fornecedorEmail: parsed.fornecedorEmail
@@ -278,7 +280,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
         ))}
 
         {eventos.length === 0 && (
-          <div className="text-center text-gray-500 py-4">{tEstoque("nenhumaMovimentacao")}</div>
+          <div className="text-center text-gray-500 py-4">{tEstoque("logs.nenhumaMovimentacao")}</div>
         )}
       </div>
 
