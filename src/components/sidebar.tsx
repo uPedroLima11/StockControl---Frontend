@@ -486,16 +486,16 @@ export default function Sidebar() {
             <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
           </Link>
 
-          <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
+            <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
             <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm" style={{ backgroundColor: temNotificacaoNaoLida ? cores.azulBrilhante + "20" : "transparent" }}>
               <span className="text-lg relative">
-                <FaBell />
-                {temNotificacaoNaoLida && (
-                  <>
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
-                  </>
-                )}
+              <FaBell />
+              {temNotificacaoNaoLida && (
+                <>
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
+                </>
+              )}
               </span>
               <span className="text-sm md:inline cursor-pointer">{t("notifications")}</span>
             </button>
@@ -511,36 +511,36 @@ export default function Sidebar() {
             {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />}
             {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />}
             {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />}
-            {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exportacoes")} cores={cores} />}
+            {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} cores={cores} />}
             <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
             <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
             <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
 
             <Link href="/empresa" className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]">
               <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
-                <Image
-                  src={fotoEmpresa || "/contadefault.png"}
-                  alt="Foto da Empresa"
-                  width={48}
-                  height={48}
-                  className="object-cover w-full h-full"
-                  style={{
-                    objectFit: "cover",
-                    width: "100%",
-                    height: "100%",
-                    minWidth: "100%",
-                    minHeight: "100%",
-                    background: "#fff",
-                    padding: 0,
-                  }}
-                  quality={100}
-                  priority
-                />
+              <Image
+                src={fotoEmpresa || "/contadefault.png"}
+                alt={t("company_photo")}
+                width={48}
+                height={48}
+                className="object-cover w-full h-full"
+                style={{
+                objectFit: "cover",
+                width: "100%",
+                height: "100%",
+                minWidth: "100%",
+                minHeight: "100%",
+                background: "#fff",
+                padding: 0,
+                }}
+                quality={100}
+                priority
+              />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
-            <LinkSidebar href="/ajuda" icon={<FaBook />} label="Central de Ajuda" cores={cores} />
-          </nav>
+            <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} cores={cores} />
+            </nav>
         </div>
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
