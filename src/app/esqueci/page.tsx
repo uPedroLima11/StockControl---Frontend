@@ -21,8 +21,9 @@ export default function Esqueci() {
     setCarregando(true);
     try {
       const token = Math.floor(100000 + Math.random() * 900000);
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
-        method: "put",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -31,32 +32,45 @@ export default function Esqueci() {
         }),
       });
 
-      await fetch(`${process.env.NEXT_PUBLIC_URL_ESQUECI}`, {
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar código no banco');
+      }
+
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/recuperacao-senha`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json" 
+        },
         body: JSON.stringify({
           email: data.email,
           codigo: token.toString(),
         }),
       });
 
-      if (!response.ok) {
-        Swal.fire({
-          title: "Erro ao enviar",
-          text: "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.",
-          icon: "error",
-          confirmButtonText: "OK",
-          confirmButtonColor: temaAtual.primario,
-          background: temaAtual.card,
-          color: temaAtual.texto
-        });
-        return;
+      const emailData = await emailResponse.json();
+
+      if (!emailResponse.ok || !emailData.success) {
+        throw new Error(emailData.message || 'Erro ao enviar email');
       }
+
       setEnviado(true);
-    } catch {
+      
+      Swal.fire({
+        title: "Email enviado!",
+        text: "Verifique sua caixa de entrada para o código de recuperação.",
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: temaAtual.primario,
+        background: temaAtual.card,
+        color: temaAtual.texto
+      });
+
+    } catch (error: any) {
+      console.error('Erro:', error);
+      
       Swal.fire({
         title: "Erro ao enviar",
-        text: "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.",
+        text: error.message || "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: temaAtual.primario,
@@ -114,7 +128,10 @@ export default function Esqueci() {
           </div>
           <input 
             type="email" 
-            {...register("email")} 
+            {...register("email", { 
+              required: true,
+              pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/
+            })} 
             className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
             placeholder="Digite seu e-mail" 
             required 
@@ -142,25 +159,19 @@ export default function Esqueci() {
             }
           }}
         >
-          {carregando ? "Processando..." : "Enviar e-mail"}
+          {carregando ? "Enviando código..." : "Enviar código de recuperação"}
         </button>
-        
-        {carregando && (
-          <div className="text-center mt-4">
-            <span style={{ color: temaAtual.primario }}>Processando...</span>
-          </div>
-        )}
 
         {enviado && (
           <div 
             className="mt-4 p-3 rounded-lg text-center border"
             style={{
-              backgroundColor: temaAtual.sucesso + "20",
-              color: temaAtual.sucesso,
-              borderColor: temaAtual.sucesso
+              backgroundColor: "#10B98120",
+              borderColor: "#10B981",
+              color: "#10B981"
             }}
           >
-            <p className="text-sm md:text-base">E-mail de recuperação enviado! Verifique sua caixa de entrada.</p>
+            <p className="text-sm md:text-base">Código enviado! Verifique seu email.</p>
           </div>
         )}
         

@@ -400,10 +400,6 @@ export default function PedidosPage() {
             setEnviandoEmail(prev => ({ ...prev, [pedido.id]: true }));
 
             try {
-                if (!N8N_WEBHOOK_URL) {
-                    throw new Error('Serviço de email não configurado');
-                }
-
                 const dataFormatada = formatarData(pedido.dataSolicitacao);
 
                 const emailData = {
@@ -412,13 +408,14 @@ export default function PedidosPage() {
                     remetente_email: empresa?.email || "empresa@email.com",
                     empresa_nome: empresa?.nome || "Nome da Empresa",
                     empresa_telefone: empresa?.telefone || "(00) 00000-0000",
+                    empresa_id: empresaId,
 
                     destinatario: pedido.fornecedor.email,
                     fornecedor_nome: pedido.fornecedor.nome,
 
                     pedido_id: pedido.id,
                     pedido_numero: pedido.numero,
-                    assunto: `Pedido ${pedido.numero} - ${pedido.fornecedor.nome}`,
+                    assunto: `Pedido ${pedido.numero} - ${empresa?.nome || "Nome da Empresa"}`,
                     total: pedido.total,
                     data: dataFormatada,
                     observacoes: observacoesPersonalizadas || pedido.observacoes || 'Nenhuma',
@@ -431,8 +428,7 @@ export default function PedidosPage() {
                         observacao: item.observacao || ''
                     }))
                 };
-
-                const response = await fetch(N8N_WEBHOOK_URL, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/email-pedidos`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -440,9 +436,10 @@ export default function PedidosPage() {
                     body: JSON.stringify(emailData)
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erro no serviço de email: ${response.status} - ${errorText}`);
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Erro ao enviar email');
                 }
 
                 try {
@@ -980,11 +977,10 @@ export default function PedidosPage() {
                                             <button
                                                 onClick={() => handleAbrirModalEmail(pedido)}
                                                 disabled={pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail}
-                                                className={`px-3 py-1 rounded flex items-center gap-1 text-sm ${
-                                                    (pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail)
-                                                        ? ''
-                                                        : 'cursor-pointer'
-                                                }`}
+                                                className={`px-3 py-1 rounded flex items-center gap-1 text-sm ${(pedido.status === 'CONCLUIDO' || pedido.status === 'CANCELADO' || enviandoEmail[pedido.id] || !podeEnviarEmail)
+                                                    ? ''
+                                                    : 'cursor-pointer'
+                                                    }`}
                                                 style={{
                                                     backgroundColor: temaAtual.secundario,
                                                     color: "#FFFFFF",
