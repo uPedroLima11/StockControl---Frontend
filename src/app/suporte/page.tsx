@@ -81,7 +81,7 @@ export default function Suporte() {
     setErro("");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/suporte`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API || 'http://localhost:3001'}/suporte`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
