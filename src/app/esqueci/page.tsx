@@ -65,12 +65,17 @@ export default function Esqueci() {
         color: temaAtual.texto
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro:', error);
-      
+
+      let errorMessage = "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       Swal.fire({
         title: "Erro ao enviar",
-        text: error.message || "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.",
+        text: errorMessage,
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: temaAtual.primario,

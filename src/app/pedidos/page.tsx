@@ -24,7 +24,6 @@ export default function PedidosPage() {
     const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
     const { t } = useTranslation("pedidos");
     const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
-    const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
     const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
     const router = useRouter();
 
