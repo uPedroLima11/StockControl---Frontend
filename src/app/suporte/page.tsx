@@ -117,11 +117,14 @@ export default function Suporte() {
       } else {
         throw new Error(data.message || 'Erro ao enviar mensagem');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro:', error);
-      const errorMessage = error.message.includes('JSON') 
-        ? 'Erro de conexão com o servidor' 
-        : error.message || 'Erro ao enviar mensagem. Tente novamente.';
+      let errorMessage = 'Erro ao enviar mensagem. Tente novamente.';
+      if (typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+        errorMessage = (error as { message: string }).message.includes('JSON')
+          ? 'Erro de conexão com o servidor'
+          : (error as { message: string }).message || errorMessage;
+      }
       
       setErro(errorMessage);
       setTentativas(prev => prev + 1);
