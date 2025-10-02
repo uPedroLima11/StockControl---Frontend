@@ -25,7 +25,6 @@ export default function PedidosPage() {
     const { t } = useTranslation("pedidos");
     const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
     const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
-    const searchParams = useSearchParams();
 
     const [paginaAtual, setPaginaAtual] = useState(1);
     const itensPorPagina = 3;
@@ -115,27 +114,27 @@ export default function PedidosPage() {
         setPaginaAtual(numeroPagina);
     };
 
-    useEffect(() => {
-        if (carregamentoInicialRef.current) return;
+      useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const produtoParam = urlParams.get('produto');
+      const abrirModalParam = urlParams.get('abrirModal');
+      
+      if (produtoParam && abrirModalParam === 'true') {
+        const produtoId = parseInt(produtoParam);
+        if (!isNaN(produtoId)) {
+          setProdutoSelecionadoAutomatico(produtoId);
+          setAbrirModalAutomatico(true);
+          modalProcessadoRef.current = false;
 
-        const produtoParam = searchParams.get('produto');
-        const abrirModalParam = searchParams.get('abrirModal');
-        if (produtoParam && abrirModalParam === 'true') {
-            const produtoId = parseInt(produtoParam);
-            if (!isNaN(produtoId)) {
-                setProdutoSelecionadoAutomatico(produtoId);
-                setAbrirModalAutomatico(true);
-                modalProcessadoRef.current = false;
-
-                const url = new URL(window.location.href);
-                url.searchParams.delete('produto');
-                url.searchParams.delete('abrirModal');
-                window.history.replaceState({}, '', url.toString());
-            }
+          const url = new URL(window.location.href);
+          url.searchParams.delete('produto');
+          url.searchParams.delete('abrirModal');
+          window.history.replaceState({}, '', url.toString());
         }
-
-        carregamentoInicialRef.current = true;
-    }, [searchParams]);
+      }
+    }
+  }, []);
 
     useEffect(() => {
         const temaSalvo = localStorage.getItem("modoDark");
