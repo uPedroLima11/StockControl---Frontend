@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight, FaLock } from "react-icons/fa";
+import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { CriarModal } from "./../../components/CriarModal";
 import { Tema, Fornecedor, Produto, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function PedidosPage() {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -25,7 +25,7 @@ export default function PedidosPage() {
     const { t } = useTranslation("pedidos");
     const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
     const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
-    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [paginaAtual, setPaginaAtual] = useState(1);
     const itensPorPagina = 3;
@@ -41,6 +41,14 @@ export default function PedidosPage() {
     const [observacoesEmail, setObservacoesEmail] = useState("");
 
     const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
+
+    const [produtoSelecionadoAutomatico, setProdutoSelecionadoAutomatico] = useState<number | null>(null);
+    const [abrirModalAutomatico, setAbrirModalAutomatico] = useState(false);
+    const [produtosCarregados, setProdutosCarregados] = useState(false);
+    const [dadosUsuarioCarregados, setDadosUsuarioCarregados] = useState(false);
+
+    const modalProcessadoRef = useRef(false);
+    const carregamentoInicialRef = useRef(false);
 
     const temas: { dark: Tema; light: Tema } = {
         dark: {
@@ -76,25 +84,7 @@ export default function PedidosPage() {
         }
     };
 
-    const mostrarAlertaNaoAtivada = () => {
-        Swal.fire({
-            title: t("alerta.titulo") || "Empresa Não Ativada",
-            text: t("alerta.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade.",
-            icon: "warning",
-            confirmButtonText: t("alerta.botao") || "Ativar Empresa",
-            confirmButtonColor: "#3085d6",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.push("/ativacao");
-            }
-        });
-    };
-
     const handleAcaoProtegida = (acao: () => void) => {
-        if (!empresaAtivada) {
-            mostrarAlertaNaoAtivada();
-            return;
-        }
         acao();
     };
 
@@ -125,16 +115,82 @@ export default function PedidosPage() {
         setPaginaAtual(numeroPagina);
     };
 
+    useEffect(() => {
+        if (carregamentoInicialRef.current) return;
+        
+        const produtoParam = searchParams.get('produto');
+        const abrirModalParam = searchParams.get('abrirModal');        
+        if (produtoParam && abrirModalParam === 'true') {
+            const produtoId = parseInt(produtoParam);
+            if (!isNaN(produtoId)) {
+                setProdutoSelecionadoAutomatico(produtoId);
+                setAbrirModalAutomatico(true);
+                modalProcessadoRef.current = false;
+                
+                const url = new URL(window.location.href);
+                url.searchParams.delete('produto');
+                url.searchParams.delete('abrirModal');
+                window.history.replaceState({}, '', url.toString());
+            }
+        }
+        
+        carregamentoInicialRef.current = true;
+    }, [searchParams]);
+
+    useEffect(() => {
+        const temaSalvo = localStorage.getItem("modoDark");
+        setModoDark(temaSalvo === "true");
+
+        carregarDadosUsuario();
+    }, []);
+
+    useEffect(() => {
+        if (dadosUsuarioCarregados && empresaId && !produtosCarregados) {
+            carregarProdutos();
+        }
+    }, [dadosUsuarioCarregados, empresaId, produtosCarregados]);
+
+    useEffect(() => {
+        if (!abrirModalAutomatico || 
+            !produtoSelecionadoAutomatico || 
+            !dadosUsuarioCarregados || 
+            !produtosCarregados || 
+            modalProcessadoRef.current ||
+            modalAberto) {
+            return;
+        }
+
+        modalProcessadoRef.current = true;
+
+        setTimeout(() => {
+            const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
+            
+            if (produto) {
+                handleAbrirModalCriacaoComProduto(produto);
+            } else {
+                handleAbrirModalCriacao();
+            }
+            
+            setAbrirModalAutomatico(false);
+            setProdutoSelecionadoAutomatico(null);
+        }, 2000); 
+
+    }, [abrirModalAutomatico, produtoSelecionadoAutomatico, dadosUsuarioCarregados, produtosCarregados, produtos, modalAberto]);
+
     const carregarDadosUsuario = useCallback(async () => {
         try {
             const usuarioSalvo = localStorage.getItem("client_key");
-            if (!usuarioSalvo) return;
+            if (!usuarioSalvo) {
+                setDadosUsuarioCarregados(true);
+                return;
+            }
 
             const usuarioValor = usuarioSalvo.replace(/"/g, "");
             const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
 
             if (responseUsuario.ok) {
                 const usuario = await responseUsuario.json();
+                
                 setEmpresaId(usuario.empresaId);
                 setTipoUsuario(usuario.tipo);
                 carregarPermissoes(usuarioValor);
@@ -142,6 +198,7 @@ export default function PedidosPage() {
                 if (usuario.empresaId) {
                     const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
                     setEmpresaAtivada(ativada);
+                    
                     if (ativada) {
                         carregarPedidos(usuario.empresaId);
                     }
@@ -152,9 +209,14 @@ export default function PedidosPage() {
                     const empresaData = await responseEmpresa.json();
                     setEmpresa(empresaData);
                 }
+
+                setDadosUsuarioCarregados(true);
+            } else {
+                setDadosUsuarioCarregados(true);
             }
         } catch (error) {
             console.error("Erro ao carregar dados do usuário:", error);
+            setDadosUsuarioCarregados(true);
         }
     }, []);
 
@@ -218,15 +280,19 @@ export default function PedidosPage() {
 
     const carregarProdutos = async () => {
         try {
-            if (!empresaId) return;
-
+            if (!empresaId || produtosCarregados) return;
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/empresa/${empresaId}`);
             if (response.ok) {
                 const produtosData = await response.json();
                 setProdutos(produtosData);
+                setProdutosCarregados(true);
+            } else {
+                console.error("❌ Erro ao carregar produtos");
+                setProdutosCarregados(true);
             }
         } catch (error) {
             console.error("Erro ao carregar produtos:", error);
+            setProdutosCarregados(true);
         }
     };
 
@@ -248,13 +314,6 @@ export default function PedidosPage() {
 
         setPedidosFiltrados(filtrados);
     }, [busca, filtroStatus, pedidos]);
-
-    useEffect(() => {
-        const temaSalvo = localStorage.getItem("modoDark");
-        setModoDark(temaSalvo === "true");
-
-        carregarDadosUsuario();
-    }, [carregarDadosUsuario]);
 
     useEffect(() => {
         const style = document.createElement('style');
@@ -304,11 +363,11 @@ export default function PedidosPage() {
         };
     }, [modoDark, filtrarPedidos, pedidosFiltrados]);
 
-    const podeCriarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar) && empresaAtivada;
-    const podeEditarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar) && empresaAtivada;
-    const podeGerenciarStatus = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status) && empresaAtivada;
-    const podeVisualizarPedidos = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar) && empresaAtivada;
-    const podeEnviarEmail = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar) && empresaAtivada;
+    const podeCriarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar);
+    const podeEditarPedido = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar);
+    const podeGerenciarStatus = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status);
+    const podeVisualizarPedidos = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_visualizar);
+    const podeEnviarEmail = (tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar);
 
     const getStatusInfo = (status: string) => {
         switch (status) {
@@ -500,8 +559,53 @@ export default function PedidosPage() {
         setModalAberto(true);
     };
 
+    const handleAbrirModalCriacaoComProduto = (produto: Produto) => {
+        handleAcaoProtegida(() => {            
+            if (modalAberto) {
+                setModalAberto(false);
+                setTimeout(() => {
+                    abrirModalComProduto(produto);
+                }, 300);
+            } else {
+                abrirModalComProduto(produto);
+            }
+        });
+    };
+
+    const abrirModalComProduto = (produto: Produto) => {        
+        setModalTipo('criar');
+        setModalAberto(true);
+        carregarFornecedores();
+        
+        setFornecedorSelecionado("");
+        setObservacoesCriacao("");
+        setBuscaProduto("");
+        
+        const itemExistente = itensCriacao.find(item => item.produtoId === produto.id);
+        
+        if (!itemExistente) {
+            setItensCriacao([
+                {
+                    produtoId: produto.id,
+                    produto: produto,
+                    quantidade: 1,
+                    precoUnitario: produto.preco,
+                    observacao: ``
+                }
+            ]);
+        } 
+        
+        setTimeout(() => {
+            const buscaInput = document.querySelector('input[placeholder*="buscarProdutos"]') as HTMLInputElement;
+            if (buscaInput) {
+                buscaInput.focus();
+            }
+        }, 500);
+    };
+
     const handleAbrirModalCriacao = () => {
         handleAcaoProtegida(() => {
+            
             setModalTipo('criar');
             setModalAberto(true);
             carregarFornecedores();
@@ -511,6 +615,11 @@ export default function PedidosPage() {
             setObservacoesCriacao("");
             setBuscaProduto("");
         });
+    };
+
+    const handleFecharModal = () => {
+        setModalAberto(false);
+        setItensCriacao([]); 
     };
 
     const adicionarItem = (produto: Produto) => {
@@ -718,29 +827,6 @@ export default function PedidosPage() {
         });
     };
 
-    if (!podeVisualizarPedidos && empresaId && !empresaAtivada) {
-        return (
-            <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-                <div className="w-full max-w-6xl">
-                    <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-                        {t("titulo")}
-                    </h1>
-                    <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-                        backgroundColor: temaAtual.primario + "20",
-                        color: temaAtual.texto,
-                        border: `1px solid ${temaAtual.borda}`
-                    }}>
-                        <FaLock className="text-xl" />
-                        <div>
-                            <p className="font-bold">{t("empresaNaoAtivada.titulo") || "Empresa Não Ativada"}</p>
-                            <p>{t("empresaNaoAtivada.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade."}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     if (!podeVisualizarPedidos) {
         return (
             <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
@@ -770,20 +856,6 @@ export default function PedidosPage() {
                 <h1 className="text-2xl md:text-3xl font-bold mb-6 text-left" style={{ color: temaAtual.texto }}>
                     {t("titulo")}
                 </h1>
-
-                {empresaId && !empresaAtivada && (
-                    <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-                        backgroundColor: temaAtual.primario + "20",
-                        color: temaAtual.texto,
-                        border: `1px solid ${temaAtual.borda}`
-                    }}>
-                        <FaLock className="text-xl" />
-                        <div>
-                            <p className="font-bold">{t("empresaNaoAtivada.titulo") || "Empresa Não Ativada"}</p>
-                            <p>{t("empresaNaoAtivada.mensagem") || "Sua empresa precisa ser ativada para acessar esta funcionalidade."}</p>
-                        </div>
-                    </div>
-                )}
 
                 <div
                     className="flex flex-col md:flex-row gap-2 md:gap-1 mb-4 p-3 rounded-lg relative w-full md:w-auto"
@@ -1128,7 +1200,7 @@ export default function PedidosPage() {
                     atualizarObservacao={atualizarObservacao}
                     calcularTotal={calcularTotal}
                     handleCriarPedido={handleCriarPedido}
-                    onClose={() => setModalAberto(false)}
+                    onClose={handleFecharModal}
                 />
             )}
 

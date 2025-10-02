@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook } from "react-icons/fa";
+import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook, FaClipboardList } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
-import { FaClipboardList } from "react-icons/fa";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
 import { ConviteI } from "@/utils/types/convite";
@@ -11,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -22,13 +22,11 @@ export default function Sidebar() {
   const [possuiEmpresa, setPossuiEmpresa] = useState(false);
   const [empresaAtivada, setEmpresaAtivada] = useState(false);
   const { logar } = useUsuarioStore();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [audioInicializado, setAudioInicializado] = useState(false);
+  const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const notificacoesNaoLidasRef = useRef<NotificacaoI[]>([]);
-  const idsNotificacoesTocadasRef = useRef<Set<string>>(new Set());
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
-  const [ultimaVerificacao, setUltimaVerificacao] = useState<number>(0);
   const [modoDark, setModoDark] = useState(false);
+  const [usuarioInteragiu, setUsuarioInteragiu] = useState(false);
 
   const cores = {
     azulEscuro: "#0A1929",
@@ -40,9 +38,45 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
+    const handleInteracao = () => {
+      setUsuarioInteragiu(true);
+      document.removeEventListener('click', handleInteracao);
+      document.removeEventListener('keydown', handleInteracao);
+    };
+
+    document.addEventListener('click', handleInteracao);
+    document.addEventListener('keydown', handleInteracao);
+
+    return () => {
+      document.removeEventListener('click', handleInteracao);
+      document.removeEventListener('keydown', handleInteracao);
+    };
+  }, []);
+
+  useEffect(() => {
+    const carregarUsuarioId = () => {
+      try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        if (usuarioSalvo) {
+          const id = usuarioSalvo.replace(/"/g, "");
+          setUsuarioId(id);
+          return id;
+        }
+      } catch (error) {}
+      return null;
+    };
+
+    const id = carregarUsuarioId();
+    if (id) {
+      setUsuarioId(id);
+    }
+  }, []);
+
+  useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
+    aplicarTema(ativo);
   }, []);
 
   const aplicarTema = (ativado: boolean) => {
@@ -67,7 +101,6 @@ export default function Sidebar() {
     setModoDark(novoTema);
     localStorage.setItem("modoDark", String(novoTema));
     aplicarTema(novoTema);
-    window.location.reload();
   };
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
@@ -82,144 +115,14 @@ export default function Sidebar() {
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
-      console.error("Erro ao verificar ativação da empresa:", error);
       setEmpresaAtivada(false);
       return false;
     }
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const sidebar = document.querySelector("aside");
-      const menuButton = document.querySelector("button.md\\:hidden");
-
-      if (window.innerWidth < 768 && estaAberto && sidebar && !sidebar.contains(event.target as Node) && menuButton && !menuButton.contains(event.target as Node)) {
-        setEstaAberto(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [estaAberto]);
-
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-      .sidebar-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-thumb {
-        background: ${cores.azulClaro};
-        border-radius: 3px;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: ${cores.azulBrilhante};
-      }
-      
-      .sidebar-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: ${cores.azulClaro} transparent;
-      }
-      
-      .sidebar-scrollbar {
-        -ms-overflow-style: -ms-autohiding-scrollbar;
-      }
-      
-     @media (max-width: 768px) {
-  .sidebar-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: ${cores.azulBrilhante};
-    border-radius: 2px;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: ${cores.azulNeon};
-  }
-  
-  .sidebar-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: ${cores.azulBrilhante} transparent;
-  }
-}
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [cores.azulClaro, cores.azulBrilhante]);
-
-  const limparNotificacoesLidas = useCallback(async (idUsuario: string) => {
-    try {
-      const idsSalvos = localStorage.getItem(`idsNotificacoesSom_${idUsuario}`);
-      if (idsSalvos) {
-        const idsArray = JSON.parse(idsSalvos);
-        const idsLimitadas = idsArray.slice(-50);
-        localStorage.setItem(`idsNotificacoesSom_${idUsuario}`, JSON.stringify(idsLimitadas));
-      }
-
-      localStorage.removeItem(`idsNotificacoesTocadas_${idUsuario}`);
-
-      console.log("IDs antigas limpas, mantendo histórico recente");
-    } catch (erro) {
-      console.error("Erro ao limpar notificações lidas:", erro);
-    }
-  }, []);
-
-  const verificarEstoque = async () => {
-    try {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) {
-        console.log("Nenhum usuário logado encontrado");
-        return;
-      }
-
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/verificar-estoque-empresa`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!resposta.ok) {
-        const errorData = await resposta.json().catch(() => ({}));
-        throw new Error(`Erro HTTP ${resposta.status}: ${errorData.message || "Erro desconhecido"}`);
-      }
-
-      const dados = await resposta.json();
-      console.log("Verificação de estoque concluída:", dados);
-    } catch (erro) {
-      console.error("Erro detalhado ao verificar estoque:", erro);
-    }
-  };
-
-  const inicializarAudio = useCallback(() => {
-    if (typeof window !== "undefined" && !audioRef.current) {
-      audioRef.current = new Audio("/notification-sound.mp3");
-      audioRef.current.volume = 0.3;
-      audioRef.current.load();
-      setAudioInicializado(true);
-    }
-  }, []);
-
-  const tocarSomNotificacao = useCallback(async () => {
-    if (!audioRef.current) {
-      inicializarAudio();
-      await new Promise((resolve) => setTimeout(resolve, 100));
+  const tocarSomNotificacao = useCallback(async (notificacaoId: string) => {
+    if (!usuarioId || !usuarioInteragiu) {
+      return;
     }
 
     const somAtivado = localStorage.getItem("somNotificacao") !== "false";
@@ -231,222 +134,220 @@ export default function Sidebar() {
       const audio = new Audio("/notification-sound.mp3");
       audio.volume = 0.3;
 
-      await audio.play();
-    } catch (erro) {
-      console.error("Erro ao reproduzir som:", erro);
-
-      if (audioRef.current) {
+      const somTocado = await new Promise<boolean>(async (resolve) => {
         try {
-          audioRef.current.currentTime = 0;
-          await audioRef.current.play();
-        } catch (fallbackError) {
-          console.error("Erro no fallback também:", fallbackError);
+          const playPromise = audio.play();
+
+          if (playPromise !== undefined) {
+            await playPromise;
+            resolve(true);
+          } else {
+            resolve(true);
+          }
+        } catch (error) {
+          resolve(false);
         }
+      });
+
+      if (somTocado) {
+        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ usuarioId }),
+        });
+      }
+
+    } catch (erro) {}
+  }, [usuarioId, usuarioInteragiu]);
+
+
+  const agruparNotificacoesInteligente = (notificacoes: NotificacaoI[]): { chave: string; notificacoes: NotificacaoI[] }[] => {
+    if (notificacoes.length === 0) return [];
+
+    const notificacoesOrdenadas = [...notificacoes].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    const grupos: NotificacaoI[][] = [];
+    let grupoAtual: NotificacaoI[] = [notificacoesOrdenadas[0]];
+
+    for (let i = 1; i < notificacoesOrdenadas.length; i++) {
+      const notificacaoAtual = notificacoesOrdenadas[i];
+      const notificacaoAnterior = notificacoesOrdenadas[i - 1];
+
+      const diferencaTempo = new Date(notificacaoAtual.createdAt).getTime() - new Date(notificacaoAnterior.createdAt).getTime();
+
+      if (diferencaTempo < 2 * 60 * 1000) { 
+        grupoAtual.push(notificacaoAtual);
+      } else {
+        grupos.push([...grupoAtual]);
+        grupoAtual = [notificacaoAtual];
       }
     }
-  }, [inicializarAudio, audioInicializado]);
 
-  const verificarNotificacoes = useCallback(
-    async (idUsuario: string) => {
-      try {
-        const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${idUsuario}`);
-        const notificacoes: NotificacaoI[] = await resposta.json();
+    grupos.push(grupoAtual);
 
-        const notificacoesFiltradas = notificacoes.filter((n) => {
-          if (!n.empresaId) {
-            return n.usuarioId === idUsuario;
-          }
-          return true;
-        });
+    return grupos.map((notificacoesGrupo, index) => ({
+      chave: `lote-${index + 1}`,
+      notificacoes: notificacoesGrupo
+    }));
+  };
 
-        const notificacoesNaoLidas = notificacoesFiltradas.filter((n: NotificacaoI) => {
+  const marcarSomTocado = async (notificacaoId: string) => {
+    if (!usuarioId) return;
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuarioId }),
+      });
+    } catch (erro) {}
+  };
+
+  const verificarNotificacoes = useCallback(async () => {
+    if (!usuarioId) return;
+
+    try {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuarioId}`);
+      if (!resposta.ok) {
+        throw new Error("Erro ao buscar notificações");
+      }
+
+      const notificacoes: NotificacaoI[] = await resposta.json();
+
+      const notificacoesNaoLidas = notificacoes.filter((n: NotificacaoI) => !n.lida);
+
+      notificacoesNaoLidasRef.current = notificacoesNaoLidas;
+      setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
+
+      if (usuarioInteragiu) {
+        const notificacoesParaTocarSom = notificacoesNaoLidas.filter((n: NotificacaoI) => {
           if (n.empresaId) {
-            return !n.NotificacaoLida || n.NotificacaoLida.length === 0 || !n.NotificacaoLida.some((nl) => nl.usuarioId === idUsuario);
+            return !n.somTocado;
           }
           return !n.lida;
         });
 
-        notificacoesNaoLidasRef.current = notificacoesNaoLidas;
-        setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
+        if (notificacoesParaTocarSom.length > 0) {
+          const notificacoesAgrupadas = agruparNotificacoesInteligente(notificacoesParaTocarSom);
 
-        const todasOrdenadas = [...notificacoes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          for (const grupo of notificacoesAgrupadas) {
+            await tocarSomNotificacao(grupo.notificacoes[0].id);
 
-        const notificacaoMaisRecente = todasOrdenadas[0];
+            for (const notificacao of grupo.notificacoes) {
+              await marcarSomTocado(notificacao.id);
+            }
 
-        if (!notificacaoMaisRecente) return;
-        const ultimaIdSom = localStorage.getItem(`ultimaNotificacaoSom_${idUsuario}`);
-        if (ultimaIdSom !== notificacaoMaisRecente.id) {
-          setTimeout(async () => {
-            await tocarSomNotificacao();
-            localStorage.setItem(`ultimaNotificacaoSom_${idUsuario}`, notificacaoMaisRecente.id);
-          }, 300);
+            if (notificacoesAgrupadas.length > 1) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
         }
-      } catch (erro) {
-        console.error("Erro ao verificar notificações:", erro);
       }
-    },
-    [tocarSomNotificacao, ultimaVerificacao]
-  );
 
-  useEffect(() => {
-    const carregarPermissoes = async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (usuarioSalvo) {
-        const usuarioId = usuarioSalvo.replace(/"/g, "");
+    } catch (erro) {}
+  }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
-        const permissoesParaVerificar = ["usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", "exportar_dados", "inventario_visualizar", "pedidos_visualizar"];
+  const carregarPermissoes = useCallback(async () => {
+    if (!usuarioId) return;
 
-        const permissoes: Record<string, boolean> = {};
-        for (const permissao of permissoesParaVerificar) {
+    try {
+      const permissoesParaVerificar = ["usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", "exportar_dados", "inventario_visualizar", "pedidos_visualizar"];
+
+      const permissoes: Record<string, boolean> = {};
+      for (const permissao of permissoesParaVerificar) {
+        try {
           const temPermissao = await usuarioTemPermissao(usuarioId, permissao);
           permissoes[permissao] = temPermissao;
-        }
-
-        setPermissoesUsuario(permissoes);
-      }
-    };
-
-    carregarPermissoes();
-  }, []);
-
-  useEffect(() => {
-    const carregarDados = async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-
-      const usuarioId = usuarioSalvo.replace(/"/g, "");
-
-      try {
-        const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
-        if (respostaUsuario.status === 200) {
-          const dadosUsuario = await respostaUsuario.json();
-          logar(dadosUsuario);
-        }
-
-        const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
-        if (respostaEmpresa.status === 200) {
-          const dadosEmpresa = await respostaEmpresa.json();
-          setFotoEmpresa(dadosEmpresa.foto);
-          setNomeEmpresa(dadosEmpresa.nome);
-          setPossuiEmpresa(true);
-
-          if (dadosEmpresa.id) {
-            await verificarAtivacaoEmpresa(dadosEmpresa.id);
-          }
-        } else {
-          setPossuiEmpresa(false);
-          setEmpresaAtivada(false);
-        }
-
-        await verificarNotificacoes(usuarioId);
-      } catch (erro) {
-        console.error("Erro ao carregar dados:", erro);
-        setPossuiEmpresa(false);
-        setEmpresaAtivada(false);
-      }
-    };
-
-    carregarDados();
-  }, [logar, verificarNotificacoes, verificarAtivacaoEmpresa]);
-
-  useEffect(() => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    const usuarioId = usuarioSalvo?.replace(/"/g, "");
-
-    if (usuarioId) {
-      const idsSalvos = localStorage.getItem(`idsNotificacoesTocadas_${usuarioId}`);
-      if (idsSalvos) {
-        try {
-          const idsArray = JSON.parse(idsSalvos);
-          idsNotificacoesTocadasRef.current = new Set(idsArray);
         } catch (error) {
-          console.error("Erro ao carregar IDs de notificações:", error);
-          idsNotificacoesTocadasRef.current = new Set();
-          localStorage.setItem(`idsNotificacoesTocadas_${usuarioId}`, JSON.stringify([]));
+          permissoes[permissao] = false;
+        }
+      }
+
+      setPermissoesUsuario(permissoes);
+    } catch (error) {}
+  }, [usuarioId]);
+
+  const carregarDadosUsuario = useCallback(async () => {
+    if (!usuarioId) return;
+
+    try {
+      const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      if (respostaUsuario.status === 200) {
+        const dadosUsuario = await respostaUsuario.json();
+        logar(dadosUsuario);
+      }
+
+      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
+      if (respostaEmpresa.status === 200) {
+        const dadosEmpresa = await respostaEmpresa.json();
+        setFotoEmpresa(dadosEmpresa.foto || "/contadefault.png");
+        setNomeEmpresa(dadosEmpresa.nome);
+        setPossuiEmpresa(true);
+
+        if (dadosEmpresa.id) {
+          await verificarAtivacaoEmpresa(dadosEmpresa.id);
         }
       } else {
-        idsNotificacoesTocadasRef.current = new Set();
-        localStorage.setItem(`idsNotificacoesTocadas_${usuarioId}`, JSON.stringify([]));
+        setPossuiEmpresa(false);
+        setEmpresaAtivada(false);
+        setFotoEmpresa("/contadefault.png");
+        setNomeEmpresa(t("create_company"));
       }
 
-      const timestampSalvo = localStorage.getItem(`ultimaVerificacao_${usuarioId}`);
-      if (timestampSalvo) {
-        setUltimaVerificacao(Number(timestampSalvo));
-      }
+      await verificarNotificacoes();
+    } catch (erro) {
+      setPossuiEmpresa(false);
+      setEmpresaAtivada(false);
+      setFotoEmpresa("/contadefault.png");
+      setNomeEmpresa(t("create_company"));
     }
+  }, [usuarioId, logar, verificarNotificacoes, verificarAtivacaoEmpresa, t]);
 
-    const intervaloEstoque = setInterval(verificarEstoque, 60 * 60 * 1000);
-    verificarEstoque();
+  useEffect(() => {
+    if (!usuarioId) return;
 
-    async function carregarDados() {
-      if (!usuarioId) return;
+    const carregarTudo = async () => {
+      await carregarDadosUsuario();
+      await carregarPermissoes();
+    };
 
-      try {
-        const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
-        if (respostaUsuario.status === 200) {
-          const dadosUsuario = await respostaUsuario.json();
-          logar(dadosUsuario);
-        }
+    carregarTudo();
+  }, [usuarioId, carregarDadosUsuario, carregarPermissoes]);
 
-        const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
-        if (respostaEmpresa.status === 200) {
-          const dadosEmpresa = await respostaEmpresa.json();
-          setFotoEmpresa(dadosEmpresa.foto);
-          setNomeEmpresa(dadosEmpresa.nome);
-          setPossuiEmpresa(true);
-        } else {
-          setPossuiEmpresa(false);
-        }
-
-        await verificarNotificacoes(usuarioId);
-      } catch (erro) {
-        console.error("Erro ao carregar dados:", erro);
-      }
-    }
-
-    carregarDados();
+  useEffect(() => {
+    if (!usuarioId) return;
 
     const intervaloNotificacoes = setInterval(() => {
-      if (usuarioId) verificarNotificacoes(usuarioId);
-    }, 10000);
+      verificarNotificacoes();
+    }, 15000); 
+
+    verificarNotificacoes();
 
     return () => {
-      clearInterval(intervaloEstoque);
       clearInterval(intervaloNotificacoes);
     };
-  }, [logar, verificarNotificacoes]);
+  }, [usuarioId, verificarNotificacoes]);
 
   const alternarSidebar = () => {
-    inicializarAudio();
     setEstaAberto(!estaAberto);
   };
 
   const alternarNotificacoes = () => {
-    inicializarAudio();
     setMostrarNotificacoes(!mostrarNotificacoes);
-
-    if (!mostrarNotificacoes) {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      const usuarioId = usuarioSalvo?.replace(/"/g, "");
-
-      if (usuarioId && notificacoesNaoLidasRef.current.length > 0) {
-        const novosIds = new Set(idsNotificacoesTocadasRef.current);
-        notificacoesNaoLidasRef.current.forEach((notificacao) => {
-          novosIds.add(notificacao.id);
-        });
-
-        idsNotificacoesTocadasRef.current = novosIds;
-        localStorage.setItem(`idsNotificacoesTocadas_${usuarioId}`, JSON.stringify(Array.from(novosIds)));
-      }
-    }
   };
 
   return (
     <>
-      <></>
       <button className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#1976D2] p-3 rounded-full shadow-lg hover:bg-[#1565C0] transition-colors" onClick={alternarSidebar}>
         <FaBars />
       </button>
+
       <aside
         className={`sidebar-scrollbar fixed top-0 h-screen w-64 flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}
         style={{
@@ -458,18 +359,6 @@ export default function Sidebar() {
           backgroundClip: "content-box, border-box",
           boxShadow: "8px 0 20px rgba(0, 0, 0, 0.4)",
         }}
-        onClick={(e) => {
-          if (window.innerWidth < 768) {
-            let target = e.target as HTMLElement | null;
-            while (target) {
-              if (target.tagName === "A") {
-                setEstaAberto(false);
-                break;
-              }
-              target = target.parentElement;
-            }
-          }
-        }}
       >
         <div>
           <Link
@@ -480,67 +369,55 @@ export default function Sidebar() {
               borderColor: cores.azulBrilhante,
               borderBottomWidth: "2px",
             }}
-            onClick={() => setTimeout(() => window.location.reload(), 500)}
           >
             <Image className="object-contain filter brightness-0 invert" src="/icone.png" alt="Logo" width={28} height={28} />
             <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
           </Link>
 
-            <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
+          <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
             <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm" style={{ backgroundColor: temNotificacaoNaoLida ? cores.azulBrilhante + "20" : "transparent" }}>
               <span className="text-lg relative">
-              <FaBell />
-              {temNotificacaoNaoLida && (
-                <>
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
-                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
-                </>
-              )}
+                <FaBell />
+                {temNotificacaoNaoLida && (
+                  <>
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
+                  </>
+                )}
               </span>
               <span className="text-sm md:inline cursor-pointer">{t("notifications")}</span>
             </button>
+
             <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} />
             {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />}
             {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />}
-
             {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} />}
             {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />}
-
             {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />}
-
             {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />}
             {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />}
             {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />}
             {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} cores={cores} />}
+
             <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
             <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
             <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
 
             <Link href="/empresa" className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]">
               <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
-              <Image
-                src={fotoEmpresa || "/contadefault.png"}
-                alt={t("company_photo")}
-                width={48}
-                height={48}
-                className="object-cover w-full h-full"
-                style={{
-                objectFit: "cover",
-                width: "100%",
-                height: "100%",
-                minWidth: "100%",
-                minHeight: "100%",
-                background: "#fff",
-                padding: 0,
-                }}
-                quality={100}
-                priority
-              />
+                <Image
+                  src={fotoEmpresa || "/contadefault.png"}
+                  alt={t("company_photo")}
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
+                />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
+
             <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} cores={cores} />
-            </nav>
+          </nav>
         </div>
 
         <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
@@ -554,14 +431,6 @@ export default function Sidebar() {
           <button
             onClick={() => {
               localStorage.removeItem("client_key");
-              const usuarioSalvo = localStorage.getItem("client_key");
-              if (usuarioSalvo) {
-                const usuarioId = usuarioSalvo.replace(/"/g, "");
-                localStorage.removeItem(`idsNotificacoesTocadas_${usuarioId}`);
-                localStorage.removeItem(`idsNotificacoesSom_${usuarioId}`);
-                localStorage.removeItem(`ultimaNotificacaoSom_${usuarioId}`);
-                localStorage.removeItem(`ultimaVerificacao_${usuarioId}`);
-              }
               window.location.href = "/";
             }}
             className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
@@ -574,19 +443,14 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {mostrarNotificacoes && (
+      {mostrarNotificacoes && usuarioId && (
         <PainelNotificacoes
           estaVisivel={mostrarNotificacoes}
           aoFechar={() => setMostrarNotificacoes(false)}
           nomeEmpresa={nomeEmpresa}
           cores={cores}
-          onMarcarTodasComoLidas={() => {
-            const usuarioSalvo = localStorage.getItem("client_key");
-            const usuarioId = usuarioSalvo?.replace(/"/g, "");
-            if (usuarioId) {
-              limparNotificacoesLidas(usuarioId);
-            }
-          }}
+          usuarioId={usuarioId}
+          onNotificacoesAtualizadas={verificarNotificacoes}
         />
       )}
     </>
@@ -626,7 +490,8 @@ function PainelNotificacoes({
   aoFechar,
   nomeEmpresa,
   cores,
-  onMarcarTodasComoLidas,
+  usuarioId,
+  onNotificacoesAtualizadas,
 }: {
   estaVisivel: boolean;
   aoFechar: () => void;
@@ -639,14 +504,45 @@ function PainelNotificacoes({
     azulNeon: string;
     cinzaEscuro: string;
   };
-  onMarcarTodasComoLidas: () => void;
+  usuarioId: string;
+  onNotificacoesAtualizadas: () => void;
 }) {
   const [modoDark, setModoDark] = useState(false);
-  const { t } = useTranslation("sidebar");
+  const { t, i18n } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const [mostrarLidas, setMostrarLidas] = useState(false);
-  const { usuario } = useUsuarioStore();
+  const router = useRouter();
+
+  const traduzirNotificacao = (notificacao: NotificacaoI) => {
+    const idioma = i18n.language;
+
+    if (idioma === 'en') {
+      let descricaoTraduzida = notificacao.descricao
+        .replace(/O produto (.+?) está com estoque próximo do limite/, 'Product $1 is running low on stock')
+        .replace(/unidades restantes/, 'units remaining')
+        .replace(/QTD Min:/, 'Min Qty:')
+        .replace(/está com estoque CRÍTICO/, 'has CRITICAL stock level')
+        .replace(/É necessário repor urgentemente!/, 'Urgent restocking required!')
+        .replace(/está com estoque ZERADO/, 'is OUT OF STOCK')
+        .replace(/Reposição IMEDIATA necessária!/, 'IMMEDIATE restocking required!')
+        .replace(/Alerta para o produto/, 'Alert for product');
+
+      if (notificacao.titulo.includes('Alerta de Estoque')) {
+        return { ...notificacao, titulo: 'Stock Alert', descricao: descricaoTraduzida };
+      }
+      if (notificacao.titulo.includes('Estoque Crítico')) {
+        return { ...notificacao, titulo: 'Critical Stock', descricao: descricaoTraduzida };
+      }
+      if (notificacao.titulo.includes('Estoque Zerado')) {
+        return { ...notificacao, titulo: 'Out of Stock', descricao: descricaoTraduzida };
+      }
+
+      return { ...notificacao, descricao: descricaoTraduzida };
+    }
+
+    return notificacao;
+  };
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -654,134 +550,103 @@ function PainelNotificacoes({
     setModoDark(ativo);
   }, []);
 
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-      .sidebar-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-thumb {
-        background: ${cores.azulClaro};
-        border-radius: 3px;
-      }
-      
-      .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: ${cores.azulBrilhante};
-      }
-      
-      .sidebar-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: ${cores.azulClaro} transparent;
-      }
-      
-      .sidebar-scrollbar {
-        -ms-overflow-style: -ms-autohiding-scrollbar;
-      }
-      
-     @media (max-width: 768px) {
-  .sidebar-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: ${cores.azulBrilhante};
-    border-radius: 2px;
-  }
-  
-  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: ${cores.azulNeon};
-  }
-  
-  .sidebar-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: ${cores.azulBrilhante} transparent;
-  }
-}
-    `;
-    document.head.appendChild(style);
+  const extrairProdutoIdDaNotificacao = (notificacao: NotificacaoI): number | null => {
+    try {
+      const descricao = notificacao.descricao;
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [cores.azulClaro, cores.azulBrilhante]);
+      const idMatch1 = descricao.match(/Produto ID:\s*(\d+)/i);
+      if (idMatch1 && idMatch1[1]) {
+        return parseInt(idMatch1[1]);
+      }
+
+      const todosNumeros = descricao.match(/\d+/g);
+      if (todosNumeros && todosNumeros.length > 0) {
+        for (const numeroStr of todosNumeros) {
+          const numero = parseInt(numeroStr);
+          if (numero > 0 && numero < 100000) { 
+            return numero;
+          }
+        }
+      }
+
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const handleFazerPedido = (notificacao: NotificacaoI) => {
+    const produtoId = extrairProdutoIdDaNotificacao(notificacao);
+
+    if (produtoId) {
+      aoFechar();
+
+      router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
+    } else {
+      const primeiraLinha = notificacao.descricao.split('\n')[0];
+      const palavras = primeiraLinha.split(' ');
+      const possivelNomeProduto = palavras.slice(2, -2).join(' ');
+
+      aoFechar();
+
+      router.push('/pedidos?abrirModal=true');
+
+      setTimeout(() => {
+        alert(`Redirecionando para pedidos. Produto: ${possivelNomeProduto || 'Não identificado'}`);
+      }, 1000);
+    }
+  };
 
   const marcarTodasComoLidas = useCallback(async () => {
-    if (!usuario?.id) return;
+    if (!usuarioId) return;
 
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-lidas`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuarioId: usuario.id }),
-      });
+    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/marcar-todas`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuarioId }),
+    });
 
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacoes-lidas/marcar-todas`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuarioId: usuario.id }),
-      });
-
-      if (!resposta.ok) {
-        throw new Error("Falha ao marcar notificações como lidas");
-      }
-
-      const notificacoesAtualizadas = await buscarNotificacoes();
-      setNotificacoes(notificacoesAtualizadas);
-
-      onMarcarTodasComoLidas();
-    } catch (erro) {
-      console.error("Erro ao marcar notificações como lidas:", erro);
+    if (!resposta.ok) {
+      throw new Error("Falha ao marcar notificações como lidas");
     }
-  }, [usuario?.id, onMarcarTodasComoLidas]);
+
+    const notificacoesAtualizadas = await buscarNotificacoes();
+    setNotificacoes(notificacoesAtualizadas);
+
+    onNotificacoesAtualizadas();
+  }, [usuarioId, onNotificacoesAtualizadas]);
 
   const alternarMostrarLidas = useCallback(() => {
     setMostrarLidas(!mostrarLidas);
   }, [mostrarLidas]);
 
   const buscarNotificacoes = useCallback(async (): Promise<NotificacaoI[]> => {
-    if (!usuario?.id) return [];
+    if (!usuarioId) return [];
 
     try {
-      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuario.id}`);
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${usuarioId}`);
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao buscar notificações");
+      }
+
       const todasNotificacoes: NotificacaoI[] = await resposta.json();
 
       const notificacoesFiltradas = todasNotificacoes.filter((n) => {
-        if (!n.empresaId) {
-          return n.usuarioId === usuario.id;
-        }
-        return true;
-      });
-
-      const notificacoesComStatus = notificacoesFiltradas.map((n) => ({
-        ...n,
-        lida: n.empresaId ? n.NotificacaoLida?.some((nl) => nl.usuarioId === usuario.id) || false : n.lida,
-      }));
-
-      notificacoesComStatus.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      const notificacoesResultado = notificacoesComStatus.filter((n) => {
         if (mostrarLidas) {
           return n.lida;
         } else {
-          return !n.lida;
+          return !n.lida; 
         }
       });
 
-      return mostrarLidas ? notificacoesResultado.slice(0, 15) : notificacoesResultado;
+      notificacoesFiltradas.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      return mostrarLidas ? notificacoesFiltradas.slice(0, 15) : notificacoesFiltradas;
     } catch (erro) {
-      console.error("Erro ao buscar as notificações:", erro);
       return [];
     }
-  }, [usuario?.id, mostrarLidas]);
+  }, [usuarioId, mostrarLidas]);
 
   useEffect(() => {
     async function carregarNotificacoes() {
@@ -801,10 +666,10 @@ function PainelNotificacoes({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [estaVisivel, usuario, mostrarLidas, aoFechar, buscarNotificacoes]);
+  }, [estaVisivel, usuarioId, mostrarLidas, aoFechar, buscarNotificacoes]);
 
-  const responderConvite = useCallback(async (id: string, convite: ConviteI) => {
-    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${id}`, {
+  const responderConvite = useCallback(async (convite: ConviteI) => {
+    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${usuarioId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -815,23 +680,22 @@ function PainelNotificacoes({
     if (resposta.ok) {
       window.location.href = "/empresa";
     }
-  }, []);
+  }, [usuarioId]);
 
   const deletarNotificacao = useCallback(
     async (id: string) => {
-      if (!usuario?.id) return;
+      if (!usuarioId) return;
 
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}?usuarioId=${usuario.id}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${id}?usuarioId=${usuarioId}`, {
           method: "DELETE",
         });
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
-      } catch (erro) {
-        console.error("Erro ao deletar notificação:", erro);
-      }
+        onNotificacoesAtualizadas();
+      } catch (erro) {}
     },
-    [usuario?.id]
+    [usuarioId, onNotificacoesAtualizadas]
   );
 
   const formatarData = (dataString: string | Date) => {
@@ -850,9 +714,19 @@ function PainelNotificacoes({
   const closeButtonColor = modoDark ? "#FFFFFF" : "#6B7280";
   const borderColor = modoDark ? "#1E4976" : cores.azulBrilhante;
 
-  const tabelaNotificacoes = notificacoes.map((notificacao) => {
-    const estaLida = notificacao.empresaId ? notificacao.NotificacaoLida?.some((nl) => nl.usuarioId === usuario?.id) : notificacao.lida;
+  const getEmojiPorTipo = (titulo: string) => {
+    if (titulo.includes('Crítico') || titulo.includes('CRÍTICO') || titulo.includes('Critical')) {
+      return '🔴';
+    } else if (titulo.includes('Alerta') || titulo.includes('ALERTA') || titulo.includes('Alert')) {
+      return '🟡';
+    } else if (titulo.includes('Zerado') || titulo.includes('ZERADO') || titulo.includes('Out of Stock')) {
+      return '⚫';
+    }
+    return 'ℹ️'; 
+  };
 
+  const tabelaNotificacoes = notificacoes.map((notificacao) => {
+    const notificacaoTraduzida = traduzirNotificacao(notificacao);
     if (notificacao.convite) {
       return (
         <div
@@ -866,9 +740,6 @@ function PainelNotificacoes({
         >
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold">{t("invite_title")}</h3>
-            <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
-              ✕
-            </button>
           </div>
 
           <p>
@@ -882,26 +753,113 @@ function PainelNotificacoes({
             <span>{formatarData(notificacao.createdAt)}</span>
           </div>
 
-          <button
-            className="py-2 px-4 rounded-lg mt-2 transition-colors"
-            style={{
-              backgroundColor: cores.azulBrilhante,
-              color: "white",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
-            onClick={() => notificacao.convite && responderConvite(usuario?.id || "", notificacao.convite)}
-          >
-            {t("accept")}
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              className="py-2 px-4 rounded-lg transition-colors flex-1"
+              style={{
+                backgroundColor: cores.azulBrilhante,
+                color: "white",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
+              onClick={() => notificacao.convite && responderConvite(notificacao.convite)}
+            >
+              {t("accept")}
+            </button>
+          </div>
         </div>
       );
     }
 
-    const descricao = notificacao.descricao;
+    const descricao = notificacaoTraduzida.descricao;
+    const isNotificacaoEstoque = descricao.includes('\n');
+    if (isNotificacaoEstoque) {
+      const titulo = notificacaoTraduzida.titulo;
+      const linhas = descricao.split('\n');
+      const emojiTipo = getEmojiPorTipo(titulo);
+
+      return (
+        <div
+          key={notificacao.id}
+          className="flex flex-col gap-3 p-4 rounded-lg mb-2"
+          style={{
+            backgroundColor: bgColor,
+            border: `1px solid ${borderColor}`,
+            color: textColor,
+          }}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{emojiTipo}</span>
+              <h3 className="font-bold text-base">{titulo}</h3>
+            </div>
+            {!notificacao.empresaId && (
+              <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
+                ✕
+              </button>
+            )}
+          </div>
+          <div className="space-y-2 text-sm">
+            {linhas.map((linha, index) => {
+              let emoji = '';
+              let texto = linha;
+
+              if (linha.includes('unidades restantes')) {
+                emoji = '📦';
+              } else if (linha.includes('QTD Min:')) {
+                emoji = '⚡';
+                texto = texto.replace('QTD Min:', 'Mínimo:');
+              } else if (linha.includes('urgentemente') || linha.includes('IMEDIATA')) {
+                emoji = '🚨';
+              } else if (linha.includes('produto')) {
+                emoji = '📋';
+              }
+
+              return (
+                <div key={index} className="flex items-start gap-2">
+                  {emoji && <span className="flex-shrink-0">{emoji}</span>}
+                  <span className={linha.includes('🚨') || linha.includes('⚡') ? 'font-semibold' : ''}>
+                    {texto}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: cores.azulBrilhante }}>
+            <span>
+              {t("Data")}: {formatarData(notificacao.createdAt)}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs flex items-center gap-1">
+              {notificacao.lida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
+              {notificacao.lida ? t("read") : t("unread")}
+            </span>
+
+            <button
+              onClick={() => handleFazerPedido(notificacao)}
+              className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+              style={{
+                backgroundColor: cores.azulBrilhante,
+                color: "#FFFFFF"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
+            >
+              <FaClipboardList size={10} />
+              {t("fazerPedido") || "Fazer Pedido"}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     const partesDescricao = descricao.split(": ");
     const nomeRemetente = partesDescricao[0]?.replace("Enviado por", "").trim() || "Desconhecido";
     const mensagem = partesDescricao.slice(1).join(": ").trim();
+    const titulo = notificacaoTraduzida.titulo;
 
     return (
       <div
@@ -914,7 +872,7 @@ function PainelNotificacoes({
         }}
       >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold">{notificacao.titulo}</h3>
+          <h3 className="font-bold">{titulo}</h3> 
           {!notificacao.empresaId && (
             <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
               ✕
@@ -933,10 +891,10 @@ function PainelNotificacoes({
           </span>
         </div>
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-2">
           <span className="text-xs flex items-center gap-1">
-            {estaLida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
-            {estaLida ? t("read") : t("unread")}
+            {notificacao.lida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
+            {notificacao.lida ? t("read") : t("unread")}
           </span>
         </div>
       </div>

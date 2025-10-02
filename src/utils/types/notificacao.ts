@@ -1,25 +1,28 @@
 import { ConviteI } from "./convite";
 
-export interface UsuarioI {
-  id: string;
-  nome: string;
-}
-
 export interface NotificacaoI {
   id: string;
   titulo: string;
   descricao: string;
   lida: boolean;
-  empresaId: string | null;
-  empresa?: UsuarioI;
-  usuarioId: string | null;  
-  usuario?: UsuarioI;
-  convite: ConviteI | null;
-  createdAt: Date;
-  updatedAt: Date;
-  NotificacaoLida?: {
-    notificacaoId: string;
+  somTocado?: boolean;
+  empresaId?: string;
+  usuarioId?: string;
+  conviteId?: string;
+  convite?: ConviteI;
+  usuario?: {
+    id: string;
+    nome: string;
+  };
+  NotificacaoLida: Array<{
     usuarioId: string;
-    createdAt: Date;
-  }[];
+    createdAt: string;
+  }>;
+  NotificacaoUsuario?: Array<{
+    usuarioId: string;
+    lida: boolean;
+    somTocado: boolean;
+  }>;
+  createdAt: string;
+  updatedAt: string;
 }

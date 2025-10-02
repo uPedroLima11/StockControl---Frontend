@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaPlus, FaMinus, FaTimes } from "react-icons/fa";
 import { Tema, Fornecedor, Produto, ItemPedidoCriacao as ItemPedidoCriacaoType } from "../utils/types/index";
 
@@ -47,10 +47,24 @@ export function CriarModal({
   handleCriarPedido,
   onClose
 }: CriarModalProps) {
+  const [inicializado, setInicializado] = useState(false);
+  const buscaInputRef = useRef<HTMLInputElement>(null);
   const produtosFiltrados = produtos.filter(produto =>
     produto.nome.toLowerCase().includes(buscaProduto.toLowerCase()) &&
     (!fornecedorSelecionado || produto.fornecedorId === fornecedorSelecionado)
   );
+
+  useEffect(() => {
+    if (inicializado) return;
+
+    if (buscaInputRef.current) {
+      setTimeout(() => {
+        buscaInputRef.current?.focus();
+      }, 100);
+    }
+
+    setInicializado(true);
+  }, [inicializado]);
 
   const formatarNomeFornecedor = (nome: string, email: string) => {
     const maxLength = 25;
@@ -85,6 +99,7 @@ export function CriarModal({
             <label className="block mb-2 font-medium">{t("adicionarProdutos")}</label>
             <div className="flex items-center border rounded-full px-3 py-1" style={{ borderColor: temaAtual.borda }}>
               <input
+                ref={buscaInputRef}
                 type="text"
                 placeholder={t("buscarProdutos")}
                 className="outline-none bg-transparent placeholder-gray-400 flex-1 text-sm"
@@ -108,7 +123,7 @@ export function CriarModal({
                     <span className="text-sm">R$ {produto.preco.toFixed(2)}</span>
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    {t("estoque")}: {produto.quantidade} | {t("codigo")}: {produto.id}
+                    {t("estoque")}: {produto.quantidade}
                   </div>
                 </div>
               ))}
@@ -200,21 +215,20 @@ export function CriarModal({
             {t("cancelar")}
           </button>
 
-            <button
+          <button
             onClick={handleCriarPedido}
             disabled={carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado}
-            className={`px-4 py-2 rounded text-white text-sm ${
-              (carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado)
+            className={`px-4 py-2 rounded text-white text-sm ${(carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado)
               ? ""
               : "cursor-pointer"
-            }`}
+              }`}
             style={{
               backgroundColor: temaAtual.primario,
               opacity: (carregandoCriacao || itensCriacao.length === 0 || !fornecedorSelecionado) ? 0.6 : 1
             }}
-            >
+          >
             {carregandoCriacao ? t("criandoPedido") : t("criarPedido")}
-            </button>
+          </button>
         </div>
       </div>
     </div>
