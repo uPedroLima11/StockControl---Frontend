@@ -62,7 +62,7 @@ export default function Sidebar() {
           setUsuarioId(id);
           return id;
         }
-      } catch {}
+      } catch { }
       return null;
     };
 
@@ -159,7 +159,7 @@ export default function Sidebar() {
         });
       }
 
-    } catch {}
+    } catch { }
   }, [usuarioId, usuarioInteragiu]);
 
 
@@ -179,7 +179,7 @@ export default function Sidebar() {
 
       const diferencaTempo = new Date(notificacaoAtual.createdAt).getTime() - new Date(notificacaoAnterior.createdAt).getTime();
 
-      if (diferencaTempo < 2 * 60 * 1000) { 
+      if (diferencaTempo < 2 * 60 * 1000) {
         grupoAtual.push(notificacaoAtual);
       } else {
         grupos.push([...grupoAtual]);
@@ -206,7 +206,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch {}
+    } catch { }
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -250,7 +250,7 @@ export default function Sidebar() {
         }
       }
 
-    } catch {}
+    } catch { }
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
   const carregarPermissoes = useCallback(async () => {
@@ -270,7 +270,7 @@ export default function Sidebar() {
       }
 
       setPermissoesUsuario(permissoes);
-    } catch {}
+    } catch { }
   }, [usuarioId]);
 
   const carregarDadosUsuario = useCallback(async () => {
@@ -325,7 +325,7 @@ export default function Sidebar() {
 
     const intervaloNotificacoes = setInterval(() => {
       verificarNotificacoes();
-    }, 15000); 
+    }, 15000);
 
     verificarNotificacoes();
 
@@ -563,7 +563,7 @@ function PainelNotificacoes({
       if (todosNumeros && todosNumeros.length > 0) {
         for (const numeroStr of todosNumeros) {
           const numero = parseInt(numeroStr);
-          if (numero > 0 && numero < 100000) { 
+          if (numero > 0 && numero < 100000) {
             return numero;
           }
         }
@@ -636,7 +636,7 @@ function PainelNotificacoes({
         if (mostrarLidas) {
           return n.lida;
         } else {
-          return !n.lida; 
+          return !n.lida;
         }
       });
 
@@ -693,7 +693,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch {}
+      } catch { }
     },
     [usuarioId, onNotificacoesAtualizadas]
   );
@@ -722,7 +722,7 @@ function PainelNotificacoes({
     } else if (titulo.includes('Zerado') || titulo.includes('ZERADO') || titulo.includes('Out of Stock')) {
       return '⚫';
     }
-    return 'ℹ️'; 
+    return 'ℹ️';
   };
 
   const tabelaNotificacoes = notificacoes.map((notificacao) => {
@@ -872,7 +872,7 @@ function PainelNotificacoes({
         }}
       >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold">{titulo}</h3> 
+          <h3 className="font-bold">{titulo}</h3>
           {!notificacao.empresaId && (
             <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
               ✕
