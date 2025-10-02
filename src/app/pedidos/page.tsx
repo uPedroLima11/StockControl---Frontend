@@ -117,23 +117,23 @@ export default function PedidosPage() {
 
     useEffect(() => {
         if (carregamentoInicialRef.current) return;
-        
+
         const produtoParam = searchParams.get('produto');
-        const abrirModalParam = searchParams.get('abrirModal');        
+        const abrirModalParam = searchParams.get('abrirModal');
         if (produtoParam && abrirModalParam === 'true') {
             const produtoId = parseInt(produtoParam);
             if (!isNaN(produtoId)) {
                 setProdutoSelecionadoAutomatico(produtoId);
                 setAbrirModalAutomatico(true);
                 modalProcessadoRef.current = false;
-                
+
                 const url = new URL(window.location.href);
                 url.searchParams.delete('produto');
                 url.searchParams.delete('abrirModal');
                 window.history.replaceState({}, '', url.toString());
             }
         }
-        
+
         carregamentoInicialRef.current = true;
     }, [searchParams]);
 
@@ -151,10 +151,10 @@ export default function PedidosPage() {
     }, [dadosUsuarioCarregados, empresaId, produtosCarregados]);
 
     useEffect(() => {
-        if (!abrirModalAutomatico || 
-            !produtoSelecionadoAutomatico || 
-            !dadosUsuarioCarregados || 
-            !produtosCarregados || 
+        if (!abrirModalAutomatico ||
+            !produtoSelecionadoAutomatico ||
+            !dadosUsuarioCarregados ||
+            !produtosCarregados ||
             modalProcessadoRef.current ||
             modalAberto) {
             return;
@@ -164,16 +164,16 @@ export default function PedidosPage() {
 
         setTimeout(() => {
             const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
-            
+
             if (produto) {
                 handleAbrirModalCriacaoComProduto(produto);
             } else {
                 handleAbrirModalCriacao();
             }
-            
+
             setAbrirModalAutomatico(false);
             setProdutoSelecionadoAutomatico(null);
-        }, 2000); 
+        }, 2000);
 
     }, [abrirModalAutomatico, produtoSelecionadoAutomatico, dadosUsuarioCarregados, produtosCarregados, produtos, modalAberto]);
 
@@ -190,7 +190,7 @@ export default function PedidosPage() {
 
             if (responseUsuario.ok) {
                 const usuario = await responseUsuario.json();
-                
+
                 setEmpresaId(usuario.empresaId);
                 setTipoUsuario(usuario.tipo);
                 carregarPermissoes(usuarioValor);
@@ -198,7 +198,7 @@ export default function PedidosPage() {
                 if (usuario.empresaId) {
                     const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
                     setEmpresaAtivada(ativada);
-                    
+
                     if (ativada) {
                         carregarPedidos(usuario.empresaId);
                     }
@@ -560,7 +560,7 @@ export default function PedidosPage() {
     };
 
     const handleAbrirModalCriacaoComProduto = (produto: Produto) => {
-        handleAcaoProtegida(() => {            
+        handleAcaoProtegida(() => {
             if (modalAberto) {
                 setModalAberto(false);
                 setTimeout(() => {
@@ -572,17 +572,17 @@ export default function PedidosPage() {
         });
     };
 
-    const abrirModalComProduto = (produto: Produto) => {        
+    const abrirModalComProduto = (produto: Produto) => {
         setModalTipo('criar');
         setModalAberto(true);
         carregarFornecedores();
-        
+
         setFornecedorSelecionado("");
         setObservacoesCriacao("");
         setBuscaProduto("");
-        
+
         const itemExistente = itensCriacao.find(item => item.produtoId === produto.id);
-        
+
         if (!itemExistente) {
             setItensCriacao([
                 {
@@ -593,8 +593,8 @@ export default function PedidosPage() {
                     observacao: ``
                 }
             ]);
-        } 
-        
+        }
+
         setTimeout(() => {
             const buscaInput = document.querySelector('input[placeholder*="buscarProdutos"]') as HTMLInputElement;
             if (buscaInput) {
@@ -605,7 +605,7 @@ export default function PedidosPage() {
 
     const handleAbrirModalCriacao = () => {
         handleAcaoProtegida(() => {
-            
+
             setModalTipo('criar');
             setModalAberto(true);
             carregarFornecedores();
@@ -619,7 +619,7 @@ export default function PedidosPage() {
 
     const handleFecharModal = () => {
         setModalAberto(false);
-        setItensCriacao([]); 
+        setItensCriacao([]);
     };
 
     const adicionarItem = (produto: Produto) => {

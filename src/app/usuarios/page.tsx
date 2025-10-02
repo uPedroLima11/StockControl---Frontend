@@ -255,7 +255,7 @@ export default function Usuarios() {
     }
   };
 
-    const verificarPermissaoExcluir = async () => {
+  const verificarPermissaoExcluir = async () => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) {
