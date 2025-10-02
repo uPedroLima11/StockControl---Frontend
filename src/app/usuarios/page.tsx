@@ -69,9 +69,7 @@ export default function Usuarios() {
   const [todasMarcadas, setTodasMarcadas] = useState(false);
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-
   const temaAtual = modoDark ? cores.dark : cores.light;
-
   const translateRole = (role: string) => {
     return t(`roles.${role}`, { defaultValue: role });
   };

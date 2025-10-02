@@ -40,16 +40,13 @@ export default function Fornecedores() {
   const { t } = useTranslation("fornecedores");
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [nomeCaracteres, setNomeCaracteres] = useState(0);
   const [categoriaCaracteres, setCategoriaCaracteres] = useState(0);
   const [emailCaracteres, setEmailCaracteres] = useState(0);
   const [cnpjCaracteres, setCnpjCaracteres] = useState(0);
   const [telefoneCaracteres, setTelefoneCaracteres] = useState(0);
   const [, setIsUploading] = useState(false);
-
   const temaAtual = modoDark ? cores.dark : cores.light;
-
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
     try {
       const usuarioSalvo = localStorage.getItem("client_key");

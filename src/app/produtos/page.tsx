@@ -29,19 +29,16 @@ export default function Produtos() {
   const [modoDark, setModoDark] = useState(false);
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const produtosPorPagina = 10;
+  const produtosPorPagina = 12;
   const { t } = useTranslation("produtos");
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
   const [totalProdutos, setTotalProdutos] = useState<number>(0);
-
   const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
   const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
-
   const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao>('none');
   const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
-
   const [form, setForm] = useState<ProdutoI>({
     id: "",
     nome: "",
@@ -65,13 +62,11 @@ export default function Produtos() {
   const [nomeCaracteres, setNomeCaracteres] = useState(0);
   const [descricaoCaracteres, setDescricaoCaracteres] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
-
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuCategoriasRef = useRef<HTMLDivElement>(null);
-
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {

@@ -15,7 +15,6 @@ export default function Suporte() {
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
   const [tentativas, setTentativas] = useState(0);
-
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {

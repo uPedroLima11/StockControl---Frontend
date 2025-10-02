@@ -6,8 +6,6 @@ import { FaSearch, FaPlus, FaEnvelope, FaClock, FaCheck, FaTimes, FaEye, FaChevr
 import Swal from "sweetalert2";
 import { CriarModal } from "./../../components/CriarModal";
 import { Tema, Fornecedor, Produto, Pedido, ItemPedidoCriacao, Permissao } from "../../utils/types/index";
-import { useSearchParams } from "next/navigation";
-
 export default function PedidosPage() {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
     const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
@@ -25,10 +23,8 @@ export default function PedidosPage() {
     const { t } = useTranslation("pedidos");
     const [enviandoEmail, setEnviandoEmail] = useState<Record<string, boolean>>({});
     const [empresa, setEmpresa] = useState<{ id: string, nome: string, email: string, telefone?: string } | null>(null);
-
     const [paginaAtual, setPaginaAtual] = useState(1);
-    const itensPorPagina = 3;
-
+    const itensPorPagina = 5;
     const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
     const [produtos, setProdutos] = useState<Produto[]>([]);
     const [fornecedorSelecionado, setFornecedorSelecionado] = useState<string>("");
@@ -36,19 +32,14 @@ export default function PedidosPage() {
     const [observacoesCriacao, setObservacoesCriacao] = useState("");
     const [buscaProduto, setBuscaProduto] = useState("");
     const [carregandoCriacao, setCarregandoCriacao] = useState(false);
-
     const [observacoesEmail, setObservacoesEmail] = useState("");
-
     const [quantidadesAtendidas, setQuantidadesAtendidas] = useState<Record<string, number>>({});
-
     const [produtoSelecionadoAutomatico, setProdutoSelecionadoAutomatico] = useState<number | null>(null);
     const [abrirModalAutomatico, setAbrirModalAutomatico] = useState(false);
     const [produtosCarregados, setProdutosCarregados] = useState(false);
     const [dadosUsuarioCarregados, setDadosUsuarioCarregados] = useState(false);
 
     const modalProcessadoRef = useRef(false);
-    const carregamentoInicialRef = useRef(false);
-
     const temas: { dark: Tema; light: Tema } = {
         dark: {
             fundo: "#0A1929",
