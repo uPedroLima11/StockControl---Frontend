@@ -12,7 +12,7 @@ export default function PedidosPage() {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
     const [pedidosFiltrados, setPedidosFiltrados] = useState<Pedido[]>([]);
     const [empresaId, setEmpresaId] = useState<string | null>(null);
-    const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
+    const [, setEmpresaAtivada] = useState<boolean>(false);
     const [modalAberto, setModalAberto] = useState(false);
     const [modalTipo, setModalTipo] = useState<'criar' | 'detalhes' | 'enviarEmail'>('criar');
     const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
@@ -116,66 +116,68 @@ export default function PedidosPage() {
     };
 
     useEffect(() => {
-        if (carregamentoInicialRef.current) return;
+        if (!carregamentoInicialRef.current) {
+            const produtoParam = searchParams.get('produto');
+            const abrirModalParam = searchParams.get('abrirModal');
+            if (produtoParam && abrirModalParam === 'true') {
+                const produtoId = parseInt(produtoParam);
+                if (!isNaN(produtoId)) {
+                    setProdutoSelecionadoAutomatico(produtoId);
+                    setAbrirModalAutomatico(true);
+                    modalProcessadoRef.current = false;
 
-        const produtoParam = searchParams.get('produto');
-        const abrirModalParam = searchParams.get('abrirModal');
-        if (produtoParam && abrirModalParam === 'true') {
-            const produtoId = parseInt(produtoParam);
-            if (!isNaN(produtoId)) {
-                setProdutoSelecionadoAutomatico(produtoId);
-                setAbrirModalAutomatico(true);
-                modalProcessadoRef.current = false;
-
-                const url = new URL(window.location.href);
-                url.searchParams.delete('produto');
-                url.searchParams.delete('abrirModal');
-                window.history.replaceState({}, '', url.toString());
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('produto');
+                    url.searchParams.delete('abrirModal');
+                    window.history.replaceState({}, '', url.toString());
+                }
             }
+            carregamentoInicialRef.current = true;
         }
 
-        carregamentoInicialRef.current = true;
-    }, [searchParams]);
+        if (!dadosUsuarioCarregados && !empresaId) {
+            const temaSalvo = localStorage.getItem("modoDark");
+            setModoDark(temaSalvo === "true");
+            carregarDadosUsuario();
+        }
 
-    useEffect(() => {
-        const temaSalvo = localStorage.getItem("modoDark");
-        setModoDark(temaSalvo === "true");
-
-        carregarDadosUsuario();
-    }, []);
-
-    useEffect(() => {
         if (dadosUsuarioCarregados && empresaId && !produtosCarregados) {
             carregarProdutos();
         }
-    }, [dadosUsuarioCarregados, empresaId, produtosCarregados]);
 
-    useEffect(() => {
-        if (!abrirModalAutomatico ||
-            !produtoSelecionadoAutomatico ||
-            !dadosUsuarioCarregados ||
-            !produtosCarregados ||
-            modalProcessadoRef.current ||
-            modalAberto) {
-            return;
+        if (
+            abrirModalAutomatico &&
+            produtoSelecionadoAutomatico &&
+            dadosUsuarioCarregados &&
+            produtosCarregados &&
+            !modalProcessadoRef.current &&
+            !modalAberto
+        ) {
+            modalProcessadoRef.current = true;
+
+            setTimeout(() => {
+                const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
+
+                if (produto) {
+                    handleAbrirModalCriacaoComProduto(produto);
+                } else {
+                    handleAbrirModalCriacao();
+                }
+
+                setAbrirModalAutomatico(false);
+                setProdutoSelecionadoAutomatico(null);
+            }, 2000);
         }
-
-        modalProcessadoRef.current = true;
-
-        setTimeout(() => {
-            const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
-
-            if (produto) {
-                handleAbrirModalCriacaoComProduto(produto);
-            } else {
-                handleAbrirModalCriacao();
-            }
-
-            setAbrirModalAutomatico(false);
-            setProdutoSelecionadoAutomatico(null);
-        }, 2000);
-
-    }, [abrirModalAutomatico, produtoSelecionadoAutomatico, dadosUsuarioCarregados, produtosCarregados, produtos, modalAberto]);
+    }, [
+        searchParams,
+        dadosUsuarioCarregados,
+        empresaId,
+        produtosCarregados,
+        abrirModalAutomatico,
+        produtoSelecionadoAutomatico,
+        produtos,
+        modalAberto
+    ]);
 
     const carregarDadosUsuario = useCallback(async () => {
         try {
