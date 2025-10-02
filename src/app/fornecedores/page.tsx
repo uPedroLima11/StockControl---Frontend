@@ -71,7 +71,7 @@ export default function Fornecedores() {
       }
       return false;
     } catch (error) {
-      console.error("Erro ao verificar permissão:", error);
+      console.error("Erro ao verificar a permissão:", error);
       return false;
     }
   };

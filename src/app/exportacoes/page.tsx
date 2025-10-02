@@ -132,7 +132,7 @@ export default function Exportacoes() {
             fetchExportHistory();
         }
     }, [activeTab, empresaId]);
-  
+
     const verificarAtivacaoEmpresa = async (empresaId: string) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
