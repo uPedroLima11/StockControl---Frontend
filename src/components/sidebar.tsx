@@ -62,7 +62,7 @@ export default function Sidebar() {
           setUsuarioId(id);
           return id;
         }
-      } catch (error) {}
+      } catch {}
       return null;
     };
 
@@ -114,7 +114,7 @@ export default function Sidebar() {
       const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
       setEmpresaAtivada(ativada);
       return ativada;
-    } catch (error) {
+    } catch {
       setEmpresaAtivada(false);
       return false;
     }
@@ -144,7 +144,7 @@ export default function Sidebar() {
           } else {
             resolve(true);
           }
-        } catch (error) {
+        } catch {
           resolve(false);
         }
       });
@@ -159,7 +159,7 @@ export default function Sidebar() {
         });
       }
 
-    } catch (erro) {}
+    } catch {}
   }, [usuarioId, usuarioInteragiu]);
 
 
@@ -206,7 +206,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch (erro) {}
+    } catch {}
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -250,7 +250,7 @@ export default function Sidebar() {
         }
       }
 
-    } catch (erro) {}
+    } catch {}
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
   const carregarPermissoes = useCallback(async () => {
@@ -264,13 +264,13 @@ export default function Sidebar() {
         try {
           const temPermissao = await usuarioTemPermissao(usuarioId, permissao);
           permissoes[permissao] = temPermissao;
-        } catch (error) {
+        } catch {
           permissoes[permissao] = false;
         }
       }
 
       setPermissoesUsuario(permissoes);
-    } catch (error) {}
+    } catch {}
   }, [usuarioId]);
 
   const carregarDadosUsuario = useCallback(async () => {
@@ -301,7 +301,7 @@ export default function Sidebar() {
       }
 
       await verificarNotificacoes();
-    } catch (erro) {
+    } catch {
       setPossuiEmpresa(false);
       setEmpresaAtivada(false);
       setFotoEmpresa("/contadefault.png");
@@ -518,7 +518,7 @@ function PainelNotificacoes({
     const idioma = i18n.language;
 
     if (idioma === 'en') {
-      let descricaoTraduzida = notificacao.descricao
+      const descricaoTraduzida = notificacao.descricao
         .replace(/O produto (.+?) está com estoque próximo do limite/, 'Product $1 is running low on stock')
         .replace(/unidades restantes/, 'units remaining')
         .replace(/QTD Min:/, 'Min Qty:')
@@ -570,7 +570,7 @@ function PainelNotificacoes({
       }
 
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   };
@@ -643,7 +643,7 @@ function PainelNotificacoes({
       notificacoesFiltradas.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       return mostrarLidas ? notificacoesFiltradas.slice(0, 15) : notificacoesFiltradas;
-    } catch (erro) {
+    } catch {
       return [];
     }
   }, [usuarioId, mostrarLidas]);
@@ -693,7 +693,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch (erro) {}
+      } catch {}
     },
     [usuarioId, onNotificacoesAtualizadas]
   );
