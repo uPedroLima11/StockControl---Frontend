@@ -116,68 +116,66 @@ export default function PedidosPage() {
     };
 
     useEffect(() => {
-        if (!carregamentoInicialRef.current) {
-            const produtoParam = searchParams.get('produto');
-            const abrirModalParam = searchParams.get('abrirModal');
-            if (produtoParam && abrirModalParam === 'true') {
-                const produtoId = parseInt(produtoParam);
-                if (!isNaN(produtoId)) {
-                    setProdutoSelecionadoAutomatico(produtoId);
-                    setAbrirModalAutomatico(true);
-                    modalProcessadoRef.current = false;
+        if (carregamentoInicialRef.current) return;
 
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('produto');
-                    url.searchParams.delete('abrirModal');
-                    window.history.replaceState({}, '', url.toString());
-                }
+        const produtoParam = searchParams.get('produto');
+        const abrirModalParam = searchParams.get('abrirModal');
+        if (produtoParam && abrirModalParam === 'true') {
+            const produtoId = parseInt(produtoParam);
+            if (!isNaN(produtoId)) {
+                setProdutoSelecionadoAutomatico(produtoId);
+                setAbrirModalAutomatico(true);
+                modalProcessadoRef.current = false;
+
+                const url = new URL(window.location.href);
+                url.searchParams.delete('produto');
+                url.searchParams.delete('abrirModal');
+                window.history.replaceState({}, '', url.toString());
             }
-            carregamentoInicialRef.current = true;
         }
 
-        if (!dadosUsuarioCarregados && !empresaId) {
-            const temaSalvo = localStorage.getItem("modoDark");
-            setModoDark(temaSalvo === "true");
-            carregarDadosUsuario();
-        }
+        carregamentoInicialRef.current = true;
+    }, [searchParams]);
 
+    useEffect(() => {
+        const temaSalvo = localStorage.getItem("modoDark");
+        setModoDark(temaSalvo === "true");
+
+        carregarDadosUsuario();
+    }, []);
+
+    useEffect(() => {
         if (dadosUsuarioCarregados && empresaId && !produtosCarregados) {
             carregarProdutos();
         }
+    }, [dadosUsuarioCarregados, empresaId, produtosCarregados]);
 
-        if (
-            abrirModalAutomatico &&
-            produtoSelecionadoAutomatico &&
-            dadosUsuarioCarregados &&
-            produtosCarregados &&
-            !modalProcessadoRef.current &&
-            !modalAberto
-        ) {
-            modalProcessadoRef.current = true;
-
-            setTimeout(() => {
-                const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
-
-                if (produto) {
-                    handleAbrirModalCriacaoComProduto(produto);
-                } else {
-                    handleAbrirModalCriacao();
-                }
-
-                setAbrirModalAutomatico(false);
-                setProdutoSelecionadoAutomatico(null);
-            }, 2000);
+    useEffect(() => {
+        if (!abrirModalAutomatico ||
+            !produtoSelecionadoAutomatico ||
+            !dadosUsuarioCarregados ||
+            !produtosCarregados ||
+            modalProcessadoRef.current ||
+            modalAberto) {
+            return;
         }
-    }, [
-        searchParams,
-        dadosUsuarioCarregados,
-        empresaId,
-        produtosCarregados,
-        abrirModalAutomatico,
-        produtoSelecionadoAutomatico,
-        produtos,
-        modalAberto
-    ]);
+
+        modalProcessadoRef.current = true;
+
+        setTimeout(() => {
+            const produto = produtos.find(p => p.id === produtoSelecionadoAutomatico);
+
+            if (produto) {
+                handleAbrirModalCriacaoComProduto(produto);
+            } else {
+                handleAbrirModalCriacao();
+            }
+
+            setAbrirModalAutomatico(false);
+            setProdutoSelecionadoAutomatico(null);
+        }, 2000);
+
+    }, [abrirModalAutomatico, produtoSelecionadoAutomatico, dadosUsuarioCarregados, produtosCarregados, produtos, modalAberto]);
 
     const carregarDadosUsuario = useCallback(async () => {
         try {
