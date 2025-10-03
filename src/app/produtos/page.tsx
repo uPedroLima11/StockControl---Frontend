@@ -1497,7 +1497,7 @@ export default function Produtos() {
                       />
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center  justify-center gap-2 h-[42px]"
                         style={{
                           backgroundColor: temaAtual.primario,
                           color: "#FFFFFF",
