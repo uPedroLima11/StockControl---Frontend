@@ -8,6 +8,7 @@ import { FaEye, FaEyeSlash, FaCheck, FaTimes } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 type Inputs = {
   nome: string;
@@ -35,14 +36,13 @@ export default function Registro() {
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
     carregando: false,
-    mensagem: ""
+    mensagem: "",
   });
-
 
   const temaAtual = cores.dark;
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       html::-webkit-scrollbar {
         width: 10px;
@@ -88,7 +88,10 @@ export default function Registro() {
   function validarSenha(senha: string) {
     if (!senha) return false;
     if (senha.length < 8) return false;
-    let minusculas = 0, maiusculas = 0, numeros = 0, simbolos = 0;
+    let minusculas = 0,
+      maiusculas = 0,
+      numeros = 0,
+      simbolos = 0;
     for (const char of senha) {
       if (/[a-z]/.test(char)) minusculas++;
       else if (/[A-Z]/.test(char)) maiusculas++;
@@ -104,7 +107,7 @@ export default function Registro() {
         setEmailStatus({
           existe: false,
           carregando: false,
-          mensagem: ""
+          mensagem: "",
         });
         return;
       }
@@ -114,37 +117,38 @@ export default function Registro() {
         setEmailStatus({
           existe: false,
           carregando: false,
-          mensagem: ""
+          mensagem: "",
         });
         return;
       }
 
-      setEmailStatus(prev => ({ ...prev, carregando: true }));
+      setEmailStatus((prev) => ({ ...prev, carregando: true }));
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(email)}`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(email)}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${Cookies.get("token")}` },
+        });
 
         if (response.ok) {
           const data = await response.json();
           setEmailStatus({
             existe: data.existe,
             carregando: false,
-            mensagem: data.mensagem
+            mensagem: data.mensagem,
           });
         } else {
           setEmailStatus({
             existe: false,
             carregando: false,
-            mensagem: "Erro ao verificar email"
+            mensagem: "Erro ao verificar email",
           });
         }
       } catch {
         setEmailStatus({
           existe: false,
           carregando: false,
-          mensagem: "Erro ao verificar email"
+          mensagem: "Erro ao verificar email",
         });
       }
     };
@@ -155,7 +159,7 @@ export default function Registro() {
 
   useEffect(() => {
     setPasswordValid(validarSenha(senha));
-    setPasswordsMatch(senha === verificarSenha && senha !== '');
+    setPasswordsMatch(senha === verificarSenha && senha !== "");
   }, [senha, verificarSenha]);
 
   async function verificaCadastro(data: Inputs) {
@@ -167,7 +171,7 @@ export default function Registro() {
           text: emailStatus.mensagem,
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         });
         return;
       }
@@ -179,7 +183,7 @@ export default function Registro() {
           text: "A senha deve ter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         });
         return;
       }
@@ -191,7 +195,7 @@ export default function Registro() {
           text: "As senhas não coincidem.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         });
         return;
       }
@@ -214,7 +218,7 @@ export default function Registro() {
           text: "Sua conta foi criada com sucesso.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         }).then(() => {
           router.push("/login");
         });
@@ -226,7 +230,7 @@ export default function Registro() {
           text: errorData.mensagem || "Verifique se o email já está cadastrado ou se a senha atende todos os requisitos.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         });
       }
     } catch (err) {
@@ -237,37 +241,23 @@ export default function Registro() {
         text: "Não foi possível conectar ao servidor. Tente novamente.",
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
       });
     }
   }
 
   return (
-    <div 
-      className="flex justify-center items-center flex-col gap-5 min-h-screen w-full px-2 py-4"
-      style={{ backgroundColor: temaAtual.fundo }}
-    >
+    <div className="flex justify-center items-center flex-col gap-5 min-h-screen w-full px-2 py-4" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="mt-2 w-full flex justify-center">
-        <Link
-          href="/"
-          className="px-6 py-6 md:px-8 md:py-8 rounded-4xl flex flex-col items-center justify-center shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]"
-          style={{ backgroundColor: temaAtual.card }}
-        >
+        <Link href="/" className="px-6 py-6 md:px-8 md:py-8 rounded-4xl flex flex-col items-center justify-center shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]" style={{ backgroundColor: temaAtual.card }}>
           <img src="/icone.png" alt="Logo" className="w-16 h-16 md:w-20 md:h-20 mb-2 brightness-0 invert" />
-          <span 
-            className="p-0 pr-2 text-xl md:text-2xl font-semibold whitespace-nowrap"
-            style={{ color: temaAtual.texto }}
-          >
+          <span className="p-0 pr-2 text-xl md:text-2xl font-semibold whitespace-nowrap" style={{ color: temaAtual.texto }}>
             StockControl
           </span>
         </Link>
       </div>
 
-      <form
-        className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-xl shadow-lg p-4 md:p-8 mx-auto"
-        onSubmit={handleSubmit(verificaCadastro)}
-        style={{ backgroundColor: temaAtual.card }}
-      >
+      <form className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-xl shadow-lg p-4 md:p-8 mx-auto" onSubmit={handleSubmit(verificaCadastro)} style={{ backgroundColor: temaAtual.card }}>
         <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
           Seu Nome:
         </label>
@@ -284,7 +274,7 @@ export default function Registro() {
             style={{
               backgroundColor: temaAtual.fundo,
               color: temaAtual.texto,
-              borderColor: temaAtual.borda
+              borderColor: temaAtual.borda,
             }}
             placeholder="Seu nome completo"
           />
@@ -301,41 +291,18 @@ export default function Registro() {
             type="email"
             {...register("email")}
             required
-            className={`border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 ${
-              emailStatus.existe ? 'border-red-500' : 
-              email && !emailStatus.existe && !emailStatus.carregando ? 'border-green-500' : 
-              'border-gray-600'
-            }`}
+            className={`border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 ${emailStatus.existe ? "border-red-500" : email && !emailStatus.existe && !emailStatus.carregando ? "border-green-500" : "border-gray-600"}`}
             style={{
               backgroundColor: temaAtual.fundo,
-              color: temaAtual.texto
+              color: temaAtual.texto,
             }}
             placeholder="seu@email.com"
           />
-          
-          {email && (
-            <div className="absolute inset-y-0 end-0 flex items-center pe-3.5">
-              {emailStatus.carregando ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
-              ) : emailStatus.existe ? (
-                <FaTimes style={{ color: temaAtual.erro }} />
-              ) : (
-                <FaCheck style={{ color: temaAtual.sucesso }} />
-              )}
-            </div>
-          )}
+
+          {email && <div className="absolute inset-y-0 end-0 flex items-center pe-3.5">{emailStatus.carregando ? <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div> : emailStatus.existe ? <FaTimes style={{ color: temaAtual.erro }} /> : <FaCheck style={{ color: temaAtual.sucesso }} />}</div>}
         </div>
 
-        {emailStatus.mensagem && (
-          <div 
-            className={`text-xs mb-3 p-2 rounded border ${
-              emailStatus.existe ? 'bg-red-900/20 text-red-400 border-red-800' : 
-              'bg-green-900/20 text-green-400 border-green-800'
-            }`}
-          >
-            {emailStatus.mensagem}
-          </div>
-        )}
+        {emailStatus.mensagem && <div className={`text-xs mb-3 p-2 rounded border ${emailStatus.existe ? "bg-red-900/20 text-red-400 border-red-800" : "bg-green-900/20 text-green-400 border-green-800"}`}>{emailStatus.mensagem}</div>}
 
         <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
           Sua Senha:
@@ -353,27 +320,13 @@ export default function Registro() {
             style={{
               backgroundColor: temaAtual.fundo,
               color: temaAtual.texto,
-              borderColor: temaAtual.borda
+              borderColor: temaAtual.borda,
             }}
           />
-          <div
-            className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5"
-            onClick={() => setVisivel(!visivel)}
-          >
-            {visivel ? 
-              <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : 
-              <FaEye style={{ color: temaAtual.placeholder }} />
-            }
+          <div className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5" onClick={() => setVisivel(!visivel)}>
+            {visivel ? <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : <FaEye style={{ color: temaAtual.placeholder }} />}
           </div>
-          {senha && (
-            <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">
-              {passwordValid ? (
-                <HiCheckCircle style={{ color: temaAtual.sucesso }} />
-              ) : (
-                <HiExclamationCircle style={{ color: temaAtual.erro }} />
-              )}
-            </div>
-          )}
+          {senha && <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">{passwordValid ? <HiCheckCircle style={{ color: temaAtual.sucesso }} /> : <HiExclamationCircle style={{ color: temaAtual.erro }} />}</div>}
         </div>
 
         <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
@@ -392,27 +345,13 @@ export default function Registro() {
             style={{
               backgroundColor: temaAtual.fundo,
               color: temaAtual.texto,
-              borderColor: temaAtual.borda
+              borderColor: temaAtual.borda,
             }}
           />
-          <div
-            className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5"
-            onClick={() => setVisivel(!visivel)}
-          >
-            {visivel ? 
-              <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : 
-              <FaEye style={{ color: temaAtual.placeholder }} />
-            }
+          <div className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5" onClick={() => setVisivel(!visivel)}>
+            {visivel ? <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : <FaEye style={{ color: temaAtual.placeholder }} />}
           </div>
-          {verificarSenha && (
-            <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">
-              {passwordsMatch ? (
-                <HiCheckCircle style={{ color: temaAtual.sucesso }} />
-              ) : (
-                <HiExclamationCircle style={{ color: temaAtual.erro }} />
-              )}
-            </div>
-          )}
+          {verificarSenha && <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">{passwordsMatch ? <HiCheckCircle style={{ color: temaAtual.sucesso }} /> : <HiExclamationCircle style={{ color: temaAtual.erro }} />}</div>}
         </div>
 
         <div className="mb-6">
@@ -448,11 +387,7 @@ export default function Registro() {
         </button>
 
         <div className="flex justify-between pt-5">
-          <Link 
-            href="/login" 
-            className="font-italic hover:opacity-80 text-sm md:text-base cursor-pointer transition-all"
-            style={{ color: temaAtual.texto }}
-          >
+          <Link href="/login" className="font-italic hover:opacity-80 text-sm md:text-base cursor-pointer transition-all" style={{ color: temaAtual.texto }}>
             já possuo login
           </Link>
         </div>

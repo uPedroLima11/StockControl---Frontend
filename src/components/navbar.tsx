@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { Link as ScrollLink } from 'react-scroll';
 import { useUsuarioStore } from '@/context/usuario';
+import Cookies from 'js-cookie';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,7 +40,13 @@ export default function Navbar() {
     }
 
     const buscaEmpresa = async (idUsuario: string) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`
+        },
+      });
       if (response.status === 200) {
         const dados = await response.json();
         setFotoEmpresa(dados?.foto || '/contadefault.png');

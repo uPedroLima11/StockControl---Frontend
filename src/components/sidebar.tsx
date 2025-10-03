@@ -11,6 +11,7 @@ import { usuarioTemPermissao } from "@/utils/permissoes";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -40,16 +41,16 @@ export default function Sidebar() {
   useEffect(() => {
     const handleInteracao = () => {
       setUsuarioInteragiu(true);
-      document.removeEventListener('click', handleInteracao);
-      document.removeEventListener('keydown', handleInteracao);
+      document.removeEventListener("click", handleInteracao);
+      document.removeEventListener("keydown", handleInteracao);
     };
 
-    document.addEventListener('click', handleInteracao);
-    document.addEventListener('keydown', handleInteracao);
+    document.addEventListener("click", handleInteracao);
+    document.addEventListener("keydown", handleInteracao);
 
     return () => {
-      document.removeEventListener('click', handleInteracao);
-      document.removeEventListener('keydown', handleInteracao);
+      document.removeEventListener("click", handleInteracao);
+      document.removeEventListener("keydown", handleInteracao);
     };
   }, []);
 
@@ -62,7 +63,7 @@ export default function Sidebar() {
           setUsuarioId(id);
           return id;
         }
-      } catch { }
+      } catch {}
       return null;
     };
 
@@ -105,7 +106,13 @@ export default function Sidebar() {
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
       }
@@ -120,55 +127,54 @@ export default function Sidebar() {
     }
   }, []);
 
-  const tocarSomNotificacao = useCallback(async (notificacaoId: string) => {
-    if (!usuarioId || !usuarioInteragiu) {
-      return;
-    }
-
-    const somAtivado = localStorage.getItem("somNotificacao") !== "false";
-    if (!somAtivado) {
-      return;
-    }
-
-    try {
-      const audio = new Audio("/notification-sound.mp3");
-      audio.volume = 0.3;
-
-      const somTocado = await new Promise<boolean>(async (resolve) => {
-        try {
-          const playPromise = audio.play();
-
-          if (playPromise !== undefined) {
-            await playPromise;
-            resolve(true);
-          } else {
-            resolve(true);
-          }
-        } catch {
-          resolve(false);
-        }
-      });
-
-      if (somTocado) {
-        await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ usuarioId }),
-        });
+  const tocarSomNotificacao = useCallback(
+    async (notificacaoId: string) => {
+      if (!usuarioId || !usuarioInteragiu) {
+        return;
       }
 
-    } catch { }
-  }, [usuarioId, usuarioInteragiu]);
+      const somAtivado = localStorage.getItem("somNotificacao") !== "false";
+      if (!somAtivado) {
+        return;
+      }
 
+      try {
+        const audio = new Audio("/notification-sound.mp3");
+        audio.volume = 0.3;
+
+        const somTocado = await new Promise<boolean>(async (resolve) => {
+          try {
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+              await playPromise;
+              resolve(true);
+            } else {
+              resolve(true);
+            }
+          } catch {
+            resolve(false);
+          }
+        });
+
+        if (somTocado) {
+          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ usuarioId }),
+          });
+        }
+      } catch {}
+    },
+    [usuarioId, usuarioInteragiu]
+  );
 
   const agruparNotificacoesInteligente = (notificacoes: NotificacaoI[]): { chave: string; notificacoes: NotificacaoI[] }[] => {
     if (notificacoes.length === 0) return [];
 
-    const notificacoesOrdenadas = [...notificacoes].sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
+    const notificacoesOrdenadas = [...notificacoes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     const grupos: NotificacaoI[][] = [];
     let grupoAtual: NotificacaoI[] = [notificacoesOrdenadas[0]];
@@ -191,7 +197,7 @@ export default function Sidebar() {
 
     return grupos.map((notificacoesGrupo, index) => ({
       chave: `lote-${index + 1}`,
-      notificacoes: notificacoesGrupo
+      notificacoes: notificacoesGrupo,
     }));
   };
 
@@ -206,7 +212,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch { }
+    } catch {}
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -244,13 +250,12 @@ export default function Sidebar() {
             }
 
             if (notificacoesAgrupadas.length > 1) {
-              await new Promise(resolve => setTimeout(resolve, 500));
+              await new Promise((resolve) => setTimeout(resolve, 500));
             }
           }
         }
       }
-
-    } catch { }
+    } catch {}
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
   const carregarPermissoes = useCallback(async () => {
@@ -270,7 +275,7 @@ export default function Sidebar() {
       }
 
       setPermissoesUsuario(permissoes);
-    } catch { }
+    } catch {}
   }, [usuarioId]);
 
   const carregarDadosUsuario = useCallback(async () => {
@@ -283,7 +288,13 @@ export default function Sidebar() {
         logar(dadosUsuario);
       }
 
-      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`);
+      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (respostaEmpresa.status === 200) {
         const dadosEmpresa = await respostaEmpresa.json();
         setFotoEmpresa(dadosEmpresa.foto || "/contadefault.png");
@@ -405,13 +416,7 @@ export default function Sidebar() {
 
             <Link href="/empresa" className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]">
               <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
-                <Image
-                  src={fotoEmpresa || "/contadefault.png"}
-                  alt={t("company_photo")}
-                  width={48}
-                  height={48}
-                  className="object-cover w-full h-full"
-                />
+                <Image src={fotoEmpresa || "/contadefault.png"} alt={t("company_photo")} width={48} height={48} className="object-cover w-full h-full" />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
@@ -443,16 +448,7 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {mostrarNotificacoes && usuarioId && (
-        <PainelNotificacoes
-          estaVisivel={mostrarNotificacoes}
-          aoFechar={() => setMostrarNotificacoes(false)}
-          nomeEmpresa={nomeEmpresa}
-          cores={cores}
-          usuarioId={usuarioId}
-          onNotificacoesAtualizadas={verificarNotificacoes}
-        />
-      )}
+      {mostrarNotificacoes && usuarioId && <PainelNotificacoes estaVisivel={mostrarNotificacoes} aoFechar={() => setMostrarNotificacoes(false)} nomeEmpresa={nomeEmpresa} cores={cores} usuarioId={usuarioId} onNotificacoesAtualizadas={verificarNotificacoes} />}
     </>
   );
 }
@@ -517,25 +513,25 @@ function PainelNotificacoes({
   const traduzirNotificacao = (notificacao: NotificacaoI) => {
     const idioma = i18n.language;
 
-    if (idioma === 'en') {
+    if (idioma === "en") {
       const descricaoTraduzida = notificacao.descricao
-        .replace(/O produto (.+?) está com estoque próximo do limite/, 'Product $1 is running low on stock')
-        .replace(/unidades restantes/, 'units remaining')
-        .replace(/QTD Min:/, 'Min Qty:')
-        .replace(/está com estoque CRÍTICO/, 'has CRITICAL stock level')
-        .replace(/É necessário repor urgentemente!/, 'Urgent restocking required!')
-        .replace(/está com estoque ZERADO/, 'is OUT OF STOCK')
-        .replace(/Reposição IMEDIATA necessária!/, 'IMMEDIATE restocking required!')
-        .replace(/Alerta para o produto/, 'Alert for product');
+        .replace(/O produto (.+?) está com estoque próximo do limite/, "Product $1 is running low on stock")
+        .replace(/unidades restantes/, "units remaining")
+        .replace(/QTD Min:/, "Min Qty:")
+        .replace(/está com estoque CRÍTICO/, "has CRITICAL stock level")
+        .replace(/É necessário repor urgentemente!/, "Urgent restocking required!")
+        .replace(/está com estoque ZERADO/, "is OUT OF STOCK")
+        .replace(/Reposição IMEDIATA necessária!/, "IMMEDIATE restocking required!")
+        .replace(/Alerta para o produto/, "Alert for product");
 
-      if (notificacao.titulo.includes('Alerta de Estoque')) {
-        return { ...notificacao, titulo: 'Stock Alert', descricao: descricaoTraduzida };
+      if (notificacao.titulo.includes("Alerta de Estoque")) {
+        return { ...notificacao, titulo: "Stock Alert", descricao: descricaoTraduzida };
       }
-      if (notificacao.titulo.includes('Estoque Crítico')) {
-        return { ...notificacao, titulo: 'Critical Stock', descricao: descricaoTraduzida };
+      if (notificacao.titulo.includes("Estoque Crítico")) {
+        return { ...notificacao, titulo: "Critical Stock", descricao: descricaoTraduzida };
       }
-      if (notificacao.titulo.includes('Estoque Zerado')) {
-        return { ...notificacao, titulo: 'Out of Stock', descricao: descricaoTraduzida };
+      if (notificacao.titulo.includes("Estoque Zerado")) {
+        return { ...notificacao, titulo: "Out of Stock", descricao: descricaoTraduzida };
       }
 
       return { ...notificacao, descricao: descricaoTraduzida };
@@ -583,16 +579,16 @@ function PainelNotificacoes({
 
       router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
     } else {
-      const primeiraLinha = notificacao.descricao.split('\n')[0];
-      const palavras = primeiraLinha.split(' ');
-      const possivelNomeProduto = palavras.slice(2, -2).join(' ');
+      const primeiraLinha = notificacao.descricao.split("\n")[0];
+      const palavras = primeiraLinha.split(" ");
+      const possivelNomeProduto = palavras.slice(2, -2).join(" ");
 
       aoFechar();
 
-      router.push('/pedidos?abrirModal=true');
+      router.push("/pedidos?abrirModal=true");
 
       setTimeout(() => {
-        alert(`Redirecionando para pedidos. Produto: ${possivelNomeProduto || 'Não identificado'}`);
+        alert(`Redirecionando para pedidos. Produto: ${possivelNomeProduto || "Não identificado"}`);
       }, 1000);
     }
   };
@@ -668,19 +664,22 @@ function PainelNotificacoes({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [estaVisivel, usuarioId, mostrarLidas, aoFechar, buscarNotificacoes]);
 
-  const responderConvite = useCallback(async (convite: ConviteI) => {
-    const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${usuarioId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ empresaId: convite.empresaId }),
-    });
+  const responderConvite = useCallback(
+    async (convite: ConviteI) => {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/convite/${usuarioId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ empresaId: convite.empresaId }),
+      });
 
-    if (resposta.ok) {
-      window.location.href = "/empresa";
-    }
-  }, [usuarioId]);
+      if (resposta.ok) {
+        window.location.href = "/empresa";
+      }
+    },
+    [usuarioId]
+  );
 
   const deletarNotificacao = useCallback(
     async (id: string) => {
@@ -693,7 +692,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch { }
+      } catch {}
     },
     [usuarioId, onNotificacoesAtualizadas]
   );
@@ -715,14 +714,14 @@ function PainelNotificacoes({
   const borderColor = modoDark ? "#1E4976" : cores.azulBrilhante;
 
   const getEmojiPorTipo = (titulo: string) => {
-    if (titulo.includes('Crítico') || titulo.includes('CRÍTICO') || titulo.includes('Critical')) {
-      return '🔴';
-    } else if (titulo.includes('Alerta') || titulo.includes('ALERTA') || titulo.includes('Alert')) {
-      return '🟡';
-    } else if (titulo.includes('Zerado') || titulo.includes('ZERADO') || titulo.includes('Out of Stock')) {
-      return '⚫';
+    if (titulo.includes("Crítico") || titulo.includes("CRÍTICO") || titulo.includes("Critical")) {
+      return "🔴";
+    } else if (titulo.includes("Alerta") || titulo.includes("ALERTA") || titulo.includes("Alert")) {
+      return "🟡";
+    } else if (titulo.includes("Zerado") || titulo.includes("ZERADO") || titulo.includes("Out of Stock")) {
+      return "⚫";
     }
-    return 'ℹ️';
+    return "ℹ️";
   };
 
   const tabelaNotificacoes = notificacoes.map((notificacao) => {
@@ -772,10 +771,10 @@ function PainelNotificacoes({
     }
 
     const descricao = notificacaoTraduzida.descricao;
-    const isNotificacaoEstoque = descricao.includes('\n');
+    const isNotificacaoEstoque = descricao.includes("\n");
     if (isNotificacaoEstoque) {
       const titulo = notificacaoTraduzida.titulo;
-      const linhas = descricao.split('\n');
+      const linhas = descricao.split("\n");
       const emojiTipo = getEmojiPorTipo(titulo);
 
       return (
@@ -801,26 +800,24 @@ function PainelNotificacoes({
           </div>
           <div className="space-y-2 text-sm">
             {linhas.map((linha, index) => {
-              let emoji = '';
+              let emoji = "";
               let texto = linha;
 
-              if (linha.includes('unidades restantes')) {
-                emoji = '📦';
-              } else if (linha.includes('QTD Min:')) {
-                emoji = '⚡';
-                texto = texto.replace('QTD Min:', 'Mínimo:');
-              } else if (linha.includes('urgentemente') || linha.includes('IMEDIATA')) {
-                emoji = '🚨';
-              } else if (linha.includes('produto')) {
-                emoji = '📋';
+              if (linha.includes("unidades restantes")) {
+                emoji = "📦";
+              } else if (linha.includes("QTD Min:")) {
+                emoji = "⚡";
+                texto = texto.replace("QTD Min:", "Mínimo:");
+              } else if (linha.includes("urgentemente") || linha.includes("IMEDIATA")) {
+                emoji = "🚨";
+              } else if (linha.includes("produto")) {
+                emoji = "📋";
               }
 
               return (
                 <div key={index} className="flex items-start gap-2">
                   {emoji && <span className="flex-shrink-0">{emoji}</span>}
-                  <span className={linha.includes('🚨') || linha.includes('⚡') ? 'font-semibold' : ''}>
-                    {texto}
-                  </span>
+                  <span className={linha.includes("🚨") || linha.includes("⚡") ? "font-semibold" : ""}>{texto}</span>
                 </div>
               );
             })}
@@ -843,7 +840,7 @@ function PainelNotificacoes({
               className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
               style={{
                 backgroundColor: cores.azulBrilhante,
-                color: "#FFFFFF"
+                color: "#FFFFFF",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}

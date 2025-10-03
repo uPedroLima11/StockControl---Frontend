@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { FaEdit, FaTrash, FaLock } from "react-icons/fa";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 export default function MinhaConta() {
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -48,7 +49,14 @@ export default function MinhaConta() {
         setUsuarioLogado(dados);
       }
 
-      const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
+      const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+          "Content-Type": "application/json",
+        },
+      }
+      );
       if (responseEmpresa.status === 200) {
         const dados = await responseEmpresa.json();
         setEmpresa(dados);

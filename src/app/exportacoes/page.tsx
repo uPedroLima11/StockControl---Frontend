@@ -5,6 +5,7 @@ import { FaFileExcel, FaDownload, FaChevronDown, FaChevronUp, FaAngleLeft, FaAng
 import { useTranslation } from "react-i18next";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 interface ExportHistory {
     id: string;
@@ -135,7 +136,13 @@ export default function Exportacoes() {
 
     const verificarAtivacaoEmpresa = async (empresaId: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get("token")}`,
+                },
+            });
             if (!response.ok) return false;
 
             const empresaData = await response.json();

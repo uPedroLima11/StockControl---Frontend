@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Image from "next/image";
+import Cookies from "js-cookie";
 
 export default function Fornecedores() {
   const [modoDark, setModoDark] = useState(false);
@@ -219,7 +220,12 @@ export default function Fornecedores() {
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`
+        }
+      });
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
       }

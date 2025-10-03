@@ -6,6 +6,7 @@ import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronU
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 export default function Clientes() {
   const [modoDark, setModoDark] = useState(false);
@@ -201,7 +202,13 @@ export default function Clientes() {
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        headers: {
+          "user-id": localStorage.getItem("client_key") || "",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Erro ao buscar os dados da empresa");
       }

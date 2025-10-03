@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { useTranslation } from "react-i18next";
 import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 type Inputs = {
   nome: string;
@@ -36,8 +37,14 @@ type EmailStatus = {
 };
 
 export default function CriarEmpresa() {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<Inputs>({
-    mode: "onChange"
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>({
+    mode: "onChange",
   });
   const router = useRouter();
   const [, setUsuarioLogado] = useState<UsuarioI | null>(null);
@@ -52,13 +59,13 @@ export default function CriarEmpresa() {
     disponivel: false,
     carregando: false,
     mensagem: "",
-    dominioSugerido: ""
+    dominioSugerido: "",
   });
 
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
     carregando: false,
-    mensagem: ""
+    mensagem: "",
   });
 
   const cores = {
@@ -73,7 +80,7 @@ export default function CriarEmpresa() {
       hover: "#1E4976",
       sucesso: "#22C55E",
       erro: "#EF4444",
-      alerta: "#F59E0B"
+      alerta: "#F59E0B",
     },
     light: {
       fundo: "#cccccc",
@@ -86,8 +93,8 @@ export default function CriarEmpresa() {
       hover: "#EFF6FF",
       sucesso: "#22C55E",
       erro: "#EF4444",
-      alerta: "#F59E0B"
-    }
+      alerta: "#F59E0B",
+    },
   };
 
   const temaAtual = modoDark ? cores.dark : cores.light;
@@ -114,17 +121,21 @@ export default function CriarEmpresa() {
           disponivel: false,
           carregando: false,
           mensagem: "",
-          dominioSugerido: ""
+          dominioSugerido: "",
         });
         return;
       }
 
-      setDominioStatus(prev => ({ ...prev, carregando: true }));
+      setDominioStatus((prev) => ({ ...prev, carregando: true }));
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-dominio/${encodeURIComponent(dominioWatch)}`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-dominio/${encodeURIComponent(dominioWatch)}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${Cookies.get("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -132,7 +143,7 @@ export default function CriarEmpresa() {
             disponivel: data.disponivel,
             carregando: false,
             mensagem: data.mensagem,
-            dominioSugerido: data.dominioSugerido
+            dominioSugerido: data.dominioSugerido,
           });
         }
       } catch {
@@ -140,7 +151,7 @@ export default function CriarEmpresa() {
           disponivel: false,
           carregando: false,
           mensagem: t("erros.verificacaoDominio"),
-          dominioSugerido: ""
+          dominioSugerido: "",
         });
       }
     };
@@ -157,37 +168,41 @@ export default function CriarEmpresa() {
         setEmailStatus({
           existe: false,
           carregando: false,
-          mensagem: ""
+          mensagem: "",
         });
         return;
       }
 
-      setEmailStatus(prev => ({ ...prev, carregando: true }));
+      setEmailStatus((prev) => ({ ...prev, carregando: true }));
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(emailWatch)}`
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(emailWatch)}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${Cookies.get("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
           setEmailStatus({
             existe: data.existe,
             carregando: false,
-            mensagem: data.mensagem
+            mensagem: data.mensagem,
           });
         } else {
           setEmailStatus({
             existe: false,
             carregando: false,
-            mensagem: t("erros.verificacaoEmail")
+            mensagem: t("erros.verificacaoEmail"),
           });
         }
       } catch {
         setEmailStatus({
           existe: false,
           carregando: false,
-          mensagem: t("erros.verificacaoEmail")
+          mensagem: t("erros.verificacaoEmail"),
         });
       }
     };
@@ -242,7 +257,13 @@ export default function CriarEmpresa() {
           }
         }
 
-        const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`);
+        const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${Cookies.get("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
         if (responseEmpresa.ok) {
           const data = await responseEmpresa.json();
           if (data.empresa) {
@@ -288,8 +309,9 @@ export default function CriarEmpresa() {
         method: "POST",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
       });
 
       if (response.ok) {
@@ -308,7 +330,7 @@ export default function CriarEmpresa() {
   };
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -349,8 +371,8 @@ export default function CriarEmpresa() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [modoDark]); 
-  
+  }, [modoDark]);
+
   async function onSubmit(data: Inputs) {
     if (!data.dominio || data.dominio.trim().length < 4) {
       Swal.fire({
@@ -359,7 +381,7 @@ export default function CriarEmpresa() {
         text: t("erros.dominioInvalidoTexto"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
       });
       return;
     }
@@ -371,7 +393,7 @@ export default function CriarEmpresa() {
         text: t("erros.emailExistenteTexto"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
       });
       return;
     }
@@ -393,7 +415,7 @@ export default function CriarEmpresa() {
             text: t("avisos.uploadFotoFalhouTexto"),
             confirmButtonColor: temaAtual.primario,
             background: temaAtual.card,
-            color: temaAtual.texto
+            color: temaAtual.texto,
           });
         }
       }
@@ -402,7 +424,8 @@ export default function CriarEmpresa() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "user-id": usuarioValor
+          "user-id": usuarioValor,
+          "Authorization": `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           nome: data.nome,
@@ -414,8 +437,8 @@ export default function CriarEmpresa() {
           cidade: data.cidade,
           cep: data.cep,
           dominioSolicitado: data.dominio,
-          fotoUrl: fotoUrl
-        })
+          fotoUrl: fotoUrl,
+        }),
       });
 
       if (response.ok) {
@@ -432,7 +455,7 @@ export default function CriarEmpresa() {
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto,
-          confirmButtonText: t("sucesso.botaoConfirmar")
+          confirmButtonText: t("sucesso.botaoConfirmar"),
         });
 
         router.push("/empresa");
@@ -447,7 +470,7 @@ export default function CriarEmpresa() {
           text: errorData.mensagem || t("erro.mensagem"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
-          color: temaAtual.texto
+          color: temaAtual.texto,
         });
       }
     } catch (err) {
@@ -458,16 +481,13 @@ export default function CriarEmpresa() {
         text: t("erro.mensagem"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
       });
     }
   }
 
   const CharCounter = ({ current, max }: { current: number; max: number }) => (
-    <div
-      className={`text-xs text-right mt-1 ${current > max ? "text-red-500" : ""}`}
-      style={{ color: current > max ? temaAtual.erro : temaAtual.placeholder }}
-    >
+    <div className={`text-xs text-right mt-1 ${current > max ? "text-red-500" : ""}`} style={{ color: current > max ? temaAtual.erro : temaAtual.placeholder }}>
       {current}/{max} {current > max && ` - ${t("validacao.limiteExcedido")}`}
     </div>
   );
@@ -477,7 +497,9 @@ export default function CriarEmpresa() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-        <div className="font-mono" style={{ color: temaAtual.texto }}>{t("carregando")}</div>
+        <div className="font-mono" style={{ color: temaAtual.texto }}>
+          {t("carregando")}
+        </div>
       </div>
     );
   }
@@ -489,10 +511,13 @@ export default function CriarEmpresa() {
           {t("titulo")}
         </h1>
 
-        <div className="p-4 md:p-5 rounded-lg" style={{
-          backgroundColor: temaAtual.card,
-          border: `1px solid ${temaAtual.borda}`
-        }}>
+        <div
+          className="p-4 md:p-5 rounded-lg"
+          style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`,
+          }}
+        >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <div>
               <label className="block mb-1 text-sm font-medium items-center" style={{ color: temaAtual.texto }}>
@@ -502,7 +527,7 @@ export default function CriarEmpresa() {
               <input
                 {...register("nome", {
                   required: t("validacao.nomeObrigatorio"),
-                  maxLength: 20
+                  maxLength: 20,
                 })}
                 placeholder={t("campos.nome")}
                 required
@@ -510,14 +535,12 @@ export default function CriarEmpresa() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${errors.nome ? temaAtual.erro : temaAtual.borda}`
+                  border: `1px solid ${errors.nome ? temaAtual.erro : temaAtual.borda}`,
                 }}
                 maxLength={20}
               />
               <CharCounter current={charCounts.nome} max={20} />
-              {errors.nome && (
-                <p className="text-xs text-red-500 mt-1">{errors.nome.message}</p>
-              )}
+              {errors.nome && <p className="text-xs text-red-500 mt-1">{errors.nome.message}</p>}
             </div>
 
             <div>
@@ -532,8 +555,8 @@ export default function CriarEmpresa() {
                     maxLength: 60,
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: t("validacao.emailInvalido")
-                    }
+                      message: t("validacao.emailInvalido"),
+                    },
                   })}
                   placeholder={t("campos.email")}
                   type="email"
@@ -542,7 +565,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${errors.email || emailStatus.existe ? temaAtual.erro : temaAtual.borda}`
+                    border: `1px solid ${errors.email || emailStatus.existe ? temaAtual.erro : temaAtual.borda}`,
                   }}
                   maxLength={60}
                 />
@@ -551,27 +574,14 @@ export default function CriarEmpresa() {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
                   </div>
                 )}
-                {!emailStatus.carregando && emailWatch && emailWatch.length > 0 && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {emailStatus.existe ? (
-                      <FaTimes className="text-red-500" />
-                    ) : (
-                      <FaCheck className="text-green-500" />
-                    )}
-                  </div>
-                )}
+                {!emailStatus.carregando && emailWatch && emailWatch.length > 0 && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">{emailStatus.existe ? <FaTimes className="text-red-500" /> : <FaCheck className="text-green-500" />}</div>}
               </div>
               <CharCounter current={charCounts.email} max={60} />
 
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
 
               {emailStatus.mensagem && (
-                <div
-                  className={`text-xs mt-1 ${emailStatus.existe ? 'text-red-600' : 'text-green-600'}`}
-                  style={{ color: emailStatus.existe ? temaAtual.erro : temaAtual.sucesso }}
-                >
+                <div className={`text-xs mt-1 ${emailStatus.existe ? "text-red-600" : "text-green-600"}`} style={{ color: emailStatus.existe ? temaAtual.erro : temaAtual.sucesso }}>
                   {emailStatus.mensagem}
                 </div>
               )}
@@ -589,7 +599,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={15}
                 />
@@ -607,7 +617,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={20}
                 />
@@ -627,7 +637,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={50}
                 />
@@ -645,7 +655,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={20}
                 />
@@ -665,7 +675,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={2}
                 />
@@ -683,7 +693,7 @@ export default function CriarEmpresa() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   maxLength={10}
                 />
@@ -704,15 +714,15 @@ export default function CriarEmpresa() {
                     maxLength: 30,
                     minLength: {
                       value: 4,
-                      message: t("validacao.dominioMinimo")
-                    }
+                      message: t("validacao.dominioMinimo"),
+                    },
                   })}
                   placeholder={t("campos.dominioPlaceholder")}
                   className="w-full px-3 py-2 rounded border text-sm pr-10"
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${errors.dominio || (dominioWatch && dominioWatch.length > 0 && dominioWatch.length < 4) ? temaAtual.erro : temaAtual.borda}`
+                    border: `1px solid ${errors.dominio || (dominioWatch && dominioWatch.length > 0 && dominioWatch.length < 4) ? temaAtual.erro : temaAtual.borda}`,
                   }}
                   maxLength={30}
                 />
@@ -721,31 +731,16 @@ export default function CriarEmpresa() {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
                   </div>
                 )}
-                {!dominioStatus.carregando && dominioWatch && dominioWatch.length >= 3 && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {dominioStatus.disponivel ? (
-                      <FaCheck className="text-green-500" />
-                    ) : (
-                      <FaTimes className="text-red-500" />
-                    )}
-                  </div>
-                )}
+                {!dominioStatus.carregando && dominioWatch && dominioWatch.length >= 3 && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">{dominioStatus.disponivel ? <FaCheck className="text-green-500" /> : <FaTimes className="text-red-500" />}</div>}
               </div>
               <CharCounter current={charCounts.dominio} max={30} />
 
-              {errors.dominio && (
-                <p className="text-xs text-red-500 mt-1">{errors.dominio.message}</p>
-              )}
+              {errors.dominio && <p className="text-xs text-red-500 mt-1">{errors.dominio.message}</p>}
 
-              {dominioWatch && dominioWatch.length > 0 && dominioWatch.length < 4 && (
-                <p className="text-xs text-red-500 mt-1">{t("validacao.dominioMinimo")}</p>
-              )}
+              {dominioWatch && dominioWatch.length > 0 && dominioWatch.length < 4 && <p className="text-xs text-red-500 mt-1">{t("validacao.dominioMinimo")}</p>}
 
               {dominioWatch && dominioWatch.length >= 3 && !dominioStatus.carregando && (
-                <div
-                  className={`text-xs mt-1 ${dominioStatus.disponivel ? 'text-green-600' : 'text-red-600'}`}
-                  style={{ color: dominioStatus.disponivel ? temaAtual.sucesso : temaAtual.erro }}
-                >
+                <div className={`text-xs mt-1 ${dominioStatus.disponivel ? "text-green-600" : "text-red-600"}`} style={{ color: dominioStatus.disponivel ? temaAtual.sucesso : temaAtual.erro }}>
                   {dominioStatus.mensagem}
                 </div>
               )}
@@ -759,28 +754,15 @@ export default function CriarEmpresa() {
               <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                 {t("campos.foto")}
               </label>
-              {fotoPreview && (
-                <img
-                  src={fotoPreview}
-                  alt="Preview"
-                  className="w-16 h-16 object-cover rounded-full mb-2 mx-auto border"
-                  style={{ borderColor: temaAtual.borda }}
-                />
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-                id="fileInput"
-              />
+              {fotoPreview && <img src={fotoPreview} alt="Preview" className="w-16 h-16 object-cover rounded-full mb-2 mx-auto border" style={{ borderColor: temaAtual.borda }} />}
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="fileInput" />
               <label
                 htmlFor="fileInput"
                 className="flex items-center justify-center gap-2 px-3 py-1.5 rounded border text-sm cursor-pointer transition"
                 style={{
                   backgroundColor: temaAtual.card,
                   border: `1px solid ${temaAtual.borda}`,
-                  color: temaAtual.texto
+                  color: temaAtual.texto,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = temaAtual.hover;
@@ -801,13 +783,7 @@ export default function CriarEmpresa() {
                 backgroundColor: temaAtual.primario,
                 color: "#FFFFFF",
               }}
-              disabled={
-                !dominioWatch ||
-                dominioWatch.length < 4 ||
-                (dominioWatch.length >= 4 && !dominioStatus.disponivel && !dominioStatus.carregando) ||
-                emailStatus.existe ||
-                emailStatus.carregando
-              }
+              disabled={!dominioWatch || dominioWatch.length < 4 || (dominioWatch.length >= 4 && !dominioStatus.disponivel && !dominioStatus.carregando) || emailStatus.existe || emailStatus.carregando}
             >
               {t("botaoCriar")}
             </button>

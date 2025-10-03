@@ -10,6 +10,8 @@ import { useUsuarioStore } from "@/context/usuario";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 
+import Cookies from "js-cookie";
+
 type Inputs = {
   email: string;
   senha: string;
@@ -89,6 +91,7 @@ export default function Login() {
           color: temaAtual.texto
         });
         const dados = await response.json();
+        Cookies.set("token", dados.token, { expires: 1 });
         logar(dados);
         localStorage.setItem("client_key", JSON.stringify(dados.id));
         router.push("/dashboard");

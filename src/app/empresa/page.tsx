@@ -9,6 +9,7 @@ import { usuarioTemPermissao } from "@/utils/permissoes";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Image from "next/image";
+import Cookies from "js-cookie";
 
 type EmailStatus = {
   existe: boolean;
@@ -142,7 +143,13 @@ export default function Empresa() {
         const usuarioSalvo = localStorage.getItem("client_key") as string;
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioValor}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioValor}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Cookies.get("token")}`,
+          },
+        });
 
         if (res.status === 404) {
           router.push("/criarempresa");
@@ -257,8 +264,13 @@ export default function Empresa() {
       setEmailStatus((prev) => ({ ...prev, carregando: true }));
 
       try {
-        const url = `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(empresaEditada.email)}?empresaId=${empresaEditada.id}`;
-        const response = await fetch(url);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(empresaEditada.email)}?empresaId=${empresaEditada.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Cookies.get("token")}`,
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -314,6 +326,7 @@ export default function Empresa() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor,
+          "Authorization": `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           catalogoPublico: novoEstado,
@@ -367,6 +380,7 @@ export default function Empresa() {
         body: formData,
         headers: {
           "user-id": usuarioValor,
+          "Authorization": `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -428,6 +442,7 @@ export default function Empresa() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor,
+          "Authorization": `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           nome: empresaEditada.nome?.trim(),
@@ -501,6 +516,11 @@ export default function Empresa() {
         if (confirm.isConfirmed) {
           const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/${usuarioValor}`, {
             method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              "user-id": usuarioValor,
+              "Authorization": `Bearer ${Cookies.get("token")}`,
+            },
           });
 
           if (!res.ok) throw new Error(t("erros.erroExcluirEmpresa"));

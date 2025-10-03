@@ -7,6 +7,7 @@ import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 import { getTranslatedPermission, getTranslatedCategory } from "@/utils/permissoeTranslations";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 interface PermissaoI {
   id: string;
   nome: string;
@@ -458,7 +459,11 @@ export default function Usuarios() {
 
     const fetchDados = async (idUsuario: string) => {
       try {
-        const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`);
+        const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         if (!resEmpresa.ok) {
           setLoading(false);
           return;
@@ -621,6 +626,7 @@ export default function Usuarios() {
       const resEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
         headers: {
           "user-id": usuarioId,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
       const empresa = await resEmpresa.json();

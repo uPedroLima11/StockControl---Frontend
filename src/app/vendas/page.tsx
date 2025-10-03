@@ -10,6 +10,7 @@ import { cores } from "@/utils/cores";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 export default function Vendas() {
   const [produtos, setProdutos] = useState<ProdutoI[]>([]);
@@ -258,7 +259,14 @@ export default function Vendas() {
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      }
+      );
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
       }

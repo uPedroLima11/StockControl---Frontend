@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 
 type CampoOrdenacao = 'nome' | 'estoque' | 'preco' | 'none';
 type DirecaoOrdenacao = 'asc' | 'desc';
@@ -365,7 +366,13 @@ export default function Produtos() {
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`
+        },
+      });
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
       }
