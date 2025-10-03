@@ -530,7 +530,7 @@ export default function Home() {
                   />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Pedro Lima</h3>
-                <p className="text-blue-400 mb-4">Full-Stack Developer & UI/UX Specialist</p>
+                <p className="text-blue-400 mb-4">Full-Stack Developer & UI/UX Designer</p>
                 <p className="text-gray-300 mb-6 leading-relaxed">
                   Especialista em desenvolvimento de sistemas complexos e experiências de usuário intuitivas.
                   Foca em criar soluções que são tanto poderosas quanto fáceis de usar.
@@ -574,10 +574,10 @@ export default function Home() {
                   />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Pedro Siqueira</h3>
-                <p className="text-cyan-400 mb-4">Backend Architect & DevOps Engineer</p>
+                <p className="text-cyan-400 mb-4">Backend Architect & System Designer</p>
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Especialista em arquitetura de sistemas escaláveis e infraestrutura cloud.
-                  Garante que o StockControl tenha performance excepcional e segurança de nível enterprise.
+                  Especialista em projetar e implementar arquiteturas backend escaláveis,
+                  modelagem de dados eficiente e integração entre sistemas complexos.
                 </p>
                 <div className="flex justify-center space-x-4">
                   <a
