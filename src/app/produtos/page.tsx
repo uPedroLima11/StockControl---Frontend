@@ -892,6 +892,7 @@ export default function Produtos() {
     );
   }
   return (
+
     <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="w-full max-w-7xl">
         <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
@@ -911,7 +912,6 @@ export default function Produtos() {
             </div>
           </div>
         )}
-
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
           <div className="flex items-center gap-2 flex-1">
             <div
@@ -1504,7 +1504,7 @@ export default function Produtos() {
                       />
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center justify-center gap-2 h-[42px]"
+                        className="px-10 py-2 cursor-pointer rounded border text-sm flex items-center  justify-center gap-2 h-[42px]"
                         style={{
                           backgroundColor: temaAtual.primario,
                           color: "#FFFFFF",
@@ -1765,7 +1765,8 @@ export default function Produtos() {
             </div>
           </div>
         )
-        }     </div>
+        }
+      </div>
     </div>
   );
 }

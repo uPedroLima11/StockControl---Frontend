@@ -102,6 +102,7 @@ export default function Sidebar() {
     setModoDark(novoTema);
     localStorage.setItem("modoDark", String(novoTema));
     aplicarTema(novoTema);
+    window.location.reload();
   };
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
@@ -262,7 +263,7 @@ export default function Sidebar() {
     if (!usuarioId) return;
 
     try {
-      const permissoesParaVerificar = ["usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", "exportar_dados", "inventario_visualizar", "pedidos_visualizar"];
+      const permissoesParaVerificar = ["usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", "exportar_dados", "inventario_visualizar", "pedidos_visualizar", 'pedidos_criar'];
 
       const permissoes: Record<string, boolean> = {};
       for (const permissao of permissoesParaVerificar) {
@@ -448,7 +449,21 @@ export default function Sidebar() {
         </div>
       </aside>
 
+<<<<<<< HEAD
       {mostrarNotificacoes && usuarioId && <PainelNotificacoes estaVisivel={mostrarNotificacoes} aoFechar={() => setMostrarNotificacoes(false)} nomeEmpresa={nomeEmpresa} cores={cores} usuarioId={usuarioId} onNotificacoesAtualizadas={verificarNotificacoes} />}
+=======
+      {mostrarNotificacoes && usuarioId && (
+        <PainelNotificacoes
+          estaVisivel={mostrarNotificacoes}
+          aoFechar={() => setMostrarNotificacoes(false)}
+          nomeEmpresa={nomeEmpresa}
+          cores={cores}
+          usuarioId={usuarioId}
+          onNotificacoesAtualizadas={verificarNotificacoes}
+          permissoesUsuario={permissoesUsuario}
+        />
+      )}
+>>>>>>> ce3bfe3eb610ddcbbdbe3fb03cd96f3faea1cca3
     </>
   );
 }
@@ -488,6 +503,7 @@ function PainelNotificacoes({
   cores,
   usuarioId,
   onNotificacoesAtualizadas,
+  permissoesUsuario,
 }: {
   estaVisivel: boolean;
   aoFechar: () => void;
@@ -502,6 +518,7 @@ function PainelNotificacoes({
   };
   usuarioId: string;
   onNotificacoesAtualizadas: () => void;
+  permissoesUsuario: Record<string, boolean>;
 }) {
   const [modoDark, setModoDark] = useState(false);
   const { t, i18n } = useTranslation("sidebar");
@@ -711,7 +728,6 @@ function PainelNotificacoes({
   const bgColor = modoDark ? "#0F1E35" : "#FFFFFF";
   const textColor = modoDark ? "#FFFFFF" : "#000000";
   const closeButtonColor = modoDark ? "#FFFFFF" : "#6B7280";
-  const borderColor = modoDark ? "#1E4976" : cores.azulBrilhante;
 
   const getEmojiPorTipo = (titulo: string) => {
     if (titulo.includes("Crítico") || titulo.includes("CRÍTICO") || titulo.includes("Critical")) {
@@ -732,8 +748,10 @@ function PainelNotificacoes({
           key={notificacao.id}
           className="flex flex-col gap-2 p-4 rounded-lg mb-2"
           style={{
-            backgroundColor: bgColor,
-            border: `1px solid ${borderColor}`,
+            background: modoDark
+              ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
+              : "#ececec",
+            border: `1px solid ${cores.azulBrilhante}`,
             color: textColor,
           }}
         >
@@ -782,8 +800,10 @@ function PainelNotificacoes({
           key={notificacao.id}
           className="flex flex-col gap-3 p-4 rounded-lg mb-2"
           style={{
-            backgroundColor: bgColor,
-            border: `1px solid ${borderColor}`,
+            background: modoDark
+              ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
+              : "#ececec",
+            border: `1px solid ${cores.azulBrilhante}`,
             color: textColor,
           }}
         >
@@ -835,6 +855,7 @@ function PainelNotificacoes({
               {notificacao.lida ? t("read") : t("unread")}
             </span>
 
+<<<<<<< HEAD
             <button
               onClick={() => handleFazerPedido(notificacao)}
               className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
@@ -848,6 +869,23 @@ function PainelNotificacoes({
               <FaClipboardList size={10} />
               {t("fazerPedido") || "Fazer Pedido"}
             </button>
+=======
+            {permissoesUsuario.pedidos_criar && (
+              <button
+                onClick={() => handleFazerPedido(notificacao)}
+                className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                style={{
+                  backgroundColor: cores.azulBrilhante,
+                  color: "#FFFFFF"
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
+              >
+                <FaClipboardList size={10} />
+                {t("fazerPedido") || "Fazer Pedido"}
+              </button>
+            )}
+>>>>>>> ce3bfe3eb610ddcbbdbe3fb03cd96f3faea1cca3
           </div>
         </div>
       );
@@ -863,8 +901,10 @@ function PainelNotificacoes({
         key={notificacao.id}
         className="flex flex-col gap-2 p-4 rounded-lg mb-2"
         style={{
-          backgroundColor: bgColor,
-          border: `1px solid ${borderColor}`,
+          background: modoDark
+            ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
+            : "#ececec",
+          border: `1px solid ${cores.azulBrilhante}`,
           color: textColor,
         }}
       >
