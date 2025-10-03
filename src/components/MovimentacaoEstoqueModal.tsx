@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FaPlus, FaMinus, FaHistory, FaLock } from "react-icons/fa";
+import { FaPlus, FaMinus, FaHistory, FaLock, FaBox, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import HistoricoEstoque from "./HistoricoEstoque";
 import { useTranslation } from "react-i18next";
@@ -24,7 +24,6 @@ export default function MovimentacaoEstoqueModal({
     onMovimentacaoConcluida
 }: MovimentacaoEstoqueModalProps) {
     const { t } = useTranslation("estoque");
-    const [modalAberto, setModalAberto] = useState(false);
     const [tipoMovimentacao, setTipoMovimentacao] = useState<'ENTRADA' | 'SAIDA'>('ENTRADA');
     const [quantidade, setQuantidade] = useState("1");
     const [motivo, setMotivo] = useState('COMPRA');
@@ -32,22 +31,26 @@ export default function MovimentacaoEstoqueModal({
     const [mostrarHistorico, setMostrarHistorico] = useState(false);
     const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
     const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-    const [carregandoPermissao, setCarregandoPermissao] = useState(true);
+    const [, setCarregandoPermissao] = useState(true);
 
     const temas = {
         dark: {
-            fundo: "#0A1929",
-            texto: "#FFFFFF",
-            card: "#132F4C",
-            borda: "#1E4976",
-            primario: "#1976D2",
+            fundo: "#0f172a",
+            texto: "#f8fafc",
+            card: "#1e293b",
+            borda: "#334155",
+            primario: "#3b82f6",
+            secundario: "#0ea5e9",
+            gradiente: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
         },
         light: {
-            fundo: "#F8FAFC",
-            texto: "#0F172A",
-            card: "#FFFFFF",
-            borda: "#E2E8F0",
-            primario: "#1976D2",
+            fundo: "#f1f5f9",
+            texto: "#0f172a",
+            card: "#ffffff",
+            borda: "#e2e8f0",
+            primario: "#3b82f6",
+            secundario: "#0ea5e9",
+            gradiente: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)"
         }
     };
 
@@ -117,7 +120,7 @@ export default function MovimentacaoEstoqueModal({
                 }
 
                 const responsePermissoes = await fetch(
-                    `${process.env.NEXT_PPUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
+                    `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
                     {
                         headers: { 'user-id': usuarioId }
                     }
@@ -153,14 +156,26 @@ export default function MovimentacaoEstoqueModal({
 
     const realizarMovimentacao = async () => {
         if (!podeGerenciarEstoque) {
-            Swal.fire({ icon: "error", title: t("semPermissaoTitulo"), text: t("semPermissaoEstoque") });
+            Swal.fire({ 
+                icon: "error", 
+                title: t("semPermissaoTitulo"), 
+                text: t("semPermissaoEstoque"),
+                background: temaAtual.card,
+                color: temaAtual.texto
+            });
             return;
         }
 
         try {
             const quantidadeNum = parseInt(quantidade) || 0;
             if (quantidadeNum <= 0) {
-                Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: t("mensagens.quantidadeInvalida") });
+                Swal.fire({ 
+                    icon: "error", 
+                    title: t("mensagens.erroTitulo"), 
+                    text: t("mensagens.quantidadeInvalida"),
+                    background: temaAtual.card,
+                    color: temaAtual.texto
+                });
                 return;
             }
 
@@ -171,23 +186,50 @@ export default function MovimentacaoEstoqueModal({
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/movimentacoes-estoque`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'user-id': usuarioValor },
-                body: JSON.stringify({ produtoId: Number(produto.id), tipo: tipoMovimentacao, quantidade: quantidadeNum, motivo, observacao, empresaId })
+                body: JSON.stringify({ 
+                    produtoId: Number(produto.id), 
+                    tipo: tipoMovimentacao, 
+                    quantidade: quantidadeNum, 
+                    motivo, 
+                    observacao, 
+                    empresaId 
+                })
             });
 
             if (response.ok) {
                 Swal.fire({
                     icon: "success",
                     title: t("mensagens.sucessoTitulo"),
-                    text: t("mensagens.sucessoTexto", { tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"), quantidade: quantidadeNum })
+                    text: t("mensagens.sucessoTexto", { 
+                        tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"), 
+                        quantidade: quantidadeNum 
+                    }),
+                    background: temaAtual.card,
+                    color: temaAtual.texto,
+                    timer: 2000,
+                    showConfirmButton: false
                 });
-                setModalAberto(false);
+                setQuantidade("1");
+                setObservacao("");
                 onMovimentacaoConcluida();
             } else {
                 const erro = await response.json();
-                Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: erro.mensagem || t("mensagens.erroGenerico") });
+                Swal.fire({ 
+                    icon: "error", 
+                    title: t("mensagens.erroTitulo"), 
+                    text: erro.mensagem || t("mensagens.erroGenerico"),
+                    background: temaAtual.card,
+                    color: temaAtual.texto
+                });
             }
         } catch {
-            Swal.fire({ icon: "error", title: t("mensagens.erroTitulo"), text: t("mensagens.erroConexao") });
+            Swal.fire({ 
+                icon: "error", 
+                title: t("mensagens.erroTitulo"), 
+                text: t("mensagens.erroConexao"),
+                background: temaAtual.card,
+                color: temaAtual.texto
+            });
         }
     };
 
@@ -201,228 +243,164 @@ export default function MovimentacaoEstoqueModal({
         else if (parseInt(quantidade, 10) < 1) setQuantidade("1");
     };
 
-    const handleAbrirModal = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!podeGerenciarEstoque && !carregandoPermissao) {
-            Swal.fire({ icon: "warning", title: t("semPermissaoTitulo"), text: t("semPermissaoEstoque") });
-            return;
-        }
-        setModalAberto(true);
-    };
-
     return (
-        <>
-            <button 
-                onClick={handleAbrirModal} 
-                className="w-full px-4 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-sm font-medium h-[42px]"
-                style={{ 
-                    backgroundColor: temaAtual.primario, 
-                    color: "#FFFFFF", 
-                    opacity: carregandoPermissao ? 0.7 : 1,
-                    border: `1px solid ${temaAtual.primario}`
-                }}
-                disabled={carregandoPermissao}
-            >
-                {carregandoPermissao ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : !podeGerenciarEstoque ? (
-                    <FaLock size={14} />
-                ) : (
-                    <FaHistory size={14} />
-                )}
-                {t("estoque")}
-            </button>
-
-            {modalAberto && (
-                <div
-                    className="fixed inset-0 flex items-center justify-center z-50 min-h-screen overflow-auto"
-                    style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
-                    onClick={(e) => {
-                        if (e.target === e.currentTarget) {
-                            setModalAberto(false);
-                        }
-                    }}
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                    <FaBox className="text-blue-400" />
+                    {t("gerenciarEstoque")} 
+                    <span className="text-blue-400">- {produto.nome}</span>
+                </h2>
+                <button
+                    onClick={onMovimentacaoConcluida}
+                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-gray-400 hover:text-white"
                 >
-                    <div
-                        className="p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto mx-4 flex flex-col"
-                        style={{
-                            backgroundColor: temaAtual.card,
-                            color: temaAtual.texto,
-                            border: `1px solid ${temaAtual.borda}`,
-                            boxShadow: modoDark
-                                ? "0 4px 12px rgba(0,0,0,0.9)"
-                                : "0 4px 12px rgba(0,0,0,0.1)",
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <FaHistory />
-                            {t("gerenciarEstoque")} - {produto.nome}
-                        </h2>
-
-                        {!podeGerenciarEstoque ? (
-                            <div className="text-center py-8">
-                                <FaLock size={48} className="mx-auto mb-4 text-red-500" />
-                                <p className="text-lg font-semibold mb-2">{t("semPermissaoTitulo")}</p>
-                                <p className="text-gray-500">{t("semPermissaoEstoque")}</p>
-                            </div>
-                        ) : !mostrarHistorico ? (
-                            <>
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <button
-                                        onClick={() => setTipoMovimentacao('ENTRADA')}
-                                        className={`p-3 cursor-pointer rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${tipoMovimentacao === 'ENTRADA'
-                                            ? 'border-green-700 bg-green-700'
-                                            : modoDark
-                                                ? 'border-white bg-transparent'
-                                                : 'border-gray-300 bg-gray-100'
-                                            }`}
-                                    >
-                                        <FaPlus className={tipoMovimentacao === 'ENTRADA' ? "text-white" : modoDark ? "text-white" : "text-green-700"} />
-                                        <span style={{ color: tipoMovimentacao === 'ENTRADA' ? '#fff' : modoDark ? '#fff' : '#166534' }}>
-                                            {t("entrada")}
-                                        </span>
-                                    </button>
-
-                                    <button
-                                        onClick={() => setTipoMovimentacao('SAIDA')}
-                                        className={`p-3 cursor-pointer rounded-lg border-2 transition-all ${tipoMovimentacao === 'SAIDA'
-                                            ? 'border-red-500 bg-red-500 bg-opacity-10'
-                                            : 'border-gray-300'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-center gap-2">
-                                            <FaMinus
-                                                className={
-                                                    tipoMovimentacao === 'SAIDA'
-                                                        ? 'text-white'
-                                                        : 'text-red-500'
-                                                }
-                                            />
-                                            <span
-                                                style={{
-                                                    color:
-                                                        tipoMovimentacao === 'SAIDA'
-                                                            ? '#fff'
-                                                            : '#ef4444'
-                                                }}
-                                            >
-                                                {t("saida")}
-                                            </span>
-                                        </div>
-                                    </button>
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-medium">{t("quantidade")}</label>
-                                    <input
-                                        type="text"
-                                        value={quantidade}
-                                        onChange={(e) => handleQuantidadeChange(e.target.value)}
-                                        onBlur={handleQuantidadeBlur}
-                                        className="w-full p-2 rounded border"
-                                        style={{
-                                            backgroundColor: temaAtual.card,
-                                            borderColor: temaAtual.borda,
-                                            color: temaAtual.texto
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-medium">{t("motivo")}</label>
-                                    <select
-                                        value={motivo}
-                                        onChange={(e) => setMotivo(e.target.value)}
-                                        className="w-full p-2 rounded border"
-                                        style={{
-                                            backgroundColor: temaAtual.card,
-                                            borderColor: temaAtual.borda,
-                                            color: temaAtual.texto
-                                        }}
-                                    >
-                                        <option value="COMPRA">{t("motivos.compra")}</option>
-                                        <option value="VENDA">{t("motivos.venda")}</option>
-                                        <option value="AJUSTE">{t("motivos.ajuste")}</option>
-                                        <option value="DEVOLUCAO">{t("motivos.devolucao")}</option>
-                                        <option value="PERDA">{t("motivos.perda")}</option>
-                                        <option value="INVENTARIO">{t("motivos.inventario")}</option>
-                                    </select>
-                                </div>
-
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-medium">{t("observacao")}</label>
-                                    <textarea
-                                        value={observacao}
-                                        onChange={(e) => setObservacao(e.target.value)}
-                                        rows={3}
-                                        className="w-full p-2 rounded border"
-                                        style={{
-                                            backgroundColor: temaAtual.card,
-                                            borderColor: temaAtual.borda,
-                                            color: temaAtual.texto
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex justify-between gap-3">
-                                    <button
-                                        onClick={() => setMostrarHistorico(true)}
-                                        className="px-4 cursor-pointer py-2 rounded border"
-                                        style={{
-                                            borderColor: temaAtual.primario,
-                                            color: temaAtual.primario
-                                        }}
-                                    >
-                                        {t("verHistorico")}
-                                    </button>
-
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setModalAberto(false)}
-                                            className="px-4 cursor-pointer py-2 rounded border"
-                                            style={{
-                                                borderColor: temaAtual.borda,
-                                                color: temaAtual.texto
-                                            }}
-                                        >
-                                            {t("cancelar")}
-                                        </button>
-
-                                        <button
-                                            onClick={realizarMovimentacao}
-                                            className="px-4 cursor-pointer py-2 rounded text-white"
-                                            style={{
-                                                backgroundColor: tipoMovimentacao === 'ENTRADA' ? '#10B981' : '#EF4444'
-                                            }}
-                                        >
-                                            {tipoMovimentacao === 'ENTRADA' ? t("adicionar") : t("remover")}
-                                        </button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <HistoricoEstoque
-                                    produtoId={Number(produto.id)}
-                                    modoDark={modoDark}
-                                />
-
-                                <button
-                                    onClick={() => setMostrarHistorico(false)}
-                                    className="mt-4 px-4 py-2 cursor-pointer rounded border"
-                                    style={{
-                                        borderColor: temaAtual.primario,
-                                        color: temaAtual.primario
-                                    }}
-                                >
-                                    {t("voltar")}
-                                </button>
-                            </>
-                        )}
-                    </div>
+                    <FaTimes className="text-lg" />
+                </button>
+            </div>
+            {!podeGerenciarEstoque ? (
+                <div className="text-center py-8">
+                    <FaLock size={48} className="mx-auto mb-4 text-red-400" />
+                    <p className="text-lg font-semibold mb-2">{t("semPermissaoTitulo")}</p>
+                    <p className="opacity-70">{t("semPermissaoEstoque")}</p>
                 </div>
+            ) : !mostrarHistorico ? (
+                <>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <button
+                            onClick={() => setTipoMovimentacao('ENTRADA')}
+                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${
+                                tipoMovimentacao === 'ENTRADA'
+                                    ? 'border-green-500 bg-green-500 text-white shadow-lg'
+                                    : 'border-gray-500 bg-transparent opacity-70 hover:opacity-100'
+                            }`}
+                        >
+                            <FaPlus />
+                            {t("entrada")}
+                        </button>
+
+                        <button
+                            onClick={() => setTipoMovimentacao('SAIDA')}
+                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${
+                                tipoMovimentacao === 'SAIDA'
+                                    ? 'border-red-500 bg-red-500 text-white shadow-lg'
+                                    : 'border-gray-500 bg-transparent opacity-70 hover:opacity-100'
+                            }`}
+                        >
+                            <FaMinus />
+                            {t("saida")}
+                        </button>
+                    </div>
+                    <div className="mb-6">
+                        <label className="block mb-3 font-semibold text-lg">{t("quantidade")}</label>
+                        <input
+                            type="text"
+                            value={quantidade}
+                            onChange={(e) => handleQuantidadeChange(e.target.value)}
+                            onBlur={handleQuantidadeBlur}
+                            className="w-full p-4 rounded-xl border-2 text-center text-lg font-bold transition-all focus:ring-2 focus:ring-blue-500"
+                            style={{
+                                backgroundColor: temaAtual.card,
+                                borderColor: temaAtual.borda,
+                                color: temaAtual.texto
+                            }}
+                        />
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block mb-3 font-semibold">{t("motivo")}</label>
+                        <select
+                            value={motivo}
+                            onChange={(e) => setMotivo(e.target.value)}
+                            className="w-full p-3 rounded-xl border transition-all focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            style={{
+                                backgroundColor: temaAtual.card,
+                                borderColor: temaAtual.borda,
+                                color: temaAtual.texto
+                            }}
+                        >
+                            <option value="COMPRA">{t("motivos.compra")}</option>
+                            <option value="VENDA">{t("motivos.venda")}</option>
+                            <option value="AJUSTE">{t("motivos.ajuste")}</option>
+                            <option value="DEVOLUCAO">{t("motivos.devolucao")}</option>
+                            <option value="PERDA">{t("motivos.perda")}</option>
+                            <option value="INVENTARIO">{t("motivos.inventario")}</option>
+                        </select>
+                    </div>
+                    <div className="mb-6">
+                        <label className="block mb-3 font-semibold">{t("observacao")}</label>
+                        <textarea
+                            value={observacao}
+                            onChange={(e) => setObservacao(e.target.value)}
+                            rows={3}
+                            placeholder={t("observacaoPlaceholder")}
+                            className="w-full p-3 rounded-xl border transition-all focus:ring-2 focus:ring-blue-500 resize-none"
+                            style={{
+                                backgroundColor: temaAtual.card,
+                                borderColor: temaAtual.borda,
+                                color: temaAtual.texto
+                            }}
+                        />
+                    </div>
+                    <div className="flex justify-between gap-4">
+                        <button
+                            onClick={() => setMostrarHistorico(true)}
+                            className="px-6 py-3 rounded-xl border transition-all duration-200 hover:scale-105 cursor-pointer flex items-center gap-2"
+                            style={{
+                                borderColor: temaAtual.primario,
+                                color: temaAtual.primario
+                            }}
+                        >
+                            <FaHistory />
+                            {t("verHistorico")}
+                        </button>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={onMovimentacaoConcluida}
+                                className="px-6 py-3 rounded-xl border transition-all duration-200 hover:scale-105 cursor-pointer"
+                                style={{
+                                    borderColor: temaAtual.borda,
+                                    color: temaAtual.texto
+                                }}
+                            >
+                                {t("cancelar")}
+                            </button>
+
+                            <button
+                                onClick={realizarMovimentacao}
+                                className="px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-105 cursor-pointer shadow-lg"
+                                style={{
+                                    background: tipoMovimentacao === 'ENTRADA' 
+                                        ? "linear-gradient(135deg, #10B981, #059669)"
+                                        : "linear-gradient(135deg, #EF4444, #DC2626)"
+                                }}
+                            >
+                                {tipoMovimentacao === 'ENTRADA' ? t("adicionar") : t("remover")}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <HistoricoEstoque
+                        produtoId={Number(produto.id)}
+                        modoDark={modoDark}
+                    />
+
+                    <button
+                        onClick={() => setMostrarHistorico(false)}
+                        className="mt-6 px-6 py-3 rounded-xl border transition-all duration-200 hover:scale-105 cursor-pointer flex items-center justify-center gap-2 mx-auto"
+                        style={{
+                            borderColor: temaAtual.primario,
+                            color: temaAtual.primario
+                        }}
+                    >
+                        <FaHistory />
+                        {t("voltarGerenciamento")}
+                    </button>
+                </>
             )}
-        </>
+        </div>
     );
 }

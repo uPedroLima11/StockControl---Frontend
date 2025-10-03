@@ -359,7 +359,7 @@ export default function Home() {
                 key={index}
                 className="group bg-gradient-to-br from-blue-500/5 to-cyan-500/5 hover:from-blue-500/10 hover:to-cyan-500/10 p-6 rounded-2xl border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover:scale-105"
               >
-                <div className="text-blue-400 text-2xl mb-4 group-hover:scale-110 transition-transform">
+                <div className="text-blue-400 text-2xl mb-4">
                   {funcionalidade.icone}
                 </div>
                 <h3 className="text-white font-bold text-lg mb-2">{funcionalidade.titulo}</h3>

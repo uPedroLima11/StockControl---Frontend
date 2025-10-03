@@ -4,11 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { HiEnvelope, HiLockClosed, HiMiniUserCircle, HiCheckCircle, HiExclamationCircle } from "react-icons/hi2";
-import { FaEye, FaEyeSlash, FaCheck, FaTimes } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { FaEye, FaEyeSlash, FaCheck, FaTimes, FaArrowRight, FaShieldAlt, FaRocket, FaChartBar } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+});
 
 type Inputs = {
   nome: string;
@@ -27,11 +33,14 @@ export default function Registro() {
   const { register, handleSubmit, control } = useForm<Inputs>();
   const router = useRouter();
   const [visivel, setVisivel] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [passwordValid, setPasswordValid] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(false);
+  const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
   const senha = useWatch({ control, name: "senha" });
   const verificarSenha = useWatch({ control, name: "verificarSenha" });
   const email = useWatch({ control, name: "email" });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
@@ -41,41 +50,77 @@ export default function Registro() {
 
   const temaAtual = cores.dark;
 
+
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: #132F4C;
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: #132F4C; 
+      border-radius: 5px;
+      border: 2px solid #132F4C;
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: #132F4C; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: #132F4C #0A1830;
+    }
+    
+    @media (max-width: 768px) {
       html::-webkit-scrollbar {
-        width: 10px;
-      }
-      
-      html::-webkit-scrollbar-track {
-        background: ${temaAtual.card};
+        width: 6px;
       }
       
       html::-webkit-scrollbar-thumb {
-        background: ${temaAtual.borda}; 
-        border-radius: 5px;
-        border: 2px solid ${temaAtual.card};
+        border: 1px solid #132F4C;
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  useEffect(() => {
+    setAnimacaoAtiva(true);
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
       }
       
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${temaAtual.primario}; 
+      @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(0, 180, 216, 0.3); }
+        50% { box-shadow: 0 0 40px rgba(0, 180, 216, 0.6); }
       }
       
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${temaAtual.borda} ${temaAtual.card};
+      .animate-float {
+        animation: float 8s ease-in-out infinite;
       }
       
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${temaAtual.card};
-          border-radius: 3px;
-        }
+      .animate-glow {
+        animation: glow 4s ease-in-out infinite;
+      }
+      
+      .animate-float-delayed {
+        animation: float 10s ease-in-out infinite;
+        animation-delay: 2s;
       }
     `;
     document.head.appendChild(style);
@@ -83,7 +128,7 @@ export default function Registro() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [temaAtual]);
+  }, []);
 
   function validarSenha(senha: string) {
     if (!senha) return false;
@@ -163,6 +208,7 @@ export default function Registro() {
   }, [senha, verificarSenha]);
 
   async function verificaCadastro(data: Inputs) {
+    setIsLoading(true);
     try {
       if (emailStatus.existe) {
         Swal.fire({
@@ -243,155 +289,302 @@ export default function Registro() {
         background: temaAtual.card,
         color: temaAtual.texto,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
+  const beneficios = [
+    { icone: <FaRocket className="text-xl" />, texto: "Setup rápido e intuitivo" },
+    { icone: <FaChartBar className="text-xl" />, texto: "Dashboard completo" },
+    { icone: <FaShieldAlt className="text-xl" />, texto: "Dados protegidos" }
+  ];
+
+  const requisitosSenha = [
+    { condicao: senha?.length >= 8, texto: "Mínimo 8 caracteres" },
+    { condicao: senha && /[a-z]/.test(senha), texto: "1 letra minúscula" },
+    { condicao: senha && /[A-Z]/.test(senha), texto: "1 letra maiúscula" },
+    { condicao: senha && /[0-9]/.test(senha), texto: "1 número" },
+    { condicao: senha && /[^a-zA-Z0-9]/.test(senha), texto: "1 símbolo" }
+  ];
+
   return (
-    <div className="flex justify-center items-center flex-col gap-5 min-h-screen w-full px-2 py-4" style={{ backgroundColor: temaAtual.fundo }}>
-      <div className="mt-2 w-full flex justify-center">
-        <Link href="/" className="px-6 py-6 md:px-8 md:py-8 rounded-4xl flex flex-col items-center justify-center shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),_0_6.7px_5.3px_rgba(0,0,0,0.048),_0_12.5px_10px_rgba(0,0,0,0.06),_0_22.3px_17.9px_rgba(0,0,0,0.072),_0_41.8px_33.4px_rgba(0,0,0,0.086),_0_100px_80px_rgba(0,0,0,0.12)]" style={{ backgroundColor: temaAtual.card }}>
-          <img src="/icone.png" alt="Logo" className="w-16 h-16 md:w-20 md:h-20 mb-2 brightness-0 invert" />
-          <span className="p-0 pr-2 text-xl md:text-2xl font-semibold whitespace-nowrap" style={{ color: temaAtual.texto }}>
-            StockControl
-          </span>
-        </Link>
-      </div>
-
-      <form className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-xl shadow-lg p-4 md:p-8 mx-auto" onSubmit={handleSubmit(verificaCadastro)} style={{ backgroundColor: temaAtual.card }}>
-        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
-          Seu Nome:
-        </label>
-        <div className="relative mb-3">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiMiniUserCircle style={{ color: temaAtual.placeholder }} />
-          </div>
-          <input
-            type="text"
-            maxLength={20}
-            {...register("nome")}
-            required
-            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
-            style={{
-              backgroundColor: temaAtual.fundo,
-              color: temaAtual.texto,
-              borderColor: temaAtual.borda,
-            }}
-            placeholder="Seu nome completo"
-          />
+    <div 
+      className={`min-h-screen flex ${poppins.className}`}
+      style={{ background: temaAtual.gradiente }}
+    >
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-float-delayed"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
         </div>
 
-        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
-          Seu Email:
-        </label>
-        <div className="relative mb-3">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiEnvelope style={{ color: temaAtual.placeholder }} />
-          </div>
-          <input
-            type="email"
-            {...register("email")}
-            required
-            className={`border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 ${emailStatus.existe ? "border-red-500" : email && !emailStatus.existe && !emailStatus.carregando ? "border-green-500" : "border-gray-600"}`}
-            style={{
-              backgroundColor: temaAtual.fundo,
-              color: temaAtual.texto,
-            }}
-            placeholder="seu@email.com"
-          />
-
-          {email && <div className="absolute inset-y-0 end-0 flex items-center pe-3.5">{emailStatus.carregando ? <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div> : emailStatus.existe ? <FaTimes style={{ color: temaAtual.erro }} /> : <FaCheck style={{ color: temaAtual.sucesso }} />}</div>}
-        </div>
-
-        {emailStatus.mensagem && <div className={`text-xs mb-3 p-2 rounded border ${emailStatus.existe ? "bg-red-900/20 text-red-400 border-red-800" : "bg-green-900/20 text-green-400 border-green-800"}`}>{emailStatus.mensagem}</div>}
-
-        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
-          Sua Senha:
-        </label>
-        <div className="relative mb-3">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiLockClosed style={{ color: temaAtual.placeholder }} />
-          </div>
-          <input
-            placeholder="mínimo 8 caractéres, Maiusculas, minusculas e simbolos"
-            type={visivel ? "text" : "password"}
-            {...register("senha")}
-            required
-            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
-            style={{
-              backgroundColor: temaAtual.fundo,
-              color: temaAtual.texto,
-              borderColor: temaAtual.borda,
-            }}
-          />
-          <div className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5" onClick={() => setVisivel(!visivel)}>
-            {visivel ? <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : <FaEye style={{ color: temaAtual.placeholder }} />}
-          </div>
-          {senha && <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">{passwordValid ? <HiCheckCircle style={{ color: temaAtual.sucesso }} /> : <HiExclamationCircle style={{ color: temaAtual.erro }} />}</div>}
-        </div>
-
-        <label className="block mb-2 text-sm md:text-base font-medium" style={{ color: temaAtual.texto }}>
-          Confirmar Senha:
-        </label>
-        <div className="relative mb-6">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-            <HiLockClosed style={{ color: temaAtual.placeholder }} />
-          </div>
-          <input
-            placeholder="Digite a senha novamente"
-            type={visivel ? "text" : "password"}
-            {...register("verificarSenha")}
-            required
-            className="border text-sm md:text-base rounded-lg block w-full ps-10 p-2.5 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
-            style={{
-              backgroundColor: temaAtual.fundo,
-              color: temaAtual.texto,
-              borderColor: temaAtual.borda,
-            }}
-          />
-          <div className="absolute cursor-pointer inset-y-0 end-0 flex items-center pe-3.5" onClick={() => setVisivel(!visivel)}>
-            {visivel ? <FaEyeSlash style={{ color: temaAtual.placeholder }} /> : <FaEye style={{ color: temaAtual.placeholder }} />}
-          </div>
-          {verificarSenha && <div className="absolute inset-y-0 end-10 flex items-center pe-3.5">{passwordsMatch ? <HiCheckCircle style={{ color: temaAtual.sucesso }} /> : <HiExclamationCircle style={{ color: temaAtual.erro }} />}</div>}
-        </div>
-
-        <div className="mb-6">
-          <p className="text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
-            A senha deve conter:
-          </p>
-          <ul className="text-xs md:text-sm list-disc pl-5" style={{ color: temaAtual.placeholder }}>
-            <li className={senha?.length >= 8 ? "text-green-500" : "text-red-500"}>Mínimo 8 caracteres</li>
-            <li className={senha && /[a-z]/.test(senha) ? "text-green-500" : "text-red-500"}>Pelo menos 1 letra minúscula</li>
-            <li className={senha && /[A-Z]/.test(senha) ? "text-green-500" : "text-red-500"}>Pelo menos 1 letra maiúscula</li>
-            <li className={senha && /[0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>Pelo menos 1 número</li>
-            <li className={senha && /[^a-zA-Z0-9]/.test(senha) ? "text-green-500" : "text-red-500"}>Pelo menos 1 símbolo</li>
-          </ul>
-        </div>
-
-        <button
-          type="submit"
-          disabled={emailStatus.existe || emailStatus.carregando}
-          className="text-white cursor-pointer font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg w-full px-5 py-2.5 text-center text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
-          style={{ backgroundColor: temaAtual.primario }}
-          onMouseEnter={(e) => {
-            if (!emailStatus.existe && !emailStatus.carregando) {
-              e.currentTarget.style.opacity = "0.9";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!emailStatus.existe && !emailStatus.carregando) {
-              e.currentTarget.style.opacity = "1";
-            }
-          }}
-        >
-          {emailStatus.carregando ? "Verificando..." : "Registrar-se"}
-        </button>
-
-        <div className="flex justify-between pt-5">
-          <Link href="/login" className="font-italic hover:opacity-80 text-sm md:text-base cursor-pointer transition-all" style={{ color: temaAtual.texto }}>
-            já possuo login
+        <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
+          <Link 
+            href="/"
+            className="flex items-center gap-3 mb-12 group"
+          >
+            <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
+              <img src="/icone.png" alt="Logo" className="w-8 h-8 brightness-0 invert" />
+            </div>
+            <span className="text-2xl font-bold text-white">StockControl</span>
           </Link>
+
+          <div className={`transition-all duration-1000 transform ${animacaoAtiva ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
+            <h1 className="text-5xl font-bold text-white mb-6">
+              Comece sua
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"> jornada</span>
+            </h1>
+            
+            <p className="text-xl text-gray-300 mb-12 max-w-md">
+              Junte-se a milhares de empresas que transformaram sua gestão com o StockControl.
+            </p>
+
+            <div className="space-y-6">
+              {beneficios.map((beneficio, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-4 text-gray-300 group"
+                  style={{ transitionDelay: `${index * 200}ms` }}
+                >
+                  <div className="p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
+                    {beneficio.icone}
+                  </div>
+                  <span className="text-lg">{beneficio.texto}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </form>
+      </div>
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div 
+          ref={containerRef}
+          className="w-full max-w-md"
+        >
+          <div className="lg:hidden flex justify-center mb-8">
+            <Link 
+              href="/"
+              className="flex items-center gap-3 group"
+            >
+              <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
+                <img src="/icone.png" alt="Logo" className="w-8 h-8 brightness-0 invert" />
+              </div>
+              <span className="text-2xl font-bold text-white">StockControl</span>
+            </Link>
+          </div>
+
+          <div 
+            className={`bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-sm rounded-3xl p-8 border border-cyan-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Criar conta
+              </h2>
+              <p className="text-gray-400">
+                Primeiro passo rumo ao controle total
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit(verificaCadastro)} className="space-y-6">
+              <div className="group">
+                <label className="block mb-3 text-sm font-medium text-gray-300">
+                  Nome completo
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <HiMiniUserCircle className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={20}
+                    {...register("nome")}
+                    required
+                    className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50"
+                    placeholder="Seu nome completo"
+                    style={{
+                      backgroundColor: temaAtual.fundo + '80',
+                      borderColor: temaAtual.borda
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="group">
+                <label className="block mb-3 text-sm font-medium text-gray-300">
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <HiEnvelope className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  <input
+                    type="email"
+                    {...register("email")}
+                    required
+                    className={`w-full pl-12 pr-12 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50 ${
+                      emailStatus.existe ? "border-red-500" : 
+                      email && !emailStatus.existe && !emailStatus.carregando ? "border-green-500" : 
+                      "border-gray-600"
+                    }`}
+                    placeholder="seu@email.com"
+                    style={{
+                      backgroundColor: temaAtual.fundo + '80'
+                    }}
+                  />
+                  {email && (
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                      {emailStatus.carregando ? (
+                        <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                      ) : emailStatus.existe ? (
+                        <FaTimes className="text-red-400" />
+                      ) : (
+                        <FaCheck className="text-green-400" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {emailStatus.mensagem && (
+                  <div className={`mt-2 text-sm p-2 rounded-lg border ${
+                    emailStatus.existe ? 
+                    "bg-red-900/20 text-red-400 border-red-800" : 
+                    "bg-green-900/20 text-green-400 border-green-800"
+                  }`}>
+                    {emailStatus.mensagem}
+                  </div>
+                )}
+              </div>
+              <div className="group">
+                <label className="block mb-3 text-sm font-medium text-gray-300">
+                  Senha
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <HiLockClosed className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  <input
+                    placeholder="Crie uma senha segura"
+                    type={visivel ? "text" : "password"}
+                    {...register("senha")}
+                    required
+                    className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50"
+                    style={{
+                      backgroundColor: temaAtual.fundo + '80',
+                      borderColor: temaAtual.borda
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVisivel(!visivel)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-cyan-400 transition-colors"
+                  >
+                    {visivel ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                  {senha && (
+                    <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
+                      {passwordValid ? 
+                        <HiCheckCircle className="text-green-400" /> : 
+                        <HiExclamationCircle className="text-red-400" />
+                      }
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="group">
+                <label className="block mb-3 text-sm font-medium text-gray-300">
+                  Confirmar senha
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <HiLockClosed className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  <input
+                    placeholder="Digite a senha novamente"
+                    type={visivel ? "text" : "password"}
+                    {...register("verificarSenha")}
+                    required
+                    className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50"
+                    style={{
+                      backgroundColor: temaAtual.fundo + '80',
+                      borderColor: temaAtual.borda
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVisivel(!visivel)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-cyan-400 transition-colors"
+                  >
+                    {visivel ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                  {verificarSenha && (
+                    <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
+                      {passwordsMatch ? 
+                        <HiCheckCircle className="text-green-400" /> : 
+                        <HiExclamationCircle className="text-red-400" />
+                      }
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="bg-gray-900/30 rounded-2xl p-4 border border-gray-600">
+                <p className="text-sm font-medium text-gray-300 mb-3">
+                  Requisitos da senha:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {requisitosSenha.map((req, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      {req.condicao ? (
+                        <HiCheckCircle className="text-green-400 text-sm flex-shrink-0" />
+                      ) : (
+                        <HiExclamationCircle className="text-red-400 text-sm flex-shrink-0" />
+                      )}
+                      <span className={`text-xs ${req.condicao ? 'text-green-400' : 'text-red-400'}`}>
+                        {req.texto}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={emailStatus.existe || emailStatus.carregando || !passwordValid || !passwordsMatch || isLoading}
+                className="w-full cursor-pointer group relative bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Criando conta...
+                    </>
+                  ) : (
+                    <>
+                      Criar Minha Conta
+                      <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </span>
+              </button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-gray-700">
+              <p className="text-center text-gray-400">
+                Já tem uma conta?{" "}
+                <Link 
+                  href="/login" 
+                  className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
+                >
+                  Fazer login
+                </Link>
+              </p>
+            </div>
+          </div>
+          <div className="lg:hidden mt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              © 2025 StockControl. Sistema de gestão completo.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
