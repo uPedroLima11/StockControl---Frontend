@@ -449,9 +449,6 @@ export default function Sidebar() {
         </div>
       </aside>
 
-<<<<<<< HEAD
-      {mostrarNotificacoes && usuarioId && <PainelNotificacoes estaVisivel={mostrarNotificacoes} aoFechar={() => setMostrarNotificacoes(false)} nomeEmpresa={nomeEmpresa} cores={cores} usuarioId={usuarioId} onNotificacoesAtualizadas={verificarNotificacoes} />}
-=======
       {mostrarNotificacoes && usuarioId && (
         <PainelNotificacoes
           estaVisivel={mostrarNotificacoes}
@@ -463,7 +460,6 @@ export default function Sidebar() {
           permissoesUsuario={permissoesUsuario}
         />
       )}
->>>>>>> ce3bfe3eb610ddcbbdbe3fb03cd96f3faea1cca3
     </>
   );
 }
@@ -855,21 +851,6 @@ function PainelNotificacoes({
               {notificacao.lida ? t("read") : t("unread")}
             </span>
 
-<<<<<<< HEAD
-            <button
-              onClick={() => handleFazerPedido(notificacao)}
-              className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-              style={{
-                backgroundColor: cores.azulBrilhante,
-                color: "#FFFFFF",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
-            >
-              <FaClipboardList size={10} />
-              {t("fazerPedido") || "Fazer Pedido"}
-            </button>
-=======
             {permissoesUsuario.pedidos_criar && (
               <button
                 onClick={() => handleFazerPedido(notificacao)}
@@ -885,7 +866,6 @@ function PainelNotificacoes({
                 {t("fazerPedido") || "Fazer Pedido"}
               </button>
             )}
->>>>>>> ce3bfe3eb610ddcbbdbe3fb03cd96f3faea1cca3
           </div>
         </div>
       );
