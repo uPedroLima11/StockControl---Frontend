@@ -15,6 +15,9 @@ import Cookies from "js-cookie";
 type CampoOrdenacao = 'nome' | 'estoque' | 'preco' | 'categoria' | 'fornecedor' | 'none';
 type DirecaoOrdenacao = 'asc' | 'desc';
 
+type TipoFiltro = 'preco' | 'estoque' | 'nome' | 'categoria' | 'none';
+type DirecaoFiltro = 'maior' | 'menor' | 'crescente' | 'decrescente' | 'none';
+
 const cores = {
   dark: {
     fundo: "#0f172a",
@@ -60,7 +63,6 @@ export default function Produtos() {
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
-  const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const produtosPorPagina = 12;
   const { t } = useTranslation("produtos");
@@ -79,6 +81,11 @@ export default function Produtos() {
     emFalta: 0,
     noCatalogo: 0
   });
+
+  const [menuFiltrosAberto, setMenuFiltrosAberto] = useState(false);
+  const [tipoFiltroAtivo, setTipoFiltroAtivo] = useState<TipoFiltro>('none');
+  const [direcaoFiltroAtivo, setDirecaoFiltroAtivo] = useState<DirecaoFiltro>('none');
+  const [valorFiltro, setValorFiltro] = useState<number>(0);
 
   const [modalEstoqueAberto, setModalEstoqueAberto] = useState(false);
   const [produtoSelecionadoEstoque, setProdutoSelecionadoEstoque] = useState<{
@@ -115,9 +122,9 @@ export default function Produtos() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuCategoriasRef = useRef<HTMLDivElement>(null);
-  const menuFornecedoresRef = useRef<HTMLDivElement>(null);
-  const [menuFornecedoresAberto, setMenuFornecedoresAberto] = useState(false);
-
+  const menuFiltrosRef = useRef<HTMLDivElement>(null);
+  const [fornecedorSelecionado, setFornecedorSelecionado] = useState(form.fornecedorId);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState(form.categoriaId);
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
@@ -140,8 +147,8 @@ export default function Produtos() {
       if (menuCategoriasRef.current && !menuCategoriasRef.current.contains(event.target as Node)) {
         setMenuCategoriasAberto(false);
       }
-      if (menuFornecedoresRef.current && !menuFornecedoresRef.current.contains(event.target as Node)) {
-        setMenuFornecedoresAberto(false);
+      if (menuFiltrosRef.current && !menuFiltrosRef.current.contains(event.target as Node)) {
+        setMenuFiltrosAberto(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -191,6 +198,61 @@ export default function Produtos() {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
+
+.custom-select option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-select option:hover {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.custom-select option:not([value=""]):checked {
+  background: linear-gradient(rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.1)) !important;
+  background-color: transparent !important;
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+.custom-select option[value=""] {
+  color: inherit !important;
+  font-weight: normal !important;
+  background: transparent !important;
+}
+
+.custom-select option[value=""]:checked,
+.custom-select option[value=""]:selected,
+.custom-select option[value=""]:focus {
+  color: inherit !important;
+  font-weight: normal !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.custom-select option:focus {
+  background-color: transparent !important;
+}
+
+.custom-select option[value=""] {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+@supports (-webkit-appearance: none) or (-moz-appearance: none) {
+  .custom-select option[value=""] {
+    color: inherit !important;
+    background: transparent !important;
+  }
+  
+  .custom-select option[value=""]:checked {
+    color: inherit !important;
+    background: transparent !important;
+  }
+}
+  
       .card-hover:hover {
         transform: translateY(-8px);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -411,10 +473,46 @@ export default function Produtos() {
 
   useEffect(() => {
     if (produtosOriginais.length > 0) {
-      const produtosOrdenados = ordenarProdutos(produtosOriginais, campoOrdenacao, direcaoOrdenacao);
-      setProdutos(produtosOrdenados);
+      let produtosFiltrados = [...produtosOriginais];
+
+      if (tipoFiltroAtivo !== 'none' && direcaoFiltroAtivo !== 'none') {
+        produtosFiltrados = produtosFiltrados.filter(produto => {
+          switch (tipoFiltroAtivo) {
+            case 'preco':
+              if (direcaoFiltroAtivo === 'maior') {
+                return produto.preco > valorFiltro;
+              } else {
+                return produto.preco < valorFiltro;
+              }
+            case 'estoque':
+              if (direcaoFiltroAtivo === 'maior') {
+                return produto.quantidade > valorFiltro;
+              } else {
+                return produto.quantidade < valorFiltro;
+              }
+            default:
+              return true;
+          }
+        });
+
+        if (tipoFiltroAtivo === 'nome') {
+          produtosFiltrados.sort((a, b) => {
+            if (direcaoFiltroAtivo === 'crescente') {
+              return a.nome.localeCompare(b.nome);
+            } else {
+              return b.nome.localeCompare(a.nome);
+            }
+          });
+        }
+      } else {
+        const produtosOrdenados = ordenarProdutos(produtosOriginais, campoOrdenacao, direcaoOrdenacao);
+        setProdutos(produtosOrdenados);
+        return;
+      }
+
+      setProdutos(produtosFiltrados);
     }
-  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao]);
+  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao, tipoFiltroAtivo, direcaoFiltroAtivo, valorFiltro]);
 
   useEffect(() => {
     if (modalVisualizar) {
@@ -475,23 +573,22 @@ export default function Produtos() {
     });
   };
 
-  const handleOrdenar = (campo: CampoOrdenacao) => {
-    if (campoOrdenacao === campo) {
-      setDirecaoOrdenacao(direcaoOrdenacao === 'asc' ? 'desc' : 'asc');
-    } else {
-      setCampoOrdenacao(campo);
-      setDirecaoOrdenacao('asc');
+  const aplicarFiltroAvancado = (tipo: TipoFiltro, direcao: DirecaoFiltro, valor?: number) => {
+    setTipoFiltroAtivo(tipo);
+    setDirecaoFiltroAtivo(direcao);
+    if (valor !== undefined) {
+      setValorFiltro(valor);
     }
+    setPaginaAtual(1);
+    setMenuFiltrosAberto(false);
   };
 
-  const obterIconeOrdenacao = (campo: CampoOrdenacao) => {
-    if (campoOrdenacao !== campo) {
-      return <FaSort className={modoDark ? "text-gray-400" : "text-gray-500"} />;
-    }
-
-    return direcaoOrdenacao === 'asc' ? 
-      <FaSortUp className={modoDark ? "text-blue-400" : "text-blue-500"} /> : 
-      <FaSortDown className={modoDark ? "text-blue-400" : "text-blue-500"} />;
+  const removerTodosFiltros = () => {
+    setTipoFiltroAtivo('none');
+    setDirecaoFiltroAtivo('none');
+    setValorFiltro(0);
+    setFiltroCategoria(null);
+    setPaginaAtual(1);
   };
 
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
@@ -591,14 +688,6 @@ export default function Produtos() {
     if (value.length <= 60) {
       setForm({ ...form, nome: value });
       setNomeCaracteres(value.length);
-    }
-  };
-
-  const handleDescricaoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 255) {
-      setForm({ ...form, descricao: value });
-      setDescricaoCaracteres(value.length);
     }
   };
 
@@ -1036,11 +1125,6 @@ export default function Produtos() {
     setMenuCategoriasAberto(false);
   };
 
-  const removerFiltro = () => {
-    setFiltroCategoria(null);
-    setPaginaAtual(1);
-  };
-
   const abrirModalEstoque = (produto: ProdutoI) => {
     setProdutoSelecionadoEstoque({
       id: produto.id,
@@ -1061,41 +1145,38 @@ export default function Produtos() {
   const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
   const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
 
-  const toggleExpandirProduto = (id: string) => {
-    setProdutoExpandido(produtoExpandido === id ? null : id);
-  };
-
   const formatarPreco = (preco: number) => {
     return preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const mudarPagina = (novaPagina: number) => {
     setPaginaAtual(novaPagina);
-    setProdutoExpandido(null);
   };
 
   const nomeCategoriaSelecionada = filtroCategoria
     ? categorias.find(c => String(c.id) === filtroCategoria)?.nome
     : null;
 
+  const temFiltroAtivo = filtroCategoria || tipoFiltroAtivo !== 'none';
+
   if (!podeVisualizar) {
     return (
-      <div className={`min-h-screen ${modoDark 
-        ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" 
+      <div className={`min-h-screen ${modoDark
+        ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
         : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100"
-      } flex items-center justify-center px-4`}>
+        } flex items-center justify-center px-4`}>
         <div className="text-center">
           <div className={`w-24 h-24 mx-auto mb-6 ${modoDark ? "bg-red-500/20" : "bg-red-100"} rounded-full flex items-center justify-center`}>
             <FaLock className={`text-3xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
           </div>
-          <h1 className={`text-2xl font-bold ${modoDark ? "text-white" : "text-slate-900"} mb-4`}>Acesso Restrito</h1>
-          <p className={modoDark ? "text-gray-300" : "text-slate-600"}>Você não tem permissão para visualizar esta página.</p>
+          <h1 className={`text-2xl font-bold ${modoDark ? "text-white" : "text-slate-900"} mb-4`}>{t("acessoRestrito")}</h1>
+          <p className={modoDark ? "text-gray-300" : "text-slate-600"}>{t("acessoRestritoMensagem")}</p>
         </div>
       </div>
     );
   }
 
-  const bgGradient = modoDark 
+  const bgGradient = modoDark
     ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
     : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100";
 
@@ -1103,11 +1184,11 @@ export default function Produtos() {
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
   const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
   const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
-  const bgCardHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-white";
   const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
   const bgInput = modoDark ? "bg-slate-700/50" : "bg-white";
   const bgStats = modoDark ? "bg-slate-800/50" : "bg-white/80";
   const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
+  const bgSelected = modoDark ? "bg-blue-500/20" : "bg-blue-100";
 
   return (
     <div className={`min-h-screen ${bgGradient}`}>
@@ -1123,38 +1204,39 @@ export default function Produtos() {
 
               <div className="relative z-10 text-center">
                 <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
-                  Seus <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Produtos</span>
+                  {t('titulo')} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t('produtos')}</span>
                 </h1>
                 <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>
-                  Gerencie todo seu inventário de forma inteligente e organizada
+                  {t('subtitulo')}
                 </p>
               </div>
             </section>
+
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[
                 {
-                  label: 'Total',
+                  label: t('stats.total'),
                   value: stats.total,
                   icon: FaBox,
                   color: 'from-blue-500 to-cyan-500',
                   bgColor: modoDark ? 'bg-blue-500/10' : 'bg-blue-50'
                 },
                 {
-                  label: 'Em Estoque',
+                  label: t('stats.emEstoque'),
                   value: stats.emEstoque,
                   icon: FaCheck,
                   color: 'from-green-500 to-emerald-500',
                   bgColor: modoDark ? 'bg-green-500/10' : 'bg-green-50'
                 },
                 {
-                  label: 'Em Falta',
+                  label: t('stats.emFalta'),
                   value: stats.emFalta,
                   icon: FaExclamationTriangle,
                   color: 'from-red-500 to-orange-500',
                   bgColor: modoDark ? 'bg-red-500/10' : 'bg-red-50'
                 },
                 {
-                  label: 'No Catálogo',
+                  label: t('stats.noCatalogo'),
                   value: stats.noCatalogo,
                   icon: FaStar,
                   color: 'from-slate-500 to-slate-400',
@@ -1182,11 +1264,12 @@ export default function Produtos() {
                 </div>
               ))}
             </div>
+
             {empresaId && !empresaAtivada && (
-              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark 
-                ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30" 
+              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark
+                ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30"
                 : "bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200"
-              }`}>
+                }`}>
                 <div className={`p-2 ${modoDark ? "bg-orange-500/20" : "bg-orange-100"} rounded-xl`}>
                   <FaLock className={`text-xl ${modoDark ? "text-orange-400" : "text-orange-500"}`} />
                 </div>
@@ -1196,6 +1279,7 @@ export default function Produtos() {
                 </div>
               </div>
             )}
+
             <div className="flex flex-col lg:flex-row gap-4 mb-6 items-start lg:items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full">
                 <div className="relative flex-1 max-w-md">
@@ -1204,7 +1288,7 @@ export default function Produtos() {
                     <FaSearch className={`${modoDark ? "text-blue-400" : "text-blue-500"} mr-3 text-sm`} />
                     <input
                       type="text"
-                      placeholder="Buscar produtos..."
+                      placeholder={t('buscarPlaceholder')}
                       value={busca}
                       onChange={(e) => {
                         setBusca(e.target.value);
@@ -1214,15 +1298,111 @@ export default function Produtos() {
                     />
                   </div>
                 </div>
+
                 <div className="flex items-center gap-3 flex-wrap">
+                  <div className="relative" ref={menuFiltrosRef}>
+                    <button
+                      onClick={() => setMenuFiltrosAberto(!menuFiltrosAberto)}
+                      className={`flex items-center gap-3 ${bgCard} ${bgHover} border cursor-pointer ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm`}
+                    >
+                      <FaFilter className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                      <span className={`${textPrimary} text-sm`}>{t('filtros.filtrar')}</span>
+                      <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuFiltrosAberto ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {menuFiltrosAberto && (
+                      <div className={`absolute top-full left-0 mt-2 w-64 ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl ${modoDark ? "shadow-blue-500/20" : "shadow-blue-200"} z-50 overflow-hidden backdrop-blur-sm`}>
+                        <div className="p-3">
+                          <div className={`text-sm font-semibold ${textPrimary} mb-2`}>{t('filtros.titulo')}</div>
+                          <div className="mb-3">
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.preco')}</div>
+                            <div className="flex gap-2 mb-2">
+                              <input
+                                type="number"
+                                placeholder={t('filtros.valor')}
+                                value={valorFiltro || ""}
+                                onChange={(e) => setValorFiltro(Number(e.target.value))}
+                                className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`}
+                              />
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => aplicarFiltroAvancado('preco', 'maior')}
+                                className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === 'preco' && direcaoFiltroAtivo === 'maior' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.maiorQue')}
+                              </button>
+                              <button
+                                onClick={() => aplicarFiltroAvancado('preco', 'menor')}
+                                className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === 'preco' && direcaoFiltroAtivo === 'menor' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.menorQue')}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.estoque')}</div>
+                            <div className="flex gap-2 mb-2">
+                              <input
+                                type="number"
+                                placeholder={t('filtros.quantidade')}
+                                value={valorFiltro || ""}
+                                onChange={(e) => setValorFiltro(Number(e.target.value))}
+                                className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`}
+                              />
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => aplicarFiltroAvancado('estoque', 'maior')}
+                                className={`flex-1 px-2 py-1 cursor-pointer rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'estoque' && direcaoFiltroAtivo === 'maior' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.maiorQue')}
+                              </button>
+                              <button
+                                onClick={() => aplicarFiltroAvancado('estoque', 'menor')}
+                                className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'estoque' && direcaoFiltroAtivo === 'menor' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.menorQue')}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.nome')}</div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => aplicarFiltroAvancado('nome', 'crescente')}
+                                className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'nome' && direcaoFiltroAtivo === 'crescente' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.aZ')}
+                              </button>
+                              <button
+                                onClick={() => aplicarFiltroAvancado('nome', 'decrescente')}
+                                className={`flex-1 cursor-pointer px-2 py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'nome' && direcaoFiltroAtivo === 'decrescente' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
+                              >
+                                {t('filtros.zA')}
+                              </button>
+                            </div>
+                          </div>
+                          {temFiltroAtivo && (
+                            <button
+                              onClick={removerTodosFiltros}
+                              className={`w-full px-3 cursor-pointer py-2 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-lg ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 text-xs font-medium`}
+                            >
+                              {t('filtros.limparTodos')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div className="relative" ref={menuCategoriasRef}>
                     <button
                       onClick={() => setMenuCategoriasAberto(!menuCategoriasAberto)}
-                      className={`flex items-center gap-3 ${bgCard} ${bgHover} border ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm min-w-[180px]`}
+                      className={`flex items-center cursor-pointer gap-3 ${bgCard} ${bgHover} border ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm min-w-[180px]`}
                     >
                       <FaFilter className={modoDark ? "text-blue-400" : "text-blue-500"} />
                       <span className={`${textPrimary} flex-1 text-left text-sm`}>
-                        {filtroCategoria ? nomeCategoriaSelecionada : 'Todas Categorias'}
+                        {filtroCategoria ? nomeCategoriaSelecionada : t('filtros.todasCategorias')}
                       </span>
                       <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuCategoriasAberto ? 'rotate-180' : ''}`} />
                     </button>
@@ -1230,12 +1410,12 @@ export default function Produtos() {
                     {menuCategoriasAberto && (
                       <div className={`absolute top-full left-0 mt-2 w-56 ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl ${modoDark ? "shadow-blue-500/20" : "shadow-blue-200"} z-50 overflow-hidden backdrop-blur-sm`}>
                         <div className="p-2 max-h-48 overflow-y-auto scroll-custom">
-                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>Categorias</div>
+                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t('categorias')}</div>
                           {categorias.slice(0, 100).map((categoria) => (
                             <div
                               key={categoria.id}
-                              className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) 
-                                ? (modoDark ? 'bg-blue-500/30' : 'bg-blue-100') + ' scale-105' 
+                              className={`p-3  rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id)
+                                ? `${bgSelected} scale-105 font-medium`
                                 : ''}`}
                               onClick={() => aplicarFiltroCategoria(String(categoria.id))}
                             >
@@ -1277,15 +1457,16 @@ export default function Produtos() {
                   )}
                   {filtroCategoria && (
                     <button
-                      onClick={removerFiltro}
+                      onClick={() => aplicarFiltroCategoria(null)}
                       className={`px-4 py-3 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-xl ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 flex items-center gap-2 text-sm`}
                     >
                       <FaTimes className="text-xs" />
-                      Limpar
+                      {t('limpar')}
                     </button>
                   )}
                 </div>
               </div>
+
               <div className="flex items-center gap-3 mt-4 lg:mt-0">
                 <div className={`${textPrimary} ${bgCard} px-3 py-1 rounded-xl border ${borderColor} text-sm`}>
                   <span className="font-mono">
@@ -1296,14 +1477,15 @@ export default function Produtos() {
                 {podeCriar && empresaAtivada && (
                   <button
                     onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm"
+                    className="px-6 py-3 bg-gradient-to-r cursor-pointer from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm"
                   >
                     <FaPlus className="text-sm" />
-                    Novo Produto
+                    {t('novoProduto')}
                   </button>
                 )}
               </div>
             </div>
+
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, index) => (
@@ -1325,9 +1507,9 @@ export default function Produtos() {
                 <div className={`w-24 h-24 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
                   <FaBox className={`text-2xl ${textMuted}`} />
                 </div>
-                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>Nenhum produto encontrado</h3>
+                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t('nenhumProdutoEncontrado')}</h3>
                 <p className={`${textMuted} mb-4 text-sm`}>
-                  {filtroCategoria ? 'Nenhum produto encontrado para esta categoria.' : 'Comece adicionando seu primeiro produto!'}
+                  {filtroCategoria ? t('nenhumProdutoCategoria') : t('comeceAdicionando')}
                 </p>
                 {podeCriar && empresaAtivada && (
                   <button
@@ -1335,7 +1517,7 @@ export default function Produtos() {
                     className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm"
                   >
                     <FaPlus />
-                    Criar Primeiro Produto
+                    {t('criarPrimeiroProduto')}
                   </button>
                 )}
               </div>
@@ -1345,10 +1527,10 @@ export default function Produtos() {
                   {produtosAtuais.map((produto, index) => (
                     <div
                       key={produto.id}
-                      className={`group ${modoDark 
-                        ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" 
+                      className={`group ${modoDark
+                        ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
                         : "bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
-                      } rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
+                        } rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
                       style={{
                         animationDelay: `${index * 100}ms`,
                       }}
@@ -1379,10 +1561,10 @@ export default function Produtos() {
                               setModalVisualizar(produto);
                               setForm(produto);
                             }}
-                            className="flex-1 bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
+                            className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
                           >
                             <FaEye className="text-xs" />
-                            Ver
+                            {t('ver')}
                           </button>
                           {podeEditar && (
                             <button
@@ -1391,7 +1573,7 @@ export default function Produtos() {
                                 setModalVisualizar(produto);
                                 setForm(produto);
                               }}
-                              className="bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                              className=" cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
                             >
                               <FaEdit className="text-xs" />
                             </button>
@@ -1427,14 +1609,14 @@ export default function Produtos() {
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1">
                             <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                            Cat:
+                            {t('categoria')}:
                           </span>
                           <span className={textPrimary}>{produto.categoria?.nome || "-"}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1">
                             <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
-                            Forn:
+                            {t('fornecedor')}:
                           </span>
                           <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
                         </div>
@@ -1442,8 +1624,8 @@ export default function Produtos() {
 
                       <div className="mb-2">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className={textMuted}>Estoque</span>
-                          <span className={textPrimary}>{produto.quantidade} uni.</span>
+                          <span className={textMuted}>{t('estoque')}</span>
+                          <span className={textPrimary}>{produto.quantidade} {t('unidades')}</span>
                         </div>
                         <div className={`w-full ${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-full h-1.5`}>
                           <div
@@ -1466,20 +1648,21 @@ export default function Produtos() {
                             onClick={() => abrirModalEstoque(produto)}
                             className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
                             style={{
-                              background: modoDark 
+                              background: modoDark
                                 ? "linear-gradient(135deg, #3B82F6, #0EA5E9)"
                                 : "linear-gradient(135deg, #1976D2, #0284C7)",
                               color: "#FFFFFF"
                             }}
                           >
                             <FaBox size={14} />
-                            Estoque
+                            {t('estoque')}
                           </button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
+
                 {totalPaginas > 1 && (
                   <div className="flex justify-center items-center gap-3 mt-6 lg:hidden">
                     <button
@@ -1541,13 +1724,13 @@ export default function Produtos() {
             {(modalAberto || modalVisualizar) && (
               <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
                 <div
-                  className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto backdrop-blur-sm`}
+                  className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto backdrop-blur-sm`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className={`text-xl font-bold ${textPrimary}`}>
-                        {modalVisualizar ? t("editarProduto") : t("novoProduto")}
+                        {modalVisualizar ? t('editarProduto') : t('novoProduto')}
                       </h2>
                       <button
                         onClick={() => {
@@ -1565,10 +1748,10 @@ export default function Produtos() {
                     <div className="space-y-4">
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
-                          {t("nome")} <span className="text-red-400">*</span>
+                          {t('nome')} <span className="text-red-400">*</span>
                         </label>
                         <input
-                          placeholder="Nome do produto"
+                          placeholder={t('nomePlaceholder')}
                           value={form.nome || ""}
                           onChange={handleNomeChange}
                           className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
@@ -1579,13 +1762,12 @@ export default function Produtos() {
                           {nomeCaracteres}/60
                         </div>
                       </div>
-
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
-                          {t("descricao")} <span className="text-red-400">*</span>
+                          {t('descricao')} <span className="text-red-400">*</span>
                         </label>
                         <textarea
-                          placeholder="Descrição do produto"
+                          placeholder={t('descricaoPlaceholder')}
                           value={form.descricao || ""}
                           onChange={(e) => {
                             const value = e.target.value;
@@ -1594,8 +1776,8 @@ export default function Produtos() {
                               setDescricaoCaracteres(value.length);
                             }
                           }}
-                          rows={2}
-                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 resize-none text-sm`}
+                          rows={3}
+                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 resize-vertical text-sm`}
                           disabled={Boolean(!podeEditar && modalVisualizar)}
                           maxLength={255}
                         />
@@ -1603,25 +1785,55 @@ export default function Produtos() {
                           {descricaoCaracteres}/255
                         </div>
                       </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("preco")}</label>
+                      <div>
+                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('preco')}</label>
+                        <input
+                          placeholder="0,00"
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={form.preco || ""}
+                          onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
+                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                          disabled={Boolean(!podeEditar && modalVisualizar)}
+                        />
+                      </div>
+                      <div className="flex gap-2 w-full items-end">
+                        <div className="flex-1">
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('foto')}</label>
                           <input
-                            placeholder="0,00"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={form.preco || ""}
-                            onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
-                            disabled={Boolean(!podeEditar && modalVisualizar)}
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            className="hidden"
                           />
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading || Boolean(!podeEditar && modalVisualizar)}
+                            className={`w-full cursor-pointer ${bgInput} ${bgHover} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm h-[42px]`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
+                              />
+                            </svg>
+                            {isUploading ? t('enviando') : t('selecionarImagem')}
+                          </button>
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <div className="flex items-center gap-1 mb-2">
                             <label className={`block ${textPrimary} font-medium text-sm`}>
-                              {t("quantidadeMinima")} <span className="text-red-400">*</span>
+                              {t('quantidadeMinima')} <span className="text-red-400">*</span>
                             </label>
                             <div className="relative group">
                               <FaQuestionCircle
@@ -1632,13 +1844,13 @@ export default function Produtos() {
                               />
                               {showTooltip && (
                                 <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-2 ${modoDark ? "bg-slate-700" : "bg-white"} border ${borderColor} rounded-lg text-xs ${textPrimary} z-10 shadow-lg`}>
-                                  {t("quantidadeMinimaTooltip")}
+                                  {t('quantidadeMinimaTooltip')}
                                 </div>
                               )}
                             </div>
                           </div>
                           <input
-                            placeholder="Quantidade mínima"
+                            placeholder={t('quantidadeMinimaPlaceholder')}
                             type="number"
                             min={0}
                             value={form.quantidadeMin || ""}
@@ -1648,90 +1860,65 @@ export default function Produtos() {
                           />
                         </div>
                       </div>
-
-                      <div>
-                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("foto")}</label>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleFileChange}
-                          accept="image/*"
-                          className="hidden"
-                        />
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploading || Boolean(!podeEditar && modalVisualizar)}
-                          className={`w-full ${bgInput} ${bgHover} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm`}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                            />
-                          </svg>
-                          {isUploading ? t("enviando") : t("selecionarImagem")}
-                        </button>
-                      </div>
-
                       {(preview || form.foto) && (
-                        <div className="flex justify-center">
-                          <img
-                            src={preview || form.foto || ""}
-                            alt="Preview"
-                            className="w-24 h-24 object-cover rounded-xl border border-blue-500/30"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/out.jpg";
-                            }}
-                          />
+                        <div className="flex flex-col">
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
+                            {t('visualizacao') || 'Visualização'}
+                          </label>
+                          <div className={`w-full ${bgInput} border ${borderColor} rounded-xl flex items-center justify-center p-4`}>
+                            <img
+                              src={preview || form.foto || ""}
+                              alt="Preview"
+                              className="max-w-full max-h-48 object-cover rounded-xl"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/out.jpg";
+                              }}
+                            />
+                          </div>
                         </div>
                       )}
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="relative" ref={menuFornecedoresRef}>
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("fornecedor")}</label>
+                      <div className="flex gap-2 w-full">
+                        <div className="flex-1">
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('fornecedor')}</label>
                           <select
                             value={form.fornecedorId || ""}
                             onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm scroll-custom`}
+                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm`}
                             disabled={Boolean(!podeEditar && modalVisualizar)}
-                            size={5}
                           >
-                            <option value="" className={`${modoDark ? "bg-slate-800" : "bg-white"} text-sm`}>{t("selecionarFornecedor")}</option>
-                            {fornecedores.slice(0, 100).map((f) => (
-                              <option key={f.id} value={f.id} className={`${modoDark ? "bg-slate-800" : "bg-white"} text-sm`}>
+                            <option value="">{t('selecionarFornecedor')}</option>
+                            {fornecedores.map((f) => (
+                              <option
+                                key={f.id}
+                                value={f.id}
+                                className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
+                              >
                                 {f.nome}
                               </option>
                             ))}
                           </select>
                         </div>
-
-                        <div>
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("categoria")}</label>
+                        <div className="flex-1">
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('categoria')}</label>
                           <select
                             value={form.categoriaId || ""}
                             onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm scroll-custom`}
+                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm`}
                             disabled={Boolean(!podeEditar && modalVisualizar)}
-                            size={5}
                           >
-                            <option value="" className={`${modoDark ? "bg-slate-800" : "bg-white"} text-sm`}>{t("selecionarCategoria")}</option>
-                            {categorias.slice(0, 100).map((c) => (
-                              <option key={c.id} value={c.id} className={`${modoDark ? "bg-slate-800" : "bg-white"} text-sm`}>
+                            <option value="">{t('selecionarCategoria')}</option>
+                            {categorias.map((c) => (
+                              <option
+                                key={c.id}
+                                value={c.id}
+                                className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
+                              >
                                 {c.nome}
                               </option>
                             ))}
                           </select>
                         </div>
                       </div>
-
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
@@ -1742,19 +1929,18 @@ export default function Produtos() {
                           disabled={Boolean(!podeEditar && modalVisualizar)}
                         />
                         <label htmlFor="noCatalogo" className={`${textPrimary} cursor-pointer text-sm`}>
-                          Incluir no catálogo
+                          {t('incluirNoCatalogo')}
                         </label>
                       </div>
-
                       <div className="flex justify-between items-center pt-4 border-t border-blue-500/20">
                         <div>
                           {modalVisualizar && podeExcluir && (
                             <button
                               onClick={handleDelete}
-                              className={`px-4 py-2 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-sm`}
+                              className={`px-4 py-2 cursor-pointer ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-sm`}
                             >
                               <FaTrash className="text-xs" />
-                              {t("excluir")}
+                              {t('excluir')}
                             </button>
                           )}
                         </div>
@@ -1766,25 +1952,25 @@ export default function Produtos() {
                               setFile(null);
                               setPreview(null);
                             }}
-                            className={`px-4 py-2 ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-sm`}
+                            className={`px-4 py-2 cursor-pointer ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-sm`}
                           >
-                            {t("cancelar")}
+                            {t('cancelar')}
                           </button>
                           {(podeCriar && !modalVisualizar) && (
                             <button
                               onClick={handleSubmit}
                               disabled={isUploading}
-                              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                              className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
                             >
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  {t("enviando")}
+                                  {t('enviando')}
                                 </>
                               ) : (
                                 <>
                                   <FaCheck className="text-xs" />
-                                  {t("salvar")}
+                                  {t('salvar')}
                                 </>
                               )}
                             </button>
@@ -1793,17 +1979,17 @@ export default function Produtos() {
                             <button
                               onClick={handleUpdate}
                               disabled={isUploading}
-                              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                              className="px-4 cursor-pointer py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
                             >
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  {t("enviando")}
+                                  {t('enviando')}
                                 </>
                               ) : (
                                 <>
                                   <FaCheck className="text-xs" />
-                                  {t("atualizar")}
+                                  {t('atualizar')}
                                 </>
                               )}
                             </button>
@@ -1837,6 +2023,6 @@ export default function Produtos() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
