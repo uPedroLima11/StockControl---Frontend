@@ -69,22 +69,22 @@ export default function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center space-x-14">
-          <ScrollLink 
-            to="features" 
+          <ScrollLink
+            to="features"
             {...scrollProps}
             className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer"
           >
             Recursos
           </ScrollLink>
-          
-          <ScrollLink 
-            to="pricing" 
+
+          <ScrollLink
+            to="pricing"
             {...scrollProps}
             className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer"
           >
             Assinatura
           </ScrollLink>
-          
+
           {fotoEmpresa ? (
             <Link href="/dashboard">
               <img
@@ -107,27 +107,27 @@ export default function Navbar() {
       {menuOpen && (
         <div className="lg:hidden fixed top-16 left-0 right-0 bg-[#0A1929] border-t border-blue-500/20 z-40 shadow-lg">
           <div className="flex flex-col items-start py-4 gap-2 text-white text-lg font-semibold bg-[#0A1929] px-6">
-            <ScrollLink 
-              to="features" 
+            <ScrollLink
+              to="features"
               {...scrollProps}
               className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10 last:border-b-0"
             >
               Recursos
             </ScrollLink>
-            
-            <ScrollLink 
-              to="pricing" 
+
+            <ScrollLink
+              to="pricing"
               {...scrollProps}
               className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10 last:border-b-0"
             >
               Assinatura
             </ScrollLink>
-            
+
             <div className="w-full pt-2">
               {fotoEmpresa ? (
-                <Link 
-                  href="/conta" 
-                  onClick={() => setMenuOpen(false)} 
+                <Link
+                  href="/conta"
+                  onClick={() => setMenuOpen(false)}
                   className="py-3 flex items-center gap-3 w-full"
                 >
                   <img
@@ -148,8 +148,8 @@ export default function Navbar() {
               )}
             </div>
           </div>
-          <div 
-            className="fixed inset-0 bg-black/50 -z-10" 
+          <div
+            className="fixed inset-0 bg-black/50 -z-10"
             onClick={() => setMenuOpen(false)}
           />
         </div>
