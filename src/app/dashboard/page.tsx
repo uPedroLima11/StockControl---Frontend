@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import Cookies from "js-cookie";
 
 interface CategoriaDistribuicao {
   categoria: string;
@@ -46,7 +47,7 @@ export default function Dashboard() {
     if (total === 0) return categorias.map(() => 0);
 
     let anguloAcumulado = 0;
-    return categorias.map(cat => {
+    return categorias.map((cat) => {
       const porcentagem = (cat.quantidade / total) * 100;
       const anguloInicio = anguloAcumulado;
       anguloAcumulado += (porcentagem / 100) * 360;
@@ -57,6 +58,12 @@ export default function Dashboard() {
   const angulosPizza = calcularAngulosPizza(distribuicaoCategorias);
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
@@ -77,7 +84,7 @@ export default function Dashboard() {
       }
     }, 30000);
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       html::-webkit-scrollbar {
         width: 10px;
@@ -159,15 +166,7 @@ export default function Dashboard() {
         return;
       }
 
-      await Promise.all([
-        fetchContagem(usuarioId),
-        fetchProdutos(usuarioId),
-        fetchFornecedores(usuarioId),
-        fetchVendas(usuarioId),
-        fetchFuncionarios(usuarioId),
-        fetchTopProdutos(usuarioId),
-        fetchDistribuicaoCategorias(usuarioId)
-      ]);
+      await Promise.all([fetchContagem(usuarioId), fetchProdutos(usuarioId), fetchFornecedores(usuarioId), fetchVendas(usuarioId), fetchFuncionarios(usuarioId), fetchTopProdutos(usuarioId), fetchDistribuicaoCategorias(usuarioId)]);
     } catch (error) {
       console.error("Erro ao buscar dados da dashboard:", error);
     }
@@ -197,7 +196,12 @@ export default function Dashboard() {
 
       const [responseVendas, responseProdutos] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`),
-        fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`)
+        fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }),
       ]);
 
       if (responseVendas.ok) {
@@ -260,7 +264,12 @@ export default function Dashboard() {
 
       if (!usuario.empresaId) return;
 
-      const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+      const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (responseProdutos.ok) {
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
@@ -268,9 +277,12 @@ export default function Dashboard() {
         const produtosComSaldos = await Promise.all(
           produtosDaEmpresa.map(async (produto) => {
             try {
-              const responseSaldo = await fetch(
-                `${process.env.NEXT_PUBLIC_URL_API}/produtos/${produto.id}/saldo`
-              );
+              const responseSaldo = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${produto.id}/saldo`, {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${Cookies.get("token")}`,
+                },
+              });
               if (responseSaldo.ok) {
                 const { saldo } = await responseSaldo.json();
                 return { ...produto, quantidade: saldo };
@@ -326,16 +338,16 @@ export default function Dashboard() {
         setProdutosTopVendas(data);
       } else {
         if (todasVendas.length > 0) {
-          const vendasPorProduto: { [key: string]: { vendas: number, nome: string } } = {};
+          const vendasPorProduto: { [key: string]: { vendas: number; nome: string } } = {};
 
-          todasVendas.forEach(venda => {
+          todasVendas.forEach((venda) => {
             if (venda.produtoId && venda.produto) {
               const produtoId = venda.produtoId.toString();
 
               if (!vendasPorProduto[produtoId]) {
                 vendasPorProduto[produtoId] = {
                   vendas: 0,
-                  nome: venda.produto.nome
+                  nome: venda.produto.nome,
                 };
               }
               vendasPorProduto[produtoId].vendas += venda.quantidade || 1;
@@ -348,7 +360,7 @@ export default function Dashboard() {
             .map(([produtoId, data]) => ({
               id: produtoId,
               nome: data.nome,
-              vendas: data.vendas
+              vendas: data.vendas,
             }));
 
           setProdutosTopVendas(topProdutos);
@@ -370,8 +382,13 @@ export default function Dashboard() {
       if (!usuario.empresaId) return;
 
       const [responseProdutos, todasCategorias] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`),
-        fetchTodasCategorias()
+        fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }),
+        fetchTodasCategorias(),
       ]);
 
       if (responseProdutos.ok) {
@@ -379,34 +396,33 @@ export default function Dashboard() {
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId);
 
         const distribuicao: { [key: string]: number } = {};
-        produtosDaEmpresa.forEach(produto => {
+        produtosDaEmpresa.forEach((produto) => {
           const categoria = produto.categoria?.nome || "Sem Categoria";
           distribuicao[categoria] = (distribuicao[categoria] || 0) + 1;
         });
 
-        const categoriasOrdenadas = Object.entries(distribuicao)
-          .sort((a, b) => b[1] - a[1]);
+        const categoriasOrdenadas = Object.entries(distribuicao).sort((a, b) => b[1] - a[1]);
 
         const categoriasComProdutos = categoriasOrdenadas.filter(([, quantidade]) => quantidade > 0);
 
-        const distribuicaoFinal: CategoriaDistribuicao[] = categoriasComProdutos.map(([categoria, quantidade], index) => ({
-          categoria,
-          quantidade,
-          cor: coresCategorias[index] || "#CCCCCC"
-        })).slice(0, 5);
+        const distribuicaoFinal: CategoriaDistribuicao[] = categoriasComProdutos
+          .map(([categoria, quantidade], index) => ({
+            categoria,
+            quantidade,
+            cor: coresCategorias[index] || "#CCCCCC",
+          }))
+          .slice(0, 5);
 
         if (distribuicaoFinal.length < 5) {
-          const categoriasExistentes = new Set(distribuicaoFinal.map(item => item.categoria));
+          const categoriasExistentes = new Set(distribuicaoFinal.map((item) => item.categoria));
 
-          const categoriasDisponiveis = todasCategorias.filter((categoria: string) =>
-            !categoriasExistentes.has(categoria) && !distribuicao[categoria]
-          );
+          const categoriasDisponiveis = todasCategorias.filter((categoria: string) => !categoriasExistentes.has(categoria) && !distribuicao[categoria]);
 
           categoriasDisponiveis.slice(0, 5 - distribuicaoFinal.length).forEach((categoria: string) => {
             distribuicaoFinal.push({
               categoria,
               quantidade: 0,
-              cor: coresCategorias[distribuicaoFinal.length] || "#CCCCCC"
+              cor: coresCategorias[distribuicaoFinal.length] || "#CCCCCC",
             });
           });
         }
@@ -422,7 +438,7 @@ export default function Dashboard() {
     const data30DiasAtras = new Date();
     data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
 
-    const vendasFiltradas = vendas.filter(venda => {
+    const vendasFiltradas = vendas.filter((venda) => {
       if (!venda.createdAt) return false;
       const dataVenda = new Date(venda.createdAt);
       return dataVenda >= data30DiasAtras;
@@ -436,18 +452,9 @@ export default function Dashboard() {
     setProdutoExpandido(produtoExpandido === id ? null : id);
   };
 
-  const produtosCriticos = produtos.filter(
-    (produto) => produto.quantidade < (produto.quantidadeMin || 0) &&
-      produto.quantidadeMin !== undefined &&
-      produto.quantidadeMin > 0
-  );
+  const produtosCriticos = produtos.filter((produto) => produto.quantidade < (produto.quantidadeMin || 0) && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0);
 
-  const produtosAtencao = produtos.filter(
-    (produto) => produto.quantidade >= (produto.quantidadeMin || 0) &&
-      produto.quantidade < (produto.quantidadeMin || 0) + 5 &&
-      produto.quantidadeMin !== undefined &&
-      produto.quantidadeMin > 0
-  );
+  const produtosAtencao = produtos.filter((produto) => produto.quantidade >= (produto.quantidadeMin || 0) && produto.quantidade < (produto.quantidadeMin || 0) + 5 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0);
 
   const produtosEstoqueBaixo = [...produtosCriticos, ...produtosAtencao];
 
@@ -468,21 +475,11 @@ export default function Dashboard() {
       <div
         className="justify-center w-full max-w-6xl rounded-2xl px-4 sm:px-8 md:px-12 py-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 mx-auto mb-8 shadow-xl"
         style={{
-          background: modoDark
-            ? "linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)"
-            : "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)",
-          border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`
+          background: modoDark ? "linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)" : "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)",
+          border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
         }}
       >
-        <Image
-          alt="icone"
-          src="/icone.png"
-          width={100}
-          height={100}
-          quality={100}
-          priority
-          className="object-contain filter brightness-0 invert"
-        />
+        <Image alt="icone" src="/icone.png" width={100} height={100} quality={100} priority className="object-contain filter brightness-0 invert" />
         <div className="text-white text-center md:text-left">
           <h1 className="text-3xl font-bold">STOCKCONTROL</h1>
           <p className="text-base mt-1 opacity-90">
@@ -504,25 +501,31 @@ export default function Dashboard() {
               borderColor: "var(--cor-borda)",
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
-              color: "var(--cor-fonte)",
-              borderColor: "var(--cor-borda)"
-            }}>
+            <h2
+              className="text-lg font-semibold mb-4 border-b pb-2"
+              style={{
+                color: "var(--cor-fonte)",
+                borderColor: "var(--cor-borda)",
+              }}
+            >
               📊 {t("financeiro.titulo")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 rounded-lg" style={{
-                backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
-              }}>
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
+                }}
+              >
                 <h3 className="font-medium mb-3 flex items-center gap-2">
                   <span>🏆</span> {t("financeiro.topProdutos")}
                 </h3>
                 <div className="space-y-3">
                   {produtosTopVendas.length > 0 ? (
                     produtosTopVendas.map((produto) => {
-                      const maxVendas = Math.max(...produtosTopVendas.map(p => p.vendas));
+                      const maxVendas = Math.max(...produtosTopVendas.map((p) => p.vendas));
                       const porcentagem = maxVendas > 0 ? (produto.vendas / maxVendas) * 100 : 0;
                       return (
                         <div key={produto.id} className="space-y-1 group relative">
@@ -539,7 +542,7 @@ export default function Dashboard() {
                               className="h-2 rounded-full transition-all duration-300"
                               style={{
                                 width: `${porcentagem}%`,
-                                backgroundColor: modoDark ? "#1976D2" : "#0284C7"
+                                backgroundColor: modoDark ? "#1976D2" : "#0284C7",
                               }}
                             />
                           </div>
@@ -547,16 +550,17 @@ export default function Dashboard() {
                       );
                     })
                   ) : (
-                    <div className="text-center text-sm text-gray-500">
-                      {t("financeiro.semDados")}
-                    </div>
+                    <div className="text-center text-sm text-gray-500">{t("financeiro.semDados")}</div>
                   )}
                 </div>
               </div>
-              <div className="p-4 rounded-lg" style={{
-                backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
-              }}>
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
+                }}
+              >
                 <h3 className="font-medium mb-3 flex items-center gap-2">
                   <span>📦</span> {t("financeiro.categorias")}
                 </h3>
@@ -568,20 +572,7 @@ export default function Dashboard() {
                           const porcentagem = totalItens > 0 ? (item.quantidade / totalItens) * 100 : 0;
                           const anguloInicio = angulosPizza[index];
 
-                          return (
-                            <circle
-                              key={index}
-                              cx="50"
-                              cy="50"
-                              r="45"
-                              fill="transparent"
-                              stroke={item.cor}
-                              strokeWidth="10"
-                              strokeDasharray={`${porcentagem} ${100 - porcentagem}`}
-                              strokeDashoffset={100 - anguloInicio}
-                              className="transition-all duration-500"
-                            />
-                          );
+                          return <circle key={index} cx="50" cy="50" r="45" fill="transparent" stroke={item.cor} strokeWidth="10" strokeDasharray={`${porcentagem} ${100 - porcentagem}`} strokeDashoffset={100 - anguloInicio} className="transition-all duration-500" />;
                         })}
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -623,10 +614,13 @@ export default function Dashboard() {
               borderColor: "var(--cor-borda)",
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
-              color: "var(--cor-fonte)",
-              borderColor: "var(--cor-borda)"
-            }}>
+            <h2
+              className="text-lg font-semibold mb-4 border-b pb-2"
+              style={{
+                color: "var(--cor-fonte)",
+                borderColor: "var(--cor-borda)",
+              }}
+            >
               {t("atividades.titulo")}
             </h2>
 
@@ -636,22 +630,23 @@ export default function Dashboard() {
                 { valor: vendas30Dias, label: t("atividades.lucroMensal"), formato: "currency" },
                 { valor: contagemFornecedores, label: t("atividades.contagemFornecedores"), formato: "number" },
                 { valor: contagemProduto, label: t("atividades.contagemItens"), formato: "number" },
-                { valor: contagemFuncionarios, label: t("atividades.contagemFuncionarios"), formato: "number" }
+                { valor: contagemFuncionarios, label: t("atividades.contagemFuncionarios"), formato: "number" },
               ].map((item, index) => (
-                <div key={index} className="p-3 rounded-lg"
+                <div
+                  key={index}
+                  className="p-3 rounded-lg"
                   style={{
                     backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
+                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
                   }}
                 >
                   <p className="text-xl font-semibold mb-1" style={{ color: "var(--cor-fonte)" }}>
                     {item.formato === "currency"
                       ? item.valor.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR", {
-                        style: "currency",
-                        currency: i18n.language === "en" ? "USD" : "BRL"
-                      })
-                      : item.valor
-                    }
+                          style: "currency",
+                          currency: i18n.language === "en" ? "USD" : "BRL",
+                        })
+                      : item.valor}
                   </p>
                   <p className="text-sm text-gray-500">{item.label}</p>
                 </div>
@@ -666,19 +661,20 @@ export default function Dashboard() {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = modoDark
-                ? "0 12px 30px rgba(25, 118, 210, 0.25)"
-                : "0 12px 30px rgba(2, 132, 199, 0.2)";
+              e.currentTarget.style.boxShadow = modoDark ? "0 12px 30px rgba(25, 118, 210, 0.25)" : "0 12px 30px rgba(2, 132, 199, 0.2)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
             }}
           >
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2" style={{
-              color: "var(--cor-fonte)",
-              borderColor: "var(--cor-borda)"
-            }}>
+            <h2
+              className="text-lg font-semibold mb-4 border-b pb-2"
+              style={{
+                color: "var(--cor-fonte)",
+                borderColor: "var(--cor-borda)",
+              }}
+            >
               {t("estoqueBaixo.titulo")}
             </h2>
 
@@ -699,17 +695,15 @@ export default function Dashboard() {
                       className="border-b transition-all duration-200 cursor-pointer"
                       style={{ borderColor: "var(--cor-borda)" }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = modoDark
-                          ? "rgba(25, 118, 210, 0.15)"
-                          : "rgba(2, 132, 199, 0.1)";
+                        e.currentTarget.style.backgroundColor = modoDark ? "rgba(25, 118, 210, 0.15)" : "rgba(2, 132, 199, 0.1)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";
                       }}
                     >
                       <td className="py-3 px-4 text-start">{produto.nome}</td>
-                      <td className="py-3 px-4 text-center">{produto.quantidade}</td> 
-                      <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td> 
+                      <td className="py-3 px-4 text-center">{produto.quantidade}</td>
+                      <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td>
                       <td className="flex items-center justify-center py-3 px-4 text-center">
                         {produto.quantidade < (produto.quantidadeMin || 0) ? (
                           <div className="flex items-center gap-1 text-red-400">
@@ -729,11 +723,14 @@ export default function Dashboard() {
 
             <div className="md:hidden space-y-3">
               {produtosAtuais.length === 0 ? (
-                <div className="p-4 text-center rounded-lg" style={{
-                  color: "var(--cor-subtitulo)",
-                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`
-                }}>
+                <div
+                  className="p-4 text-center rounded-lg"
+                  style={{
+                    color: "var(--cor-subtitulo)",
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
+                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
+                  }}
+                >
                   {t("estoqueBaixo.nenhumProduto")}
                 </div>
               ) : (
@@ -746,9 +743,7 @@ export default function Dashboard() {
                       borderColor: "var(--cor-borda)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = modoDark
-                        ? "rgba(25, 118, 210, 0.15)"
-                        : "rgba(2, 132, 199, 0.1)";
+                      e.currentTarget.style.backgroundColor = modoDark ? "rgba(25, 118, 210, 0.15)" : "rgba(2, 132, 199, 0.1)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "var(--cor-fundo-bloco)";
@@ -783,10 +778,7 @@ export default function Dashboard() {
                       </button>
                     </div>
 
-                    <div
-                      className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`}
-                      style={{ color: "var(--cor-fonte)" }}
-                    >
+                    <div className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`} style={{ color: "var(--cor-fonte)" }}>
                       <div className="pt-3 border-t" style={{ borderColor: "var(--cor-borda)" }}>
                         <div className="flex items-center gap-2">
                           {produto.quantidade < (produto.quantidadeMin || 0) ? (
@@ -816,7 +808,7 @@ export default function Dashboard() {
                   className={`p-2 rounded-full transition-colors ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
                   style={{
                     color: "var(--cor-fonte)",
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)"
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
                   }}
                 >
                   <FaAngleLeft />
@@ -832,7 +824,7 @@ export default function Dashboard() {
                   className={`p-2 rounded-full transition-colors ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
                   style={{
                     color: "var(--cor-fonte)",
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)"
+                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
                   }}
                 >
                   <FaAngleRight />

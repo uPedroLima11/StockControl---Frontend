@@ -29,6 +29,12 @@ export default function AtivacaoPage() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
@@ -50,7 +56,7 @@ export default function AtivacaoPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
         const empresaData = await empresaRes.json();
@@ -61,7 +67,7 @@ export default function AtivacaoPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
         const statusData = await statusRes.json();

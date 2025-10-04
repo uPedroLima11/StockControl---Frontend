@@ -70,6 +70,12 @@ export default function Clientes() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {

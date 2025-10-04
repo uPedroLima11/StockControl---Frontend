@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FaSearch, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
+import Cookies from "js-cookie";
 
 type TipoLog = "CRIACAO" | "ATUALIZACAO" | "EXCLUSAO" | "BAIXA" | "EMAIL_ENVIADO";
 
@@ -29,10 +30,16 @@ export default function Logs() {
     primario: modoDark ? "#1976D2" : "#1976D2",
     secundario: modoDark ? "#00B4D8" : "#0284C7",
     placeholder: modoDark ? "#9CA3AF" : "#6B7280",
-    hover: modoDark ? "#1E4976" : "#EFF6FF"
+    hover: modoDark ? "#1E4976" : "#EFF6FF",
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const initialize = async () => {
       setCarregando(true);
       const temaSalvo = localStorage.getItem("modoDark");
@@ -77,11 +84,7 @@ export default function Logs() {
 
         setLogs(logsData);
 
-        const usuariosUnicos = new Set<string>(
-          logsData
-            .filter((log: LogsI) => log.usuarioId)
-            .map((log: LogsI) => log.usuarioId as string)
-        );
+        const usuariosUnicos = new Set<string>(logsData.filter((log: LogsI) => log.usuarioId).map((log: LogsI) => log.usuarioId as string));
 
         const usuariosMap: Record<string, string> = {};
 
@@ -111,7 +114,7 @@ export default function Logs() {
 
     initialize();
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -156,12 +159,8 @@ export default function Logs() {
 
   const indexUltimoLog = paginaAtual * logsPorPagina;
   const indexPrimeiroLog = indexUltimoLog - logsPorPagina;
-  const logsAtuais = logs
-    .filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase()))
-    .slice(indexPrimeiroLog, indexUltimoLog);
-  const totalPaginas = Math.ceil(
-    logs.filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase())).length / logsPorPagina
-  );
+  const logsAtuais = logs.filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase())).slice(indexPrimeiroLog, indexUltimoLog);
+  const totalPaginas = Math.ceil(logs.filter((log) => log.descricao.toLowerCase().includes(busca.toLowerCase())).length / logsPorPagina);
 
   function formatarData(dataString: string | Date) {
     const data = new Date(dataString);
@@ -176,10 +175,10 @@ export default function Logs() {
 
   const traduzirStatusPedido = (status: string): string => {
     const statusMap: Record<string, string> = {
-      'PENDENTE': t('logs.status_pedido.PENDENTE'),
-      'PROCESSANDO': t('logs.status_pedido.PROCESSANDO'),
-      'CONCLUIDO': t('logs.status_pedido.CONCLUIDO'),
-      'CANCELADO': t('logs.status_pedido.CANCELADO')
+      PENDENTE: t("logs.status_pedido.PENDENTE"),
+      PROCESSANDO: t("logs.status_pedido.PROCESSANDO"),
+      CONCLUIDO: t("logs.status_pedido.CONCLUIDO"),
+      CANCELADO: t("logs.status_pedido.CANCELADO"),
     };
     return statusMap[status] || status;
   };
@@ -192,18 +191,15 @@ export default function Logs() {
   };
 
   const extrairInfoVenda = (descricao: string) => {
-    const produtoMatch = descricao.split('\n')[0].split('|')[0].trim();
-    const quantidadeMatch = descricao.match(/\|\s*Quantidade:\s*(\d+)/i) ||
-      descricao.match(/\|\s*Qty:\s*(\d+)/i);
-    const clienteMatch = descricao.match(/\|\s*Cliente:\s*(.+?)(\n|\||$)/i) ||
-      descricao.match(/\|\s*Client:\s*(.+?)(\n|\||$)/i);
+    const produtoMatch = descricao.split("\n")[0].split("|")[0].trim();
+    const quantidadeMatch = descricao.match(/\|\s*Quantidade:\s*(\d+)/i) || descricao.match(/\|\s*Qty:\s*(\d+)/i);
+    const clienteMatch = descricao.match(/\|\s*Cliente:\s*(.+?)(\n|\||$)/i) || descricao.match(/\|\s*Client:\s*(.+?)(\n|\||$)/i);
 
     return {
       nomeProduto: produtoMatch || "",
       quantidade: quantidadeMatch?.[1] || "",
       nomeCliente: clienteMatch?.[1]?.trim() || "",
-      clienteNaoInformado: clienteMatch?.[1]?.trim() === "Não Informado" ||
-        clienteMatch?.[1]?.trim() === "Not Informed"
+      clienteNaoInformado: clienteMatch?.[1]?.trim() === "Não Informado" || clienteMatch?.[1]?.trim() === "Not Informed",
     };
   };
 
@@ -212,10 +208,12 @@ export default function Logs() {
       const parsed = JSON.parse(descricao);
 
       if (parsed.entityType === "vendas" && parsed.action === "produto_vendido") {
-        return t("logs.descricoes.produto_vendido", {
-          nome: parsed.produtoNome,
-          quantidade: parsed.quantidade
-        }) + (parsed.clienteNome ? ` | ${t("logs.cliente")}: ${parsed.clienteNome}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`);
+        return (
+          t("logs.descricoes.produto_vendido", {
+            nome: parsed.produtoNome,
+            quantidade: parsed.quantidade,
+          }) + (parsed.clienteNome ? ` | ${t("logs.cliente")}: ${parsed.clienteNome}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`)
+        );
       }
       if (parsed.entityType === "pedidos") {
         switch (parsed.action) {
@@ -223,32 +221,32 @@ export default function Logs() {
             return t("logs.descricoes.pedido_criado", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
-              quantidadeItens: parsed.quantidadeItens
+              quantidadeItens: parsed.quantidadeItens,
             });
           case "status_atualizado":
             return t("logs.descricoes.status_atualizado", {
               pedidoNumero: parsed.pedidoNumero,
               statusAnterior: traduzirStatusPedido(parsed.statusAnterior),
               statusNovo: traduzirStatusPedido(parsed.statusNovo),
-              fornecedorNome: parsed.fornecedorNome
+              fornecedorNome: parsed.fornecedorNome,
             });
           case "itens_atualizados":
             return t("logs.descricoes.itens_atualizados", {
               pedidoNumero: parsed.pedidoNumero,
               quantidadeItensAtualizados: parsed.quantidadeItensAtualizados,
-              fornecedorNome: parsed.fornecedorNome
+              fornecedorNome: parsed.fornecedorNome,
             });
           case "pedido_concluido_estoque":
             return t("logs.descricoes.pedido_concluido_estoque", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
-              statusFinal: traduzirStatusPedido(parsed.statusFinal)
+              statusFinal: traduzirStatusPedido(parsed.statusFinal),
             });
           case "email_enviado_fornecedor":
             return t("logs.descricoes.email_enviado_fornecedor", {
               pedidoNumero: parsed.pedidoNumero,
               fornecedorNome: parsed.fornecedorNome,
-              fornecedorEmail: parsed.fornecedorEmail
+              fornecedorEmail: parsed.fornecedorEmail,
             });
           default:
             return descricao;
@@ -261,28 +259,32 @@ export default function Logs() {
             <span className="font-semibold">
               {t("logs.exportacao_de")}: {t(`logs.entidades.${parsed.entityType}`) || parsed.entityType}
             </span>
-            <span>{t("logs.periodo")}: {parsed.periodo === "Todos os dados" ? t("logs.periodo_todos") : parsed.periodo}</span>
+            <span>
+              {t("logs.periodo")}: {parsed.periodo === "Todos os dados" ? t("logs.periodo_todos") : parsed.periodo}
+            </span>
           </div>
         );
       }
     } catch {
-      if (descricao.includes('Produto Vendido:') || descricao.includes('Product Sold:')) {
+      if (descricao.includes("Produto Vendido:") || descricao.includes("Product Sold:")) {
         const produtoMatch = descricao.match(/Produto Vendido: (.+?) \|/) || descricao.match(/Product Sold: (.+?) \|/);
         const quantidadeMatch = descricao.match(/\|\s*Quantidade: (\d+)/) || descricao.match(/\|\s*Quantity: (\d+)/);
         const clienteMatch = descricao.match(/\|\s*Cliente: (.+?)$/) || descricao.match(/\|\s*Client: (.+?)$/);
 
-        return t("logs.descricoes.produto_vendido", {
-          nome: produtoMatch?.[1] || '',
-          quantidade: quantidadeMatch?.[1] || '0'
-        }) + (clienteMatch?.[1] ? ` | ${t("logs.cliente")}: ${clienteMatch[1]}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`);
+        return (
+          t("logs.descricoes.produto_vendido", {
+            nome: produtoMatch?.[1] || "",
+            quantidade: quantidadeMatch?.[1] || "0",
+          }) + (clienteMatch?.[1] ? ` | ${t("logs.cliente")}: ${clienteMatch[1]}` : ` | ${t("logs.cliente")}: ${t("logs.cliente_nao_informado")}`)
+        );
       }
 
-      if (descricao.includes('Exportação de')) {
-        const parts = descricao.split(' | ');
+      if (descricao.includes("Exportação de")) {
+        const parts = descricao.split(" | ");
         const entityMatch = parts[0].match(/Exportação de (\w+)/);
         const periodMatch = parts[1]?.match(/Período: (.+)/);
 
-        const entityType = entityMatch ? entityMatch[1] : '';
+        const entityType = entityMatch ? entityMatch[1] : "";
         let periodo = periodMatch ? periodMatch[1] : t("logs.periodo_todos");
 
         if (periodo === "Todos os dados") {
@@ -294,26 +296,26 @@ export default function Logs() {
             <span className="font-semibold">
               {t("logs.exportacao_de")}: {t(`logs.entidades.${entityType}`) || entityType}
             </span>
-            <span>{t("logs.periodo")}: {periodo}</span>
+            <span>
+              {t("logs.periodo")}: {periodo}
+            </span>
           </div>
         );
       }
 
       if (descricao.includes("Vendas excluídas automaticamente") || descricao.includes("Sales automatically deleted")) {
-        const match = descricao.match(/para o produto: (.+?) \((\d+) vendas\)/) ||
-          descricao.match(/for product: (.+?) \((\d+) sales\)/);
+        const match = descricao.match(/para o produto: (.+?) \((\d+) vendas\)/) || descricao.match(/for product: (.+?) \((\d+) sales\)/);
         return t("logs.descricoes.vendas_excluidas_automaticamente", {
-          nome: match?.[1] || '',
-          quantidade: match?.[2] || '0'
+          nome: match?.[1] || "",
+          quantidade: match?.[2] || "0",
         });
       }
 
       if (descricao.includes("Movimentações de estoque excluídas automaticamente") || descricao.includes("Stock movements automatically deleted")) {
-        const match = descricao.match(/para o produto: (.+?) \((\d+) movimentações\)/) ||
-          descricao.match(/for product: (.+?) \((\d+) movements\)/);
+        const match = descricao.match(/para o produto: (.+?) \((\d+) movimentações\)/) || descricao.match(/for product: (.+?) \((\d+) movements\)/);
         return t("logs.descricoes.movimentacoes_excluidas_automaticamente", {
-          nome: match?.[1] || '',
-          quantidade: match?.[2] || '0'
+          nome: match?.[1] || "",
+          quantidade: match?.[2] || "0",
         });
       }
 
@@ -333,11 +335,10 @@ export default function Logs() {
       }
 
       if (descricao.includes("Produto Exportado") || descricao.includes("Product Exported")) {
-        const match = descricao.match(/Produto Exportado: (.+?) \(Período: (.+?)\)/) ||
-          descricao.match(/Product Exported: (.+?) \(Period: (.+?)\)/);
+        const match = descricao.match(/Produto Exportado: (.+?) \(Período: (.+?)\)/) || descricao.match(/Product Exported: (.+?) \(Period: (.+?)\)/);
         return t("logs.descricoes.produto_exportado", {
-          nome: match?.[1] || '',
-          periodo: match?.[2] || ''
+          nome: match?.[1] || "",
+          periodo: match?.[2] || "",
         });
       }
     }
@@ -486,33 +487,35 @@ export default function Logs() {
       }
 
       if (descricao.includes("Vendas excluídas automaticamente") || descricao.includes("Sales automatically deleted")) {
-        const match = descricao.match(/para o produto: (.+?) \((\d+) vendas\)/) ||
-          descricao.match(/for product: (.+?) \((\d+) sales\)/);
+        const match = descricao.match(/para o produto: (.+?) \((\d+) vendas\)/) || descricao.match(/for product: (.+?) \((\d+) sales\)/);
         return (
           <div className="flex">
             <span className="font-semibold min-w-[70px]">{t("logs.produto")}:</span>
-            <span>{match?.[1] || ''} ({match?.[2] || '0'} {t("logs.vendas").toLowerCase()})</span>
+            <span>
+              {match?.[1] || ""} ({match?.[2] || "0"} {t("logs.vendas").toLowerCase()})
+            </span>
           </div>
         );
       }
 
       if (descricao.includes("Movimentações de estoque excluídas automaticamente") || descricao.includes("Stock movements automatically deleted")) {
-        const match = descricao.match(/para o produto: (.+?) \((\d+) movimentações\)/) ||
-          descricao.match(/for product: (.+?) \((\d+) movements\)/);
+        const match = descricao.match(/para o produto: (.+?) \((\d+) movimentações\)/) || descricao.match(/for product: (.+?) \((\d+) movements\)/);
         return (
           <div className="flex">
             <span className="font-semibold min-w-[70px]">{t("logs.produto")}:</span>
-            <span>{match?.[1] || ''} ({match?.[2] || '0'} {t("logs.movimentacoes").toLowerCase()})</span>
+            <span>
+              {match?.[1] || ""} ({match?.[2] || "0"} {t("logs.movimentacoes").toLowerCase()})
+            </span>
           </div>
         );
       }
 
       if (descricao.includes("Exportação de") || descricao.includes("Export of")) {
-        const parts = descricao.split(' | ');
+        const parts = descricao.split(" | ");
         const entityMatch = parts[0].match(/Exportação de (\w+)/) || parts[0].match(/Export of (\w+)/);
         const periodMatch = parts[1]?.match(/Período: (.+)/) || parts[1]?.match(/Period: (.+)/);
 
-        const entityType = entityMatch ? entityMatch[1] : '';
+        const entityType = entityMatch ? entityMatch[1] : "";
         let periodo = periodMatch ? periodMatch[1] : t("logs.periodo_todos");
 
         if (periodo === "Todos os dados" || periodo === "All data") {
@@ -602,12 +605,7 @@ export default function Logs() {
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleLeft />
                 </button>
 
@@ -615,12 +613,7 @@ export default function Logs() {
                   {paginaAtual}/{totalPaginas}
                 </span>
 
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleRight />
                 </button>
               </div>
@@ -661,34 +654,18 @@ export default function Logs() {
                           borderColor: temaAtual.borda,
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = modoDark
-                            ? "#1E4976"
-                            : "#EFF6FF";
+                          e.currentTarget.style.backgroundColor = modoDark ? "#1E4976" : "#EFF6FF";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = "transparent";
                         }}
                       >
+                        <td className="py-3 px-4 text-center">{log.usuarioId ? nomesUsuarios[log.usuarioId] || t("logs.carregando") : t("logs.usuario_nao_informado")}</td>
                         <td className="py-3 px-4 text-center">
-                          {log.usuarioId
-                            ? (nomesUsuarios[log.usuarioId] || t("logs.carregando"))
-                            : t("logs.usuario_nao_informado")}
+                          <span className={`px-2 py-1 rounded-full text-xs ${log.tipo === "BAIXA" ? "bg-green-100 text-green-800" : log.tipo === "CRIACAO" ? "bg-blue-100 text-blue-800" : log.tipo === "ATUALIZACAO" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>{traduzirTipoLog(log.tipo)}</span>
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className={`px-2 py-1 rounded-full text-xs ${log.tipo === "BAIXA" ? "bg-green-100 text-green-800" :
-                            log.tipo === "CRIACAO" ? "bg-blue-100 text-blue-800" :
-                              log.tipo === "ATUALIZACAO" ? "bg-yellow-100 text-yellow-800" :
-                                "bg-red-100 text-red-800"
-                            }`}>
-                            {traduzirTipoLog(log.tipo)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-left max-w-xs">
-                          {formatarDescricaoDesktop(log.descricao)}
-                        </td>
-                        <td className="py-3 px-4 text-center whitespace-nowrap">
-                          {formatarData(log.createdAt)}
-                        </td>
+                        <td className="py-3 px-4 text-left max-w-xs">{formatarDescricaoDesktop(log.descricao)}</td>
+                        <td className="py-3 px-4 text-center whitespace-nowrap">{formatarData(log.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -705,9 +682,7 @@ export default function Logs() {
                       borderColor: temaAtual.borda,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = modoDark
-                        ? "#1E4976"
-                        : "#EFF6FF";
+                      e.currentTarget.style.backgroundColor = modoDark ? "#1E4976" : "#EFF6FF";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = temaAtual.card;
@@ -717,22 +692,14 @@ export default function Logs() {
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${log.tipo === "BAIXA" ? "bg-green-100 text-green-800" :
-                            log.tipo === "CRIACAO" ? "bg-blue-100 text-blue-800" :
-                              log.tipo === "ATUALIZACAO" ? "bg-yellow-100 text-yellow-800" :
-                                "bg-red-100 text-red-800"
-                            }`}>
-                            {traduzirTipoLog(log.tipo)}
-                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${log.tipo === "BAIXA" ? "bg-green-100 text-green-800" : log.tipo === "CRIACAO" ? "bg-blue-100 text-blue-800" : log.tipo === "ATUALIZACAO" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>{traduzirTipoLog(log.tipo)}</span>
                           <span className="text-xs" style={{ color: temaAtual.placeholder }}>
                             {formatarData(log.createdAt)}
                           </span>
                         </div>
 
                         <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
-                          <span className="font-semibold">{t("logs.usuario")}:</span> {log.usuarioId
-                            ? (nomesUsuarios[log.usuarioId] || t("logs.carregando"))
-                            : t("logs.usuario_nao_informado")}
+                          <span className="font-semibold">{t("logs.usuario")}:</span> {log.usuarioId ? nomesUsuarios[log.usuarioId] || t("logs.carregando") : t("logs.usuario_nao_informado")}
                         </p>
                       </div>
 
@@ -748,11 +715,7 @@ export default function Logs() {
                       </button>
                     </div>
 
-                    <div
-                      className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${logExpandido === log.id ? "max-h-96" : "max-h-0"
-                        }`}
-                      style={{ color: temaAtual.texto }}
-                    >
+                    <div className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${logExpandido === log.id ? "max-h-96" : "max-h-0"}`} style={{ color: temaAtual.texto }}>
                       <div className="pt-2 border-t" style={{ borderColor: temaAtual.borda }}>
                         {formatarDescricaoMobile(log.descricao)}
                       </div>

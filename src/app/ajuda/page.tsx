@@ -7,6 +7,7 @@ import Image from "next/image";
 import Fuse from "fuse.js";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Cookies from "js-cookie";
 
 interface SearchableItem {
   id: string;
@@ -36,6 +37,12 @@ export default function Ajuda() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     setModoDark(temaSalvo === "true");
 

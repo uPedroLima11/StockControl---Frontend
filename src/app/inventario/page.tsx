@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { FaSearch, FaHistory } from "react-icons/fa";
 import HistoricoEstoque from "@/components/HistoricoEstoque";
+import Cookies from "js-cookie";
 
 interface Produto {
   id: number;
@@ -29,14 +30,11 @@ export default function EstoquePage() {
       if (!usuarioSalvo) return false;
 
       const usuarioId = usuarioSalvo.replace(/"/g, "");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
-        {
-          headers: {
-            'user-id': usuarioId
-          }
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
+        headers: {
+          "user-id": usuarioId,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -49,10 +47,15 @@ export default function EstoquePage() {
     }
   };
 
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.inventario_visualizar;
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.inventario_visualizar;
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const carregarPermissoes = async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
@@ -60,28 +63,23 @@ export default function EstoquePage() {
       const usuarioId = usuarioSalvo.replace(/"/g, "");
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-          {
-            headers: {
-              'user-id': usuarioId
-            }
-          }
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`, {
+          headers: {
+            "user-id": usuarioId,
+          },
+        });
 
         if (response.ok) {
           const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
 
           const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
+          dados.permissoes.forEach((permissao) => {
             permissoesUsuarioObj[permissao.chave] = permissao.concedida;
           });
 
           setPermissoesUsuario(permissoesUsuarioObj);
         } else {
-          const permissoesParaVerificar = [
-            "inventario_visualizar",
-          ];
+          const permissoesParaVerificar = ["inventario_visualizar"];
 
           const permissoes: Record<string, boolean> = {};
 
@@ -109,7 +107,12 @@ export default function EstoquePage() {
         const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
         const usuario = await responseUsuario.json();
         setTipoUsuario(usuario.tipo);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const todosProdutos: (Produto & { empresaId: number })[] = await response.json();
 
         const produtosDaEmpresa = todosProdutos
@@ -125,7 +128,7 @@ export default function EstoquePage() {
       } catch (error) {
         console.error("Erro ao carregar produtos:", error);
       } finally {
-        setCarregando(false); 
+        setCarregando(false);
       }
     };
 
@@ -134,7 +137,7 @@ export default function EstoquePage() {
   }, []);
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -176,22 +179,21 @@ export default function EstoquePage() {
       document.head.removeChild(style);
     };
   }, [modoDark]);
-  const produtosFiltrados = produtos.filter(
-    (produto) =>
-      produto.nome.toLowerCase().includes(busca.toLowerCase()) &&
-      (filtroTipo === "TODOS" || produto.quantidade < produto.quantidadeMin + 5)
-  );
+  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()) && (filtroTipo === "TODOS" || produto.quantidade < produto.quantidadeMin + 5));
 
   if (carregando) {
-  return (
-    <div className="min-h-screen p-4 md:p-8 flex items-center justify-center" style={{
-      backgroundColor: modoDark ? "#0A1929" : "#cccccc",
-      color: modoDark ? "#cccccc" : "#0F172A",
-    }}>
-      <p>{t("carregando", { ns: "vendas" })}</p>
-    </div>
-  );
-}
+    return (
+      <div
+        className="min-h-screen p-4 md:p-8 flex items-center justify-center"
+        style={{
+          backgroundColor: modoDark ? "#0A1929" : "#cccccc",
+          color: modoDark ? "#cccccc" : "#0F172A",
+        }}
+      >
+        <p>{t("carregando", { ns: "vendas" })}</p>
+      </div>
+    );
+  }
 
   if (!podeVisualizar) {
     return (
@@ -203,22 +205,18 @@ export default function EstoquePage() {
         }}
       >
         <div className="max-w-7xl mx-auto w-full">
-          <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-        {t("tituloRelatorioEstoque")}
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t("tituloRelatorioEstoque")}</h1>
         </div>
         <div
           className="p-6 rounded-lg shadow-md mt-4"
           style={{
-        backgroundColor: modoDark ? "#132F4C" : "#cccccc",
-        border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
-        width: "100%",
-        maxWidth: 480,
+            backgroundColor: modoDark ? "#132F4C" : "#cccccc",
+            border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
+            width: "100%",
+            maxWidth: 480,
           }}
         >
-          <p className="text-lg text-center">
-        {t("semPermissaoVisualizar", { ns: "vendas" })}
-          </p>
+          <p className="text-lg text-center">{t("semPermissaoVisualizar", { ns: "vendas" })}</p>
         </div>
       </div>
     );
@@ -233,9 +231,7 @@ export default function EstoquePage() {
       }}
     >
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-          {t("tituloRelatorioEstoque")}
-        </h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t("tituloRelatorioEstoque")}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-4">
@@ -254,14 +250,7 @@ export default function EstoquePage() {
                     borderColor: modoDark ? "#1E4976" : "#E2E8F0",
                   }}
                 >
-                  <input
-                    type="text"
-                    placeholder={t("buscarProduto")}
-                    className="outline-none bg-transparent placeholder-gray-400 flex-1"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                    style={{ color: modoDark ? "#ececec" : "#0F172A" }}
-                  />
+                  <input type="text" placeholder={t("buscarProduto")} className="outline-none bg-transparent placeholder-gray-400 flex-1" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ color: modoDark ? "#ececec" : "#0F172A" }} />
                   <FaSearch className="ml-2" style={{ color: modoDark ? "#1976D2" : "#0284C7" }} />
                 </div>
 
@@ -285,36 +274,16 @@ export default function EstoquePage() {
                   <div
                     key={produto.id}
                     onClick={() => setProdutoSelecionado(produto.id)}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${produtoSelecionado === produto.id
-                      ? modoDark
-                        ? "bg-blue-900"
-                        : "bg-blue-100"
-                      : modoDark
-                        ? "hover:bg-blue-800"
-                        : "hover:bg-blue-50"
-                      }`}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${produtoSelecionado === produto.id ? (modoDark ? "bg-blue-900" : "bg-blue-100") : modoDark ? "hover:bg-blue-800" : "hover:bg-blue-50"}`}
                     style={{
                       border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
                     }}
                   >
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{produto.nome}</span>
-                      <span
-                        className={`text-sm ${produto.quantidade < produto.quantidadeMin
-                          ? "text-red-500"
-                          : produto.quantidade < produto.quantidadeMin + 5
-                            ? "text-yellow-500"
-                            : "text-green-500"
-                          }`}
-                      >
-                        {produto.quantidade} uni
-                      </span>
+                      <span className={`text-sm ${produto.quantidade < produto.quantidadeMin ? "text-red-500" : produto.quantidade < produto.quantidadeMin + 5 ? "text-yellow-500" : "text-green-500"}`}>{produto.quantidade} uni</span>
                     </div>
-                    {produto.quantidadeMin > 0 && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        Mín: {produto.quantidadeMin} uni
-                      </div>
-                    )}
+                    {produto.quantidadeMin > 0 && <div className="text-xs text-gray-500 mt-1">Mín: {produto.quantidadeMin} uni</div>}
                   </div>
                 ))}
               </div>

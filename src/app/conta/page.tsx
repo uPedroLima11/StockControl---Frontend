@@ -30,6 +30,12 @@ export default function MinhaConta() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
@@ -52,11 +58,10 @@ export default function MinhaConta() {
       const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${idUsuario}`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
           "Content-Type": "application/json",
         },
-      }
-      );
+      });
       if (responseEmpresa.status === 200) {
         const dados = await responseEmpresa.json();
         setEmpresa(dados);

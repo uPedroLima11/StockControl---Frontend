@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { FaPaperPlane, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { cores } from "@/utils/cores";
+import Cookies from "js-cookie";
 
 export default function Suporte() {
   const [modoDark, setModoDark] = useState(false);
@@ -18,13 +19,19 @@ export default function Suporte() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
   }, []);
 
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -69,10 +76,10 @@ export default function Suporte() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (tentativas >= 3) {
-      setErro('Muitas tentativas. Aguarde 1 minuto antes de tentar novamente.');
-      setTimeout(() => setErro(''), 5000);
+      setErro("Muitas tentativas. Aguarde 1 minuto antes de tentar novamente.");
+      setTimeout(() => setErro(""), 5000);
       return;
     }
 
@@ -80,21 +87,21 @@ export default function Suporte() {
     setErro("");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API || 'http://localhost:3001'}/suporte`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API || "http://localhost:3001"}/suporte`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           nome: nome.trim(),
           email: email.trim(),
-          mensagem: mensagem.trim()
+          mensagem: mensagem.trim(),
         }),
       });
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Resposta inválida do servidor');
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Resposta inválida do servidor");
       }
 
       const data = await response.json();
@@ -108,26 +115,24 @@ export default function Suporte() {
         setNome("");
         setEmail("");
         setMensagem("");
-        setTentativas(0); 
-        
+        setTentativas(0);
+
         setTimeout(() => {
           setEnviado(false);
         }, 5000);
       } else {
-        throw new Error(data.message || 'Erro ao enviar mensagem');
+        throw new Error(data.message || "Erro ao enviar mensagem");
       }
     } catch (error: unknown) {
-      console.error('Erro:', error);
-      let errorMessage = 'Erro ao enviar mensagem. Tente novamente.';
-      if (typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
-        errorMessage = (error as { message: string }).message.includes('JSON')
-          ? 'Erro de conexão com o servidor'
-          : (error as { message: string }).message || errorMessage;
+      console.error("Erro:", error);
+      let errorMessage = "Erro ao enviar mensagem. Tente novamente.";
+      if (typeof error === "object" && error !== null && "message" in error && typeof (error as { message: unknown }).message === "string") {
+        errorMessage = (error as { message: string }).message.includes("JSON") ? "Erro de conexão com o servidor" : (error as { message: string }).message || errorMessage;
       }
-      
+
       setErro(errorMessage);
-      setTentativas(prev => prev + 1);
-      
+      setTentativas((prev) => prev + 1);
+
       setTimeout(() => {
         setErro("");
       }, 5000);
@@ -155,13 +160,14 @@ export default function Suporte() {
           {t("suporte_descricao")}
         </p>
 
-        <div className="p-6 rounded-lg shadow-lg" style={{
-          backgroundColor: temaAtual.card,
-          border: `1px solid ${temaAtual.borda}`,
-          boxShadow: modoDark 
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.5)' 
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div
+          className="p-6 rounded-lg shadow-lg"
+          style={{
+            backgroundColor: temaAtual.card,
+            border: `1px solid ${temaAtual.borda}`,
+            boxShadow: modoDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.5)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             <div>
               <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
@@ -179,7 +185,7 @@ export default function Suporte() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = temaAtual.primario;
@@ -187,7 +193,7 @@ export default function Suporte() {
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = temaAtual.borda;
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.boxShadow = "none";
                 }}
               />
             </div>
@@ -207,7 +213,7 @@ export default function Suporte() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = temaAtual.primario;
@@ -215,7 +221,7 @@ export default function Suporte() {
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = temaAtual.borda;
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.boxShadow = "none";
                 }}
               />
             </div>
@@ -236,7 +242,7 @@ export default function Suporte() {
                 style={{
                   backgroundColor: temaAtual.card,
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = temaAtual.primario;
@@ -244,7 +250,7 @@ export default function Suporte() {
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = temaAtual.borda;
-                  e.target.style.boxShadow = 'none';
+                  e.target.style.boxShadow = "none";
                 }}
               ></textarea>
               <div className="text-right text-xs mt-1" style={{ color: temaAtual.placeholder }}>
@@ -289,10 +295,13 @@ export default function Suporte() {
             </button>
 
             {enviado && (
-              <div className="flex items-center gap-2 p-3 rounded-lg mt-4" style={{
-                backgroundColor: "#10B98120",
-                border: "1px solid #10B981"
-              }}>
+              <div
+                className="flex items-center gap-2 p-3 rounded-lg mt-4"
+                style={{
+                  backgroundColor: "#10B98120",
+                  border: "1px solid #10B981",
+                }}
+              >
                 <FaCheckCircle className="text-green-500 flex-shrink-0" />
                 <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                   {t("mensagemEnviada")} ✅
@@ -301,10 +310,13 @@ export default function Suporte() {
             )}
 
             {erro && (
-              <div className="flex items-center gap-2 p-3 rounded-lg mt-4" style={{
-                backgroundColor: "#EF444420",
-                border: "1px solid #EF4444"
-              }}>
+              <div
+                className="flex items-center gap-2 p-3 rounded-lg mt-4"
+                style={{
+                  backgroundColor: "#EF444420",
+                  border: "1px solid #EF4444",
+                }}
+              >
                 <FaExclamationTriangle className="text-red-500 flex-shrink-0" />
                 <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                   {erro}
@@ -315,37 +327,52 @@ export default function Suporte() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg text-center transition-all hover:scale-105" style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-            boxShadow: modoDark 
-              ? '0 2px 4px rgba(0, 0, 0, 0.3)' 
-              : '0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Email</h3>
-            <p className="text-sm" style={{ color: temaAtual.placeholder }}>stockcontroldev@gmail.com</p>
+          <div
+            className="p-4 rounded-lg text-center transition-all hover:scale-105"
+            style={{
+              backgroundColor: temaAtual.card,
+              border: `1px solid ${temaAtual.borda}`,
+              boxShadow: modoDark ? "0 2px 4px rgba(0, 0, 0, 0.3)" : "0 2px 4px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>
+              Email
+            </h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>
+              stockcontroldev@gmail.com
+            </p>
           </div>
-          
-          <div className="p-4 rounded-lg text-center transition-all hover:scale-105" style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-            boxShadow: modoDark 
-              ? '0 2px 4px rgba(0, 0, 0, 0.3)' 
-              : '0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Telefone</h3>
-            <p className="text-sm" style={{ color: temaAtual.placeholder }}>(53) 98118-5633</p>
+
+          <div
+            className="p-4 rounded-lg text-center transition-all hover:scale-105"
+            style={{
+              backgroundColor: temaAtual.card,
+              border: `1px solid ${temaAtual.borda}`,
+              boxShadow: modoDark ? "0 2px 4px rgba(0, 0, 0, 0.3)" : "0 2px 4px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>
+              Telefone
+            </h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>
+              (53) 98118-5633
+            </p>
           </div>
-          
-          <div className="p-4 rounded-lg text-center transition-all hover:scale-105" style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-            boxShadow: modoDark 
-              ? '0 2px 4px rgba(0, 0, 0, 0.3)' 
-              : '0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>Horário</h3>
-            <p className="text-sm" style={{ color: temaAtual.placeholder }}>Seg-Sex: 9h-18h</p>
+
+          <div
+            className="p-4 rounded-lg text-center transition-all hover:scale-105"
+            style={{
+              backgroundColor: temaAtual.card,
+              border: `1px solid ${temaAtual.borda}`,
+              boxShadow: modoDark ? "0 2px 4px rgba(0, 0, 0, 0.3)" : "0 2px 4px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <h3 className="font-semibold mb-2" style={{ color: temaAtual.texto }}>
+              Horário
+            </h3>
+            <p className="text-sm" style={{ color: temaAtual.placeholder }}>
+              Seg-Sex: 9h-18h
+            </p>
           </div>
         </div>
       </div>

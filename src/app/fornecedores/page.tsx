@@ -54,14 +54,11 @@ export default function Fornecedores() {
       if (!usuarioSalvo) return false;
 
       const usuarioId = usuarioSalvo.replace(/"/g, "");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
-        {
-          headers: {
-            'user-id': usuarioId
-          }
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
+        headers: {
+          "user-id": usuarioId,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -75,37 +72,35 @@ export default function Fornecedores() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const carregarDadosIniciais = async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (usuarioSalvo) {
         const usuarioId = usuarioSalvo.replace(/"/g, "");
 
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-            {
-              headers: {
-                'user-id': usuarioId
-              }
-            }
-          );
+          const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`, {
+            headers: {
+              "user-id": usuarioId,
+            },
+          });
 
           if (response.ok) {
             const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
 
             const permissoesUsuarioObj: Record<string, boolean> = {};
-            dados.permissoes.forEach(permissao => {
+            dados.permissoes.forEach((permissao) => {
               permissoesUsuarioObj[permissao.chave] = permissao.concedida;
             });
 
             setPermissoesUsuario(permissoesUsuarioObj);
           } else {
-            const permissoesParaVerificar = [
-              "fornecedores_criar",
-              "fornecedores_editar",
-              "fornecedores_excluir",
-              "fornecedores_visualizar"
-            ];
+            const permissoesParaVerificar = ["fornecedores_criar", "fornecedores_editar", "fornecedores_excluir", "fornecedores_visualizar"];
 
             const permissoes: Record<string, boolean> = {};
 
@@ -140,19 +135,17 @@ export default function Fornecedores() {
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+        },
       });
       const fornecedoresData = await responseFornecedores.json();
-      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      const fornecedoresOrdenados = fornecedoresData.sort((a: FornecedorI, b: FornecedorI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setFornecedores(fornecedoresOrdenados);
     };
 
     carregarDadosIniciais();
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -205,26 +198,21 @@ export default function Fornecedores() {
     }
   }, [modalVisualizar]);
 
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.fornecedores_visualizar;
 
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.fornecedores_visualizar;
+  const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.fornecedores_criar;
 
-  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.fornecedores_criar;
+  const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.fornecedores_editar;
 
-  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.fornecedores_editar;
-
-  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.fornecedores_excluir;
+  const podeExcluir = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.fornecedores_excluir;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${Cookies.get("token")}`
-        }
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
       });
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
@@ -280,7 +268,7 @@ export default function Fornecedores() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 11) {
       setForm({ ...form, telefone: value });
       setTelefoneCaracteres(value.length);
@@ -297,7 +285,7 @@ export default function Fornecedores() {
   };
 
   const formatarTelefone = (telefone: string) => {
-    const numeros = telefone.replace(/\D/g, '');
+    const numeros = telefone.replace(/\D/g, "");
 
     if (numeros.length === 11) {
       return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
@@ -350,8 +338,8 @@ export default function Fornecedores() {
         method: "POST",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+        },
       });
 
       if (response.ok) {
@@ -384,8 +372,8 @@ export default function Fornecedores() {
         method: "PUT",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+        },
       });
 
       if (response.ok) {
@@ -428,7 +416,7 @@ export default function Fornecedores() {
       if (mensagemErro) {
         Swal.fire({
           title: t("modal.camposObrigatorios.titulo", "Campos obrigatórios"),
-          html: `${t("modal.camposObrigatorios.texto", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          html: `${t("modal.camposObrigatorios.texto", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, "<br>")}`,
           icon: "warning",
           confirmButtonColor: "#013C3C",
         });
@@ -457,7 +445,7 @@ export default function Fornecedores() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            'user-id': usuarioValor
+            "user-id": usuarioValor,
           },
           body: JSON.stringify({
             nome: form.nome.trim(),
@@ -467,8 +455,8 @@ export default function Fornecedores() {
             categoria: form.categoria.trim(),
             empresaId: empresaId,
             usuarioId: usuarioValor,
-            fotoUrl: fotoUrl
-          })
+            fotoUrl: fotoUrl,
+          }),
         });
 
         if (response.status === 201) {
@@ -540,7 +528,7 @@ export default function Fornecedores() {
       if (mensagemErro) {
         Swal.fire({
           title: t("mensagens.camposObrigatorios", "Campos obrigatórios"),
-          html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, '<br>')}`,
+          html: `${t("mensagens.preenchaCampos", "Por favor, preencha os seguintes campos:")}<br><br>${mensagemErro.replace(/\n/g, "<br>")}`,
           icon: "warning",
           confirmButtonColor: "#013C3C",
         });
@@ -569,7 +557,7 @@ export default function Fornecedores() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            'user-id': usuarioValor
+            "user-id": usuarioValor,
           },
           body: JSON.stringify({
             nome: form.nome.trim(),
@@ -579,8 +567,8 @@ export default function Fornecedores() {
             categoria: form.categoria.trim(),
             empresaId: empresaId || "",
             usuarioId: usuarioValor,
-            fotoUrl: fotoUrl
-          })
+            fotoUrl: fotoUrl,
+          }),
         });
 
         if (response.ok) {
@@ -638,8 +626,8 @@ export default function Fornecedores() {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/${fornecedor.id}`, {
             method: "DELETE",
             headers: {
-              'user-id': usuarioValor
-            }
+              "user-id": usuarioValor,
+            },
           });
           Swal.fire(t("mensagens.deletado"), t("mensagens.produtoExcluido"), "success");
           setModalVisualizar(null);
@@ -665,12 +653,7 @@ export default function Fornecedores() {
     setFornecedorExpandido(fornecedorExpandido === id ? null : id);
   };
 
-  const fornecedoresFiltrados = fornecedores.filter(
-    (fornecedor) =>
-      fornecedor.empresaId === empresaId &&
-      (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        fornecedor.categoria.toLowerCase().includes(busca.toLowerCase()))
-  );
+  const fornecedoresFiltrados = fornecedores.filter((fornecedor) => fornecedor.empresaId === empresaId && (fornecedor.nome.toLowerCase().includes(busca.toLowerCase()) || fornecedor.categoria.toLowerCase().includes(busca.toLowerCase())));
 
   const indexUltimoFornecedor = paginaAtual * fornecedoresPorPagina;
   const indexPrimeiroFornecedor = indexUltimoFornecedor - fornecedoresPorPagina;
@@ -705,11 +688,14 @@ export default function Fornecedores() {
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-            backgroundColor: temaAtual.primario + "20",
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}>
+          <div
+            className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: temaAtual.primario + "20",
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
             <FaLock className="text-xl" />
             <div>
               <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
@@ -719,64 +705,54 @@ export default function Fornecedores() {
         )}
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
             <div
               className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
               style={{
-              backgroundColor: temaAtual.card,
-              borderColor: temaAtual.borda,
+                backgroundColor: temaAtual.card,
+                borderColor: temaAtual.borda,
               }}
             >
               <input
-              type="text"
-              placeholder={t("buscar")}
-              className="outline-none font-mono text-sm bg-transparent placeholder-gray-400 w-full"
-              style={{
-                color: temaAtual.texto,
-              }}
-              value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value);
-                setPaginaAtual(1);
-              }}
+                type="text"
+                placeholder={t("buscar")}
+                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400 w-full"
+                style={{
+                  color: temaAtual.texto,
+                }}
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value);
+                  setPaginaAtual(1);
+                }}
               />
               <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2 mt-2 sm:mt-0">
-              <button
-                onClick={() => mudarPagina(paginaAtual - 1)}
-                disabled={paginaAtual === 1}
-                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                style={{ color: temaAtual.texto }}
-              >
-                <FaAngleLeft />
-              </button>
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
+                  <FaAngleLeft />
+                </button>
 
-              <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
-                {paginaAtual}/{totalPaginas}
-              </span>
+                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+                  {paginaAtual}/{totalPaginas}
+                </span>
 
-              <button
-                onClick={() => mudarPagina(paginaAtual + 1)}
-                disabled={paginaAtual === totalPaginas}
-                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                style={{ color: temaAtual.texto }}
-              >
-                <FaAngleRight />
-              </button>
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
+                  <FaAngleRight />
+                </button>
               </div>
             )}
-            </div>
+          </div>
 
           {podeCriar && empresaAtivada && (
             <button
               onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
               className="px-6 py-2 border-2 cursor-pointer rounded-lg transition-all duration-200 hover:scale-105 font-mono text-sm whitespace-nowrap mt-2 sm:mt-0"
               style={{
-          backgroundColor: temaAtual.primario,
-          borderColor: temaAtual.primario,
-          color: "#FFFFFF",
+                backgroundColor: temaAtual.primario,
+                borderColor: temaAtual.primario,
+                color: "#FFFFFF",
               }}
             >
               {t("novoFornecedor")}
@@ -790,12 +766,7 @@ export default function Fornecedores() {
               {t("totalFornecedores")}: {fornecedoresFiltrados.length}
             </span>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => mudarPagina(paginaAtual - 1)}
-                disabled={paginaAtual === 1}
-                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                style={{ color: temaAtual.texto }}
-              >
+              <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                 <FaAngleLeft />
               </button>
 
@@ -803,12 +774,7 @@ export default function Fornecedores() {
                 {paginaAtual} / {totalPaginas}
               </span>
 
-              <button
-                onClick={() => mudarPagina(paginaAtual + 1)}
-                disabled={paginaAtual === totalPaginas}
-                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                style={{ color: temaAtual.texto }}
-              >
+              <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                 <FaAngleRight />
               </button>
             </div>
@@ -921,17 +887,10 @@ export default function Fornecedores() {
                             setForm(fornecedor);
                           }}
                         >
-                          <span className="text-xs font-medium px-2.5 py-0.5 rounded" >
-                            {fornecedor.categoria}
-                          </span>
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded">{fornecedor.categoria}</span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <FaPhoneAlt
-                            onClick={() => handleEntrarContato(fornecedor)}
-                            color="#25D366"
-                            size={18}
-                            className="cursor-pointer m-auto hover:scale-110 transition-transform"
-                          />
+                          <FaPhoneAlt onClick={() => handleEntrarContato(fornecedor)} color="#25D366" size={18} className="cursor-pointer m-auto hover:scale-110 transition-transform" />
                         </td>
                       </tr>
                     ))}
@@ -1018,17 +977,10 @@ export default function Fornecedores() {
                             setForm(fornecedor);
                           }}
                         >
-                          <span className="text-xs font-medium px-1.5 py-0.5 rounded">
-                            {fornecedor.categoria}
-                          </span>
+                          <span className="text-xs font-medium px-1.5 py-0.5 rounded">{fornecedor.categoria}</span>
                         </td>
                         <td className="py-3 px-2 text-center">
-                          <FaPhoneAlt
-                            onClick={() => handleEntrarContato(fornecedor)}
-                            color="#25D366"
-                            size={16}
-                            className="cursor-pointer m-auto hover:scale-110 transition-transform"
-                          />
+                          <FaPhoneAlt onClick={() => handleEntrarContato(fornecedor)} color="#25D366" size={16} className="cursor-pointer m-auto hover:scale-110 transition-transform" />
                         </td>
                       </tr>
                     ))}
@@ -1090,27 +1042,14 @@ export default function Fornecedores() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <FaPhoneAlt
-                          onClick={() => handleEntrarContato(fornecedor)}
-                          color="#25D366"
-                          size={16}
-                          className="cursor-pointer border p-1 rounded-full hover:bg-green-100 transition"
-                        />
-                        <button
-                          onClick={() => toggleExpandirFornecedor(fornecedor.id)}
-                          className="p-1"
-                          style={{ color: temaAtual.primario }}
-                        >
+                        <FaPhoneAlt onClick={() => handleEntrarContato(fornecedor)} color="#25D366" size={16} className="cursor-pointer border p-1 rounded-full hover:bg-green-100 transition" />
+                        <button onClick={() => toggleExpandirFornecedor(fornecedor.id)} className="p-1" style={{ color: temaAtual.primario }}>
                           {fornecedorExpandido === fornecedor.id ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
                       </div>
                     </div>
 
-                    <div
-                      className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"
-                        }`}
-                      style={{ color: temaAtual.texto }}
-                    >
+                    <div className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${fornecedorExpandido === fornecedor.id ? "max-h-96" : "max-h-0"}`} style={{ color: temaAtual.texto }}>
                       <div className="pt-3 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
                         <div className="flex justify-between">
                           <span className="font-semibold">{t("cnpj")}:</span>
@@ -1166,10 +1105,13 @@ export default function Fornecedores() {
         </div>
 
         {totalPaginas > 1 && (
-          <div className="md:hidden flex justify-between items-center mt-4 p-3 rounded-lg" style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`
-          }}>
+          <div
+            className="md:hidden flex justify-between items-center mt-4 p-3 rounded-lg"
+            style={{
+              backgroundColor: temaAtual.card,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
             <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
               {paginaAtual} / {totalPaginas}
             </span>
@@ -1181,7 +1123,7 @@ export default function Fornecedores() {
                 className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
                 style={{
                   color: temaAtual.texto,
-                  backgroundColor: temaAtual.primario + "20"
+                  backgroundColor: temaAtual.primario + "20",
                 }}
               >
                 <FaAngleLeft />
@@ -1193,7 +1135,7 @@ export default function Fornecedores() {
                 className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
                 style={{
                   color: temaAtual.texto,
-                  backgroundColor: temaAtual.primario + "20"
+                  backgroundColor: temaAtual.primario + "20",
                 }}
               >
                 <FaAngleRight />
@@ -1210,12 +1152,10 @@ export default function Fornecedores() {
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`
+              border: `1px solid ${temaAtual.borda}`,
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">
-              {modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}
-            </h2>
+            <h2 className="text-xl font-semibold mb-4">{modalVisualizar ? t("visualizarFornecedor") : t("novoFornecedor")}</h2>
 
             <div className="space-y-4">
               <div>
@@ -1230,7 +1170,7 @@ export default function Fornecedores() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={60}
@@ -1252,7 +1192,7 @@ export default function Fornecedores() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={45}
@@ -1274,7 +1214,7 @@ export default function Fornecedores() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={18}
@@ -1294,7 +1234,7 @@ export default function Fornecedores() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={14}
@@ -1314,7 +1254,7 @@ export default function Fornecedores() {
                   style={{
                     backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`
+                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   disabled={Boolean(!podeEditar && modalVisualizar)}
                   maxLength={20}
@@ -1333,19 +1273,14 @@ export default function Fornecedores() {
                     height={80}
                     className="object-cover rounded-full mb-2 mx-auto"
                     alt="Preview"
-                    onError={e => { (e.target as HTMLImageElement).src = "/contadefault.png"; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/contadefault.png";
+                    }}
                   />
                 )}
                 {(podeCriar || podeEditar) && (
                   <div className="flex flex-col justify-end">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      disabled={Boolean(!podeEditar && modalVisualizar)}
-                      className="hidden"
-                    />
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" disabled={Boolean(!podeEditar && modalVisualizar)} className="hidden" />
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full px-3 py-3 cursor-pointer rounded border text-sm flex items-center justify-center gap-2"
@@ -1355,19 +1290,8 @@ export default function Fornecedores() {
                         borderColor: temaAtual.primario,
                       }}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#FFFFFF"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                        />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="#FFFFFF" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
                       </svg>
                       {t("selecionarImagem")}
                     </button>
@@ -1387,7 +1311,7 @@ export default function Fornecedores() {
                 className="cursor-pointer hover:underline px-4 py-2 rounded"
                 style={{
                   color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`
+                  border: `1px solid ${temaAtual.borda}`,
                 }}
               >
                 {t("fechar")}

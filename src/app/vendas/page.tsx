@@ -17,7 +17,7 @@ export default function Vendas() {
   const [vendas, setVendas] = useState<VendaI[]>([]);
   const [clientes, setClientes] = useState<ClienteI[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [carrinho, setCarrinho] = useState<{ produto: ProdutoI, quantidade: number }[]>([]);
+  const [carrinho, setCarrinho] = useState<{ produto: ProdutoI; quantidade: number }[]>([]);
   const [busca, setBusca] = useState("");
   const [modoDark, setModoDark] = useState(false);
   const [totalVendas, setTotalVendas] = useState(0);
@@ -39,14 +39,11 @@ export default function Vendas() {
       if (!usuarioSalvo) return false;
 
       const usuarioId = usuarioSalvo.replace(/"/g, "");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
-        {
-          headers: {
-            'user-id': usuarioId
-          }
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
+        headers: {
+          "user-id": usuarioId,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -60,31 +57,31 @@ export default function Vendas() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const carregarPermissoes = async (usuarioId: string) => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`,
-          {
-            headers: {
-              'user-id': usuarioId
-            }
-          }
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`, {
+          headers: {
+            "user-id": usuarioId,
+          },
+        });
 
         if (response.ok) {
           const dados: { permissoes: { chave: string; concedida: boolean }[]; permissoesPersonalizadas: boolean } = await response.json();
 
           const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
+          dados.permissoes.forEach((permissao) => {
             permissoesUsuarioObj[permissao.chave] = permissao.concedida;
           });
 
           setPermissoesUsuario(permissoesUsuarioObj);
         } else {
-          const permissoesParaVerificar = [
-            "vendas_realizar",
-            "vendas_visualizar",
-          ];
+          const permissoesParaVerificar = ["vendas_realizar", "vendas_visualizar"];
 
           const permissoes: Record<string, boolean> = {};
 
@@ -101,14 +98,14 @@ export default function Vendas() {
     };
 
     const initialize = async () => {
-      const carrinhoSalvo = localStorage.getItem('carrinhoVendas');
+      const carrinhoSalvo = localStorage.getItem("carrinhoVendas");
       if (carrinhoSalvo) {
         try {
           const carrinhoParseado = JSON.parse(carrinhoSalvo);
           setCarrinho(carrinhoParseado);
         } catch (err) {
-          console.error('Erro ao parsear carrinho do localStorage', err);
-          localStorage.removeItem('carrinhoVendas');
+          console.error("Erro ao parsear carrinho do localStorage", err);
+          localStorage.removeItem("carrinhoVendas");
         }
       }
 
@@ -145,7 +142,12 @@ export default function Vendas() {
         const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
         setEmpresaAtivada(ativada);
 
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const todosProdutos: ProdutoI[] = await responseProdutos.json();
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId && p.quantidade > 0);
         setProdutos(produtosDaEmpresa);
@@ -157,15 +159,13 @@ export default function Vendas() {
 
         const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
         if (!responseVendas.ok) {
-          throw new Error('Erro ao carregar vendas');
+          throw new Error("Erro ao carregar vendas");
         }
 
         const vendasData = await responseVendas.json();
         const vendasDaEmpresa = vendasData.vendas || [];
 
-        const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) =>
-          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        );
+        const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
         setVendas(vendasOrdenadas);
 
         const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
@@ -178,12 +178,11 @@ export default function Vendas() {
           total = totalData.sum;
         } else if (totalData?.total) {
           total = totalData.total;
-        } else if (typeof totalData === 'number') {
+        } else if (typeof totalData === "number") {
           total = totalData;
         }
 
         setTotalVendas(total);
-
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         Swal.fire({
@@ -200,7 +199,7 @@ export default function Vendas() {
 
     initialize();
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -245,17 +244,15 @@ export default function Vendas() {
 
   useEffect(() => {
     if (carrinho.length > 0) {
-      localStorage.setItem('carrinhoVendas', JSON.stringify(carrinho));
+      localStorage.setItem("carrinhoVendas", JSON.stringify(carrinho));
     } else {
-      localStorage.removeItem('carrinhoVendas');
+      localStorage.removeItem("carrinhoVendas");
     }
   }, [carrinho]);
 
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.vendas_visualizar;
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.vendas_visualizar;
 
-  const podeRealizarVendas = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.vendas_realizar;
+  const podeRealizarVendas = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.vendas_realizar;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -263,10 +260,9 @@ export default function Vendas() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
-      }
-      );
+      });
       if (!response.ok) {
         throw new Error("Erro ao buscar dados da empresa");
       }
@@ -304,19 +300,14 @@ export default function Vendas() {
     acao();
   };
 
-
   const adicionarAoCarrinho = (produto: ProdutoI) => {
     if (!podeRealizarVendas) return;
 
-    const itemExistente = carrinho.find(item => item.produto.id === produto.id);
+    const itemExistente = carrinho.find((item) => item.produto.id === produto.id);
 
     if (itemExistente) {
       if (itemExistente.quantidade < produto.quantidade) {
-        setCarrinho(carrinho.map(item =>
-          item.produto.id === produto.id
-            ? { ...item, quantidade: item.quantidade + 1 }
-            : item
-        ));
+        setCarrinho(carrinho.map((item) => (item.produto.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item)));
       } else {
         Swal.fire({
           icon: "warning",
@@ -338,11 +329,11 @@ export default function Vendas() {
   };
 
   const atualizarQuantidade = (produtoId: string, novaQuantidade: number | "") => {
-    const produto = produtos.find(p => p.id === produtoId);
+    const produto = produtos.find((p) => p.id === produtoId);
 
-    setCarrinho(prevCarrinho => {
+    setCarrinho((prevCarrinho) => {
       return prevCarrinho
-        .map(item => {
+        .map((item) => {
           if (item.produto.id === produtoId) {
             if (novaQuantidade === "" || isNaN(Number(novaQuantidade))) {
               return { ...item, quantidade: 0 };
@@ -367,19 +358,19 @@ export default function Vendas() {
           }
           return item;
         })
-        .filter(item => item.quantidade >= 0);
+        .filter((item) => item.quantidade >= 0);
     });
   };
 
   const removerDoCarrinho = (produtoId: string) => {
-    setCarrinho(carrinho.filter(item => item.produto.id !== produtoId));
+    setCarrinho(carrinho.filter((item) => item.produto.id !== produtoId));
   };
 
   const finalizarVenda = async () => {
     const usuarioSalvo = localStorage.getItem("client_key");
     if (!usuarioSalvo) return;
 
-    const hasValidItems = carrinho.some(item => item.quantidade > 0);
+    const hasValidItems = carrinho.some((item) => item.quantidade > 0);
 
     if (!empresaId || !hasValidItems) {
       Swal.fire({
@@ -395,10 +386,8 @@ export default function Vendas() {
         setCarregando(true);
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-        for (const item of carrinho.filter(i => i.quantidade > 0)) {
-          const responseSaldo = await fetch(
-            `${process.env.NEXT_PUBLIC_URL_API}/produtos/${item.produto.id}/saldo`
-          );
+        for (const item of carrinho.filter((i) => i.quantidade > 0)) {
+          const responseSaldo = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${item.produto.id}/saldo`);
 
           if (responseSaldo.ok) {
             const { saldo } = await responseSaldo.json();
@@ -413,14 +402,14 @@ export default function Vendas() {
           }
         }
 
-        const itemsToSell = carrinho.filter(item => item.quantidade > 0);
+        const itemsToSell = carrinho.filter((item) => item.quantidade > 0);
 
-        const vendasPromises = itemsToSell.map(item =>
+        const vendasPromises = itemsToSell.map((item) =>
           fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "user-id": usuarioValor
+              "user-id": usuarioValor,
             },
             body: JSON.stringify({
               empresaId,
@@ -430,7 +419,7 @@ export default function Vendas() {
               valorCompra: item.produto.preco * 0.8 * item.quantidade,
               usuarioId: usuarioValor,
               clienteId: clienteSelecionado,
-              clienteNome: clientes.find(c => c.id === clienteSelecionado)?.nome || null
+              clienteNome: clientes.find((c) => c.id === clienteSelecionado)?.nome || null,
             }),
           })
         );
@@ -447,21 +436,23 @@ export default function Vendas() {
 
         setCarrinho([]);
         setClienteSelecionado(null);
-        localStorage.removeItem('carrinhoVendas');
+        localStorage.removeItem("carrinhoVendas");
 
         await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`).then(res => res.json()),
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`).then(res => res.json()),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          }).then((res) => res.json()),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`).then((res) => res.json()),
         ]).then(([produtosData, vendasData]) => {
           const produtosDaEmpresa = produtosData.filter((p: ProdutoI) => p.empresaId === empresaId);
           setProdutos(produtosDaEmpresa);
 
-          const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) =>
-            new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-          );
+          const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
           setVendas(vendasOrdenadas);
         });
-
       } catch (err) {
         console.error("Erro ao finalizar venda:", err);
         await Swal.fire({
@@ -475,9 +466,7 @@ export default function Vendas() {
     });
   };
 
-  const produtosFiltrados = produtos.filter((produto) =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()));
 
   const indexUltimoProduto = paginaAtual * produtosPorPagina;
   const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
@@ -488,9 +477,7 @@ export default function Vendas() {
     setPaginaAtual(novaPagina);
   };
 
-  const totalCarrinho = carrinho.reduce((total, item) =>
-    total + (item.produto.preco * item.quantidade), 0
-  );
+  const totalCarrinho = carrinho.reduce((total, item) => total + item.produto.preco * item.quantidade, 0);
 
   if (!podeVisualizar) {
     return (
@@ -522,11 +509,16 @@ export default function Vendas() {
           <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
             {t("titulo")}
           </h1>
-          <div className="border rounded-xl p-8 shadow" style={{
-            backgroundColor: temaAtual.card,
-            borderColor: temaAtual.borda,
-          }}>
-            <p className="text-lg" style={{ color: temaAtual.texto }}>{t("naoPossuiProdutos")}</p>
+          <div
+            className="border rounded-xl p-8 shadow"
+            style={{
+              backgroundColor: temaAtual.card,
+              borderColor: temaAtual.borda,
+            }}
+          >
+            <p className="text-lg" style={{ color: temaAtual.texto }}>
+              {t("naoPossuiProdutos")}
+            </p>
           </div>
         </div>
       </div>
@@ -541,11 +533,14 @@ export default function Vendas() {
         </h1>
 
         {empresaId && !empresaAtivada && (
-          <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-            backgroundColor: temaAtual.primario + "20",
-            color: temaAtual.texto,
-            border: `1px solid ${temaAtual.borda}`
-          }}>
+          <div
+            className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: temaAtual.primario + "20",
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
             <FaLock className="text-xl" />
             <div>
               <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
@@ -580,12 +575,7 @@ export default function Vendas() {
             </div>
             {totalPaginas > 1 && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleLeft />
                 </button>
 
@@ -593,12 +583,7 @@ export default function Vendas() {
                   {paginaAtual}/{totalPaginas}
                 </span>
 
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                  style={{ color: temaAtual.texto }}
-                >
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
                   <FaAngleRight />
                 </button>
               </div>
@@ -628,9 +613,7 @@ export default function Vendas() {
                       <th className="py-3 px-4 text-left">{t("produto")}</th>
                       <th className="text-center">{t("estoque")}</th>
                       <th className="text-center">{t("preco")}</th>
-                      {podeRealizarVendas && (
-                        <th className="text-center">{t("acoes")}</th>
-                      )}
+                      {podeRealizarVendas && <th className="text-center">{t("acoes")}</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -641,15 +624,13 @@ export default function Vendas() {
                         style={{
                           color: temaAtual.texto,
                           borderColor: temaAtual.borda,
-                          backgroundColor: temaAtual.card
+                          backgroundColor: temaAtual.card,
                         }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = modoDark
-                            ? cores.dark.hover
-                            : cores.light.hover
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = modoDark ? cores.dark.hover : cores.light.hover;
                         }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = temaAtual.card
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = temaAtual.card;
                         }}
                       >
                         <td className="py-3 px-4 flex items-center gap-2">
@@ -665,12 +646,8 @@ export default function Vendas() {
                           />
                           <span>{produto.nome}</span>
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          {produto.quantidade}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          R$ {produto.preco.toFixed(2).replace(".", ",")}
-                        </td>
+                        <td className="py-3 px-4 text-center">{produto.quantidade}</td>
+                        <td className="py-3 px-4 text-center">R$ {produto.preco.toFixed(2).replace(".", ",")}</td>
                         {podeRealizarVendas && (
                           <td className="py-3 px-4 text-center">
                             <button
@@ -704,12 +681,10 @@ export default function Vendas() {
                       backgroundColor: temaAtual.card,
                       borderColor: temaAtual.borda,
                     }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor = modoDark
-                        ? `${cores.dark.hover}40`
-                        : `${cores.light.hover}`;
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor = modoDark ? `${cores.dark.hover}40` : `${cores.light.hover}`;
                     }}
-                    onMouseLeave={e => {
+                    onMouseLeave={(e) => {
                       (e.currentTarget as HTMLDivElement).style.backgroundColor = temaAtual.card;
                     }}
                   >
@@ -802,13 +777,14 @@ export default function Vendas() {
                             <span className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
                               {item.produto.nome}
                             </span>
-                            <div className="text-xs" style={{
-                              color: item.quantidade >= item.produto.quantidade ? "#EF4444" : temaAtual.placeholder
-                            }}>
+                            <div
+                              className="text-xs"
+                              style={{
+                                color: item.quantidade >= item.produto.quantidade ? "#EF4444" : temaAtual.placeholder,
+                              }}
+                            >
                               {t("estoqueDisponivel")}: {item.produto.quantidade}
-                              {item.quantidade >= item.produto.quantidade && (
-                                <span className="ml-1">({t("semEstoqueAdicional")})</span>
-                              )}
+                              {item.quantidade >= item.produto.quantidade && <span className="ml-1">({t("semEstoqueAdicional")})</span>}
                             </div>
                           </div>
                         </div>
@@ -823,13 +799,11 @@ export default function Vendas() {
                               const value = e.target.value;
                               if (value === "") {
                                 atualizarQuantidade(item.produto.id, 0);
-                              }
-                              else if (/^\d+$/.test(value)) {
+                              } else if (/^\d+$/.test(value)) {
                                 const numValue = parseInt(value, 10);
                                 if (item.quantidade === 0) {
                                   atualizarQuantidade(item.produto.id, numValue);
-                                }
-                                else {
+                                } else {
                                   atualizarQuantidade(item.produto.id, numValue);
                                 }
                               }
@@ -851,10 +825,7 @@ export default function Vendas() {
                             R$ {(item.produto.preco * item.quantidade).toFixed(2).replace(".", ",")}
                           </span>
 
-                          <button
-                            onClick={() => removerDoCarrinho(item.produto.id)}
-                            className="p-1 cursor-pointer rounded-full text-red-500 hover:text-red-700"
-                          >
+                          <button onClick={() => removerDoCarrinho(item.produto.id)} className="p-1 cursor-pointer rounded-full text-red-500 hover:text-red-700">
                             <FaRegTrashAlt size={14} />
                           </button>
                         </div>

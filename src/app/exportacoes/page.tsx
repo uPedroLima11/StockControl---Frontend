@@ -8,85 +8,89 @@ import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 
 interface ExportHistory {
-    id: string;
-    descricao: string;
-    createdAt: string;
-    tipo: string;
-    usuario?: {
-        nome: string;
-    };
+  id: string;
+  descricao: string;
+  createdAt: string;
+  tipo: string;
+  usuario?: {
+    nome: string;
+  };
 }
 
 export default function Exportacoes() {
-    const [empresaId, setEmpresaId] = useState<string | null>(null);
-    const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
-    const [modoDark, setModoDark] = useState(false);
-    const [activeTab, setActiveTab] = useState<'exportar' | 'historico'>('exportar');
-    const [loading, setLoading] = useState(false);
-    const [exportHistory, setExportHistory] = useState<ExportHistory[]>([]);
-    const [dateRange, setDateRange] = useState({ start: '', end: '' });
-    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-    const [paginaAtual, setPaginaAtual] = useState(1);
-    const [carregandoHistorico, setCarregandoHistorico] = useState(false);
-    const [temPermissaoExportar, setTemPermissaoExportar] = useState<boolean | null>(null);
-    const router = useRouter();
-    const { t, i18n } = useTranslation("exportacoes");
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
+  const [modoDark, setModoDark] = useState(false);
+  const [activeTab, setActiveTab] = useState<"exportar" | "historico">("exportar");
+  const [loading, setLoading] = useState(false);
+  const [exportHistory, setExportHistory] = useState<ExportHistory[]>([]);
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+  const [temPermissaoExportar, setTemPermissaoExportar] = useState<boolean | null>(null);
+  const router = useRouter();
+  const { t, i18n } = useTranslation("exportacoes");
 
-    const itensPorPagina = 6;
+  const itensPorPagina = 6;
 
-    const temaAtual = modoDark ? cores.dark : cores.light;
+  const temaAtual = modoDark ? cores.dark : cores.light;
 
-    const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`
-            );
-            if (response.ok) {
-                const data = await response.json();
-                return data.temPermissao;
-            }
-            return false;
-        } catch (error) {
-            console.error("Erro ao verificar permissão:", error);
-            return false;
+  const usuarioTemPermissao = async (userId: string, permissaoChave: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${userId}/tem-permissao/${permissaoChave}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.temPermissao;
+      }
+      return false;
+    } catch (error) {
+      console.error("Erro ao verificar permissão:", error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
+    const initialize = async () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      const temPermissao = await usuarioTemPermissao(usuarioValor, "exportar_dados");
+      setTemPermissaoExportar(temPermissao);
+
+      if (!temPermissao) return;
+
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+
+      if (responseUsuario.ok) {
+        const usuario = await responseUsuario.json();
+        setEmpresaId(usuario.empresaId);
+
+        if (usuario.empresaId) {
+          const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+          setEmpresaAtivada(ativada);
         }
+      }
     };
 
-    useEffect(() => {
-        const initialize = async () => {
-            const temaSalvo = localStorage.getItem("modoDark");
-            const ativado = temaSalvo === "true";
-            setModoDark(ativado);
+    initialize();
+  }, []);
 
-            const usuarioSalvo = localStorage.getItem("client_key");
-            if (!usuarioSalvo) return;
-
-            const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-            const temPermissao = await usuarioTemPermissao(usuarioValor, "exportar_dados");
-            setTemPermissaoExportar(temPermissao);
-
-            if (!temPermissao) return;
-
-            const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
-
-            if (responseUsuario.ok) {
-                const usuario = await responseUsuario.json();
-                setEmpresaId(usuario.empresaId);
-
-                if (usuario.empresaId) {
-                    const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
-                    setEmpresaAtivada(ativada);
-                }
-            }
-        };
-
-        initialize();
-    }, []);
-
-    useEffect(() => {
-        const style = document.createElement('style');
-        style.textContent = `
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
         html::-webkit-scrollbar {
           width: 10px;
         }
@@ -121,604 +125,597 @@ export default function Exportacoes() {
           }
         }
       `;
-        document.head.appendChild(style);
+    document.head.appendChild(style);
 
-        return () => {
-            document.head.removeChild(style);
-        };
-    }, [modoDark]);
-
-    useEffect(() => {
-        if (activeTab === 'historico' && empresaId) {
-            fetchExportHistory();
-        }
-    }, [activeTab, empresaId]);
-
-    const verificarAtivacaoEmpresa = async (empresaId: string) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Cookies.get("token")}`,
-                },
-            });
-            if (!response.ok) return false;
-
-            const empresaData = await response.json();
-            return empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
-        } catch (error) {
-            console.error("Erro ao verificar ativação:", error);
-            return false;
-        }
+    return () => {
+      document.head.removeChild(style);
     };
+  }, [modoDark]);
 
-    const mostrarAlertaNaoAtivada = () => {
-        Swal.fire({
-            title: t("alerta.titulo"),
-            text: t("alerta.mensagem"),
-            icon: "warning",
-            confirmButtonText: t("alerta.botao"),
-            confirmButtonColor: "#3085d6",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.push("/ativacao");
-            }
-        });
-    };
+  useEffect(() => {
+    if (activeTab === "historico" && empresaId) {
+      fetchExportHistory();
+    }
+  }, [activeTab, empresaId]);
 
-    const mostrarAlertaSemPermissao = () => {
-        Swal.fire({
-            title: t("semPermissao.titulo") || "Permissão Negada",
-            text: t("semPermissao.mensagem") || "Você não tem permissão para exportar dados.",
-            icon: "warning",
-            confirmButtonText: t("semPermissao.botao") || "OK",
-            confirmButtonColor: "#3085d6",
-        });
-    };
+  const verificarAtivacaoEmpresa = async (empresaId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
+      if (!response.ok) return false;
 
-    const handleAcaoProtegida = (acao: () => void) => {
-        if (temPermissaoExportar === false) {
-            mostrarAlertaSemPermissao();
-            return;
-        }
+      const empresaData = await response.json();
+      return empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
+    } catch (error) {
+      console.error("Erro ao verificar ativação:", error);
+      return false;
+    }
+  };
 
-        if (!empresaAtivada) {
-            mostrarAlertaNaoAtivada();
-            return;
-        }
-        acao();
-    };
+  const mostrarAlertaNaoAtivada = () => {
+    Swal.fire({
+      title: t("alerta.titulo"),
+      text: t("alerta.mensagem"),
+      icon: "warning",
+      confirmButtonText: t("alerta.botao"),
+      confirmButtonColor: "#3085d6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push("/ativacao");
+      }
+    });
+  };
 
-    const handleExport = async (entityType: string) => {
-        handleAcaoProtegida(async () => {
-            if (!empresaId || temPermissaoExportar === false) return;
+  const mostrarAlertaSemPermissao = () => {
+    Swal.fire({
+      title: t("semPermissao.titulo") || "Permissão Negada",
+      text: t("semPermissao.mensagem") || "Você não tem permissão para exportar dados.",
+      icon: "warning",
+      confirmButtonText: t("semPermissao.botao") || "OK",
+      confirmButtonColor: "#3085d6",
+    });
+  };
 
-            setLoading(true);
-            try {
-                const usuarioSalvo = localStorage.getItem("client_key");
-                const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
-
-                const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/${entityType}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "user-id": usuarioValor
-                    },
-                    body: JSON.stringify({
-                        startDate: dateRange.start || undefined,
-                        endDate: dateRange.end || undefined,
-                        empresaId
-                    })
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${entityType}_${new Date().toISOString().split('T')[0]}.xlsx`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-
-                    Swal.fire({
-                        position: "center",
-                        icon: "success",
-                        title: t("exportacaoSucesso"),
-                        showConfirmButton: false,
-                        timer: 1500,
-                    });
-
-                    if (activeTab === 'historico') {
-                        fetchExportHistory();
-                    }
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.mensagem || t("erroExportacao"));
-                }
-            } catch (error) {
-                console.error("Erro ao exportar:", error);
-                Swal.fire(t("erroTitulo"), error instanceof Error ? error.message : t("erroGenerico"), "error");
-            } finally {
-                setLoading(false);
-            }
-        });
-    };
-
-    const fetchExportHistory = async () => {
-        if (!empresaId || temPermissaoExportar === false) return;
-
-        setCarregandoHistorico(true);
-        try {
-            const usuarioSalvo = localStorage.getItem("client_key");
-            const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`, {
-                headers: {
-                    'user-id': usuarioValor
-                }
-            });
-
-            if (response.ok) {
-                const history = await response.json();
-                setExportHistory(history);
-                setPaginaAtual(1);
-            } else {
-                console.error("Erro na resposta:", response.status);
-            }
-        } catch (error) {
-            console.error("Erro ao carregar histórico:", error);
-        } finally {
-            setCarregandoHistorico(false);
-        }
-    };
-
-    const toggleExpand = (id: string) => {
-        const newExpanded = new Set(expandedItems);
-        if (newExpanded.has(id)) {
-            newExpanded.delete(id);
-        } else {
-            newExpanded.add(id);
-        }
-        setExpandedItems(newExpanded);
-    };
-
-    const parseExportDescription = (descricao: string) => {
-        if (!descricao || typeof descricao !== 'string') {
-            return {
-                entity: t("desconhecido"),
-                user: t("desconhecido"),
-                period: t("periodoNaoEspecificado")
-            };
-        }
-
-        try {
-            const parsed = JSON.parse(descricao);
-            return {
-                entity: parsed.entityType || t("desconhecido"),
-                user: t("desconhecido"),
-                period: parsed.periodo === "Todos os dados" ? t("periodoNaoEspecificado") : parsed.periodo
-            };
-        } catch {
-            const parts = descricao.split(' | ');
-
-            if (parts.length === 2) {
-                const entityMatch = parts[0].match(/Exportação de (\w+)/);
-                const periodMatch = parts[1].match(/Período: (.+)/);
-
-                return {
-                    entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-                    user: t("desconhecido"),
-                    period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado")
-                };
-            }
-
-            if (parts.length >= 3) {
-                const entityMatch = parts[0].match(/Exportação de (\w+)/);
-                const userMatch = parts[1].match(/Usuário: (.+)/);
-                const periodMatch = parts[2].match(/Período: (.+)/);
-
-                return {
-                    entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-                    user: userMatch ? userMatch[1] : t("desconhecido"),
-                    period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado")
-                };
-            }
-
-            const entityMatch = descricao.match(/Exportação de (\w+)/);
-            return {
-                entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-                user: t("desconhecido"),
-                period: t("periodoNaoEspecificado")
-            };
-        }
-    };
-
-    const indexUltimoItem = paginaAtual * itensPorPagina;
-    const indexPrimeiroItem = indexUltimoItem - itensPorPagina;
-    const itensAtuais = exportHistory.slice(indexPrimeiroItem, indexUltimoItem);
-    const totalPaginas = Math.ceil(exportHistory.length / itensPorPagina);
-
-    const mudarPagina = (novaPagina: number) => {
-        setPaginaAtual(novaPagina);
-        setExpandedItems(new Set());
-    };
-
-    const entityNames = {
-        produtos: t("entidades.produtos"),
-        vendas: t("entidades.vendas"),
-        clientes: t("entidades.clientes"),
-        fornecedores: t("entidades.fornecedores"),
-        usuarios: t("entidades.usuarios"),
-        movimentacoes: t("entidades.movimentacoes")
-    };
-
+  const handleAcaoProtegida = (acao: () => void) => {
     if (temPermissaoExportar === false) {
-        return (
-            <div className="flex flex-col items-center justify-start min-h-screen px-4 py-8 gap-4" style={{ backgroundColor: temaAtual.fundo }}>
-                <div className="w-full max-w-md mt-8">
-                    <h1 className="text-xl font-bold mb-2 text-center" style={{ color: temaAtual.texto }}>
-                        {t("acessoNegado.titulo") || "Acesso Negado"}
-                    </h1>
-                    <p className="text-center" style={{ color: temaAtual.texto }}>
-                        {t("acessoNegado.mensagem") || "Você não tem permissão para acessar esta funcionalidade."}
-                    </p>
-                </div>
-            </div>
-        );
+      mostrarAlertaSemPermissao();
+      return;
     }
 
-    if (temPermissaoExportar === null) {
-        return (
-            <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
-                <p style={{ color: temaAtual.texto }}>{t("carregando") || "Carregando..."}</p>
-            </div>
-        );
+    if (!empresaAtivada) {
+      mostrarAlertaNaoAtivada();
+      return;
+    }
+    acao();
+  };
+
+  const handleExport = async (entityType: string) => {
+    handleAcaoProtegida(async () => {
+      if (!empresaId || temPermissaoExportar === false) return;
+
+      setLoading(true);
+      try {
+        const usuarioSalvo = localStorage.getItem("client_key");
+        const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/${entityType}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-id": usuarioValor,
+          },
+          body: JSON.stringify({
+            startDate: dateRange.start || undefined,
+            endDate: dateRange.end || undefined,
+            empresaId,
+          }),
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${entityType}_${new Date().toISOString().split("T")[0]}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: t("exportacaoSucesso"),
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          if (activeTab === "historico") {
+            fetchExportHistory();
+          }
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.mensagem || t("erroExportacao"));
+        }
+      } catch (error) {
+        console.error("Erro ao exportar:", error);
+        Swal.fire(t("erroTitulo"), error instanceof Error ? error.message : t("erroGenerico"), "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+  };
+
+  const fetchExportHistory = async () => {
+    if (!empresaId || temPermissaoExportar === false) return;
+
+    setCarregandoHistorico(true);
+    try {
+      const usuarioSalvo = localStorage.getItem("client_key");
+      const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`, {
+        headers: {
+          "user-id": usuarioValor,
+        },
+      });
+
+      if (response.ok) {
+        const history = await response.json();
+        setExportHistory(history);
+        setPaginaAtual(1);
+      } else {
+        console.error("Erro na resposta:", response.status);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar histórico:", error);
+    } finally {
+      setCarregandoHistorico(false);
+    }
+  };
+
+  const toggleExpand = (id: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedItems(newExpanded);
+  };
+
+  const parseExportDescription = (descricao: string) => {
+    if (!descricao || typeof descricao !== "string") {
+      return {
+        entity: t("desconhecido"),
+        user: t("desconhecido"),
+        period: t("periodoNaoEspecificado"),
+      };
     }
 
+    try {
+      const parsed = JSON.parse(descricao);
+      return {
+        entity: parsed.entityType || t("desconhecido"),
+        user: t("desconhecido"),
+        period: parsed.periodo === "Todos os dados" ? t("periodoNaoEspecificado") : parsed.periodo,
+      };
+    } catch {
+      const parts = descricao.split(" | ");
 
+      if (parts.length === 2) {
+        const entityMatch = parts[0].match(/Exportação de (\w+)/);
+        const periodMatch = parts[1].match(/Período: (.+)/);
+
+        return {
+          entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+          user: t("desconhecido"),
+          period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado"),
+        };
+      }
+
+      if (parts.length >= 3) {
+        const entityMatch = parts[0].match(/Exportação de (\w+)/);
+        const userMatch = parts[1].match(/Usuário: (.+)/);
+        const periodMatch = parts[2].match(/Período: (.+)/);
+
+        return {
+          entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+          user: userMatch ? userMatch[1] : t("desconhecido"),
+          period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado"),
+        };
+      }
+
+      const entityMatch = descricao.match(/Exportação de (\w+)/);
+      return {
+        entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+        user: t("desconhecido"),
+        period: t("periodoNaoEspecificado"),
+      };
+    }
+  };
+
+  const indexUltimoItem = paginaAtual * itensPorPagina;
+  const indexPrimeiroItem = indexUltimoItem - itensPorPagina;
+  const itensAtuais = exportHistory.slice(indexPrimeiroItem, indexUltimoItem);
+  const totalPaginas = Math.ceil(exportHistory.length / itensPorPagina);
+
+  const mudarPagina = (novaPagina: number) => {
+    setPaginaAtual(novaPagina);
+    setExpandedItems(new Set());
+  };
+
+  const entityNames = {
+    produtos: t("entidades.produtos"),
+    vendas: t("entidades.vendas"),
+    clientes: t("entidades.clientes"),
+    fornecedores: t("entidades.fornecedores"),
+    usuarios: t("entidades.usuarios"),
+    movimentacoes: t("entidades.movimentacoes"),
+  };
+
+  if (temPermissaoExportar === false) {
     return (
-        <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-            <div className="w-full max-w-4xl">
-                <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
-                    {t("titulo")}
-                </h1>
+      <div className="flex flex-col items-center justify-start min-h-screen px-4 py-8 gap-4" style={{ backgroundColor: temaAtual.fundo }}>
+        <div className="w-full max-w-md mt-8">
+          <h1 className="text-xl font-bold mb-2 text-center" style={{ color: temaAtual.texto }}>
+            {t("acessoNegado.titulo") || "Acesso Negado"}
+          </h1>
+          <p className="text-center" style={{ color: temaAtual.texto }}>
+            {t("acessoNegado.mensagem") || "Você não tem permissão para acessar esta funcionalidade."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-                {empresaId && !empresaAtivada && (
-                    <div className="mb-6 p-4 rounded-lg flex items-center gap-3" style={{
-                        backgroundColor: temaAtual.primario + "20",
-                        color: temaAtual.texto,
-                        border: `1px solid ${temaAtual.borda}`
-                    }}>
-                        <FaLock className="text-xl" />
-                        <div>
-                            <p className="font-bold">{t("empresaNaoAtivada.titulo")}</p>
-                            <p>{t("empresaNaoAtivada.mensagem")}</p>
-                        </div>
-                    </div>
-                )}
+  if (temPermissaoExportar === null) {
+    return (
+      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
+        <p style={{ color: temaAtual.texto }}>{t("carregando") || "Carregando..."}</p>
+      </div>
+    );
+  }
 
-                <div className="flex border-b mb-6" style={{ borderColor: temaAtual.borda }}>
-                    <button
-                        onClick={() => setActiveTab('exportar')}
-                        className={`px-4 py-2 cursor-pointer font-medium ${activeTab === 'exportar'
-                            ? 'border-b-2'
-                            : 'hover:opacity-80'
-                            }`}
-                        style={{
-                            color: activeTab === 'exportar' ? temaAtual.texto : temaAtual.placeholder,
-                            borderColor: activeTab === 'exportar' ? temaAtual.primario : 'transparent'
-                        }}
-                    >
-                        {t("abas.exportar")}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('historico')}
-                        className={`px-4 py-2 cursor-pointer font-medium ${activeTab === 'historico'
-                            ? 'border-b-2'
-                            : 'hover:opacity-80'
-                            }`}
-                        style={{
-                            color: activeTab === 'historico' ? temaAtual.texto : temaAtual.placeholder,
-                            borderColor: activeTab === 'historico' ? temaAtual.primario : 'transparent'
-                        }}
-                    >
-                        {t("abas.historico")}
-                    </button>
+  return (
+    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
+      <div className="w-full max-w-4xl">
+        <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
+          {t("titulo")}
+        </h1>
+
+        {empresaId && !empresaAtivada && (
+          <div
+            className="mb-6 p-4 rounded-lg flex items-center gap-3"
+            style={{
+              backgroundColor: temaAtual.primario + "20",
+              color: temaAtual.texto,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
+            <FaLock className="text-xl" />
+            <div>
+              <p className="font-bold">{t("empresaNaoAtivada.titulo")}</p>
+              <p>{t("empresaNaoAtivada.mensagem")}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex border-b mb-6" style={{ borderColor: temaAtual.borda }}>
+          <button
+            onClick={() => setActiveTab("exportar")}
+            className={`px-4 py-2 cursor-pointer font-medium ${activeTab === "exportar" ? "border-b-2" : "hover:opacity-80"}`}
+            style={{
+              color: activeTab === "exportar" ? temaAtual.texto : temaAtual.placeholder,
+              borderColor: activeTab === "exportar" ? temaAtual.primario : "transparent",
+            }}
+          >
+            {t("abas.exportar")}
+          </button>
+          <button
+            onClick={() => setActiveTab("historico")}
+            className={`px-4 py-2 cursor-pointer font-medium ${activeTab === "historico" ? "border-b-2" : "hover:opacity-80"}`}
+            style={{
+              color: activeTab === "historico" ? temaAtual.texto : temaAtual.placeholder,
+              borderColor: activeTab === "historico" ? temaAtual.primario : "transparent",
+            }}
+          >
+            {t("abas.historico")}
+          </button>
+        </div>
+
+        {activeTab === "exportar" && (
+          <div className="space-y-6">
+            <div
+              className="p-6 rounded-lg"
+              style={{
+                backgroundColor: temaAtual.card,
+                border: `1px solid ${temaAtual.borda}`,
+              }}
+            >
+              <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
+                {t("filtros.titulo")}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm mb-2" style={{ color: temaAtual.texto }}>
+                    {t("filtros.dataInicial")}
+                  </label>
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+                    className="w-full p-2 cursor-pointer border rounded"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`,
+                    }}
+                  />
                 </div>
 
-                {activeTab === 'exportar' && (
-                    <div className="space-y-6">
-                        <div className="p-6 rounded-lg" style={{
-                            backgroundColor: temaAtual.card,
-                            border: `1px solid ${temaAtual.borda}`
-                        }}>
-                            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
-                                {t("filtros.titulo")}
-                            </h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="block text-sm mb-2" style={{ color: temaAtual.texto }}>
-                                        {t("filtros.dataInicial")}
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={dateRange.start}
-                                        onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                                        className="w-full p-2 cursor-pointer border rounded"
-                                        style={{
-                                            backgroundColor: temaAtual.card,
-                                            color: temaAtual.texto,
-                                            border: `1px solid ${temaAtual.borda}`
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm mb-2" style={{ color: temaAtual.texto }}>
-                                        {t("filtros.dataFinal")}
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={dateRange.end}
-                                        onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                                        className="w-full p-2 border cursor-pointer rounded"
-                                        style={{
-                                            backgroundColor: temaAtual.card,
-                                            color: temaAtual.texto,
-                                            border: `1px solid ${temaAtual.borda}`
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Object.entries(entityNames).map(([key, name]) => (
-                                <div key={key} className="p-6 rounded-lg transition-all duration-200" style={{
-                                    backgroundColor: temaAtual.card,
-                                    border: `1px solid ${temaAtual.borda}`,
-                                }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = temaAtual.hover;
-                                        e.currentTarget.style.transform = "translateY(-2px)";
-                                        e.currentTarget.style.boxShadow = modoDark
-                                            ? "0 4px 12px rgba(30, 73, 118, 0.3)"
-                                            : "0 4px 12px rgba(2, 132, 199, 0.15)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = temaAtual.card;
-                                        e.currentTarget.style.transform = "translateY(0)";
-                                        e.currentTarget.style.boxShadow = "none";
-                                    }}>
-                                    <h3 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>{name}</h3>
-                                    <button
-                                        onClick={() => handleExport(key)}
-                                        disabled={loading || !empresaAtivada}
-                                        className="flex transition-all duration-200 hover:scale-105 cursor-pointer items-center gap-2 px-4 py-2 rounded disabled:opacity-50 "
-                                        style={{
-                                            backgroundColor: temaAtual.primario,
-                                            color: "#FFFFFF",
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            if (!loading && empresaAtivada) {
-                                                e.currentTarget.style.opacity = "0.9";
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            if (!loading && empresaAtivada) {
-                                                e.currentTarget.style.opacity = "1";
-                                            }
-                                        }}
-                                    >
-                                        <FaFileExcel />
-                                        <FaDownload />
-                                        {t("botaoExportar")}
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'historico' && (
-                    <div className="p-6 rounded-lg" style={{
-                        backgroundColor: temaAtual.card,
-                        border: `1px solid ${temaAtual.borda}`
-                    }}>
-                        <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
-                            {t("historico.titulo")}
-                        </h2>
-
-                        {carregandoHistorico ? (
-                            <p className="text-center py-8" style={{ color: temaAtual.placeholder }}>
-                                {t("historico.carregando")}
-                            </p>
-                        ) : exportHistory.length === 0 ? (
-                            <p className="text-center py-8" style={{ color: temaAtual.placeholder }}>
-                                {t("historico.nenhumaExportacao")}
-                            </p>
-                        ) : (
-                            <>
-                                {totalPaginas > 1 && (
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="text-sm" style={{ color: temaAtual.placeholder }}>
-                                            {t("historico.mostrando", {
-                                                inicio: indexPrimeiroItem + 1,
-                                                fim: Math.min(indexUltimoItem, exportHistory.length),
-                                                total: exportHistory.length
-                                            })}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => mudarPagina(paginaAtual - 1)}
-                                                disabled={paginaAtual === 1}
-                                                className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{ color: temaAtual.texto }}
-                                            >
-                                                <FaAngleLeft />
-                                            </button>
-
-                                            <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
-                                                {paginaAtual}/{totalPaginas}
-                                            </span>
-
-                                            <button
-                                                onClick={() => mudarPagina(paginaAtual + 1)}
-                                                disabled={paginaAtual === totalPaginas}
-                                                className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{ color: temaAtual.texto }}
-                                            >
-                                                <FaAngleRight />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-3">
-                                    {itensAtuais.map((item) => {
-                                        const { entity, period } = parseExportDescription(item.descricao);
-                                        const isExpanded = expandedItems.has(item.id);
-
-                                        return (
-                                            <div key={item.id} className="border rounded-lg p-4 transition-all" style={{
-                                                borderColor: temaAtual.borda,
-                                                backgroundColor: isExpanded ? temaAtual.hover : temaAtual.card,
-                                            }}
-                                                onMouseEnter={(e) => {
-                                                    if (!isExpanded) {
-                                                        e.currentTarget.style.backgroundColor = temaAtual.hover;
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (!isExpanded) {
-                                                        e.currentTarget.style.backgroundColor = temaAtual.card;
-                                                    }
-                                                }}>
-                                                <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpand(item.id)}>
-                                                    <div className="flex-1">
-                                                        <p className="font-medium" style={{ color: temaAtual.texto }}>
-                                                            {t("historico.exportacaoDe", { entidade: entityNames[entity as keyof typeof entityNames] || entity })}
-                                                            <span className="ml-2 text-sm font-normal" style={{ color: temaAtual.placeholder }}>
-                                                                ({item.usuario?.nome || t("desconhecido")})
-                                                            </span>
-                                                        </p>
-                                                        <p className="text-sm mt-1" style={{ color: temaAtual.placeholder }}>
-                                                            {new Date(item.createdAt).toLocaleString(i18n.language === 'en' ? 'en-US' : 'pt-BR')}
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                toggleExpand(item.id);
-                                                            }}
-                                                            className="p-1"
-                                                            style={{ color: temaAtual.texto }}
-                                                        >
-                                                            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                {isExpanded && (
-                                                    <div className="mt-3 pt-3 border-t" style={{ borderColor: temaAtual.borda }}>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                            <div>
-                                                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
-                                                                    {t("historico.detalhes.tipoDados")}:
-                                                                </p>
-                                                                <p style={{ color: temaAtual.placeholder }}>
-                                                                    {entityNames[entity as keyof typeof entityNames] || entity}
-                                                                </p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
-                                                                    {t("historico.detalhes.exportadoPor")}:
-                                                                </p>
-                                                                <p style={{ color: temaAtual.placeholder }}>{item.usuario?.nome || t("desconhecido")}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
-                                                                    {t("historico.detalhes.periodo")}:
-                                                                </p>
-                                                                <p style={{ color: temaAtual.placeholder }}>{period}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
-                                                                    {t("historico.detalhes.dataExportacao")}:
-                                                                </p>
-                                                                <p style={{ color: temaAtual.placeholder }}>
-                                                                    {new Date(item.createdAt).toLocaleString(i18n.language === 'en' ? 'en-US' : 'pt-BR')}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {totalPaginas > 1 && (
-                                    <div className="flex justify-center mt-6">
-                                        <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={() => mudarPagina(paginaAtual - 1)}
-                                                disabled={paginaAtual === 1}
-                                                className={`px-3 py-1 rounded ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{
-                                                    color: temaAtual.texto,
-                                                    backgroundColor: temaAtual.card,
-                                                    border: `1px solid ${temaAtual.borda}`
-                                                }}
-                                            >
-                                                <FaAngleLeft />
-                                            </button>
-
-                                            <div className="flex gap-1">
-                                                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
-                                                    <button
-                                                        key={page}
-                                                        onClick={() => mudarPagina(page)}
-                                                        className={`w-8 h-8 rounded ${paginaAtual === page
-                                                            ? "text-white"
-                                                            : "hover:opacity-80"
-                                                            }`}
-                                                        style={{
-                                                            color: paginaAtual === page ? "white" : temaAtual.texto,
-                                                            backgroundColor: paginaAtual === page ? temaAtual.primario : temaAtual.card,
-                                                            border: `1px solid ${temaAtual.borda}`
-                                                        }}
-                                                    >
-                                                        {page}
-                                                    </button>
-                                                ))}
-                                            </div>
-
-                                            <button
-                                                onClick={() => mudarPagina(paginaAtual + 1)}
-                                                disabled={paginaAtual === totalPaginas}
-                                                className={`px-3 py-1 rounded ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
-                                                style={{
-                                                    color: temaAtual.texto,
-                                                    backgroundColor: temaAtual.card,
-                                                    border: `1px solid ${temaAtual.borda}`
-                                                }}
-                                            >
-                                                <FaAngleRight />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                )}
+                <div>
+                  <label className="block text-sm mb-2" style={{ color: temaAtual.texto }}>
+                    {t("filtros.dataFinal")}
+                  </label>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+                    className="w-full p-2 border cursor-pointer rounded"
+                    style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      border: `1px solid ${temaAtual.borda}`,
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-        </div>
-    );
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(entityNames).map(([key, name]) => (
+                <div
+                  key={key}
+                  className="p-6 rounded-lg transition-all duration-200"
+                  style={{
+                    backgroundColor: temaAtual.card,
+                    border: `1px solid ${temaAtual.borda}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = temaAtual.hover;
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = temaAtual.card;
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
+                  <h3 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
+                    {name}
+                  </h3>
+                  <button
+                    onClick={() => handleExport(key)}
+                    disabled={loading || !empresaAtivada}
+                    className="flex transition-all duration-200 hover:scale-105 cursor-pointer items-center gap-2 px-4 py-2 rounded disabled:opacity-50 "
+                    style={{
+                      backgroundColor: temaAtual.primario,
+                      color: "#FFFFFF",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading && empresaAtivada) {
+                        e.currentTarget.style.opacity = "0.9";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading && empresaAtivada) {
+                        e.currentTarget.style.opacity = "1";
+                      }
+                    }}
+                  >
+                    <FaFileExcel />
+                    <FaDownload />
+                    {t("botaoExportar")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "historico" && (
+          <div
+            className="p-6 rounded-lg"
+            style={{
+              backgroundColor: temaAtual.card,
+              border: `1px solid ${temaAtual.borda}`,
+            }}
+          >
+            <h2 className="text-lg font-semibold mb-4" style={{ color: temaAtual.texto }}>
+              {t("historico.titulo")}
+            </h2>
+
+            {carregandoHistorico ? (
+              <p className="text-center py-8" style={{ color: temaAtual.placeholder }}>
+                {t("historico.carregando")}
+              </p>
+            ) : exportHistory.length === 0 ? (
+              <p className="text-center py-8" style={{ color: temaAtual.placeholder }}>
+                {t("historico.nenhumaExportacao")}
+              </p>
+            ) : (
+              <>
+                {totalPaginas > 1 && (
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm" style={{ color: temaAtual.placeholder }}>
+                      {t("historico.mostrando", {
+                        inicio: indexPrimeiroItem + 1,
+                        fim: Math.min(indexUltimoItem, exportHistory.length),
+                        total: exportHistory.length,
+                      })}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
+                        <FaAngleLeft />
+                      </button>
+
+                      <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
+                        {paginaAtual}/{totalPaginas}
+                      </span>
+
+                      <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
+                        <FaAngleRight />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {itensAtuais.map((item) => {
+                    const { entity, period } = parseExportDescription(item.descricao);
+                    const isExpanded = expandedItems.has(item.id);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="border rounded-lg p-4 transition-all"
+                        style={{
+                          borderColor: temaAtual.borda,
+                          backgroundColor: isExpanded ? temaAtual.hover : temaAtual.card,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isExpanded) {
+                            e.currentTarget.style.backgroundColor = temaAtual.hover;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isExpanded) {
+                            e.currentTarget.style.backgroundColor = temaAtual.card;
+                          }
+                        }}
+                      >
+                        <div className="flex justify-between items-start cursor-pointer" onClick={() => toggleExpand(item.id)}>
+                          <div className="flex-1">
+                            <p className="font-medium" style={{ color: temaAtual.texto }}>
+                              {t("historico.exportacaoDe", { entidade: entityNames[entity as keyof typeof entityNames] || entity })}
+                              <span className="ml-2 text-sm font-normal" style={{ color: temaAtual.placeholder }}>
+                                ({item.usuario?.nome || t("desconhecido")})
+                              </span>
+                            </p>
+                            <p className="text-sm mt-1" style={{ color: temaAtual.placeholder }}>
+                              {new Date(item.createdAt).toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpand(item.id);
+                              }}
+                              className="p-1"
+                              style={{ color: temaAtual.texto }}
+                            >
+                              {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="mt-3 pt-3 border-t" style={{ borderColor: temaAtual.borda }}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
+                                  {t("historico.detalhes.tipoDados")}:
+                                </p>
+                                <p style={{ color: temaAtual.placeholder }}>{entityNames[entity as keyof typeof entityNames] || entity}</p>
+                              </div>
+                              <div>
+                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
+                                  {t("historico.detalhes.exportadoPor")}:
+                                </p>
+                                <p style={{ color: temaAtual.placeholder }}>{item.usuario?.nome || t("desconhecido")}</p>
+                              </div>
+                              <div>
+                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
+                                  {t("historico.detalhes.periodo")}:
+                                </p>
+                                <p style={{ color: temaAtual.placeholder }}>{period}</p>
+                              </div>
+                              <div>
+                                <p className="font-semibold" style={{ color: temaAtual.texto }}>
+                                  {t("historico.detalhes.dataExportacao")}:
+                                </p>
+                                <p style={{ color: temaAtual.placeholder }}>{new Date(item.createdAt).toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR")}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {totalPaginas > 1 && (
+                  <div className="flex justify-center mt-6">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => mudarPagina(paginaAtual - 1)}
+                        disabled={paginaAtual === 1}
+                        className={`px-3 py-1 rounded ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                        style={{
+                          color: temaAtual.texto,
+                          backgroundColor: temaAtual.card,
+                          border: `1px solid ${temaAtual.borda}`,
+                        }}
+                      >
+                        <FaAngleLeft />
+                      </button>
+
+                      <div className="flex gap-1">
+                        {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => mudarPagina(page)}
+                            className={`w-8 h-8 rounded ${paginaAtual === page ? "text-white" : "hover:opacity-80"}`}
+                            style={{
+                              color: paginaAtual === page ? "white" : temaAtual.texto,
+                              backgroundColor: paginaAtual === page ? temaAtual.primario : temaAtual.card,
+                              border: `1px solid ${temaAtual.borda}`,
+                            }}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => mudarPagina(paginaAtual + 1)}
+                        disabled={paginaAtual === totalPaginas}
+                        className={`px-3 py-1 rounded ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`}
+                        style={{
+                          color: temaAtual.texto,
+                          backgroundColor: temaAtual.card,
+                          border: `1px solid ${temaAtual.borda}`,
+                        }}
+                      >
+                        <FaAngleRight />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

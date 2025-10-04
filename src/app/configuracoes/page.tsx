@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { FaSun, FaMoon, FaVolumeUp, FaVolumeMute, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import i18n from "i18next";
 import Image from "next/image";
+import Cookies from "js-cookie";
 
 export default function Configuracoes() {
   const [modoDark, setModoDark] = useState(false);
@@ -13,6 +14,12 @@ export default function Configuracoes() {
   const { t } = useTranslation("settings");
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+    
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
@@ -21,7 +28,7 @@ export default function Configuracoes() {
     const somSalvo = localStorage.getItem("somNotificacao");
     setSomNotificacao(somSalvo === null || somSalvo === "true");
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
     html::-webkit-scrollbar {
       width: 10px;
@@ -110,7 +117,7 @@ export default function Configuracoes() {
     card: modoDark ? "#132F4C" : "#ecececec",
     borda: modoDark ? "#1E4976" : "#cccccc",
     primario: modoDark ? "#FFFFFF" : "#000000",
-    secundario: modoDark ? "#00B4D8" : "#0284C7"
+    secundario: modoDark ? "#00B4D8" : "#0284C7",
   };
 
   return (
@@ -122,9 +129,7 @@ export default function Configuracoes() {
           border: `1px solid ${temaAtual.borda}`,
         }}
       >
-        <h2 className="text-lg font-bold mb-6">
-          {t("settings")}
-        </h2>
+        <h2 className="text-lg font-bold mb-6">{t("settings")}</h2>
 
         <ul className="space-y-4 text-sm font-medium">
           {[
@@ -132,11 +137,7 @@ export default function Configuracoes() {
             { label: t("change_password"), link: "/esqueci" },
           ].map((item, i) => (
             <li key={i}>
-              <a
-                href={item.link}
-                className="cursor-pointer hover:underline"
-                style={{ color: temaAtual.primario }}
-              >
+              <a href={item.link} className="cursor-pointer hover:underline" style={{ color: temaAtual.primario }}>
                 {item.label}
               </a>
             </li>
@@ -183,9 +184,7 @@ export default function Configuracoes() {
             {mostrarIdiomas ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
           </button>
 
-          <div
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${mostrarIdiomas ? "max-h-40" : "max-h-0"}`}
-          >
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${mostrarIdiomas ? "max-h-40" : "max-h-0"}`}>
             <div className="flex flex-col gap-2 mt-2">
               <button
                 onClick={() => mudarIdioma("pt")}
@@ -215,13 +214,9 @@ export default function Configuracoes() {
       </aside>
 
       <main className="flex-1 mb-8 md:mb-0 md:ml-8">
-        <h1 className="text-2xl font-bold mb-4">
-          {t("preferences")}
-        </h1>
+        <h1 className="text-2xl font-bold mb-4">{t("preferences")}</h1>
 
-        <p style={{ color: temaAtual.primario }}>
-          {t("preferences_desc")}
-        </p>
+        <p style={{ color: temaAtual.primario }}>{t("preferences_desc")}</p>
       </main>
     </div>
   );

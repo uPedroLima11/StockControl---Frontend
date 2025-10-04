@@ -115,6 +115,12 @@ export default function CriarEmpresa() {
   const emailWatch = watch("email");
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const verificarDominio = async () => {
       if (!dominioWatch || dominioWatch.trim().length < 3) {
         setDominioStatus({
@@ -132,7 +138,7 @@ export default function CriarEmpresa() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-dominio/${encodeURIComponent(dominioWatch)}`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
             "Content-Type": "application/json",
           },
         });
@@ -179,7 +185,7 @@ export default function CriarEmpresa() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(emailWatch)}`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
             "Content-Type": "application/json",
           },
         });
@@ -260,7 +266,7 @@ export default function CriarEmpresa() {
         const responseEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/empresa/${usuarioId}`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
             "Content-Type": "application/json",
           },
         });
@@ -310,7 +316,7 @@ export default function CriarEmpresa() {
         body: formData,
         headers: {
           "user-id": usuarioValor,
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -425,7 +431,7 @@ export default function CriarEmpresa() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor,
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           nome: data.nome,

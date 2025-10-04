@@ -113,6 +113,12 @@ export default function PedidosPage() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const produtoParam = urlParams.get("produto");

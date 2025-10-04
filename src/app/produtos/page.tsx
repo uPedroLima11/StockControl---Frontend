@@ -12,11 +12,11 @@ import Image from "next/image";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 
-type CampoOrdenacao = 'nome' | 'estoque' | 'preco' | 'categoria' | 'fornecedor' | 'none';
-type DirecaoOrdenacao = 'asc' | 'desc';
+type CampoOrdenacao = "nome" | "estoque" | "preco" | "categoria" | "fornecedor" | "none";
+type DirecaoOrdenacao = "asc" | "desc";
 
-type TipoFiltro = 'preco' | 'estoque' | 'nome' | 'categoria' | 'none';
-type DirecaoFiltro = 'maior' | 'menor' | 'crescente' | 'decrescente' | 'none';
+type TipoFiltro = "preco" | "estoque" | "nome" | "categoria" | "none";
+type DirecaoFiltro = "maior" | "menor" | "crescente" | "decrescente" | "none";
 
 const cores = {
   dark: {
@@ -32,7 +32,7 @@ const cores = {
     sucesso: "#10b981",
     erro: "#ef4444",
     alerta: "#f59e0b",
-    gradiente: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)"
+    gradiente: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)",
   },
   light: {
     fundo: "#f8fafc",
@@ -47,8 +47,8 @@ const cores = {
     sucesso: "#10b981",
     erro: "#EF4444",
     alerta: "#F59E0B",
-    gradiente: "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%)"
-  }
+    gradiente: "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%)",
+  },
 };
 
 export default function Produtos() {
@@ -72,19 +72,19 @@ export default function Produtos() {
   const [totalProdutos, setTotalProdutos] = useState<number>(0);
   const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
   const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
-  const [campoOrdenacao] = useState<CampoOrdenacao>('none');
-  const [direcaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
+  const [campoOrdenacao] = useState<CampoOrdenacao>("none");
+  const [direcaoOrdenacao] = useState<DirecaoOrdenacao>("asc");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
     emEstoque: 0,
     emFalta: 0,
-    noCatalogo: 0
+    noCatalogo: 0,
   });
 
   const [menuFiltrosAberto, setMenuFiltrosAberto] = useState(false);
-  const [tipoFiltroAtivo, setTipoFiltroAtivo] = useState<TipoFiltro>('none');
-  const [direcaoFiltroAtivo, setDirecaoFiltroAtivo] = useState<DirecaoFiltro>('none');
+  const [tipoFiltroAtivo, setTipoFiltroAtivo] = useState<TipoFiltro>("none");
+  const [direcaoFiltroAtivo, setDirecaoFiltroAtivo] = useState<DirecaoFiltro>("none");
   const [valorFiltro, setValorFiltro] = useState<number>(0);
 
   const [modalEstoqueAberto, setModalEstoqueAberto] = useState(false);
@@ -126,16 +126,22 @@ export default function Produtos() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     if (produtos.length > 0) {
-      const emEstoque = produtos.filter(p => p.quantidade > 0).length;
-      const emFalta = produtos.filter(p => p.quantidade <= (p.quantidadeMin || 0)).length;
-      const noCatalogo = produtos.filter(p => p.noCatalogo).length;
+      const emEstoque = produtos.filter((p) => p.quantidade > 0).length;
+      const emFalta = produtos.filter((p) => p.quantidade <= (p.quantidadeMin || 0)).length;
+      const noCatalogo = produtos.filter((p) => p.noCatalogo).length;
 
       setStats({
         total: produtos.length,
         emEstoque,
         emFalta,
-        noCatalogo
+        noCatalogo,
       });
     }
   }, [produtos]);
@@ -151,7 +157,7 @@ export default function Produtos() {
     }
     document.addEventListener("mousedown", handleClickOutside);
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       @keyframes fadeInUp {
         from {
@@ -223,13 +229,13 @@ export default function Produtos() {
       
       .gradient-border {
         position: relative;
-        background: linear-gradient(45deg, ${modoDark ? '#3B82F6, #0EA5E9, #1E293B' : '#1976D2, #0284C7, #E2E8F0'});
+        background: linear-gradient(45deg, ${modoDark ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
         padding: 1px;
         border-radius: 16px;
       }
       
       .gradient-border > div {
-        background: ${modoDark ? '#1E293B' : '#FFFFFF'};
+        background: ${modoDark ? "#1E293B" : "#FFFFFF"};
         border-radius: 15px;
       }
       
@@ -243,17 +249,17 @@ export default function Produtos() {
       }
       
       .scroll-custom::-webkit-scrollbar-track {
-        background: ${modoDark ? '#1E293B' : '#F1F5F9'};
+        background: ${modoDark ? "#1E293B" : "#F1F5F9"};
         border-radius: 3px;
       }
       
       .scroll-custom::-webkit-scrollbar-thumb {
-        background: ${modoDark ? '#3B82F6' : '#94A3B8'};
+        background: ${modoDark ? "#3B82F6" : "#94A3B8"};
         border-radius: 3px;
       }
       
       .scroll-custom::-webkit-scrollbar-thumb:hover {
-        background: ${modoDark ? '#2563EB' : '#64748B'};
+        background: ${modoDark ? "#2563EB" : "#64748B"};
       }
       
       .line-clamp-2 {
@@ -277,25 +283,16 @@ export default function Produtos() {
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`,
-          { headers: { 'user-id': usuarioValor } }
-        );
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, { headers: { "user-id": usuarioValor } });
         if (response.ok) {
           const dados: { permissoes: { chave: string; concedida: boolean }[] } = await response.json();
           const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach(permissao => {
+          dados.permissoes.forEach((permissao) => {
             permissoesUsuarioObj[permissao.chave] = permissao.concedida;
           });
           setPermissoesUsuario(permissoesUsuarioObj);
         } else {
-          const permissoesParaVerificar = [
-            "produtos_criar",
-            "produtos_editar",
-            "produtos_excluir",
-            "produtos_visualizar",
-            "estoque_gerenciar"
-          ];
+          const permissoesParaVerificar = ["produtos_criar", "produtos_editar", "produtos_excluir", "produtos_visualizar", "estoque_gerenciar"];
           const permissoes: Record<string, boolean> = {};
           for (const permissao of permissoesParaVerificar) {
             const temPermissao = await usuarioTemPermissao(permissao);
@@ -319,7 +316,7 @@ export default function Produtos() {
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: { 'user-id': usuarioValor }
+        headers: { "user-id": usuarioValor },
       });
       if (!responseUsuario.ok) {
         console.error("Erro ao buscar os dados do usuário");
@@ -334,14 +331,15 @@ export default function Produtos() {
         const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
         setEmpresaAtivada(ativada);
         if (ativada) {
-          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+            headers: {
+              "content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          });
           if (responseProdutos.ok) {
             const todosProdutos = await responseProdutos.json();
-            const produtosDaEmpresa = todosProdutos
-              .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
-              .sort((a: ProdutoI, b: ProdutoI) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-              );
+            const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId).sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             setProdutos(produtosDaEmpresa);
             setProdutosOriginais(produtosDaEmpresa);
             setTotalProdutos(produtosDaEmpresa.length);
@@ -350,7 +348,7 @@ export default function Produtos() {
       }
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        headers: { 'user-id': usuarioValor }
+        headers: { "user-id": usuarioValor },
       });
       if (responseFornecedores.ok) {
         const fornecedoresData = await responseFornecedores.json();
@@ -358,7 +356,7 @@ export default function Produtos() {
       }
 
       const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
-        headers: { 'user-id': usuarioValor }
+        headers: { "user-id": usuarioValor },
       });
       if (responseCategorias.ok) {
         const categoriasData = await responseCategorias.json();
@@ -385,7 +383,7 @@ export default function Produtos() {
     const carregarProdutos = async () => {
       setLoading(true);
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: { 'user-id': usuarioValor }
+        headers: { "user-id": usuarioValor },
       });
       if (!responseUsuario.ok) {
         console.error("Erro ao buscar os dados do usuário");
@@ -395,14 +393,15 @@ export default function Produtos() {
       const usuario = await responseUsuario.json();
 
       if (usuario?.empresaId && empresaAtivada) {
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+          headers: {
+            "content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         if (responseProdutos.ok) {
           const todosProdutos = await responseProdutos.json();
-          const produtosDaEmpresa = todosProdutos
-            .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
-            .sort((a: ProdutoI, b: ProdutoI) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
+          const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId).sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           setProdutos(produtosDaEmpresa);
           setProdutosOriginais(produtosDaEmpresa);
           setTotalProdutos(produtosDaEmpresa.length);
@@ -418,17 +417,17 @@ export default function Produtos() {
     if (produtosOriginais.length > 0) {
       let produtosFiltrados = [...produtosOriginais];
 
-      if (tipoFiltroAtivo !== 'none' && direcaoFiltroAtivo !== 'none') {
-        produtosFiltrados = produtosFiltrados.filter(produto => {
+      if (tipoFiltroAtivo !== "none" && direcaoFiltroAtivo !== "none") {
+        produtosFiltrados = produtosFiltrados.filter((produto) => {
           switch (tipoFiltroAtivo) {
-            case 'preco':
-              if (direcaoFiltroAtivo === 'maior') {
+            case "preco":
+              if (direcaoFiltroAtivo === "maior") {
                 return produto.preco > valorFiltro;
               } else {
                 return produto.preco < valorFiltro;
               }
-            case 'estoque':
-              if (direcaoFiltroAtivo === 'maior') {
+            case "estoque":
+              if (direcaoFiltroAtivo === "maior") {
                 return produto.quantidade > valorFiltro;
               } else {
                 return produto.quantidade < valorFiltro;
@@ -438,9 +437,9 @@ export default function Produtos() {
           }
         });
 
-        if (tipoFiltroAtivo === 'nome') {
+        if (tipoFiltroAtivo === "nome") {
           produtosFiltrados.sort((a, b) => {
-            if (direcaoFiltroAtivo === 'crescente') {
+            if (direcaoFiltroAtivo === "crescente") {
               return a.nome.localeCompare(b.nome);
             } else {
               return b.nome.localeCompare(a.nome);
@@ -472,45 +471,45 @@ export default function Produtos() {
   }, [modalVisualizar]);
 
   const recarregarListaProdutos = () => {
-    setRecarregarProdutos(prev => prev + 1);
+    setRecarregarProdutos((prev) => prev + 1);
   };
 
   const ordenarProdutos = (produtos: ProdutoI[], campo: CampoOrdenacao, direcao: DirecaoOrdenacao) => {
-    if (campo === 'none') return [...produtos];
+    if (campo === "none") return [...produtos];
 
     return [...produtos].sort((a, b) => {
       let valorA, valorB;
 
       switch (campo) {
-        case 'nome':
+        case "nome":
           valorA = a.nome.toLowerCase();
           valorB = b.nome.toLowerCase();
           break;
-        case 'estoque':
+        case "estoque":
           valorA = a.quantidade;
           valorB = b.quantidade;
           break;
-        case 'preco':
+        case "preco":
           valorA = a.preco;
           valorB = b.preco;
           break;
-        case 'categoria':
-          valorA = a.categoria?.nome?.toLowerCase() || '';
-          valorB = b.categoria?.nome?.toLowerCase() || '';
+        case "categoria":
+          valorA = a.categoria?.nome?.toLowerCase() || "";
+          valorB = b.categoria?.nome?.toLowerCase() || "";
           break;
-        case 'fornecedor':
-          valorA = a.fornecedor?.nome?.toLowerCase() || '';
-          valorB = b.fornecedor?.nome?.toLowerCase() || '';
+        case "fornecedor":
+          valorA = a.fornecedor?.nome?.toLowerCase() || "";
+          valorB = b.fornecedor?.nome?.toLowerCase() || "";
           break;
         default:
           return 0;
       }
 
       if (valorA < valorB) {
-        return direcao === 'asc' ? -1 : 1;
+        return direcao === "asc" ? -1 : 1;
       }
       if (valorA > valorB) {
-        return direcao === 'asc' ? 1 : -1;
+        return direcao === "asc" ? 1 : -1;
       }
       return 0;
     });
@@ -527,8 +526,8 @@ export default function Produtos() {
   };
 
   const removerTodosFiltros = () => {
-    setTipoFiltroAtivo('none');
-    setDirecaoFiltroAtivo('none');
+    setTipoFiltroAtivo("none");
+    setDirecaoFiltroAtivo("none");
     setValorFiltro(0);
     setFiltroCategoria(null);
     setPaginaAtual(1);
@@ -540,14 +539,11 @@ export default function Produtos() {
       if (!usuarioSalvo) return false;
 
       const usuarioId = usuarioSalvo.replace(/"/g, "");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`,
-        {
-          headers: {
-            'user-id': usuarioId
-          }
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
+        headers: {
+          "user-id": usuarioId,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -560,23 +556,17 @@ export default function Produtos() {
     }
   };
 
-  const podeVisualizar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.produtos_visualizar;
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_visualizar;
 
-  const podeCriar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.produtos_criar;
+  const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_criar;
 
-  const podeEditar = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.produtos_editar;
+  const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
 
-  const podeExcluir = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.produtos_excluir;
+  const podeExcluir = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_excluir;
 
-  const podeGerenciarCatalogo = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.produtos_editar;
+  const podeGerenciarCatalogo = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
 
-  const podeGerenciarEstoque = (tipoUsuario === "PROPRIETARIO") ||
-    permissoesUsuario.estoque_gerenciar;
+  const podeGerenciarEstoque = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.estoque_gerenciar;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -584,7 +574,7 @@ export default function Produtos() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
       if (!response.ok) {
@@ -609,8 +599,8 @@ export default function Produtos() {
       icon: "warning",
       confirmButtonText: t("empresaNaoAtivada.botao"),
       confirmButtonColor: "#3085d6",
-      background: modoDark ? temaAtual.card : '#FFFFFF',
-      color: modoDark ? temaAtual.texto : temaAtual.texto
+      background: modoDark ? temaAtual.card : "#FFFFFF",
+      color: modoDark ? temaAtual.texto : temaAtual.texto,
     }).then((result) => {
       if (result.isConfirmed) {
         router.push("/ativacao");
@@ -662,8 +652,9 @@ export default function Produtos() {
         method: "POST",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
       });
 
       if (response.ok) {
@@ -692,7 +683,8 @@ export default function Produtos() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            'user-id': usuarioValor
+            "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify({ noCatalogo: !noCatalogo }),
         });
@@ -700,28 +692,20 @@ export default function Produtos() {
         if (response.ok) {
           const produtoAtualizado = await response.json();
 
-          setProdutos(prevProdutos =>
-            prevProdutos.map(p =>
-              p.id === produtoId
-                ? { ...p, noCatalogo: produtoAtualizado.noCatalogo }
-                : p
-            )
-          );
+          setProdutos((prevProdutos) => prevProdutos.map((p) => (p.id === produtoId ? { ...p, noCatalogo: produtoAtualizado.noCatalogo } : p)));
 
           if (modalVisualizar && modalVisualizar.id === produtoId) {
-            setModalVisualizar(prev => prev ? { ...prev, noCatalogo: produtoAtualizado.noCatalogo } : null);
+            setModalVisualizar((prev) => (prev ? { ...prev, noCatalogo: produtoAtualizado.noCatalogo } : null));
           }
 
           Swal.fire({
             position: "center",
             icon: "success",
-            title: produtoAtualizado.noCatalogo
-              ? t("produtoAdicionadoCatalogo.titulo")
-              : t("produtoRemovidoCatalogo.titulo"),
+            title: produtoAtualizado.noCatalogo ? t("produtoAdicionadoCatalogo.titulo") : t("produtoRemovidoCatalogo.titulo"),
             showConfirmButton: false,
             timer: 1500,
-            background: modoDark ? temaAtual.card : '#FFFFFF',
-            color: modoDark ? temaAtual.texto : temaAtual.texto
+            background: modoDark ? temaAtual.card : "#FFFFFF",
+            color: modoDark ? temaAtual.texto : temaAtual.texto,
           });
         } else {
           Swal.fire("Erro!", "Não foi possível alterar o catálogo", "error");
@@ -746,7 +730,7 @@ export default function Produtos() {
       const camposObrigatorios = {
         nome: form.nome.trim(),
         descricao: form.descricao.trim(),
-        quantidadeMin: form.quantidadeMin !== 0
+        quantidadeMin: form.quantidadeMin !== 0,
       };
 
       const camposFaltando = Object.entries(camposObrigatorios)
@@ -754,22 +738,26 @@ export default function Produtos() {
         .map(([campo]) => campo);
 
       if (camposFaltando.length > 0) {
-        const camposTraduzidos = camposFaltando.map(campo => {
+        const camposTraduzidos = camposFaltando.map((campo) => {
           switch (campo) {
-            case 'nome': return t("nome");
-            case 'descricao': return t("descricao");
-            case 'quantidadeMin': return t("quantidadeMinima");
-            default: return campo;
+            case "nome":
+              return t("nome");
+            case "descricao":
+              return t("descricao");
+            case "quantidadeMin":
+              return t("quantidadeMinima");
+            default:
+              return campo;
           }
         });
 
         Swal.fire({
-          icon: 'error',
-          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
-          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
-          confirmButtonColor: '#EF4444',
-          background: modoDark ? temaAtual.card : '#FFFFFF',
-          color: modoDark ? temaAtual.texto : temaAtual.texto
+          icon: "error",
+          title: t("erroCamposObrigatorios.titulo") || "Campos obrigatórios",
+          html: `${t("erroCamposObrigatorios.mensagem") || "Preencha os campos obrigatórios:"}<br><strong>${camposTraduzidos.join(", ")}</strong>`,
+          confirmButtonColor: "#EF4444",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         return;
       }
@@ -796,7 +784,8 @@ export default function Produtos() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            'user-id': usuarioValor
+            "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify({
             nome: form.nome,
@@ -809,8 +798,8 @@ export default function Produtos() {
             categoriaId: form.categoriaId,
             empresaId: empresaId,
             usuarioId: usuarioValor,
-            fotoUrl: fotoUrl
-          })
+            fotoUrl: fotoUrl,
+          }),
         });
 
         if (response.ok) {
@@ -843,14 +832,14 @@ export default function Produtos() {
             title: t("produtoCriadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-            background: modoDark ? temaAtual.card : '#FFFFFF',
-            color: modoDark ? temaAtual.texto : temaAtual.texto
+            background: modoDark ? temaAtual.card : "#FFFFFF",
+            color: modoDark ? temaAtual.texto : temaAtual.texto,
           });
 
           setTimeout(() => window.location.reload(), 1600);
         } else {
           const errorData = await response.json();
-          Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorData.mensagem || 'Erro desconhecido'}`, "error");
+          Swal.fire("Erro!", `Erro ao cadastrar produto: ${errorData.mensagem || "Erro desconhecido"}`, "error");
         }
       } catch (err) {
         console.error("Erro ao criar produto:", err);
@@ -874,8 +863,9 @@ export default function Produtos() {
         method: "PUT",
         body: formData,
         headers: {
-          'user-id': usuarioValor
-        }
+          "user-id": usuarioValor,
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
       });
 
       if (response.ok) {
@@ -903,7 +893,7 @@ export default function Produtos() {
       const camposObrigatorios = {
         nome: form.nome.trim(),
         descricao: form.descricao.trim(),
-        quantidadeMin: form.quantidadeMin !== 0
+        quantidadeMin: form.quantidadeMin !== 0,
       };
 
       const camposFaltando = Object.entries(camposObrigatorios)
@@ -911,22 +901,26 @@ export default function Produtos() {
         .map(([campo]) => campo);
 
       if (camposFaltando.length > 0) {
-        const camposTraduzidos = camposFaltando.map(campo => {
+        const camposTraduzidos = camposFaltando.map((campo) => {
           switch (campo) {
-            case 'nome': return t("nome");
-            case 'descricao': return t("descricao");
-            case 'quantidadeMin': return t("quantidadeMinima");
-            default: return campo;
+            case "nome":
+              return t("nome");
+            case "descricao":
+              return t("descricao");
+            case "quantidadeMin":
+              return t("quantidadeMinima");
+            default:
+              return campo;
           }
         });
 
         Swal.fire({
-          icon: 'error',
-          title: t("erroCamposObrigatorios.titulo") || 'Campos obrigatórios',
-          html: `${t("erroCamposObrigatorios.mensagem") || 'Preencha os campos obrigatórios:'}<br><strong>${camposTraduzidos.join(', ')}</strong>`,
-          confirmButtonColor: '#EF4444',
-          background: modoDark ? temaAtual.card : '#FFFFFF',
-          color: modoDark ? temaAtual.texto : temaAtual.texto
+          icon: "error",
+          title: t("erroCamposObrigatorios.titulo") || "Campos obrigatórios",
+          html: `${t("erroCamposObrigatorios.mensagem") || "Preencha os campos obrigatórios:"}<br><strong>${camposTraduzidos.join(", ")}</strong>`,
+          confirmButtonColor: "#EF4444",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         return;
       }
@@ -955,7 +949,8 @@ export default function Produtos() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            'user-id': usuarioValor
+            "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify({
             nome: form.nome,
@@ -966,8 +961,8 @@ export default function Produtos() {
             fornecedorId: form.fornecedorId,
             categoriaId: form.categoriaId,
             usuarioId: usuarioValor,
-            fotoUrl: fotoUrl
-          })
+            fotoUrl: fotoUrl,
+          }),
         });
 
         if (response.ok) {
@@ -977,15 +972,15 @@ export default function Produtos() {
           setFile(null);
           setPreview(null);
 
-          setProdutos(produtos.map(p => p.id === updatedProduto.id ? updatedProduto : p));
+          setProdutos(produtos.map((p) => (p.id === updatedProduto.id ? updatedProduto : p)));
           Swal.fire({
             position: "center",
             icon: "success",
             title: t("produtoAtualizadoSucesso.titulo"),
             showConfirmButton: false,
             timer: 1500,
-            background: modoDark ? temaAtual.card : '#FFFFFF',
-            color: modoDark ? temaAtual.texto : temaAtual.texto
+            background: modoDark ? temaAtual.card : "#FFFFFF",
+            color: modoDark ? temaAtual.texto : temaAtual.texto,
           });
           setTimeout(() => window.location.reload(), 1600);
         } else {
@@ -994,8 +989,8 @@ export default function Produtos() {
             icon: "error",
             title: "Erro!",
             text: `Erro ao atualizar produto: ${errorText}`,
-            background: modoDark ? temaAtual.card : '#FFFFFF',
-            color: modoDark ? temaAtual.texto : temaAtual.texto
+            background: modoDark ? temaAtual.card : "#FFFFFF",
+            color: modoDark ? temaAtual.texto : temaAtual.texto,
           });
         }
       } catch (err) {
@@ -1004,8 +999,8 @@ export default function Produtos() {
           icon: "error",
           title: "Erro!",
           text: "Erro inesperado ao tentar atualizar.",
-          background: modoDark ? temaAtual.card : '#FFFFFF',
-          color: modoDark ? temaAtual.texto : temaAtual.texto
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     });
@@ -1032,8 +1027,8 @@ export default function Produtos() {
         cancelButtonColor: "#d33",
         confirmButtonText: t("confirmacaoExclusao.botaoConfirmar"),
         cancelButtonText: t("confirmacaoExclusao.botaoCancelar"),
-        background: modoDark ? temaAtual.card : '#FFFFFF',
-        color: modoDark ? temaAtual.texto : temaAtual.texto
+        background: modoDark ? temaAtual.card : "#FFFFFF",
+        color: modoDark ? temaAtual.texto : temaAtual.texto,
       });
 
       const usuarioSalvo = localStorage.getItem("client_key");
@@ -1044,14 +1039,11 @@ export default function Produtos() {
           await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
             method: "DELETE",
             headers: {
-              'user-id': usuarioValor
-            }
+              "user-id": usuarioValor,
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
           });
-          Swal.fire(
-            t("produtoExcluidoSucesso.titulo"),
-            t("produtoExcluidoSucesso.mensagem"),
-            "success"
-          );
+          Swal.fire(t("produtoExcluidoSucesso.titulo"), t("produtoExcluidoSucesso.mensagem"), "success");
           setModalVisualizar(null);
           window.location.reload();
         } catch (err) {
@@ -1072,7 +1064,7 @@ export default function Produtos() {
     setProdutoSelecionadoEstoque({
       id: produto.id,
       nome: produto.nome,
-      quantidade: produto.quantidade
+      quantidade: produto.quantidade,
     });
     setModalEstoqueAberto(true);
   };
@@ -1089,25 +1081,23 @@ export default function Produtos() {
   const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
 
   const formatarPreco = (preco: number) => {
-    return preco.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return preco
+      .toFixed(2)
+      .replace(".", ",")
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const mudarPagina = (novaPagina: number) => {
     setPaginaAtual(novaPagina);
   };
 
-  const nomeCategoriaSelecionada = filtroCategoria
-    ? categorias.find(c => String(c.id) === filtroCategoria)?.nome
-    : null;
+  const nomeCategoriaSelecionada = filtroCategoria ? categorias.find((c) => String(c.id) === filtroCategoria)?.nome : null;
 
-  const temFiltroAtivo = filtroCategoria || tipoFiltroAtivo !== 'none';
+  const temFiltroAtivo = filtroCategoria || tipoFiltroAtivo !== "none";
 
   if (!podeVisualizar) {
     return (
-      <div className={`min-h-screen ${modoDark
-        ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-        : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100"
-        } flex items-center justify-center px-4`}>
+      <div className={`min-h-screen ${modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100"} flex items-center justify-center px-4`}>
         <div className="text-center">
           <div className={`w-24 h-24 mx-auto mb-6 ${modoDark ? "bg-red-500/20" : "bg-red-100"} rounded-full flex items-center justify-center`}>
             <FaLock className={`text-3xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
@@ -1119,9 +1109,7 @@ export default function Produtos() {
     );
   }
 
-  const bgGradient = modoDark
-    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-    : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100";
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100";
 
   const textPrimary = modoDark ? "text-white" : "text-slate-900";
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
@@ -1141,62 +1129,54 @@ export default function Produtos() {
             <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${modoDark ? "bg-slate-800/30" : "bg-white/30"} backdrop-blur-sm border ${borderColor}`}>
               <div className="absolute inset-0">
                 <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
-                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: '2s' }}></div>
-                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: '4s' }}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
               </div>
 
               <div className="relative z-10 text-center">
                 <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
-                  {t('titulo')} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t('produtos')}</span>
+                  {t("titulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t("produtos")}</span>
                 </h1>
-                <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>
-                  {t('subtitulo')}
-                </p>
+                <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>{t("subtitulo")}</p>
               </div>
             </section>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[
                 {
-                  label: t('stats.total'),
+                  label: t("stats.total"),
                   value: stats.total,
                   icon: FaBox,
-                  color: 'from-blue-500 to-cyan-500',
-                  bgColor: modoDark ? 'bg-blue-500/10' : 'bg-blue-50'
+                  color: "from-blue-500 to-cyan-500",
+                  bgColor: modoDark ? "bg-blue-500/10" : "bg-blue-50",
                 },
                 {
-                  label: t('stats.emEstoque'),
+                  label: t("stats.emEstoque"),
                   value: stats.emEstoque,
                   icon: FaCheck,
-                  color: 'from-green-500 to-emerald-500',
-                  bgColor: modoDark ? 'bg-green-500/10' : 'bg-green-50'
+                  color: "from-green-500 to-emerald-500",
+                  bgColor: modoDark ? "bg-green-500/10" : "bg-green-50",
                 },
                 {
-                  label: t('stats.emFalta'),
+                  label: t("stats.emFalta"),
                   value: stats.emFalta,
                   icon: FaExclamationTriangle,
-                  color: 'from-red-500 to-orange-500',
-                  bgColor: modoDark ? 'bg-red-500/10' : 'bg-red-50'
+                  color: "from-red-500 to-orange-500",
+                  bgColor: modoDark ? "bg-red-500/10" : "bg-red-50",
                 },
                 {
-                  label: t('stats.noCatalogo'),
+                  label: t("stats.noCatalogo"),
                   value: stats.noCatalogo,
                   icon: FaStar,
-                  color: 'from-slate-500 to-slate-400',
-                  bgColor: modoDark ? 'bg-slate-500/10' : 'bg-slate-50'
-                }
+                  color: "from-slate-500 to-slate-400",
+                  bgColor: modoDark ? "bg-slate-500/10" : "bg-slate-50",
+                },
               ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="gradient-border animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
+                <div key={index} className="gradient-border animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
-                          {stat.value}
-                        </div>
+                        <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>{stat.value}</div>
                         <div className={textMuted}>{stat.label}</div>
                       </div>
                       <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -1209,10 +1189,7 @@ export default function Produtos() {
             </div>
 
             {empresaId && !empresaAtivada && (
-              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark
-                ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30"
-                : "bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200"
-                }`}>
+              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30" : "bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200"}`}>
                 <div className={`p-2 ${modoDark ? "bg-orange-500/20" : "bg-orange-100"} rounded-xl`}>
                   <FaLock className={`text-xl ${modoDark ? "text-orange-400" : "text-orange-500"}`} />
                 </div>
@@ -1231,7 +1208,7 @@ export default function Produtos() {
                     <FaSearch className={`${modoDark ? "text-blue-400" : "text-blue-500"} mr-3 text-sm`} />
                     <input
                       type="text"
-                      placeholder={t('buscarPlaceholder')}
+                      placeholder={t("buscarPlaceholder")}
                       value={busca}
                       onChange={(e) => {
                         setBusca(e.target.value);
@@ -1244,94 +1221,58 @@ export default function Produtos() {
 
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="relative" ref={menuFiltrosRef}>
-                    <button
-                      onClick={() => setMenuFiltrosAberto(!menuFiltrosAberto)}
-                      className={`flex items-center gap-3 ${bgCard} ${bgHover} border cursor-pointer ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm`}
-                    >
+                    <button onClick={() => setMenuFiltrosAberto(!menuFiltrosAberto)} className={`flex items-center gap-3 ${bgCard} ${bgHover} border cursor-pointer ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm`}>
                       <FaFilter className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                      <span className={`${textPrimary} text-sm`}>{t('filtros.filtrar')}</span>
-                      <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuFiltrosAberto ? 'rotate-180' : ''}`} />
+                      <span className={`${textPrimary} text-sm`}>{t("filtros.filtrar")}</span>
+                      <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuFiltrosAberto ? "rotate-180" : ""}`} />
                     </button>
 
                     {menuFiltrosAberto && (
                       <div className={`absolute top-full left-0 mt-2 w-64 ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl ${modoDark ? "shadow-blue-500/20" : "shadow-blue-200"} z-50 overflow-hidden backdrop-blur-sm`}>
                         <div className="p-3">
-                          <div className={`text-sm font-semibold ${textPrimary} mb-2`}>{t('filtros.titulo')}</div>
+                          <div className={`text-sm font-semibold ${textPrimary} mb-2`}>{t("filtros.titulo")}</div>
                           <div className="mb-3">
-                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.preco')}</div>
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t("filtros.preco")}</div>
                             <div className="flex gap-2 mb-2">
-                              <input
-                                type="number"
-                                placeholder={t('filtros.valor')}
-                                value={valorFiltro || ""}
-                                onChange={(e) => setValorFiltro(Number(e.target.value))}
-                                className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`}
-                              />
+                              <input type="number" placeholder={t("filtros.valor")} value={valorFiltro || ""} onChange={(e) => setValorFiltro(Number(e.target.value))} className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`} />
                             </div>
                             <div className="flex gap-1">
-                              <button
-                                onClick={() => aplicarFiltroAvancado('preco', 'maior')}
-                                className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === 'preco' && direcaoFiltroAtivo === 'maior' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.maiorQue')}
+                              <button onClick={() => aplicarFiltroAvancado("preco", "maior")} className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === "preco" && direcaoFiltroAtivo === "maior" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.maiorQue")}
                               </button>
-                              <button
-                                onClick={() => aplicarFiltroAvancado('preco', 'menor')}
-                                className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === 'preco' && direcaoFiltroAtivo === 'menor' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.menorQue')}
+                              <button onClick={() => aplicarFiltroAvancado("preco", "menor")} className={`flex-1 px-2 py-1 rounded-lg cursor-pointer text-xs transition-all ${tipoFiltroAtivo === "preco" && direcaoFiltroAtivo === "menor" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.menorQue")}
                               </button>
                             </div>
                           </div>
                           <div className="mb-3">
-                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.estoque')}</div>
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t("filtros.estoque")}</div>
                             <div className="flex gap-2 mb-2">
-                              <input
-                                type="number"
-                                placeholder={t('filtros.quantidade')}
-                                value={valorFiltro || ""}
-                                onChange={(e) => setValorFiltro(Number(e.target.value))}
-                                className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`}
-                              />
+                              <input type="number" placeholder={t("filtros.quantidade")} value={valorFiltro || ""} onChange={(e) => setValorFiltro(Number(e.target.value))} className={`flex-1 ${bgInput} border ${borderColor} rounded-lg px-2 py-1 ${textPrimary} text-xs`} />
                             </div>
                             <div className="flex gap-1">
-                              <button
-                                onClick={() => aplicarFiltroAvancado('estoque', 'maior')}
-                                className={`flex-1 px-2 py-1 cursor-pointer rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'estoque' && direcaoFiltroAtivo === 'maior' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.maiorQue')}
+                              <button onClick={() => aplicarFiltroAvancado("estoque", "maior")} className={`flex-1 px-2 py-1 cursor-pointer rounded-lg text-xs transition-all ${tipoFiltroAtivo === "estoque" && direcaoFiltroAtivo === "maior" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.maiorQue")}
                               </button>
-                              <button
-                                onClick={() => aplicarFiltroAvancado('estoque', 'menor')}
-                                className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'estoque' && direcaoFiltroAtivo === 'menor' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.menorQue')}
+                              <button onClick={() => aplicarFiltroAvancado("estoque", "menor")} className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === "estoque" && direcaoFiltroAtivo === "menor" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.menorQue")}
                               </button>
                             </div>
                           </div>
                           <div className="mb-3">
-                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t('filtros.nome')}</div>
+                            <div className={`text-xs font-medium ${textMuted} mb-2`}>{t("filtros.nome")}</div>
                             <div className="flex gap-1">
-                              <button
-                                onClick={() => aplicarFiltroAvancado('nome', 'crescente')}
-                                className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'nome' && direcaoFiltroAtivo === 'crescente' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.aZ')}
+                              <button onClick={() => aplicarFiltroAvancado("nome", "crescente")} className={`flex-1 px-2 cursor-pointer py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === "nome" && direcaoFiltroAtivo === "crescente" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.aZ")}
                               </button>
-                              <button
-                                onClick={() => aplicarFiltroAvancado('nome', 'decrescente')}
-                                className={`flex-1 cursor-pointer px-2 py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === 'nome' && direcaoFiltroAtivo === 'decrescente' ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}
-                              >
-                                {t('filtros.zA')}
+                              <button onClick={() => aplicarFiltroAvancado("nome", "decrescente")} className={`flex-1 cursor-pointer px-2 py-1 rounded-lg text-xs transition-all ${tipoFiltroAtivo === "nome" && direcaoFiltroAtivo === "decrescente" ? `${bgSelected} text-blue-600 font-medium` : `${bgHover} ${textPrimary}`}`}>
+                                {t("filtros.zA")}
                               </button>
                             </div>
                           </div>
                           {temFiltroAtivo && (
-                            <button
-                              onClick={removerTodosFiltros}
-                              className={`w-full px-3 cursor-pointer py-2 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-lg ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 text-xs font-medium`}
-                            >
-                              {t('filtros.limparTodos')}
+                            <button onClick={removerTodosFiltros} className={`w-full px-3 cursor-pointer py-2 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-lg ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 text-xs font-medium`}>
+                              {t("filtros.limparTodos")}
                             </button>
                           )}
                         </div>
@@ -1339,29 +1280,18 @@ export default function Produtos() {
                     )}
                   </div>
                   <div className="relative" ref={menuCategoriasRef}>
-                    <button
-                      onClick={() => setMenuCategoriasAberto(!menuCategoriasAberto)}
-                      className={`flex items-center cursor-pointer gap-3 ${bgCard} ${bgHover} border ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm min-w-[180px]`}
-                    >
+                    <button onClick={() => setMenuCategoriasAberto(!menuCategoriasAberto)} className={`flex items-center cursor-pointer gap-3 ${bgCard} ${bgHover} border ${borderColor} rounded-xl px-4 py-3 transition-all duration-300 backdrop-blur-sm min-w-[180px]`}>
                       <FaFilter className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                      <span className={`${textPrimary} flex-1 text-left text-sm`}>
-                        {filtroCategoria ? nomeCategoriaSelecionada : t('filtros.todasCategorias')}
-                      </span>
-                      <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuCategoriasAberto ? 'rotate-180' : ''}`} />
+                      <span className={`${textPrimary} flex-1 text-left text-sm`}>{filtroCategoria ? nomeCategoriaSelecionada : t("filtros.todasCategorias")}</span>
+                      <FaChevronDown className={`${modoDark ? "text-blue-400" : "text-blue-500"} transition-transform duration-300 text-xs ${menuCategoriasAberto ? "rotate-180" : ""}`} />
                     </button>
 
                     {menuCategoriasAberto && (
                       <div className={`absolute top-full left-0 mt-2 w-56 ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl ${modoDark ? "shadow-blue-500/20" : "shadow-blue-200"} z-50 overflow-hidden backdrop-blur-sm`}>
                         <div className="p-2 max-h-48 overflow-y-auto scroll-custom">
-                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t('categorias')}</div>
+                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t("categorias")}</div>
                           {categorias.slice(0, 100).map((categoria) => (
-                            <div
-                              key={categoria.id}
-                              className={`p-3  rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id)
-                                ? `${bgSelected} scale-105 font-medium`
-                                : ''}`}
-                              onClick={() => aplicarFiltroCategoria(String(categoria.id))}
-                            >
+                            <div key={categoria.id} className={`p-3  rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) ? `${bgSelected} scale-105 font-medium` : ""}`} onClick={() => aplicarFiltroCategoria(String(categoria.id))}>
                               <span className={textPrimary}>{categoria.nome}</span>
                             </div>
                           ))}
@@ -1371,14 +1301,7 @@ export default function Produtos() {
                   </div>
                   {totalPaginas > 1 && (
                     <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl px-3 py-2`}>
-                      <button
-                        onClick={() => mudarPagina(paginaAtual - 1)}
-                        disabled={paginaAtual === 1}
-                        className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === 1
-                          ? `${textMuted} cursor-not-allowed`
-                          : `${textPrimary} ${bgHover} hover:scale-105`
-                          }`}
-                      >
+                      <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === 1 ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
                         <FaAngleLeft className="text-sm" />
                       </button>
 
@@ -1386,25 +1309,15 @@ export default function Produtos() {
                         {paginaAtual}/{totalPaginas}
                       </span>
 
-                      <button
-                        onClick={() => mudarPagina(paginaAtual + 1)}
-                        disabled={paginaAtual === totalPaginas}
-                        className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas
-                          ? `${textMuted} cursor-not-allowed`
-                          : `${textPrimary} ${bgHover} hover:scale-105`
-                          }`}
-                      >
+                      <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
                         <FaAngleRight className="text-sm" />
                       </button>
                     </div>
                   )}
                   {filtroCategoria && (
-                    <button
-                      onClick={() => aplicarFiltroCategoria(null)}
-                      className={`px-4 py-3 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-xl ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 flex items-center gap-2 text-sm`}
-                    >
+                    <button onClick={() => aplicarFiltroCategoria(null)} className={`px-4 py-3 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-xl ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 flex items-center gap-2 text-sm`}>
                       <FaTimes className="text-xs" />
-                      {t('limpar')}
+                      {t("limpar")}
                     </button>
                   )}
                 </div>
@@ -1418,12 +1331,9 @@ export default function Produtos() {
                 </div>
 
                 {podeCriar && empresaAtivada && (
-                  <button
-                    onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-                    className="px-6 py-3 bg-gradient-to-r cursor-pointer from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm"
-                  >
+                  <button onClick={() => handleAcaoProtegida(() => setModalAberto(true))} className="px-6 py-3 bg-gradient-to-r cursor-pointer from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm">
                     <FaPlus className="text-sm" />
-                    {t('novoProduto')}
+                    {t("novoProduto")}
                   </button>
                 )}
               </div>
@@ -1432,10 +1342,7 @@ export default function Produtos() {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, index) => (
-                  <div
-                    key={index}
-                    className={`${bgCard} rounded-xl p-4 animate-pulse border ${borderColor}`}
-                  >
+                  <div key={index} className={`${bgCard} rounded-xl p-4 animate-pulse border ${borderColor}`}>
                     <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-xl h-32 mb-3`}></div>
                     <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded h-3 mb-2`}></div>
                     <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded h-3 w-2/3 mb-3`}></div>
@@ -1450,17 +1357,12 @@ export default function Produtos() {
                 <div className={`w-24 h-24 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
                   <FaBox className={`text-2xl ${textMuted}`} />
                 </div>
-                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t('nenhumProdutoEncontrado')}</h3>
-                <p className={`${textMuted} mb-4 text-sm`}>
-                  {filtroCategoria ? t('nenhumProdutoCategoria') : t('comeceAdicionando')}
-                </p>
+                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t("nenhumProdutoEncontrado")}</h3>
+                <p className={`${textMuted} mb-4 text-sm`}>{filtroCategoria ? t("nenhumProdutoCategoria") : t("comeceAdicionando")}</p>
                 {podeCriar && empresaAtivada && (
-                  <button
-                    onClick={() => setModalAberto(true)}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm"
-                  >
+                  <button onClick={() => setModalAberto(true)} className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm">
                     <FaPlus />
-                    {t('criarPrimeiroProduto')}
+                    {t("criarPrimeiroProduto")}
                   </button>
                 )}
               </div>
@@ -1470,10 +1372,7 @@ export default function Produtos() {
                   {produtosAtuais.map((produto, index) => (
                     <div
                       key={produto.id}
-                      className={`group ${modoDark
-                        ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
-                        : "bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
-                        } rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
+                      className={`group ${modoDark ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" : "bg-gradient-to-br from-blue-50/50 to-cyan-50/50"} rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
                       style={{
                         animationDelay: `${index * 100}ms`,
                       }}
@@ -1490,14 +1389,7 @@ export default function Produtos() {
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0)
-                          ? 'bg-red-500/90 text-white'
-                          : produto.quantidade <= (produto.quantidadeMin || 0) * 2
-                            ? 'bg-yellow-500/90 text-white'
-                            : 'bg-green-500/90 text-white'
-                          }`}>
-                          {produto.quantidade}
-                        </div>
+                        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-500/90 text-white"}`}>{produto.quantidade}</div>
                         <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1">
                           <button
                             onClick={() => {
@@ -1507,7 +1399,7 @@ export default function Produtos() {
                             className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
                           >
                             <FaEye className="text-xs" />
-                            {t('ver')}
+                            {t("ver")}
                           </button>
                           {podeEditar && (
                             <button
@@ -1524,14 +1416,10 @@ export default function Produtos() {
                         </div>
                       </div>
 
-                      <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>
-                        {produto.nome}
-                      </h3>
+                      <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
 
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-bold text-cyan-500">
-                          R$ {formatarPreco(produto.preco)}
-                        </span>
+                        <span className="text-lg font-bold text-cyan-500">R$ {formatarPreco(produto.preco)}</span>
                         {podeGerenciarCatalogo && (
                           <button
                             onClick={(e) => {
@@ -1540,10 +1428,7 @@ export default function Produtos() {
                             }}
                             className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
                           >
-                            {produto.noCatalogo ?
-                              <FaStar className="text-yellow-500 text-base" /> :
-                              <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />
-                            }
+                            {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
                           </button>
                         )}
                       </div>
@@ -1552,14 +1437,14 @@ export default function Produtos() {
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1">
                             <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                            {t('categoria')}:
+                            {t("categoria")}:
                           </span>
                           <span className={textPrimary}>{produto.categoria?.nome || "-"}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1">
                             <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
-                            {t('fornecedor')}:
+                            {t("fornecedor")}:
                           </span>
                           <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
                         </div>
@@ -1567,19 +1452,16 @@ export default function Produtos() {
 
                       <div className="mb-2">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className={textMuted}>{t('estoque')}</span>
-                          <span className={textPrimary}>{produto.quantidade} {t('unidades')}</span>
+                          <span className={textMuted}>{t("estoque")}</span>
+                          <span className={textPrimary}>
+                            {produto.quantidade} {t("unidades")}
+                          </span>
                         </div>
                         <div className={`w-full ${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-full h-1.5`}>
                           <div
-                            className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                              : produto.quantidade > (produto.quantidadeMin || 0)
-                                ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                                : 'bg-gradient-to-r from-red-500 to-pink-500'
-                              }`}
+                            className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2 ? "bg-gradient-to-r from-green-500 to-emerald-500" : produto.quantidade > (produto.quantidadeMin || 0) ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-gradient-to-r from-red-500 to-pink-500"}`}
                             style={{
-                              width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`
+                              width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`,
                             }}
                           />
                         </div>
@@ -1591,14 +1473,12 @@ export default function Produtos() {
                             onClick={() => abrirModalEstoque(produto)}
                             className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
                             style={{
-                              background: modoDark
-                                ? "linear-gradient(135deg, #3B82F6, #0EA5E9)"
-                                : "linear-gradient(135deg, #1976D2, #0284C7)",
-                              color: "#FFFFFF"
+                              background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                              color: "#FFFFFF",
                             }}
                           >
                             <FaBox size={14} />
-                            {t('estoque')}
+                            {t("estoque")}
                           </button>
                         </div>
                       )}
@@ -1608,55 +1488,35 @@ export default function Produtos() {
 
                 {totalPaginas > 1 && (
                   <div className="flex justify-center items-center gap-3 mt-6 lg:hidden">
-                    <button
-                      onClick={() => mudarPagina(paginaAtual - 1)}
-                      disabled={paginaAtual === 1}
-                      className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1
-                        ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed`
-                        : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`
-                        }`}
-                    >
+                    <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1 ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                       <FaAngleLeft className="text-sm" />
                     </button>
 
                     <div className="flex gap-1">
                       {[...Array(totalPaginas)].map((_, index) => {
                         const pagina = index + 1;
-                        const mostrarPagina =
-                          pagina === 1 ||
-                          pagina === totalPaginas ||
-                          (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
+                        const mostrarPagina = pagina === 1 || pagina === totalPaginas || (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
 
                         if (!mostrarPagina) {
                           if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
-                            return <span key={pagina} className={`px-2 py-1 ${textMuted} text-sm`}>...</span>;
+                            return (
+                              <span key={pagina} className={`px-2 py-1 ${textMuted} text-sm`}>
+                                ...
+                              </span>
+                            );
                           }
                           return null;
                         }
 
                         return (
-                          <button
-                            key={pagina}
-                            onClick={() => mudarPagina(pagina)}
-                            className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual
-                              ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105"
-                              : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
-                              }`}
-                          >
+                          <button key={pagina} onClick={() => mudarPagina(pagina)} className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105" : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                             {pagina}
                           </button>
                         );
                       })}
                     </div>
 
-                    <button
-                      onClick={() => mudarPagina(paginaAtual + 1)}
-                      disabled={paginaAtual === totalPaginas}
-                      className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas
-                        ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed`
-                        : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`
-                        }`}
-                    >
+                    <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                       <FaAngleRight className="text-sm" />
                     </button>
                   </div>
@@ -1666,15 +1526,10 @@ export default function Produtos() {
 
             {(modalAberto || modalVisualizar) && (
               <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-                <div
-                  className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto backdrop-blur-sm`}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto backdrop-blur-sm`} onClick={(e) => e.stopPropagation()}>
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className={`text-xl font-bold ${textPrimary}`}>
-                        {modalVisualizar ? t('editarProduto') : t('novoProduto')}
-                      </h2>
+                      <h2 className={`text-xl font-bold ${textPrimary}`}>{modalVisualizar ? t("editarProduto") : t("novoProduto")}</h2>
                       <button
                         onClick={() => {
                           setModalAberto(false);
@@ -1691,26 +1546,17 @@ export default function Produtos() {
                     <div className="space-y-4">
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
-                          {t('nome')} <span className="text-red-400">*</span>
+                          {t("nome")} <span className="text-red-400">*</span>
                         </label>
-                        <input
-                          placeholder={t('nomePlaceholder')}
-                          value={form.nome || ""}
-                          onChange={handleNomeChange}
-                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
-                          disabled={Boolean(!podeEditar && modalVisualizar)}
-                          maxLength={60}
-                        />
-                        <div className={`text-right text-xs ${textMuted} mt-1`}>
-                          {nomeCaracteres}/60
-                        </div>
+                        <input placeholder={t("nomePlaceholder")} value={form.nome || ""} onChange={handleNomeChange} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} maxLength={60} />
+                        <div className={`text-right text-xs ${textMuted} mt-1`}>{nomeCaracteres}/60</div>
                       </div>
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
-                          {t('descricao')} <span className="text-red-400">*</span>
+                          {t("descricao")} <span className="text-red-400">*</span>
                         </label>
                         <textarea
-                          placeholder={t('descricaoPlaceholder')}
+                          placeholder={t("descricaoPlaceholder")}
                           value={form.descricao || ""}
                           onChange={(e) => {
                             const value = e.target.value;
@@ -1724,90 +1570,39 @@ export default function Produtos() {
                           disabled={Boolean(!podeEditar && modalVisualizar)}
                           maxLength={255}
                         />
-                        <div className={`text-right text-xs ${textMuted} mt-1`}>
-                          {descricaoCaracteres}/255
-                        </div>
+                        <div className={`text-right text-xs ${textMuted} mt-1`}>{descricaoCaracteres}/255</div>
                       </div>
                       <div>
-                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('preco')}</label>
-                        <input
-                          placeholder="0,00"
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          value={form.preco || ""}
-                          onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })}
-                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
-                          disabled={Boolean(!podeEditar && modalVisualizar)}
-                        />
+                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("preco")}</label>
+                        <input placeholder="0,00" type="number" min={0} step="0.01" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
                       </div>
                       <div className="flex gap-2 w-full items-end">
                         <div className="flex-1">
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('foto')}</label>
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading || Boolean(!podeEditar && modalVisualizar)}
-                            className={`w-full cursor-pointer ${bgInput} ${bgHover} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm h-[42px]`}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"
-                              />
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("foto")}</label>
+                          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || Boolean(!podeEditar && modalVisualizar)} className={`w-full cursor-pointer ${bgInput} ${bgHover} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm h-[42px]`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
                             </svg>
-                            {isUploading ? t('enviando') : t('selecionarImagem')}
+                            {isUploading ? t("enviando") : t("selecionarImagem")}
                           </button>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-1 mb-2">
                             <label className={`block ${textPrimary} font-medium text-sm`}>
-                              {t('quantidadeMinima')} <span className="text-red-400">*</span>
+                              {t("quantidadeMinima")} <span className="text-red-400">*</span>
                             </label>
                             <div className="relative group">
-                              <FaQuestionCircle
-                                className={`${textMuted} hover:text-blue-500 cursor-help transition-colors`}
-                                size={12}
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}
-                              />
-                              {showTooltip && (
-                                <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-2 ${modoDark ? "bg-slate-700" : "bg-white"} border ${borderColor} rounded-lg text-xs ${textPrimary} z-10 shadow-lg`}>
-                                  {t('quantidadeMinimaTooltip')}
-                                </div>
-                              )}
+                              <FaQuestionCircle className={`${textMuted} hover:text-blue-500 cursor-help transition-colors`} size={12} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)} />
+                              {showTooltip && <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-2 ${modoDark ? "bg-slate-700" : "bg-white"} border ${borderColor} rounded-lg text-xs ${textPrimary} z-10 shadow-lg`}>{t("quantidadeMinimaTooltip")}</div>}
                             </div>
                           </div>
-                          <input
-                            placeholder={t('quantidadeMinimaPlaceholder')}
-                            type="number"
-                            min={0}
-                            value={form.quantidadeMin || ""}
-                            onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
-                            disabled={Boolean(!podeEditar && modalVisualizar)}
-                          />
+                          <input placeholder={t("quantidadeMinimaPlaceholder")} type="number" min={0} value={form.quantidadeMin || ""} onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
                         </div>
                       </div>
                       {(preview || form.foto) && (
                         <div className="flex flex-col">
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
-                            {t('visualizacao') || 'Visualização'}
-                          </label>
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("visualizacao") || "Visualização"}</label>
                           <div className={`w-full ${bgInput} border ${borderColor} rounded-xl flex items-center justify-center p-4`}>
                             <img
                               src={preview || form.foto || ""}
@@ -1822,7 +1617,7 @@ export default function Produtos() {
                       )}
                       <div className="flex gap-2 w-full">
                         <div className="flex-1">
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('fornecedor')}</label>
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("fornecedor")}</label>
                           <div className="relative">
                             <select
                               value={form.fornecedorId || ""}
@@ -1830,13 +1625,13 @@ export default function Produtos() {
                               className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
                               disabled={Boolean(!podeEditar && modalVisualizar)}
                               size={1}
-                              onFocus={e => e.currentTarget.size = 5}
-                              onBlur={e => e.currentTarget.size = 1}
+                              onFocus={(e) => (e.currentTarget.size = 5)}
+                              onBlur={(e) => (e.currentTarget.size = 1)}
                               style={{
                                 background: modoDark ? cores.dark.card : cores.light.card,
                               }}
                             >
-                              <option value="">{t('selecionarFornecedor')}</option>
+                              <option value="">{t("selecionarFornecedor")}</option>
                               {fornecedores.map((f) => (
                                 <option
                                   key={f.id}
@@ -1857,7 +1652,7 @@ export default function Produtos() {
                         </div>
 
                         <div className="flex-1">
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('categoria')}</label>
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("categoria")}</label>
                           <div className="relative">
                             <select
                               value={form.categoriaId || ""}
@@ -1865,13 +1660,13 @@ export default function Produtos() {
                               className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
                               disabled={Boolean(!podeEditar && modalVisualizar)}
                               size={1}
-                              onFocus={e => e.currentTarget.size = 5}
-                              onBlur={e => e.currentTarget.size = 1}
+                              onFocus={(e) => (e.currentTarget.size = 5)}
+                              onBlur={(e) => (e.currentTarget.size = 1)}
                               style={{
                                 background: modoDark ? cores.dark.card : cores.light.card,
                               }}
                             >
-                              <option value="">{t('selecionarCategoria')}</option>
+                              <option value="">{t("selecionarCategoria")}</option>
                               {categorias.map((c) => (
                                 <option
                                   key={c.id}
@@ -1892,27 +1687,17 @@ export default function Produtos() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="noCatalogo"
-                          checked={form.noCatalogo}
-                          onChange={(e) => setForm({ ...form, noCatalogo: e.target.checked })}
-                          className={`w-4 h-4 text-blue-500 ${modoDark ? "bg-slate-700" : "bg-white"} border-blue-500/30 rounded focus:ring-blue-500 focus:ring-2`}
-                          disabled={Boolean(!podeEditar && modalVisualizar)}
-                        />
+                        <input type="checkbox" id="noCatalogo" checked={form.noCatalogo} onChange={(e) => setForm({ ...form, noCatalogo: e.target.checked })} className={`w-4 h-4 text-blue-500 ${modoDark ? "bg-slate-700" : "bg-white"} border-blue-500/30 rounded focus:ring-blue-500 focus:ring-2`} disabled={Boolean(!podeEditar && modalVisualizar)} />
                         <label htmlFor="noCatalogo" className={`${textPrimary} cursor-pointer text-sm`}>
-                          {t('incluirNoCatalogo')}
+                          {t("incluirNoCatalogo")}
                         </label>
                       </div>
                       <div className="flex justify-between items-center pt-4 border-t border-blue-500/20">
                         <div>
                           {modalVisualizar && podeExcluir && (
-                            <button
-                              onClick={handleDelete}
-                              className={`px-4 py-2 cursor-pointer ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-sm`}
-                            >
+                            <button onClick={handleDelete} className={`px-4 py-2 cursor-pointer ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-sm`}>
                               <FaTrash className="text-xs" />
-                              {t('excluir')}
+                              {t("excluir")}
                             </button>
                           )}
                         </div>
@@ -1926,42 +1711,34 @@ export default function Produtos() {
                             }}
                             className={`px-4 py-2 cursor-pointer ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-sm`}
                           >
-                            {t('cancelar')}
+                            {t("cancelar")}
                           </button>
-                          {(podeCriar && !modalVisualizar) && (
-                            <button
-                              onClick={handleSubmit}
-                              disabled={isUploading}
-                              className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
-                            >
+                          {podeCriar && !modalVisualizar && (
+                            <button onClick={handleSubmit} disabled={isUploading} className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm">
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  {t('enviando')}
+                                  {t("enviando")}
                                 </>
                               ) : (
                                 <>
                                   <FaCheck className="text-xs" />
-                                  {t('salvar')}
+                                  {t("salvar")}
                                 </>
                               )}
                             </button>
                           )}
-                          {(podeEditar && modalVisualizar) && (
-                            <button
-                              onClick={handleUpdate}
-                              disabled={isUploading}
-                              className="px-4 cursor-pointer py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
-                            >
+                          {podeEditar && modalVisualizar && (
+                            <button onClick={handleUpdate} disabled={isUploading} className="px-4 cursor-pointer py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm">
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  {t('enviando')}
+                                  {t("enviando")}
                                 </>
                               ) : (
                                 <>
                                   <FaCheck className="text-xs" />
-                                  {t('atualizar')}
+                                  {t("atualizar")}
                                 </>
                               )}
                             </button>
@@ -1975,10 +1752,7 @@ export default function Produtos() {
             )}
             {modalEstoqueAberto && produtoSelecionadoEstoque && (
               <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-                <div
-                  className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm`}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm`} onClick={(e) => e.stopPropagation()}>
                   <MovimentacaoEstoqueModal
                     produto={produtoSelecionadoEstoque}
                     modoDark={modoDark}
@@ -1995,6 +1769,6 @@ export default function Produtos() {
           </div>
         </div>
       </div>
-    </div >
-  )
+    </div>
+  );
 }

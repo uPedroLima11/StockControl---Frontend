@@ -68,6 +68,12 @@ export default function Empresa() {
   const [cepCaracteres, setCepCaracteres] = useState(0);
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     if (modalEdicaoAberto && empresaEditada) {
       setNomeCaracteres(empresaEditada.nome?.length || 0);
       setEmailCaracteres(empresaEditada.email?.length || 0);
@@ -147,7 +153,7 @@ export default function Empresa() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
 
@@ -268,7 +274,7 @@ export default function Empresa() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
 
@@ -326,7 +332,7 @@ export default function Empresa() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor,
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           catalogoPublico: novoEstado,
@@ -380,7 +386,7 @@ export default function Empresa() {
         body: formData,
         headers: {
           "user-id": usuarioValor,
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -442,7 +448,7 @@ export default function Empresa() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor,
-          "Authorization": `Bearer ${Cookies.get("token")}`,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           nome: empresaEditada.nome?.trim(),
@@ -519,7 +525,7 @@ export default function Empresa() {
             headers: {
               "Content-Type": "application/json",
               "user-id": usuarioValor,
-              "Authorization": `Bearer ${Cookies.get("token")}`,
+              Authorization: `Bearer ${Cookies.get("token")}`,
             },
           });
 

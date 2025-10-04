@@ -76,6 +76,12 @@ export default function Usuarios() {
   };
 
   useEffect(() => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      window.location.href = "/login";
+    }
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     setModoDark(ativado);
