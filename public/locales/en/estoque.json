@@ -25,6 +25,8 @@
   "por": "By",
   "cliente": "Client",
   "nenhumaMovimentacao": "No movement recorded",
+  "semPermissaoTitulo": "No Permission",
+  "semPermissaoEstoque": "You do not have permission to access the stock.",
   "motivos": {
     "compra": "Purchase",
     "venda": "Sale",

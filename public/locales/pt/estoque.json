@@ -18,6 +18,8 @@
     "observacaoPlaceholder": "Observação",
     "remover": "Remover",
     "voltar": "Voltar",
+    "semPermissaoTitulo": "Sem Permissão",
+    "semPermissaoEstoque": "Você não tem permissão para acessar o estoque.",
     "carregando": "Carregando...",
     "historicoTitulo": "Histórico de Movimentações",
     "voltarGerenciamento": "Voltar ao Gerenciamento",

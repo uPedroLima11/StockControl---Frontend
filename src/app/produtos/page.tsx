@@ -4,7 +4,7 @@ import { ProdutoI } from "@/utils/types/produtos";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaLock, FaChevronDown, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaSort, FaSortUp, FaSortDown, FaQuestionCircle, FaTimes, FaFilter, FaBox, FaExclamationTriangle, FaCheck, FaPlus, FaEdit, FaTrash, FaEye, FaWarehouse } from "react-icons/fa";
+import { FaSearch, FaCog, FaLock, FaChevronDown, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaQuestionCircle, FaTimes, FaFilter, FaBox, FaExclamationTriangle, FaCheck, FaPlus, FaEdit, FaTrash, FaEye, FaWarehouse } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
@@ -72,8 +72,8 @@ export default function Produtos() {
   const [totalProdutos, setTotalProdutos] = useState<number>(0);
   const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
   const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
-  const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao>('none');
-  const [direcaoOrdenacao, setDirecaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
+  const [campoOrdenacao] = useState<CampoOrdenacao>('none');
+  const [direcaoOrdenacao] = useState<DirecaoOrdenacao>('asc');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -123,8 +123,6 @@ export default function Produtos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuCategoriasRef = useRef<HTMLDivElement>(null);
   const menuFiltrosRef = useRef<HTMLDivElement>(null);
-  const [fornecedorSelecionado, setFornecedorSelecionado] = useState(form.fornecedorId);
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState(form.categoriaId);
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
@@ -197,62 +195,7 @@ export default function Produtos() {
       .card-hover {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      
-
-.custom-select option {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.custom-select option:hover {
-  background-color: rgba(59, 130, 246, 0.1) !important;
-}
-
-.custom-select option:not([value=""]):checked {
-  background: linear-gradient(rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.1)) !important;
-  background-color: transparent !important;
-  color: #3b82f6 !important;
-  font-weight: 600 !important;
-}
-
-.custom-select option[value=""] {
-  color: inherit !important;
-  font-weight: normal !important;
-  background: transparent !important;
-}
-
-.custom-select option[value=""]:checked,
-.custom-select option[value=""]:selected,
-.custom-select option[value=""]:focus {
-  color: inherit !important;
-  font-weight: normal !important;
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-.custom-select option:focus {
-  background-color: transparent !important;
-}
-
-.custom-select option[value=""] {
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-}
-
-@supports (-webkit-appearance: none) or (-moz-appearance: none) {
-  .custom-select option[value=""] {
-    color: inherit !important;
-    background: transparent !important;
-  }
-  
-  .custom-select option[value=""]:checked {
-    color: inherit !important;
-    background: transparent !important;
-  }
-}
-  
+        
       .card-hover:hover {
         transform: translateY(-8px);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -1880,43 +1823,72 @@ export default function Produtos() {
                       <div className="flex gap-2 w-full">
                         <div className="flex-1">
                           <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('fornecedor')}</label>
-                          <select
-                            value={form.fornecedorId || ""}
-                            onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm`}
-                            disabled={Boolean(!podeEditar && modalVisualizar)}
-                          >
-                            <option value="">{t('selecionarFornecedor')}</option>
-                            {fornecedores.map((f) => (
-                              <option
-                                key={f.id}
-                                value={f.id}
-                                className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
-                              >
-                                {f.nome}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={form.fornecedorId || ""}
+                              onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                              className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
+                              disabled={Boolean(!podeEditar && modalVisualizar)}
+                              size={1}
+                              onFocus={e => e.currentTarget.size = 5}
+                              onBlur={e => e.currentTarget.size = 1}
+                              style={{
+                                background: modoDark ? cores.dark.card : cores.light.card,
+                              }}
+                            >
+                              <option value="">{t('selecionarFornecedor')}</option>
+                              {fornecedores.map((f) => (
+                                <option
+                                  key={f.id}
+                                  value={f.id}
+                                  className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
+                                  style={{
+                                    background: modoDark ? cores.dark.card : cores.light.card,
+                                  }}
+                                >
+                                  {f.nome}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                              <FaChevronDown />
+                            </span>
+                          </div>
                         </div>
+
                         <div className="flex-1">
                           <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t('categoria')}</label>
-                          <select
-                            value={form.categoriaId || ""}
-                            onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm`}
-                            disabled={Boolean(!podeEditar && modalVisualizar)}
-                          >
-                            <option value="">{t('selecionarCategoria')}</option>
-                            {categorias.map((c) => (
-                              <option
-                                key={c.id}
-                                value={c.id}
-                                className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
-                              >
-                                {c.nome}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={form.categoriaId || ""}
+                              onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                              className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
+                              disabled={Boolean(!podeEditar && modalVisualizar)}
+                              size={1}
+                              onFocus={e => e.currentTarget.size = 5}
+                              onBlur={e => e.currentTarget.size = 1}
+                              style={{
+                                background: modoDark ? cores.dark.card : cores.light.card,
+                              }}
+                            >
+                              <option value="">{t('selecionarCategoria')}</option>
+                              {categorias.map((c) => (
+                                <option
+                                  key={c.id}
+                                  value={c.id}
+                                  className={`${modoDark ? "bg-slate-800" : "bg-white"} ${textPrimary}`}
+                                  style={{
+                                    background: modoDark ? cores.dark.card : cores.light.card,
+                                  }}
+                                >
+                                  {c.nome}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                              <FaChevronDown />
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
