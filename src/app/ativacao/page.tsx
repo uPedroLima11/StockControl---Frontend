@@ -136,7 +136,6 @@ export default function AtivacaoPage() {
 
       const chaveRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!chaveRegex.test(codigo)) {
-        console.log("Formato inválido detectado:", codigo);
         throw new Error(t("erroCodigoInvalido"));
       }
 
@@ -186,8 +185,6 @@ export default function AtivacaoPage() {
           mensagemErro = t("empresaJaAtivada") || "Esta empresa já possui uma chave de ativação";
         }
 
-        console.log("Mensagem de erro para usuário:", mensagemErro);
-
         Swal.fire({
           icon: "error",
           title: "Erro na ativação",
@@ -195,8 +192,6 @@ export default function AtivacaoPage() {
           confirmButtonColor: temaAtual.erro,
         });
       } else {
-        console.log("Erro desconhecido");
-
         Swal.fire({
           icon: "error",
           title: "Erro",
