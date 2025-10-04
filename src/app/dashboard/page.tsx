@@ -434,7 +434,7 @@ export default function Dashboard() {
     }
   }
 
-  function calcularVendas30Dias(vendas: VendaI[]) {
+  async function calcularVendas30Dias(vendas: VendaI[]) {
     const data30DiasAtras = new Date();
     data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
 
@@ -445,7 +445,16 @@ export default function Dashboard() {
     });
 
     const total = vendasFiltradas.reduce((sum, venda) => sum + (venda.valorVenda || 0), 0);
-    setVendas30Dias(total);
+
+    if (i18n.language === "pt") {
+      setVendas30Dias(total);
+    } else {
+      const cotacao = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+      const cotacaoJson = await cotacao.json();
+      const valorConvertido = total / parseFloat(cotacaoJson.USDBRL.bid);
+
+      setVendas30Dias(valorConvertido);
+    }
   }
 
   const toggleExpandirProduto = (id: string) => {
