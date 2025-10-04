@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { HiEnvelope, HiLockClosed, HiMiniUserCircle, HiCheckCircle, HiExclamationCircle } from "react-icons/hi2";
 import { FaEye, FaEyeSlash, FaCheck, FaTimes, FaArrowRight, FaShieldAlt, FaRocket, FaChartBar } from "react-icons/fa";
@@ -35,7 +34,6 @@ interface RegistroFormProps {
 
 export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
   const { register, handleSubmit, control } = useForm<Inputs>();
-  const router = useRouter();
   const [visivel, setVisivel] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordValid, setPasswordValid] = useState(false);
@@ -186,7 +184,6 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
       });
 
       if (response.status === 201) {
-        const usuario = await response.json();
         Swal.fire({
           icon: "success",
           title: "Cadastro realizado!",
