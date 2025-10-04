@@ -11,6 +11,7 @@ import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
+import { i18n } from "next-i18next";
 
 type CampoOrdenacao = "nome" | "estoque" | "preco" | "categoria" | "fornecedor" | "none";
 type DirecaoOrdenacao = "asc" | "desc";
@@ -65,7 +66,7 @@ export default function Produtos() {
   const [modoDark, setModoDark] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const produtosPorPagina = 12;
-  const { t } = useTranslation("produtos");
+  const { t, i18n } = useTranslation("produtos");
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
@@ -74,6 +75,7 @@ export default function Produtos() {
   const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
   const [campoOrdenacao] = useState<CampoOrdenacao>("none");
   const [direcaoOrdenacao] = useState<DirecaoOrdenacao>("asc");
+  const [cotacaoDolar, setCotacaoDolar] = useState(6);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -344,6 +346,11 @@ export default function Produtos() {
             setProdutosOriginais(produtosDaEmpresa);
             setTotalProdutos(produtosDaEmpresa.length);
           }
+
+          const valorDolar = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+          const cotacaoJson = await valorDolar.json();
+
+          setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
         }
       }
 
@@ -458,9 +465,15 @@ export default function Produtos() {
 
   useEffect(() => {
     if (modalVisualizar) {
+      let precoParaMostrar = modalVisualizar.preco;
+
+      if (i18n.language === "en") {
+        precoParaMostrar = modalVisualizar.preco / cotacaoDolar;
+      }
+
       setForm({
         ...modalVisualizar,
-        preco: parseFloat(modalVisualizar.preco.toFixed(2)),
+        preco: parseFloat(precoParaMostrar.toFixed(2)),
         quantidade: modalVisualizar.quantidade,
         quantidadeMin: modalVisualizar.quantidadeMin || 0,
       });
@@ -468,7 +481,7 @@ export default function Produtos() {
       setNomeCaracteres(modalVisualizar.nome?.length || 0);
       setDescricaoCaracteres(modalVisualizar.descricao?.length || 0);
     }
-  }, [modalVisualizar]);
+  }, [modalVisualizar, i18n.language, cotacaoDolar]);
 
   const recarregarListaProdutos = () => {
     setRecarregarProdutos((prev) => prev + 1);
@@ -779,7 +792,11 @@ export default function Produtos() {
             Swal.fire("Aviso", "Upload da foto falhou, continuando sem imagem", "warning");
           }
         }
+        let precoParaSalvar = form.preco || 0;
 
+        if (i18n.language === "en") {
+          precoParaSalvar = form.preco * cotacaoDolar;
+        }
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
           method: "POST",
           headers: {
@@ -790,7 +807,7 @@ export default function Produtos() {
           body: JSON.stringify({
             nome: form.nome,
             descricao: form.descricao,
-            preco: form.preco || 0,
+            preco: precoParaSalvar,
             quantidade: form.quantidade || 0,
             quantidadeMin: form.quantidadeMin,
             noCatalogo: form.noCatalogo,
@@ -945,6 +962,12 @@ export default function Produtos() {
           }
         }
 
+        let precoParaSalvar = form.preco;
+
+        if (i18n.language === "en") {
+          precoParaSalvar = form.preco * cotacaoDolar;
+        }
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${modalVisualizar.id}`, {
           method: "PUT",
           headers: {
@@ -955,7 +978,7 @@ export default function Produtos() {
           body: JSON.stringify({
             nome: form.nome,
             descricao: form.descricao,
-            preco: form.preco,
+            preco: precoParaSalvar,
             quantidadeMin: form.quantidadeMin,
             noCatalogo: form.noCatalogo,
             fornecedorId: form.fornecedorId,
@@ -1419,7 +1442,7 @@ export default function Produtos() {
                       <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
 
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-bold text-cyan-500">R$ {formatarPreco(produto.preco)}</span>
+                        <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
                         {podeGerenciarCatalogo && (
                           <button
                             onClick={(e) => {
@@ -1573,8 +1596,10 @@ export default function Produtos() {
                         <div className={`text-right text-xs ${textMuted} mt-1`}>{descricaoCaracteres}/255</div>
                       </div>
                       <div>
-                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("preco")}</label>
-                        <input placeholder="0,00" type="number" min={0} step="0.01" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
+                        <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
+                          {t("preco")} {i18n.language === "pt" ? "(R$)" : "($)"}
+                        </label>
+                        <input placeholder={i18n.language === "pt" ? "0,00" : "0.00"} type="number" min={0} step="0.01" value={form.preco || ""} onChange={(e) => setForm({ ...form, preco: parseFloat(e.target.value) || 0 })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
                       </div>
                       <div className="flex gap-2 w-full items-end">
                         <div className="flex-1">
