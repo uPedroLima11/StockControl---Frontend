@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import LoginForm from "./LoginForm";
 import VerificacaoEmail from "@/components/VerificacaoEmail";
 import { useUsuarioStore } from "@/context/usuario";
@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 
 type LoginStep = "form" | "verificacao" | "emailNaoVerificado";
 
-export default function LoginPage() {
+function LoginContent() {
   const [currentStep, setCurrentStep] = useState<LoginStep>("form");
   const [userEmail, setUserEmail] = useState("");
   const [userSenha, setUserSenha] = useState("");
@@ -21,6 +21,7 @@ export default function LoginPage() {
     const email = searchParams.get('email');
     
     if (message === 'email-verificado' && email) {
+      console.log("✅ Usuário veio do registro com email verificado:", email);
     }
   }, [searchParams]);
 
@@ -40,6 +41,7 @@ export default function LoginPage() {
   };
 
   const handleEmailVerificado = async () => {
+    console.log("✅ Email verificado, fazendo login automático:", userEmail);
     
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login`, {
@@ -80,7 +82,6 @@ export default function LoginPage() {
 
   const finalizarLogin = async () => {
     try {
-      
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login-finalizar`, {
         method: "POST",
         headers: {
@@ -134,5 +135,20 @@ export default function LoginPage() {
         />
       )}
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-cyan-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Carregando...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import RegistroForm from "./registroform";
 import VerificacaoEmail from "@/components/VerificacaoEmail";
 
 type RegistroStep = "form" | "verificacao";
 
-export default function RegistroPage() {
+function RegistroContent() {
   const [currentStep, setCurrentStep] = useState<RegistroStep>("form");
   const [userEmail, setUserEmail] = useState("");
 
@@ -37,5 +37,20 @@ export default function RegistroPage() {
         />
       )}
     </>
+  );
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-900 to-blue-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Carregando...</p>
+        </div>
+      </div>
+    }>
+      <RegistroContent />
+    </Suspense>
   );
 }
