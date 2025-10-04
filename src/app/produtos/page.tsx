@@ -11,7 +11,6 @@ import MovimentacaoEstoqueModal from "@/components/MovimentacaoEstoqueModal";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
-import { i18n } from "next-i18next";
 
 type CampoOrdenacao = "nome" | "estoque" | "preco" | "categoria" | "fornecedor" | "none";
 type DirecaoOrdenacao = "asc" | "desc";
@@ -1102,13 +1101,6 @@ export default function Produtos() {
   const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
   const produtosAtuais = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
   const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
-
-  const formatarPreco = (preco: number) => {
-    return preco
-      .toFixed(2)
-      .replace(".", ",")
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
 
   const mudarPagina = (novaPagina: number) => {
     setPaginaAtual(novaPagina);

@@ -287,7 +287,13 @@ export default function PedidosPage() {
   const carregarProdutos = async () => {
     try {
       if (!empresaId || produtosCarregados) return;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/empresa/${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/empresa/${empresaId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (response.ok) {
         const produtosData = await response.json();
         setProdutos(produtosData);
