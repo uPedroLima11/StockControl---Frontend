@@ -87,7 +87,12 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    const carregarUsuarioId = () => {
+    const carregarConfiguracoesIniciais = () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativo = temaSalvo === "true";
+      setModoDark(ativo);
+      aplicarTema(ativo);
+
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (usuarioSalvo) {
@@ -101,21 +106,6 @@ export default function Sidebar() {
       return null;
     };
 
-    const id = carregarUsuarioId();
-    if (id) {
-      setUsuarioId(id);
-      
-      carregarPermissoesOtimizado(id).then(permissoes => {
-        setPermissoesUsuario(permissoes);
-        setPermissoesCarregadas(true);
-      }).catch(error => {
-        console.error("Erro ao carregar permissões:", error);
-        setPermissoesCarregadas(true);
-      });
-    }
-  }, [carregarPermissoesOtimizado]);
-
-  useEffect(() => {
     const handleInteracao = () => {
       setUsuarioInteragiu(true);
       document.removeEventListener("click", handleInteracao);
@@ -125,18 +115,78 @@ export default function Sidebar() {
     document.addEventListener("click", handleInteracao);
     document.addEventListener("keydown", handleInteracao);
 
+    const style = document.createElement("style");
+    style.textContent = `
+      html::-webkit-scrollbar {
+        width: 10px;
+      }
+      
+      html::-webkit-scrollbar-track {
+        background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+        border-radius: 5px;
+        border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      }
+      
+      html::-webkit-scrollbar-thumb:hover {
+        background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+      }
+      
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+      }
+      
+      @media (max-width: 768px) {
+        html::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        html::-webkit-scrollbar-thumb {
+          border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+          border-radius: 3px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const userId = carregarConfiguracoesIniciais();
+    
+    if (userId) {
+      carregarPermissoesOtimizado(userId).then(permissoes => {
+        setPermissoesUsuario(permissoes);
+        setPermissoesCarregadas(true);
+      }).catch(error => {
+        console.error("Erro ao carregar permissões:", error);
+        setPermissoesCarregadas(true);
+      });
+
+      carregarDadosUsuario(userId);
+    }
+
     return () => {
       document.removeEventListener("click", handleInteracao);
       document.removeEventListener("keydown", handleInteracao);
+      document.head.removeChild(style);
     };
-  }, []);
+  }, [modoDark, carregarPermissoesOtimizado]);
 
   useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-    aplicarTema(ativo);
-  }, []);
+    if (!usuarioId) return;
+
+    const intervaloNotificacoes = setInterval(() => {
+      verificarNotificacoes();
+    }, 15000);
+
+    verificarNotificacoes();
+
+    return () => {
+      clearInterval(intervaloNotificacoes);
+    };
+  }, [usuarioId]);
 
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
@@ -162,50 +212,6 @@ export default function Sidebar() {
     aplicarTema(novoTema);
     window.location.reload();
   };
-
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
@@ -361,17 +367,15 @@ export default function Sidebar() {
     } catch {}
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
-  const carregarDadosUsuario = useCallback(async () => {
-    if (!usuarioId) return;
-
+  const carregarDadosUsuario = useCallback(async (userId: string) => {
     try {
-      const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${userId}`);
       if (respostaUsuario.status === 200) {
         const dadosUsuario = await respostaUsuario.json();
         logar(dadosUsuario);
       }
 
-      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
+      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -401,31 +405,7 @@ export default function Sidebar() {
       setFotoEmpresa("/contadefault.png");
       setNomeEmpresa(t("create_company"));
     }
-  }, [usuarioId, logar, verificarNotificacoes, verificarAtivacaoEmpresa, t]);
-
-  useEffect(() => {
-    if (!usuarioId) return;
-
-    const carregarTudo = async () => {
-      await carregarDadosUsuario();
-    };
-
-    carregarTudo();
-  }, [usuarioId, carregarDadosUsuario]);
-
-  useEffect(() => {
-    if (!usuarioId) return;
-
-    const intervaloNotificacoes = setInterval(() => {
-      verificarNotificacoes();
-    }, 15000);
-
-    verificarNotificacoes();
-
-    return () => {
-      clearInterval(intervaloNotificacoes);
-    };
-  }, [usuarioId, verificarNotificacoes]);
+  }, [logar, verificarNotificacoes, verificarAtivacaoEmpresa, t]);
 
   const alternarSidebar = () => {
     setEstaAberto(!estaAberto);
