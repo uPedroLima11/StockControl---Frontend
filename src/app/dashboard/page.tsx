@@ -42,6 +42,12 @@ export default function Dashboard() {
   const produtosPorPagina = 5;
   const coresCategorias = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6", "#E74C3C", "#2ECC71"];
 
+  const calcularTotalUnidadesVendidas = (vendas: VendaI[]): number => {
+    return vendas.reduce((total, venda) => {
+      return total + (venda.quantidade || 1);
+    }, 0);
+  };
+
   const calcularPorcentagensPizza = (categorias: CategoriaDistribuicao[]) => {
     const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
     if (total === 0) return categorias.map(() => 0);
@@ -225,7 +231,7 @@ export default function Dashboard() {
       if (responseVendas.ok) {
         const totalData = await responseVendas.json();
         setContagemLucro(totalData.total || 0);
-        setContagemVendas(totalData.quantidadeVendas || 0);
+
       }
 
       if (responseProdutos.ok) {
@@ -326,6 +332,7 @@ export default function Dashboard() {
 
       if (!usuario.empresaId) {
         setTodasVendas([]);
+        setContagemVendas(0);
         return;
       }
 
@@ -335,10 +342,17 @@ export default function Dashboard() {
         const vendas = data.vendas || [];
         setTodasVendas(vendas);
         calcularVendas30Dias(vendas);
-        setContagemVendas(vendas.length);
+
+        const totalUnidades = calcularTotalUnidadesVendidas(vendas);
+        setContagemVendas(totalUnidades);
+      } else {
+        setTodasVendas([]);
+        setContagemVendas(0);
       }
     } catch (error) {
       console.error("Erro ao buscar vendas:", error);
+      setTodasVendas([]);
+      setContagemVendas(0);
     }
   }
 
