@@ -29,7 +29,6 @@ export default function CustomNotification({
   }, [duration, onClose]);
 
   const getBackgroundColor = () => {
-    const temaAtual = cores.dark;
     switch (type) {
       case "success":
         return "bg-green-600/90 border-green-400/30";

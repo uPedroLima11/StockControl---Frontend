@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
-import Swal from "sweetalert2";
 import { cores } from "@/utils/cores";
 import { HiEnvelope, HiLockClosed, HiArrowLeft } from "react-icons/hi2";
 import CustomNotification from "./NotificacaoCustom";
@@ -29,7 +28,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [tempoRestante, setTempoRestante] = useState(0); 
-  const [codigoEnviado, setCodigoEnviado] = useState(false);
+  const [, setCodigoEnviado] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   
   const codigoInicialEnviado = useRef(false);
