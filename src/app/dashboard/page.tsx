@@ -623,10 +623,8 @@ export default function Dashboard() {
                             />
                           );
                         })}
-
                         <circle cx="50" cy="50" r="35" fill="var(--cor-fundo-bloco)" />
                       </svg>
-
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-sm font-bold text-center" style={{ color: "var(--cor-fonte)" }}>
                           {totalItens}

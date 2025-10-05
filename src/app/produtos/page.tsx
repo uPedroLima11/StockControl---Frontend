@@ -3,7 +3,7 @@
 import { ProdutoI } from "@/utils/types/produtos";
 import { FornecedorI } from "@/utils/types/fornecedor";
 import { CategoriaI } from "@/utils/types/categoria";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { FaSearch, FaCog, FaLock, FaChevronDown, FaAngleLeft, FaAngleRight, FaStar, FaRegStar, FaQuestionCircle, FaTimes, FaFilter, FaBox, FaExclamationTriangle, FaCheck, FaPlus, FaEdit, FaTrash, FaEye, FaWarehouse } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -77,6 +77,7 @@ export default function Produtos() {
   const [cotacaoDolar, setCotacaoDolar] = useState(6);
   const [loading, setLoading] = useState(true);
   type TipoVisualizacao = "cards" | "lista";
+  const descricaoRef = useRef<HTMLTextAreaElement>(null);
   const [tipoVisualizacao, setTipoVisualizacao] = useState<TipoVisualizacao>("cards");
   const [stats, setStats] = useState({
     total: 0,
@@ -128,28 +129,158 @@ export default function Produtos() {
   const menuFiltrosRef = useRef<HTMLDivElement>(null);
   const temaAtual = modoDark ? cores.dark : cores.light;
 
+  const adjustTextareaHeight = useCallback((textarea: HTMLTextAreaElement) => {
+    requestAnimationFrame(() => {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+  }, []);
+
+  const handleDescricaoChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value.length <= 255) {
+      setForm(prev => ({ ...prev, descricao: value }));
+      setDescricaoCaracteres(value.length);
+      adjustTextareaHeight(e.target);
+    }
+  }, [adjustTextareaHeight]);
+
   useEffect(() => {
     const token = Cookies.get("token");
-
     if (!token) {
       window.location.href = "/login";
+      return;
     }
 
-    if (produtos.length > 0) {
-      const emEstoque = produtos.filter((p) => p.quantidade > 0).length;
-      const emFalta = produtos.filter((p) => p.quantidade <= (p.quantidadeMin || 0)).length;
-      const noCatalogo = produtos.filter((p) => p.noCatalogo).length;
+    const initialize = async () => {
+      setLoading(true);
 
-      setStats({
-        total: produtos.length,
-        emEstoque,
-        emFalta,
-        noCatalogo,
-      });
-    }
-  }, [produtos]);
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
 
-  useEffect(() => {
+      const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
+      if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
+        setTipoVisualizacao(visualizacaoSalva);
+      }
+
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) {
+        setLoading(false);
+        return;
+      }
+
+      const usuarioValor = usuarioSalvo.replace(/"/g, "");
+
+      try {
+        const carregarPermissoes = async () => {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, {
+              headers: { "user-id": usuarioValor }
+            });
+            if (response.ok) {
+              const dados: { permissoes: { chave: string; concedida: boolean }[] } = await response.json();
+              const permissoesUsuarioObj: Record<string, boolean> = {};
+              dados.permissoes.forEach((permissao) => {
+                permissoesUsuarioObj[permissao.chave] = permissao.concedida;
+              });
+              setPermissoesUsuario(permissoesUsuarioObj);
+            } else {
+              const permissoesParaVerificar = ["produtos_criar", "produtos_editar", "produtos_excluir", "produtos_visualizar", "estoque_gerenciar"];
+              const permissoes: Record<string, boolean> = {};
+              for (const permissao of permissoesParaVerificar) {
+                const temPermissao = await usuarioTemPermissao(permissao);
+                permissoes[permissao] = temPermissao;
+              }
+              setPermissoesUsuario(permissoes);
+            }
+          } catch (error) {
+            console.error("Erro ao carregar permissões:", error);
+          }
+        };
+
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+          headers: { "user-id": usuarioValor },
+        });
+
+        if (!responseUsuario.ok) {
+          console.error("Erro ao buscar os dados do usuário");
+          setLoading(false);
+          return;
+        }
+
+        const usuario = await responseUsuario.json();
+        setEmpresaId(usuario.empresaId);
+        setTipoUsuario(usuario.tipo);
+
+        if (usuario.empresaId) {
+          const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
+          setEmpresaAtivada(ativada);
+
+          if (ativada) {
+            const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+              headers: {
+                "content-Type": "application/json",
+                Authorization: `Bearer ${Cookies.get("token")}`,
+              },
+            });
+
+            if (responseProdutos.ok) {
+              const todosProdutos = await responseProdutos.json();
+              const produtosDaEmpresa = todosProdutos
+                .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
+                .sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+              setProdutos(produtosDaEmpresa);
+              setProdutosOriginais(produtosDaEmpresa);
+              setTotalProdutos(produtosDaEmpresa.length);
+
+              const emEstoque = produtosDaEmpresa.filter((p: ProdutoI) => p.quantidade > 0).length;
+              const emFalta = produtosDaEmpresa.filter((p: ProdutoI) => p.quantidade <= (p.quantidadeMin || 0)).length;
+              const noCatalogo = produtosDaEmpresa.filter((p: ProdutoI) => p.noCatalogo).length;
+
+              setStats({
+                total: produtosDaEmpresa.length,
+                emEstoque,
+                emFalta,
+                noCatalogo,
+              });
+            }
+
+            try {
+              const valorDolar = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+              const cotacaoJson = await valorDolar.json();
+              setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
+            } catch (error) {
+              console.error("Erro ao buscar cotação do dólar:", error);
+            }
+          }
+        }
+
+        const [responseFornecedores, responseCategorias] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, { headers: { "user-id": usuarioValor } }),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, { headers: { "user-id": usuarioValor } })
+        ]);
+
+        if (responseFornecedores.ok) {
+          const fornecedoresData = await responseFornecedores.json();
+          setFornecedores(fornecedoresData);
+        }
+
+        if (responseCategorias.ok) {
+          const categoriasData = await responseCategorias.json();
+          setCategorias(categoriasData);
+        }
+
+        await carregarPermissoes();
+
+      } catch (error) {
+        console.error("Erro na inicialização:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     function handleClickOutside(event: MouseEvent) {
       if (menuCategoriasRef.current && !menuCategoriasRef.current.contains(event.target as Node)) {
         setMenuCategoriasAberto(false);
@@ -158,6 +289,7 @@ export default function Produtos() {
         setMenuFiltrosAberto(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
 
     const style = document.createElement("style");
@@ -281,154 +413,13 @@ export default function Produtos() {
     `;
     document.head.appendChild(style);
 
-
-    const carregarPermissoes = async () => {
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, { headers: { "user-id": usuarioValor } });
-        if (response.ok) {
-          const dados: { permissoes: { chave: string; concedida: boolean }[] } = await response.json();
-          const permissoesUsuarioObj: Record<string, boolean> = {};
-          dados.permissoes.forEach((permissao) => {
-            permissoesUsuarioObj[permissao.chave] = permissao.concedida;
-          });
-          setPermissoesUsuario(permissoesUsuarioObj);
-        } else {
-          const permissoesParaVerificar = ["produtos_criar", "produtos_editar", "produtos_excluir", "produtos_visualizar", "estoque_gerenciar"];
-          const permissoes: Record<string, boolean> = {};
-          for (const permissao of permissoesParaVerificar) {
-            const temPermissao = await usuarioTemPermissao(permissao);
-            permissoes[permissao] = temPermissao;
-          }
-          setPermissoesUsuario(permissoes);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar permissões:", error);
-      }
-    };
-
-    const initialize = async () => {
-      setLoading(true);
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
-      const usuarioSalvo = localStorage.getItem("client_key");
-      if (!usuarioSalvo) return;
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: { "user-id": usuarioValor },
-      });
-      if (!responseUsuario.ok) {
-        console.error("Erro ao buscar os dados do usuário");
-        setLoading(false);
-        return;
-      }
-      const usuario = await responseUsuario.json();
-      setEmpresaId(usuario.empresaId);
-      setTipoUsuario(usuario.tipo);
-
-      if (usuario.empresaId) {
-        const ativada = await verificarAtivacaoEmpresa(usuario.empresaId);
-        setEmpresaAtivada(ativada);
-        if (ativada) {
-          const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
-            headers: {
-              "content-Type": "application/json",
-              Authorization: `Bearer ${Cookies.get("token")}`,
-            },
-          });
-          if (responseProdutos.ok) {
-            const todosProdutos = await responseProdutos.json();
-            const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId).sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            setProdutos(produtosDaEmpresa);
-            setProdutosOriginais(produtosDaEmpresa);
-            setTotalProdutos(produtosDaEmpresa.length);
-          }
-
-          const valorDolar = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
-          const cotacaoJson = await valorDolar.json();
-
-          setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
-        }
-      }
-
-      const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-        headers: { "user-id": usuarioValor },
-      });
-      if (responseFornecedores.ok) {
-        const fornecedoresData = await responseFornecedores.json();
-        setFornecedores(fornecedoresData);
-      }
-
-      const responseCategorias = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
-        headers: { "user-id": usuarioValor },
-      });
-      if (responseCategorias.ok) {
-        const categoriasData = await responseCategorias.json();
-        setCategorias(categoriasData);
-      }
-
-      setLoading(false);
-    };
-
-    carregarPermissoes();
     initialize();
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.head.removeChild(style);
     };
-  }, [modoDark]);
-
-
-  useEffect(() => {
-    const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
-    if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
-      setTipoVisualizacao(visualizacaoSalva);
-    }
-  }, []);
-
-  useEffect(() => {
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (!usuarioSalvo) return;
-    const usuarioValor = usuarioSalvo.replace(/"/g, "");
-
-    const carregarProdutos = async () => {
-      setLoading(true);
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
-        headers: { "user-id": usuarioValor },
-      });
-      if (!responseUsuario.ok) {
-        console.error("Erro ao buscar os dados do usuário");
-        setLoading(false);
-        return;
-      }
-      const usuario = await responseUsuario.json();
-
-      if (usuario?.empresaId && empresaAtivada) {
-        const responseProdutos = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
-          headers: {
-            "content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        });
-        if (responseProdutos.ok) {
-          const todosProdutos = await responseProdutos.json();
-          const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId).sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          setProdutos(produtosDaEmpresa);
-          setProdutosOriginais(produtosDaEmpresa);
-          setTotalProdutos(produtosDaEmpresa.length);
-        }
-      }
-      setLoading(false);
-    };
-
-    carregarProdutos();
-  }, [recarregarProdutos, empresaAtivada]);
+  }, [modoDark, recarregarProdutos]); 
 
   useEffect(() => {
     if (produtosOriginais.length > 0) {
@@ -471,9 +462,7 @@ export default function Produtos() {
 
       setProdutos(produtosFiltrados);
     }
-  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao, tipoFiltroAtivo, direcaoFiltroAtivo, valorFiltro]);
 
-  useEffect(() => {
     if (modalVisualizar) {
       let precoParaMostrar = modalVisualizar.preco;
 
@@ -490,8 +479,27 @@ export default function Produtos() {
       setPreview(modalVisualizar.foto || null);
       setNomeCaracteres(modalVisualizar.nome?.length || 0);
       setDescricaoCaracteres(modalVisualizar.descricao?.length || 0);
+
+      if (descricaoRef.current) {
+        requestAnimationFrame(() => {
+          if (descricaoRef.current) {
+            descricaoRef.current.style.height = 'auto';
+            descricaoRef.current.style.height = descricaoRef.current.scrollHeight + 'px';
+          }
+        });
+      }
     }
-  }, [modalVisualizar, i18n.language, cotacaoDolar]);
+  }, [
+    produtosOriginais,
+    campoOrdenacao,
+    direcaoOrdenacao,
+    tipoFiltroAtivo,
+    direcaoFiltroAtivo,
+    valorFiltro,
+    modalVisualizar,
+    i18n.language,
+    cotacaoDolar
+  ]);
 
   useEffect(() => {
     if (modalAberto && !modalVisualizar) {
@@ -611,18 +619,6 @@ export default function Produtos() {
       return false;
     }
   };
-
-  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_visualizar;
-
-  const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_criar;
-
-  const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
-
-  const podeExcluir = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_excluir;
-
-  const podeGerenciarCatalogo = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
-
-  const podeGerenciarEstoque = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.estoque_gerenciar;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
     try {
@@ -912,6 +908,7 @@ export default function Produtos() {
       }
     });
   };
+
   const uploadFotoUpdate = async (file: File, produtoId: string): Promise<string | null> => {
     try {
       setIsUploading(true);
@@ -1158,6 +1155,13 @@ export default function Produtos() {
   const nomeCategoriaSelecionada = filtroCategoria ? categorias.find((c) => String(c.id) === filtroCategoria)?.nome : null;
 
   const temFiltroAtivo = filtroCategoria || tipoFiltroAtivo !== "none";
+
+  const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_visualizar;
+  const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_criar;
+  const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
+  const podeExcluir = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_excluir;
+  const podeGerenciarCatalogo = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.produtos_editar;
+  const podeGerenciarEstoque = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.estoque_gerenciar;
 
   if (!podeVisualizar) {
     return (
@@ -1816,21 +1820,20 @@ export default function Produtos() {
                           {t("descricao")} <span className="text-red-400">*</span>
                         </label>
                         <textarea
+                          ref={descricaoRef}
                           placeholder={t("descricaoPlaceholder")}
                           value={form.descricao || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value.length <= 255) {
-                              setForm({ ...form, descricao: value });
-                              setDescricaoCaracteres(value.length);
-                            }
-                          }}
+                          onChange={handleDescricaoChange}
                           rows={3}
-                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 resize-vertical text-sm`}
+                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"
+                            } focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-150 resize-none overflow-hidden text-sm`}
                           disabled={Boolean(!podeEditar && modalVisualizar)}
                           maxLength={255}
+                          style={{ minHeight: '80px' }}
                         />
-                        <div className={`text-right text-xs ${textMuted} mt-1`}>{descricaoCaracteres}/255</div>
+                        <div className={`text-right text-xs ${textMuted} mt-1`}>
+                          {descricaoCaracteres}/255
+                        </div>
                       </div>
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
@@ -1850,16 +1853,48 @@ export default function Produtos() {
                           </button>
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-1 mb-2">
-                            <label className={`block ${textPrimary} font-medium text-sm`}>
+                          <div className="flex items-center justify-center gap-1 mb-2">
+                            <label className={`block ${textPrimary} font-medium text-sm text-center`}>
                               {t("quantidadeMinima")} <span className="text-red-400">*</span>
                             </label>
-                            <div className="relative group">
-                              <FaQuestionCircle className={`${textMuted} hover:text-blue-500 cursor-help transition-colors`} size={12} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)} />
-                              {showTooltip && <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-2 ${modoDark ? "bg-slate-700" : "bg-white"} border ${borderColor} rounded-lg text-xs ${textPrimary} z-10 shadow-lg`}>{t("quantidadeMinimaTooltip")}</div>}
+                            <div className="relative">
+                              <FaQuestionCircle
+                                className={`${textMuted} cursor-pointer hover:text-blue-500 transition-colors`}
+                                size={12}
+                                onClick={() => setShowTooltip(true)}
+                              />
                             </div>
                           </div>
-                          <input placeholder={t("quantidadeMinimaPlaceholder")} type="number" min={0} value={form.quantidadeMin || ""} onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
+                          {showTooltip && (
+                            <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+                              <div className={`${modoDark ? "bg-slate-800 border-blue-500/30" : "bg-white border-blue-200"} border rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto backdrop-blur-sm`}>
+                                <div className="p-6">
+                                  <div className="flex justify-between items-center mb-4">
+                                    <h3 className={`text-lg font-bold ${textPrimary}`}>{t("quantidadeMinima")}</h3>
+                                    <button
+                                      onClick={() => setShowTooltip(false)}
+                                      className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
+                                    >
+                                      <FaTimes className="text-lg" />
+                                    </button>
+                                  </div>
+                                  <div className={`${textPrimary} text-sm leading-relaxed text-center`}>
+                                    {t("quantidadeMinimaTooltip")}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <input
+                            placeholder={t("quantidadeMinimaPlaceholder")}
+                            type="number"
+                            min={0}
+                            value={form.quantidadeMin || ""}
+                            onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
+                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                            disabled={Boolean(!podeEditar && modalVisualizar)}
+                          />
                         </div>
                       </div>
                       {(preview || form.foto) && (
@@ -1883,12 +1918,12 @@ export default function Produtos() {
                           <div className="relative">
                             <select
                               value={form.fornecedorId || ""}
-                              onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })}
+                              onChange={(e) => {
+                                setForm({ ...form, fornecedorId: e.target.value });
+                                e.target.blur();
+                              }}
                               className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
                               disabled={Boolean(!podeEditar && modalVisualizar)}
-                              size={1}
-                              onFocus={(e) => (e.currentTarget.size = 5)}
-                              onBlur={(e) => (e.currentTarget.size = 1)}
                               style={{
                                 background: modoDark ? cores.dark.card : cores.light.card,
                               }}
@@ -1912,18 +1947,17 @@ export default function Produtos() {
                             </span>
                           </div>
                         </div>
-
                         <div className="flex-1">
                           <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("categoria")}</label>
                           <div className="relative">
                             <select
                               value={form.categoriaId || ""}
-                              onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
+                              onChange={(e) => {
+                                setForm({ ...form, categoriaId: e.target.value });
+                                e.target.blur();
+                              }}
                               className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 cursor-pointer text-sm appearance-none`}
                               disabled={Boolean(!podeEditar && modalVisualizar)}
-                              size={1}
-                              onFocus={(e) => (e.currentTarget.size = 5)}
-                              onBlur={(e) => (e.currentTarget.size = 1)}
                               style={{
                                 background: modoDark ? cores.dark.card : cores.light.card,
                               }}
@@ -1957,13 +1991,13 @@ export default function Produtos() {
                       <div className="flex justify-between items-center pt-4 border-t border-blue-500/20">
                         <div>
                           {modalVisualizar && podeExcluir && (
-                            <button onClick={handleDelete} className={`px-4 py-2 cursor-pointer ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-sm`}>
+                            <button onClick={handleDelete} className={`px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} ${modoDark ? "text-red-400" : "text-red-500"} rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-1 text-xs sm:text-sm`}>
                               <FaTrash className="text-xs" />
                               {t("excluir")}
                             </button>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap justify-end">
                           <button
                             onClick={() => {
                               setModalAberto(false);
@@ -1971,12 +2005,12 @@ export default function Produtos() {
                               setFile(null);
                               setPreview(null);
                             }}
-                            className={`px-4 py-2 cursor-pointer ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-sm`}
+                            className={`px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm min-w-[70px] sm:min-w-0`}
                           >
                             {t("cancelar")}
                           </button>
                           {podeCriar && !modalVisualizar && (
-                            <button onClick={handleSubmit} disabled={isUploading} className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm">
+                            <button onClick={handleSubmit} disabled={isUploading} className="px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs sm:text-sm min-w-[70px] sm:min-w-0">
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -1991,7 +2025,7 @@ export default function Produtos() {
                             </button>
                           )}
                           {podeEditar && modalVisualizar && (
-                            <button onClick={handleUpdate} disabled={isUploading} className="px-4 cursor-pointer py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm">
+                            <button onClick={handleUpdate} disabled={isUploading} className="px-3 py-1.5 sm:px-4 sm:py-2 cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs sm:text-sm min-w-[70px] sm:min-w-0">
                               {isUploading ? (
                                 <>
                                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -2012,6 +2046,8 @@ export default function Produtos() {
                 </div>
               </div>
             )}
+
+
             {modalEstoqueAberto && produtoSelecionadoEstoque && (
               <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
                 <div className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm`} onClick={(e) => e.stopPropagation()}>
@@ -2027,7 +2063,7 @@ export default function Produtos() {
                       setModalEstoqueAberto(false);
                       setProdutoSelecionadoEstoque(null);
                       recarregarListaProdutos();
-                      
+
                     }}
                   />
                 </div>
