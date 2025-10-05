@@ -1,6 +1,6 @@
 {
   "logs":{  
-  "historicoTitulo": "Histórico de Logs",
+    "historicoTitulo": "Histórico de Logs",
     "produto": "Produto",
     "quantidade": "Quantidade",
     "cliente": "Cliente",
@@ -22,6 +22,7 @@
     "periodo": "Período",
     "periodo_todos": "Todos os dados",
     "nenhum_log_encontrado": "Nenhum log encontrado",
+    "nenhumaMovimentacao": "Nenhuma movimentação encontrada",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "usuario_nao_informado": "Não Informado",
     "carregando": "Carregando...",

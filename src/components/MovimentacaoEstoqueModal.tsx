@@ -15,13 +15,15 @@ interface MovimentacaoEstoqueModalProps {
     modoDark: boolean;
     empresaId: string;
     onMovimentacaoConcluida: () => void;
+    onFecharModal: () => void; 
 }
 
 export default function MovimentacaoEstoqueModal({
     produto,
     modoDark,
     empresaId,
-    onMovimentacaoConcluida
+    onMovimentacaoConcluida,
+    onFecharModal
 }: MovimentacaoEstoqueModalProps) {
     const { t } = useTranslation("estoque");
     const [tipoMovimentacao, setTipoMovimentacao] = useState<'ENTRADA' | 'SAIDA'>('ENTRADA');
@@ -243,6 +245,19 @@ export default function MovimentacaoEstoqueModal({
         else if (parseInt(quantidade, 10) < 1) setQuantidade("1");
     };
 
+    const handleCancelar = () => {
+        setTipoMovimentacao('ENTRADA');
+        setQuantidade("1");
+        setMotivo('COMPRA');
+        setObservacao('');
+        setMostrarHistorico(false);
+        
+        onFecharModal();
+    };
+    const handleFechar = () => {
+        onFecharModal();
+    };
+
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -252,7 +267,7 @@ export default function MovimentacaoEstoqueModal({
                     <span className="text-blue-400">- {produto.nome}</span>
                 </h2>
                 <button
-                    onClick={onMovimentacaoConcluida}
+                    onClick={handleFechar} 
                     className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-gray-400 hover:text-white"
                 >
                     <FaTimes className="text-lg" />
@@ -357,7 +372,7 @@ export default function MovimentacaoEstoqueModal({
 
                         <div className="flex gap-3">
                             <button
-                                onClick={onMovimentacaoConcluida}
+                                onClick={handleCancelar}
                                 className="px-6 py-3 rounded-xl border transition-all duration-200 hover:scale-105 cursor-pointer"
                                 style={{
                                     borderColor: temaAtual.borda,

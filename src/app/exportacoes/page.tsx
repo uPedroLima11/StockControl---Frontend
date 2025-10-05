@@ -134,7 +134,6 @@ export default function Exportacoes() {
 
   useEffect(() => {
     if (activeTab === "historico" && empresaId) {
-      console.log("Buscando histórico para empresa:", empresaId);
       fetchExportHistory();
     }
   }, [activeTab, empresaId]);
@@ -260,18 +259,14 @@ export default function Exportacoes() {
       const usuarioSalvo = localStorage.getItem("client_key");
       const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
 
-      console.log("Fazendo request para histórico...");
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`, {
         headers: {
           "user-id": usuarioValor,
         },
       });
 
-      console.log("Response status:", response.status);
-
       if (response.ok) {
         const history = await response.json();
-        console.log("Histórico recebido:", history);
         setExportHistory(history);
         setPaginaAtual(1);
       } else {

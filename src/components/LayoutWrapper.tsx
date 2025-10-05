@@ -6,6 +6,7 @@ import Sidebar from "./sidebar";
 import { useEffect, useState } from "react";
 import { use2FASession } from "@/hooks/use2FASession";
 import CustomNotification from "./NotificacaoCustom";
+import Cookies from "js-cookie";
 
 export default function LayoutWrapper({
   children,
@@ -34,6 +35,27 @@ export default function LayoutWrapper({
     pathname.startsWith("/catalogo/");
 
   useEffect(() => {
+    if (!isPublicPage && !isHome) {
+      const token = Cookies.get("token");
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const initialTimer = setTimeout(() => {
+        verificarERedirecionar();
+      }, 1000);
+
+      const interval = setInterval(verificarERedirecionar, 30000);
+
+      return () => {
+        clearTimeout(initialTimer);
+        clearInterval(interval);
+      };
+    }
+  }, [pathname, isPublicPage, isHome, verificarERedirecionar]);
+
+  useEffect(() => {
     if (!isNoDarkModePage) {
       const temaSalvo = localStorage.getItem("modoDark");
       const ativado = temaSalvo === "true";
@@ -44,21 +66,6 @@ export default function LayoutWrapper({
       aplicarTema(false);
     }
   }, [pathname]);
-
-  useEffect(() => {
-    if (!isPublicPage && !isHome) {
-      const initialTimer = setTimeout(() => {
-        verificarERedirecionar();
-      }, 2000);
-
-      const interval = setInterval(verificarERedirecionar, 30000);
-
-      return () => {
-        clearTimeout(initialTimer);
-        clearInterval(interval);
-      };
-    }
-  }, [pathname, isPublicPage, isHome]);
 
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;

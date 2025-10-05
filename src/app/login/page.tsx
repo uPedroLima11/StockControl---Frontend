@@ -21,7 +21,6 @@ function LoginContent() {
     const email = searchParams.get('email');
     
     if (message === 'email-verificado' && email) {
-      console.log("✅ Usuário veio do registro com email verificado:", email);
     }
   }, [searchParams]);
 
@@ -41,7 +40,6 @@ function LoginContent() {
   };
 
   const handleEmailVerificado = async () => {
-    console.log("✅ Email verificado, fazendo login automático:", userEmail);
     
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login`, {
