@@ -8,7 +8,6 @@ import { FaEye, FaEyeSlash, FaArrowRight, FaUserShield, FaChartLine, FaClipboard
 import { useState, useEffect, useRef } from "react";
 import { useUsuarioStore } from "@/context/usuario";
 import { cores } from "@/utils/cores";
-import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 import { Poppins } from "next/font/google";
 
@@ -59,7 +58,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
 
   async function handleLogin(data: Inputs) {
     setIsLoading(true);
-    try {      
+    try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login`, {
         method: "POST",
         headers: {
@@ -76,48 +75,32 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
         if (responseData.precisa2FA) {
           on2FANeeded(data.email);
         } else {
-          Swal.fire({
-            text: "Login Realizado Com Sucesso!",
-            icon: "success",
-            confirmButtonColor: temaAtual.primario,
-            background: temaAtual.card,
-            color: temaAtual.texto
-          });
+          localStorage.setItem('login_success_message', 'Login realizado com sucesso!');
+          localStorage.setItem('login_success_type', 'success');
+
           Cookies.set("token", responseData.token, { expires: 1 });
           logar(responseData);
           localStorage.setItem("client_key", JSON.stringify(responseData.id));
           router.push("/dashboard");
         }
       } else if (response.status === 403 && responseData.precisaVerificacao) {
-        onEmailNaoVerificado(data.email, data.senha); 
+        onEmailNaoVerificado(data.email, data.senha);
       } else {
         console.error("❌ Erro no login:", responseData);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: responseData.message || "Algo deu errado, Verifique as credenciais",
-          confirmButtonColor: temaAtual.primario,
-          background: temaAtual.card,
-          color: temaAtual.texto
-        });
+        localStorage.setItem('login_success_message', responseData.message || 'Algo deu errado, Verifique as credenciais');
+        localStorage.setItem('login_success_type', 'error');
       }
     } catch (err) {
       console.error("❌ Erro de conexão:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Erro de conexão",
-        text: "Não foi possível conectar ao servidor",
-        confirmButtonColor: temaAtual.primario,
-        background: temaAtual.card,
-        color: temaAtual.texto
-      });
+      localStorage.setItem('login_success_message', 'Não foi possível conectar ao servidor');
+      localStorage.setItem('login_success_type', 'error');
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div 
+    <div
       className={`min-h-screen flex ${poppins.className}`}
       style={{ background: temaAtual.gradiente }}
     >
@@ -129,7 +112,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
         </div>
 
         <div className="relative z-10 flex flex-col justify-center items-start px-28 w-full">
-          <Link 
+          <Link
             href="/"
             className="flex items-center gap-3 mb-12 group"
           >
@@ -144,14 +127,14 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
               Bem-vindo de
               <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> volta</span>
             </h1>
-            
+
             <p className="text-xl text-gray-300 mb-12 max-w-md">
               Continue sua jornada rumo ao controle total do seu estoque e vendas.
             </p>
 
             <div className="space-y-6">
               {beneficios.map((beneficio, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-4 text-gray-300 group"
                   style={{ transitionDelay: `${index * 200}ms` }}
@@ -168,12 +151,12 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div 
+        <div
           ref={containerRef}
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex justify-center mb-8">
-            <Link 
+            <Link
               href="/"
               className="flex items-center gap-3 group"
             >
@@ -184,7 +167,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
             </Link>
           </div>
 
-          <div 
+          <div
             className={`bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-3xl p-8 border border-blue-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
             <div className="text-center mb-8">
@@ -205,10 +188,10 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiEnvelope className="text-gray-400 group-hover:text-blue-400 transition-colors" />
                   </div>
-                  <input 
-                    type="email" 
-                    {...register("email", { required: true })} 
-                    required 
+                  <input
+                    type="email"
+                    {...register("email", { required: true })}
+                    required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
                     placeholder="seu@email.com"
                     style={{
@@ -226,10 +209,10 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="text-gray-400 group-hover:text-blue-400 transition-colors" />
                   </div>
-                  <input 
-                    type={visivel ? "text" : "password"} 
-                    {...register("senha", { required: true })} 
-                    required 
+                  <input
+                    type={visivel ? "text" : "password"}
+                    {...register("senha", { required: true })}
+                    required
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
                     placeholder="Sua senha"
                     style={{
@@ -247,16 +230,16 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                 </div>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <Link 
-                  href="/esqueci" 
+                <Link
+                  href="/esqueci"
                   className="text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   Esqueceu a senha?
                 </Link>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading}
                 className="w-full cursor-pointer group relative bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -279,8 +262,8 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
                 Não tem uma conta?{" "}
-                <Link 
-                  href="/registro" 
+                <Link
+                  href="/registro"
                   className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                 >
                   Criar conta

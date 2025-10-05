@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { use2FASession } from "@/hooks/use2FASession";
 import CustomNotification from "./NotificacaoCustom";
 import Cookies from "js-cookie";
+import LoginNotificationHandler from "./LoginNotificacao"; 
 
 export default function LayoutWrapper({
   children,
@@ -98,6 +99,7 @@ export default function LayoutWrapper({
             onClose={() => removeNotification(notification.id)}
           />
         ))}
+        <LoginNotificationHandler />
         <main>{children}</main>
       </>
     );
@@ -113,6 +115,7 @@ export default function LayoutWrapper({
           onClose={() => removeNotification(notification.id)}
         />
       ))}
+      <LoginNotificationHandler />
       <Sidebar />
       <main
         className="flex-1 overflow-y-auto max-h-screen bg-white"

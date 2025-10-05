@@ -21,6 +21,8 @@ function LoginContent() {
     const email = searchParams.get('email');
     
     if (message === 'email-verificado' && email) {
+      localStorage.setItem('login_success_message', 'Email verificado com sucesso!');
+      localStorage.setItem('login_success_type', 'success');
     }
   }, [searchParams]);
 
@@ -40,7 +42,6 @@ function LoginContent() {
   };
 
   const handleEmailVerificado = async () => {
-    
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login`, {
         method: "POST",
@@ -59,6 +60,9 @@ function LoginContent() {
         if (responseData.precisa2FA) {
           setCurrentStep("verificacao");
         } else {
+          localStorage.setItem('login_success_message', 'Email verificado e login realizado com sucesso!');
+          localStorage.setItem('login_success_type', 'success');
+          
           Cookies.set("token", responseData.token, { expires: 1 });
           logar(responseData);
           localStorage.setItem("client_key", JSON.stringify(responseData.id));
@@ -66,10 +70,14 @@ function LoginContent() {
         }
       } else {
         setCurrentStep("form");
+        localStorage.setItem('login_success_message', responseData.message || 'Erro ao fazer login após verificação');
+        localStorage.setItem('login_success_type', 'error');
       }
     } catch (error) {
       console.error("❌ Erro de conexão ao fazer login após verificação:", error);
       setCurrentStep("form");
+      localStorage.setItem('login_success_message', 'Erro de conexão ao fazer login após verificação');
+      localStorage.setItem('login_success_type', 'error');
     }
   };
 
@@ -90,6 +98,9 @@ function LoginContent() {
 
       if (response.ok) {
         const dados = await response.json();        
+        localStorage.setItem('login_success_message', 'Login realizado com sucesso!');
+        localStorage.setItem('login_success_type', 'success');
+        
         Cookies.set("token", dados.token, { expires: 1 });
         logar(dados);
         localStorage.setItem("client_key", JSON.stringify(dados.id));
@@ -98,11 +109,13 @@ function LoginContent() {
       } else {
         const errorData = await response.json();
         console.error("❌ Erro ao finalizar login:", errorData);
-        alert("Erro ao finalizar login: " + errorData.message);
+        localStorage.setItem('login_success_message', errorData.message || 'Erro ao finalizar login');
+        localStorage.setItem('login_success_type', 'error');
       }
     } catch (error) {
       console.error("❌ Erro de conexão ao finalizar login:", error);
-      alert("Erro de conexão ao finalizar login");
+      localStorage.setItem('login_success_message', 'Erro de conexão ao finalizar login');
+      localStorage.setItem('login_success_type', 'error');
     }
   };
 
