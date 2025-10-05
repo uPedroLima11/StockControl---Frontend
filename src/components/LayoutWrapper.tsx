@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import Sidebar from "./sidebar";
 import { useEffect, useState } from "react";
+import { use2FASession } from "@/hooks/use2FASession";
+import CustomNotification from "./NotificacaoCustom";
 
 export default function LayoutWrapper({
   children,
@@ -11,6 +13,7 @@ export default function LayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { verificarERedirecionar, notifications, removeNotification } = use2FASession();
 
   const isHome = pathname === "/";
   const isNoDarkModePage =
@@ -21,6 +24,14 @@ export default function LayoutWrapper({
     pathname === "/alteracao" ||
     pathname.startsWith("/catalogo/");
   const [modoDark, setModoDark] = useState(false);
+
+  const isPublicPage =
+    pathname === "/login" ||
+    pathname === "/registro" ||
+    pathname === "/esqueci" ||
+    pathname === "/alteracao" ||
+    pathname === "/pt" ||
+    pathname.startsWith("/catalogo/");
 
   useEffect(() => {
     if (!isNoDarkModePage) {
@@ -34,6 +45,21 @@ export default function LayoutWrapper({
     }
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isPublicPage && !isHome) {
+      const initialTimer = setTimeout(() => {
+        verificarERedirecionar();
+      }, 2000);
+
+      const interval = setInterval(verificarERedirecionar, 30000);
+
+      return () => {
+        clearTimeout(initialTimer);
+        clearInterval(interval);
+      };
+    }
+  }, [pathname, isPublicPage, isHome]);
+
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
     if (ativado) {
@@ -45,13 +71,6 @@ export default function LayoutWrapper({
     }
   };
 
-  const isPublicPage =
-    pathname === "/login" ||
-    pathname === "/registro" ||
-    pathname === "/esqueci" ||
-    pathname === "/alteracao" ||
-    pathname === "/pt";
-
   if (isHome) {
     return (
       <>
@@ -62,11 +81,31 @@ export default function LayoutWrapper({
   }
 
   if (isPublicPage || isNoDarkModePage) {
-    return <main>{children}</main>;
+    return (
+      <>
+        {notifications.map((notification) => (
+          <CustomNotification
+            key={notification.id}
+            message={notification.message}
+            type={notification.type}
+            onClose={() => removeNotification(notification.id)}
+          />
+        ))}
+        <main>{children}</main>
+      </>
+    );
   }
 
   return (
     <div className="flex">
+      {notifications.map((notification) => (
+        <CustomNotification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
       <Sidebar />
       <main
         className="flex-1 overflow-y-auto max-h-screen bg-white"

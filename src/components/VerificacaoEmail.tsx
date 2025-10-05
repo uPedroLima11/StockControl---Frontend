@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { cores } from "@/utils/cores";
 import { HiEnvelope, HiLockClosed, HiArrowLeft } from "react-icons/hi2";
+import CustomNotification from "./NotificacaoCustom";
 
 interface VerificacaoEmailProps {
   email: string;
@@ -17,30 +18,46 @@ type Inputs = {
   codigo: string;
 };
 
+type NotificationType = {
+  id: string;
+  message: string;
+  type: "success" | "error" | "info";
+};
+
 export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }: VerificacaoEmailProps) {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<Inputs>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [tempoRestante, setTempoRestante] = useState(600); 
+  const [tempoRestante, setTempoRestante] = useState(0); 
   const [codigoEnviado, setCodigoEnviado] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
   
   const codigoInicialEnviado = useRef(false);
 
   const temaAtual = cores.dark;
 
-  useEffect(() => {
-    if (!codigoInicialEnviado.current) {
-      enviarCodigoVerificacao();
-      codigoInicialEnviado.current = true;
-    }
-  }, []); 
+  const addNotification = (message: string, type: "success" | "error" | "info" = "info") => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setNotifications(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
 
   useEffect(() => {
-    if (tempoRestante > 0 && codigoEnviado) {
+    if (!codigoInicialEnviado.current) {
+      enviarCodigoVerificacao(true); 
+      codigoInicialEnviado.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tempoRestante > 0) {
       const timer = setTimeout(() => setTempoRestante(tempoRestante - 1), 1000);
       return () => clearTimeout(timer);
     }
-  }, [tempoRestante, codigoEnviado]);
+  }, [tempoRestante]);
 
   const formatarTempo = (segundos: number) => {
     const minutos = Math.floor(segundos / 60);
@@ -48,8 +65,8 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
     return `${minutos.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
   };
 
-  const enviarCodigoVerificacao = async () => {
-    if (isSending) return;
+  const enviarCodigoVerificacao = async (isInitial: boolean = false) => {
+    if (isSending || (tempoRestante > 0 && !isInitial)) return;
     
     setIsSending(true);
     try {      
@@ -75,39 +92,23 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
       const responseData = await response.json();
       if (response.ok) {
         setCodigoEnviado(true);
-        setTempoRestante(600); 
         
-        if (codigoInicialEnviado.current) {
-          Swal.fire({
-            icon: "success",
-            title: "Código reenviado!",
-            text: "Verifique seu email e digite o novo código recebido.",
-            confirmButtonColor: temaAtual.primario,
-            background: temaAtual.card,
-            color: temaAtual.texto,
-          });
+        if (isInitial) {
+          addNotification("Código de Verificação Enviado! Verifique seu email.", "success");
+        } else {
+          addNotification("Código reenviado com sucesso! Verifique seu email.", "success");
+        }
+        
+        if (!isInitial) {
+          setTempoRestante(60); 
         }
       } else {
         console.error("❌ Erro ao enviar código:", responseData);
-        Swal.fire({
-          icon: "error",
-          title: "Erro",
-          text: responseData.message || "Erro ao enviar código de verificação",
-          confirmButtonColor: temaAtual.primario,
-          background: temaAtual.card,
-          color: temaAtual.texto,
-        });
+        addNotification(responseData.message || "Erro ao enviar código de verificação", "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erro de conexão",
-        text: "Não foi possível enviar o código de verificação",
-        confirmButtonColor: temaAtual.primario,
-        background: temaAtual.card,
-        color: temaAtual.texto,
-      });
+      addNotification("Erro de conexão ao enviar código", "error");
     } finally {
       setIsSending(false);
     }
@@ -144,37 +145,18 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
           successMessage = "Verificação em duas etapas concluída com sucesso!";
         }
 
-        Swal.fire({
-          icon: "success",
-          title: "Sucesso!",
-          text: successMessage,
-          confirmButtonColor: temaAtual.primario,
-          background: temaAtual.card,
-          color: temaAtual.texto,
-        }).then(() => {
+        addNotification(successMessage, "success");
+        
+        setTimeout(() => {
           onVerificado();
-        });
+        }, 1000);
       } else {
         console.error("❌ Erro na verificação:", responseData);
-        Swal.fire({
-          icon: "error",
-          title: "Código inválido",
-          text: responseData.message || "Verifique o código e tente novamente",
-          confirmButtonColor: temaAtual.primario,
-          background: temaAtual.card,
-          color: temaAtual.texto,
-        });
+        addNotification(responseData.message || "Código inválido. Verifique e tente novamente.", "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erro de conexão",
-        text: "Não foi possível verificar o código",
-        confirmButtonColor: temaAtual.primario,
-        background: temaAtual.card,
-        color: temaAtual.texto,
-      });
+      addNotification("Erro de conexão ao verificar código", "error");
     } finally {
       setIsLoading(false);
     }
@@ -210,6 +192,15 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: temaAtual.gradiente }}>
+      {notifications.map((notification) => (
+        <CustomNotification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+      
       <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-3xl p-8 border border-blue-500/20 shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
           {onVoltar && (
@@ -232,11 +223,12 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
           </p>
           <p className="text-blue-400 font-medium break-all">{email}</p>
           
-          {!codigoEnviado && (
+          {isSending && (
             <div className="mt-4 p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-              <p className="text-blue-300 text-sm">
-                📧 Enviando código de verificação...
-              </p>
+              <div className="text-blue-300 text-sm flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                Enviando código...
+              </div>
             </div>
           )}
         </div>
@@ -281,10 +273,10 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
             </p>
           </div>
 
-          {codigoEnviado && (
+          {tempoRestante > 0 && (
             <div className="text-center">
               <p className="text-sm text-gray-400">
-                Código expira em: <span className="font-mono text-orange-400">{formatarTempo(tempoRestante)}</span>
+                Pode reenviar em: <span className="font-mono text-orange-400">{formatarTempo(tempoRestante)}</span>
               </p>
             </div>
           )}
@@ -307,15 +299,17 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
           <div className="text-center">
             <button
               type="button"
-              onClick={enviarCodigoVerificacao}
-              disabled={isSending || tempoRestante > 540} 
+              onClick={() => enviarCodigoVerificacao(false)}
+              disabled={isSending || tempoRestante > 0}
               className="text-blue-400 hover:text-blue-300 text-sm disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
             >
               {isSending ? (
-                <span className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                   Enviando...
-                </span>
+                </div>
+              ) : tempoRestante > 0 ? (
+                `Reenviar em ${formatarTempo(tempoRestante)}`
               ) : (
                 "Não recebeu o código? Reenviar"
               )}
