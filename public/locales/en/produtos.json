@@ -1,4 +1,11 @@
 {
+  "visualizacao": {
+    "titulo": "View",
+    "cards": "Cards",
+    "lista": "List",
+    "tooltipCards": "Grid view with images",
+    "tooltipLista": "Compact list view"
+  },
   "categorias": {
     "Eletronicos": "Electronics",
     "Roupas": "Clothing",
@@ -59,21 +66,21 @@
   "fornecedor": "Supplier",
   "estoque": "Stock",
   "unidades": "units",
-  "visualizacao": "View",
-  "acessoRestrito": "Restricted Access",
-  "acessoRestritoMensagem": "You do not have permission to view this page.",
   "editarProduto": "Edit Product",
   "nome": "Name",
   "nomePlaceholder": "Product name",
   "descricao": "Description",
   "descricaoPlaceholder": "Product description",
   "preco": "Price",
+  "visualizacaoLabel": "View",
   "quantidadeMinima": "Minimum Quantity",
   "quantidadeMinimaPlaceholder": "Minimum quantity",
-  "quantidadeMinimaTooltip": "Minimum stock quantity for replenishment alerts",
+  "quantidadeMinimaTooltip": "Minimum stock quantity for restocking alerts",
   "foto": "Photo",
   "selecionarImagem": "Select Image",
   "selecionarFornecedor": "Select Supplier",
+  "acessoRestrito": "Access Restricted",
+  "acessoRestritoMensagem": "You don't have permission to view this page.",
   "selecionarCategoria": "Select Category",
   "incluirNoCatalogo": "Include in catalog",
   "excluir": "Delete",
@@ -106,12 +113,18 @@
   },
   "produtoExcluidoSucesso": {
     "titulo": "Product Deleted!",
-    "mensagem": "Your product has been deleted successfully."
+    "mensagem": "Your product has been successfully deleted."
   },
   "produtoAdicionadoCatalogo": {
     "titulo": "Product added to catalog!"
   },
   "produtoRemovidoCatalogo": {
     "titulo": "Product removed from catalog!"
-  }
+  },
+  "editar": "Edit",
+  "estoqueBaixo": {
+    "estadoCritico": "Critical",
+    "estadoAtencao": "Attention"
+  },
+  "emEstoque": "In Stock"
 }

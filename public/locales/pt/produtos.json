@@ -1,26 +1,33 @@
 {
+  "visualizacao": {
+    "titulo": "Visualização",
+    "cards": "Cards",
+    "lista": "Lista",
+    "tooltipCards": "Visualização em grade com imagens",
+    "tooltipLista": "Visualização compacta em lista"
+  },
   "categorias": {
-    "Eletronicos": "Electronics",
-    "Roupas": "Clothing",
-    "Móveis": "Furniture",
-    "Calçados": "Footwear",
-    "Acessórios": "Accessories",
-    "Esportes": "Sports",
-    "Brinquedos": "Toys",
-    "Livros": "Books",
-    "Papelaria": "Stationery",
-    "Higiene": "Hygiene",
-    "Beleza": "Beauty",
-    "Alimentos": "Food",
-    "Bebidas": "Beverages",
-    "Automotivos": "Automotive",
-    "Ferramentas": "Tools",
-    "Jardinagem": "Gardening",
-    "Informática": "Computing",
-    "Farmácia": "Pharmacy",
-    "Limpeza": "Cleaning",
-    "Decoração": "Decoration",
-    "Sem Categoria": "Uncategorized"
+    "Eletronicos": "Eletrônicos",
+    "Roupas": "Roupas",
+    "Móveis": "Móveis",
+    "Calçados": "Calçados",
+    "Acessórios": "Acessórios",
+    "Esportes": "Esportes",
+    "Brinquedos": "Brinquedos",
+    "Livros": "Livros",
+    "Papelaria": "Papelaria",
+    "Higiene": "Higiene",
+    "Beleza": "Beleza",
+    "Alimentos": "Alimentos",
+    "Bebidas": "Bebidas",
+    "Automotivos": "Automotivos",
+    "Ferramentas": "Ferramentas",
+    "Jardinagem": "Jardinagem",
+    "Informática": "Informática",
+    "Farmácia": "Farmácia",
+    "Limpeza": "Limpeza",
+    "Decoração": "Decoração",
+    "Sem Categoria": "Sem Categoria"
   },
   "titulo": "Seus",
   "produtos": "Produtos",
@@ -65,7 +72,7 @@
   "descricao": "Descrição",
   "descricaoPlaceholder": "Descrição do produto",
   "preco": "Preço",
-  "visualizacao": "View",
+  "visualizacaoLabel": "Visualização",
   "quantidadeMinima": "Quantidade Mínima",
   "quantidadeMinimaPlaceholder": "Quantidade mínima",
   "quantidadeMinimaTooltip": "Quantidade mínima em estoque para alertas de reposição",
@@ -113,5 +120,11 @@
   },
   "produtoRemovidoCatalogo": {
     "titulo": "Produto removido do catálogo!"
-  }
+  },
+  "editar": "Editar",
+  "estoqueBaixo": {
+    "estadoCritico": "Crítico",
+    "estadoAtencao": "Atenção"
+  },
+  "emEstoque": "Em Estoque"
 }

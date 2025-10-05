@@ -76,6 +76,8 @@ export default function Produtos() {
   const [direcaoOrdenacao] = useState<DirecaoOrdenacao>("asc");
   const [cotacaoDolar, setCotacaoDolar] = useState(6);
   const [loading, setLoading] = useState(true);
+  type TipoVisualizacao = "cards" | "lista";
+  const [tipoVisualizacao, setTipoVisualizacao] = useState<TipoVisualizacao>("cards");
   const [stats, setStats] = useState({
     total: 0,
     emEstoque: 0,
@@ -279,6 +281,7 @@ export default function Produtos() {
     `;
     document.head.appendChild(style);
 
+
     const carregarPermissoes = async () => {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) return;
@@ -352,6 +355,19 @@ export default function Produtos() {
           setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
         }
       }
+      useEffect(() => {
+        const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
+        if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
+          setTipoVisualizacao(visualizacaoSalva);
+        }
+      }, []);
+
+      useEffect(() => {
+        const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
+        if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
+          setTipoVisualizacao(visualizacaoSalva);
+        }
+      }, []);
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         headers: { "user-id": usuarioValor },
@@ -482,6 +498,34 @@ export default function Produtos() {
     }
   }, [modalVisualizar, i18n.language, cotacaoDolar]);
 
+  useEffect(() => {
+    if (modalAberto && !modalVisualizar) {
+      setForm({
+        id: "",
+        nome: "",
+        descricao: "",
+        preco: 0,
+        quantidade: 0,
+        quantidadeMin: 0,
+        foto: "",
+        noCatalogo: false,
+        fornecedorId: "",
+        categoriaId: "",
+        empresaId: "",
+        fornecedor: undefined,
+        categoria: undefined,
+        empresa: "",
+        usuarioId: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      setNomeCaracteres(0);
+      setDescricaoCaracteres(0);
+      setFile(null);
+      setPreview(null);
+    }
+  }, [modalAberto, modalVisualizar]);
+
   const recarregarListaProdutos = () => {
     setRecarregarProdutos((prev) => prev + 1);
   };
@@ -543,6 +587,11 @@ export default function Produtos() {
     setValorFiltro(0);
     setFiltroCategoria(null);
     setPaginaAtual(1);
+  };
+
+  const alterarVisualizacao = (novoTipo: TipoVisualizacao) => {
+    setTipoVisualizacao(novoTipo);
+    localStorage.setItem("produtos_visualizacao", novoTipo);
   };
 
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
@@ -1345,12 +1394,42 @@ export default function Produtos() {
               </div>
 
               <div className="flex items-center gap-3 mt-4 lg:mt-0">
-                <div className={`${textPrimary} ${bgCard} px-3 py-1 rounded-xl border ${borderColor} text-sm`}>
-                  <span className="font-mono">
-                    {produtosFiltrados.length}/{totalProdutos}
-                  </span>
-                </div>
+                <div className={`hidden lg:flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl p-1`}>
+                  <button
+                    onClick={() => alterarVisualizacao("cards")}
+                    className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
+                      ? "bg-blue-500 text-white"
+                      : `${bgHover} ${textPrimary}`
+                      }`}
+                    title={t("visualizacao.tooltipCards")}
+                  >
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      <div className="grid grid-cols-2 gap-0.5 w-3 h-3">
+                        <div className={`${tipoVisualizacao === "cards" ? "bg-white" : "bg-blue-500"} rounded-sm`}></div>
+                        <div className={`${tipoVisualizacao === "cards" ? "bg-white" : "bg-blue-500"} rounded-sm`}></div>
+                        <div className={`${tipoVisualizacao === "cards" ? "bg-white" : "bg-blue-500"} rounded-sm`}></div>
+                        <div className={`${tipoVisualizacao === "cards" ? "bg-white" : "bg-blue-500"} rounded-sm`}></div>
+                      </div>
+                    </div>
+                  </button>
 
+                  <button
+                    onClick={() => alterarVisualizacao("lista")}
+                    className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
+                      ? "bg-blue-500 text-white"
+                      : `${bgHover} ${textPrimary}`
+                      }`}
+                    title={t("visualizacao.tooltipLista")}
+                  >
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      <div className="flex flex-col gap-0.5 w-3 h-3">
+                        <div className={`${tipoVisualizacao === "lista" ? "bg-white" : "bg-blue-500"} rounded-sm h-1`}></div>
+                        <div className={`${tipoVisualizacao === "lista" ? "bg-white" : "bg-blue-500"} rounded-sm h-1`}></div>
+                        <div className={`${tipoVisualizacao === "lista" ? "bg-white" : "bg-blue-500"} rounded-sm h-1`}></div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
                 {podeCriar && empresaAtivada && (
                   <button onClick={() => handleAcaoProtegida(() => setModalAberto(true))} className="px-6 py-3 bg-gradient-to-r cursor-pointer from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm">
                     <FaPlus className="text-sm" />
@@ -1389,174 +1468,298 @@ export default function Produtos() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                  {produtosAtuais.map((produto, index) => (
-                    <div
-                      key={produto.id}
-                      className={`group ${modoDark ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" : "bg-gradient-to-br from-blue-50/50 to-cyan-50/50"} rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
-                      style={{
-                        animationDelay: `${index * 100}ms`,
-                      }}
-                    >
-                      <div className="relative mb-3 overflow-hidden rounded-lg">
-                        <Image
-                          src={produto.foto || "/out.jpg"}
-                          width={200}
-                          height={150}
-                          className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-110"
-                          alt={produto.nome}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/out.jpg";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-700 text-white"}`}>{produto.quantidade}</div>
-                        {podeEditar && (
-                          <div className="absolute bottom-2 right-2 xl:hidden">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setModalVisualizar(produto);
-                                setForm(produto);
-                              }}
-                              className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
-                            >
-                              <FaEdit className="text-xs" />
-                            </button>
-                          </div>
-                        )}
-                        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1 xl:flex">
-                          <button
-                            onClick={() => {
-                              setModalVisualizar(produto);
-                              setForm(produto);
+                {tipoVisualizacao === "cards" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+                    {produtosAtuais.map((produto, index) => (
+                      <div
+                        key={produto.id}
+                        className={`group ${modoDark ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" : "bg-gradient-to-br from-blue-50/50 to-cyan-50/50"} rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                        }}
+                      >
+                        <div className="relative mb-3 overflow-hidden rounded-lg">
+                          <Image
+                            src={produto.foto || "/out.jpg"}
+                            width={200}
+                            height={150}
+                            className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-110"
+                            alt={produto.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
-                            className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
-                          >
-                            <FaEye className="text-xs" />
-                            {t("ver")}
-                          </button>
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-700 text-white"}`}>{produto.quantidade}</div>
                           {podeEditar && (
+                            <div className="absolute bottom-2 right-2 xl:hidden">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalVisualizar(produto);
+                                  setForm(produto);
+                                }}
+                                className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                              >
+                                <FaEdit className="text-xs" />
+                              </button>
+                            </div>
+                          )}
+                          <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1 xl:flex">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
+                              onClick={() => {
                                 setModalVisualizar(produto);
                                 setForm(produto);
                               }}
-                              className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm xl:flex hidden"
+                              className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
                             >
-                              <FaEdit className="text-xs" />
+                              <FaEye className="text-xs" />
+                              {t("ver")}
+                            </button>
+                            {podeEditar && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalVisualizar(produto);
+                                  setForm(produto);
+                                }}
+                                className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm xl:flex hidden"
+                              >
+                                <FaEdit className="text-xs" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+                          {podeGerenciarCatalogo && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCatalogo(produto.id, produto.noCatalogo);
+                              }}
+                              className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
+                            >
+                              {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
                             </button>
                           )}
                         </div>
-                      </div>
-                      <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
-                        {podeGerenciarCatalogo && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleCatalogo(produto.id, produto.noCatalogo);
-                            }}
-                            className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
-                          >
-                            {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
-                          </button>
+
+                        <div className={`space-y-1 text-xs ${textMuted} mb-2`}>
+                          <div className="flex justify-between">
+                            <span className="flex items-center gap-1">
+                              <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                              {t("categoria")}:
+                            </span>
+                            <span className={textPrimary}>
+                              {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="flex items-center gap-1">
+                              <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
+                              {t("fornecedor")}:
+                            </span>
+                            <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
+                          </div>
+                        </div>
+
+                        <div className="mb-2">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className={textMuted}>{t("estoque")}</span>
+                            <span className={textPrimary}>
+                              {produto.quantidade} {t("unidades")}
+                            </span>
+                          </div>
+                          <div className={`w-full ${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-full h-1.5`}>
+                            <div
+                              className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2 ? "bg-gradient-to-r from-green-500 to-emerald-500" : produto.quantidade > (produto.quantidadeMin || 0) ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-gradient-to-r from-red-500 to-pink-500"}`}
+                              style={{
+                                width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {podeGerenciarEstoque && (
+                          <div className="mt-2">
+                            <button
+                              onClick={() => abrirModalEstoque(produto)}
+                              className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
+                              style={{
+                                background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              <FaBox size={14} />
+                              {t("estoque")}
+                            </button>
+                          </div>
                         )}
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3 mb-6">
+                    {produtosAtuais.map((produto, index) => (
+                      <div
+                        key={produto.id}
+                        className={`${modoDark ? "bg-slate-800/50" : "bg-white/80"} rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"} p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                          <div className="flex-shrink-0">
+                            <Image
+                              src={produto.foto || "/out.jpg"}
+                              width={80}
+                              height={80}
+                              className="w-20 h-20 object-cover rounded-lg"
+                              alt={produto.nome}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/out.jpg";
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
+                              <div>
+                                <h3 className={`font-bold ${textPrimary} line-clamp-1 text-sm`}>{produto.nome}</h3>
+                                <p className={`${textMuted} text-xs line-clamp-2 mt-1`}>{produto.descricao}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-lg font-bold text-cyan-500">
+                                  {i18n.language === "pt"
+                                    ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                                    : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })
+                                  }
+                                </span>
+                                {podeGerenciarCatalogo && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleCatalogo(produto.id, produto.noCatalogo);
+                                    }}
+                                    className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
+                                  >
+                                    {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
 
-                      <div className={`space-y-1 text-xs ${textMuted} mb-2`}>
-                        <div className="flex justify-between">
-                          <span className="flex items-center gap-1">
-                            <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                            {t("categoria")}:
-                          </span>
-                          <span className={textPrimary}>
-                            {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="flex items-center gap-1">
-                            <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
-                            {t("fornecedor")}:
-                          </span>
-                          <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                              <div>
+                                <span className={textMuted}>{t("categoria")}: </span>
+                                <span className={textPrimary}>
+                                  {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
+                                </span>
+                              </div>
+                              <div>
+                                <span className={textMuted}>{t("fornecedor")}: </span>
+                                <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
+                              </div>
+                              <div>
+                                <span className={textMuted}>{t("estoque")}: </span>
+                                <span className={textPrimary}>
+                                  {produto.quantidade} {t("unidades")}
+                                </span>
+                              </div>
+                              <div>
+                                <span className={textMuted}>Status: </span>
+                                <span className={`${produto.quantidade <= (produto.quantidadeMin || 0)
+                                  ? "text-red-500"
+                                  : produto.quantidade <= (produto.quantidadeMin || 0) * 2
+                                    ? "text-yellow-500"
+                                    : "text-green-500"
+                                  } font-medium`}>
+                                  {produto.quantidade <= (produto.quantidadeMin || 0)
+                                    ? t("estoqueBaixo.estadoCritico")
+                                    : produto.quantidade <= (produto.quantidadeMin || 0) * 2
+                                      ? t("estoqueBaixo.estadoAtencao")
+                                      : t("emEstoque")
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2 min-w-[120px]">
+                            <button
+                              onClick={() => {
+                                setModalVisualizar(produto);
+                                setForm(produto);
+                              }}
+                              className="px-3 py-2 rounded-lg cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
+                            >
+                              <FaEye className="text-xs" />
+                              {t("ver")}
+                            </button>
+
+                            {podeEditar && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalVisualizar(produto);
+                                  setForm(produto);
+                                }}
+                                className="px-3 py-2 rounded-lg cursor-pointer bg-green-600 hover:bg-green-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
+                              >
+                                <FaEdit className="text-xs" />
+                                {t("editar")}
+                              </button>
+                            )}
+
+                            {podeGerenciarEstoque && (
+                              <button
+                                onClick={() => abrirModalEstoque(produto)}
+                                className="px-3 py-2 rounded-lg cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
+                              >
+                                <FaBox className="text-xs" />
+                                {t("estoque")}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-
-                      <div className="mb-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className={textMuted}>{t("estoque")}</span>
-                          <span className={textPrimary}>
-                            {produto.quantidade} {t("unidades")}
-                          </span>
-                        </div>
-                        <div className={`w-full ${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-full h-1.5`}>
-                          <div
-                            className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2 ? "bg-gradient-to-r from-green-500 to-emerald-500" : produto.quantidade > (produto.quantidadeMin || 0) ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-gradient-to-r from-red-500 to-pink-500"}`}
-                            style={{
-                              width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {podeGerenciarEstoque && (
-                        <div className="mt-2">
-                          <button
-                            onClick={() => abrirModalEstoque(produto)}
-                            className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
-                            style={{
-                              background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
-                              color: "#FFFFFF",
-                            }}
-                          >
-                            <FaBox size={14} />
-                            {t("estoque")}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {totalPaginas > 1 && (
-                  <div className="flex justify-center items-center gap-3 mt-6 lg:hidden">
-                    <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1 ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
-                      <FaAngleLeft className="text-sm" />
-                    </button>
-
-                    <div className="flex gap-1">
-                      {[...Array(totalPaginas)].map((_, index) => {
-                        const pagina = index + 1;
-                        const mostrarPagina = pagina === 1 || pagina === totalPaginas || (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
-
-                        if (!mostrarPagina) {
-                          if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
-                            return (
-                              <span key={pagina} className={`px-2 py-1 ${textMuted} text-sm`}>
-                                ...
-                              </span>
-                            );
-                          }
-                          return null;
-                        }
-
-                        return (
-                          <button key={pagina} onClick={() => mudarPagina(pagina)} className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105" : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
-                            {pagina}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
-                      <FaAngleRight className="text-sm" />
-                    </button>
+                    ))}
                   </div>
                 )}
               </>
+
+            )}
+            {totalPaginas > 1 && (
+              <div className="flex justify-center items-center gap-3 mt-6 lg:hidden">
+                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1 ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
+                  <FaAngleLeft className="text-sm" />
+                </button>
+
+                <div className="flex gap-1">
+                  {[...Array(totalPaginas)].map((_, index) => {
+                    const pagina = index + 1;
+                    const mostrarPagina = pagina === 1 || pagina === totalPaginas || (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
+
+                    if (!mostrarPagina) {
+                      if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
+                        return (
+                          <span key={pagina} className={`px-2 py-1 ${textMuted} text-sm`}>
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <button key={pagina} onClick={() => mudarPagina(pagina)} className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105" : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
+                        {pagina}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed` : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
+                  <FaAngleRight className="text-sm" />
+                </button>
+              </div>
             )}
 
             {(modalAberto || modalVisualizar) && (
@@ -1571,13 +1774,35 @@ export default function Produtos() {
                           setModalVisualizar(null);
                           setFile(null);
                           setPreview(null);
+                          if (!modalVisualizar) {
+                            setForm({
+                              id: "",
+                              nome: "",
+                              descricao: "",
+                              preco: 0,
+                              quantidade: 0,
+                              quantidadeMin: 0,
+                              foto: "",
+                              noCatalogo: false,
+                              fornecedorId: "",
+                              categoriaId: "",
+                              empresaId: "",
+                              fornecedor: undefined,
+                              categoria: undefined,
+                              empresa: "",
+                              usuarioId: "",
+                              createdAt: new Date(),
+                              updatedAt: new Date(),
+                            });
+                            setNomeCaracteres(0);
+                            setDescricaoCaracteres(0);
+                          }
                         }}
                         className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
                       >
                         <FaTimes className="text-lg" />
                       </button>
                     </div>
-
                     <div className="space-y-4">
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
@@ -1639,7 +1864,7 @@ export default function Produtos() {
                       </div>
                       {(preview || form.foto) && (
                         <div className="flex flex-col">
-                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("visualizacao") || "Visualização"}</label>
+                          <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("visualizacaoLabel") || "Visualização"}</label>
                           <div className={`w-full ${bgInput} border ${borderColor} rounded-xl flex items-center justify-center p-4`}>
                             <img
                               src={preview || form.foto || ""}
