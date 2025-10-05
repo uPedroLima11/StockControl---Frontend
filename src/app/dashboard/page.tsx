@@ -54,6 +54,10 @@ export default function Dashboard() {
   const calcularPathSegmento = (porcentagem: number, offsetAcumulado: number, raio: number = 45) => {
     if (porcentagem === 0) return '';
 
+    if (porcentagem === 100) {
+      return `<circle cx="50" cy="50" r="${raio}" fill="transparent" stroke="currentColor" stroke-width="10"/>`;
+    }
+
     const anguloOffset = offsetAcumulado * 3.6;
     const anguloExtent = porcentagem * 3.6;
 
@@ -598,6 +602,14 @@ export default function Dashboard() {
                           let offsetAcumulado = 0;
                           for (let i = 0; i < index; i++) {
                             offsetAcumulado += porcentagensPizza[i];
+                          }
+
+                          if (porcentagem === 100) {
+                            return (
+                              <g key={index} dangerouslySetInnerHTML={{
+                                __html: calcularPathSegmento(porcentagem, offsetAcumulado)
+                              }} style={{ color: item.cor }} />
+                            );
                           }
 
                           return (
