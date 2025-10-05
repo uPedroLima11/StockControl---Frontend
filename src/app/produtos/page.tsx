@@ -1410,8 +1410,22 @@ export default function Produtos() {
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-500/90 text-white"}`}>{produto.quantidade}</div>
-                        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1">
+                        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-700 text-white"}`}>{produto.quantidade}</div>
+                        {podeEditar && (
+                          <div className="absolute bottom-2 right-2 xl:hidden">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setModalVisualizar(produto);
+                                setForm(produto);
+                              }}
+                              className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                            >
+                              <FaEdit className="text-xs" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1 xl:flex">
                           <button
                             onClick={() => {
                               setModalVisualizar(produto);
@@ -1429,16 +1443,14 @@ export default function Produtos() {
                                 setModalVisualizar(produto);
                                 setForm(produto);
                               }}
-                              className=" cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                              className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm xl:flex hidden"
                             >
                               <FaEdit className="text-xs" />
                             </button>
                           )}
                         </div>
                       </div>
-
                       <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
-
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
                         {podeGerenciarCatalogo && (
@@ -1560,7 +1572,7 @@ export default function Produtos() {
                           setFile(null);
                           setPreview(null);
                         }}
-                        className={`p-2 ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
+                        className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
                       >
                         <FaTimes className="text-lg" />
                       </button>
