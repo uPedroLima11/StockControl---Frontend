@@ -1304,10 +1304,16 @@ export default function Produtos() {
                     {menuCategoriasAberto && (
                       <div className={`absolute top-full left-0 mt-2 w-56 ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl ${modoDark ? "shadow-blue-500/20" : "shadow-blue-200"} z-50 overflow-hidden backdrop-blur-sm`}>
                         <div className="p-2 max-h-48 overflow-y-auto scroll-custom">
-                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t("categorias")}</div>
+                          <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t("categoriasLabel")}</div>
                           {categorias.slice(0, 100).map((categoria) => (
-                            <div key={categoria.id} className={`p-3  rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) ? `${bgSelected} scale-105 font-medium` : ""}`} onClick={() => aplicarFiltroCategoria(String(categoria.id))}>
-                              <span className={textPrimary}>{categoria.nome}</span>
+                            <div
+                              key={categoria.id}
+                              className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) ? `${bgSelected} scale-105 font-medium` : ""}`}
+                              onClick={() => aplicarFiltroCategoria(String(categoria.id))}
+                            >
+                              <span className={textPrimary}>
+                                {t(`categorias.${categoria.nome}`, { defaultValue: categoria.nome })}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -1454,7 +1460,9 @@ export default function Produtos() {
                             <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
                             {t("categoria")}:
                           </span>
-                          <span className={textPrimary}>{produto.categoria?.nome || "-"}</span>
+                          <span className={textPrimary}>
+                            {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="flex items-center gap-1">
@@ -1693,7 +1701,7 @@ export default function Produtos() {
                                     background: modoDark ? cores.dark.card : cores.light.card,
                                   }}
                                 >
-                                  {c.nome}
+                                  {t(`categorias.${c.nome}`, { defaultValue: c.nome })}
                                 </option>
                               ))}
                             </select>

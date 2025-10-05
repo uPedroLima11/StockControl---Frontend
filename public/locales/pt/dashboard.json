@@ -40,5 +40,28 @@
       "valorAtual": "Valor Atual",
       "valorIdeal": "Valor Ideal"
     }
+  },
+  "categorias": {
+    "Eletronicos": "Eletronicos",
+    "Roupas": "Roupas",
+    "Móveis": "Móveis",
+    "Calçados": "Calçados",
+    "Acessórios": "Acessórios",
+    "Esportes": "Esportes",
+    "Brinquedos": "Brinquedos",
+    "Livros": "Livros",
+    "Papelaria": "Papelaria",
+    "Higiene": "Higiene",
+    "Beleza": "Beleza",
+    "Alimentos": "Alimentos",
+    "Bebidas": "Bebidas",
+    "Automotivos": "Automotivos",
+    "Ferramentas": "Ferramentas",
+    "Jardinagem": "Jardinagem",
+    "Informática": "Informática",
+    "Farmácia": "Farmácia",
+    "Limpeza": "Limpeza",
+    "Decoração": "Decoração",
+    "Sem Categoria": "Sem Categoria"
   }
 }

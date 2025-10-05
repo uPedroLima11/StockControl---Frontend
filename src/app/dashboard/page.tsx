@@ -411,8 +411,8 @@ export default function Dashboard() {
 
         const distribuicao: { [key: string]: number } = {};
         produtosDaEmpresa.forEach((produto) => {
-          const categoria = produto.categoria?.nome || "Sem Categoria";
-          distribuicao[categoria] = (distribuicao[categoria] || 0) + 1;
+          const categoriaOriginal = produto.categoria?.nome || "Sem Categoria";
+          distribuicao[categoriaOriginal] = (distribuicao[categoriaOriginal] || 0) + 1;
         });
 
         const categoriasOrdenadas = Object.entries(distribuicao).sort((a, b) => b[1] - a[1]);
@@ -420,21 +420,21 @@ export default function Dashboard() {
         const categoriasComProdutos = categoriasOrdenadas.filter(([, quantidade]) => quantidade > 0);
 
         const distribuicaoFinal: CategoriaDistribuicao[] = categoriasComProdutos
-          .map(([categoria, quantidade], index) => ({
-            categoria,
+          .map(([categoriaOriginal, quantidade], index) => ({
+            categoria: t(`categorias.${categoriaOriginal}`, { defaultValue: categoriaOriginal }),
             quantidade,
             cor: coresCategorias[index] || "#CCCCCC",
           }))
           .slice(0, 5);
 
         if (distribuicaoFinal.length < 5) {
-          const categoriasExistentes = new Set(distribuicaoFinal.map((item) => item.categoria));
+          const categoriasExistentes = new Set(categoriasComProdutos.map(([cat]) => cat));
 
           const categoriasDisponiveis = todasCategorias.filter((categoria: string) => !categoriasExistentes.has(categoria) && !distribuicao[categoria]);
 
-          categoriasDisponiveis.slice(0, 5 - distribuicaoFinal.length).forEach((categoria: string) => {
+          categoriasDisponiveis.slice(0, 5 - distribuicaoFinal.length).forEach((categoriaOriginal: string) => {
             distribuicaoFinal.push({
-              categoria,
+              categoria: t(`categorias.${categoriaOriginal}`, { defaultValue: categoriaOriginal }),
               quantidade: 0,
               cor: coresCategorias[distribuicaoFinal.length] || "#CCCCCC",
             });
