@@ -664,7 +664,7 @@ function PainelNotificacoes({
       if (descricao.includes("estoque") || descricao.includes("unidades") || descricao.includes("QTD Min")) {
 
         if (notificacao.produtoId) {
-          return notificacao.produtoId;
+          return Number(notificacao.produtoId);
         }
 
         const linhas = descricao.split('\n');
@@ -708,8 +708,6 @@ function PainelNotificacoes({
       }, 300);
     } else {
       const primeiraLinha = notificacao.descricao.split("\n")[0];
-      const palavras = primeiraLinha.split(" ");
-
       let possivelNomeProduto = "";
       if (primeiraLinha.includes("O produto")) {
         possivelNomeProduto = primeiraLinha.split("O produto")[1]?.split("está com")[0]?.trim() || "";

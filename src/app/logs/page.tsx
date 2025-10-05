@@ -33,7 +33,7 @@ export default function Logs() {
   const logsPorPagina = 15;
 
   const temaAtual = {
-    fundo: modoDark ? "#0A1929" : "#cccccc",
+    fundo: modoDark ? "#0A1929" : "#E0DCDC",
     texto: modoDark ? "#FFFFFF" : "#0F172A",
     card: modoDark ? "#132F4C" : "#ecececec",
     borda: modoDark ? "#1E4976" : "#E2E8F0",
