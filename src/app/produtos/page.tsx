@@ -69,7 +69,7 @@ export default function Produtos() {
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [recarregarProdutos, setRecarregarProdutos] = useState(0);
-  const [totalProdutos, setTotalProdutos] = useState<number>(0);
+  const [, setTotalProdutos] = useState<number>(0);
   const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
   const [menuCategoriasAberto, setMenuCategoriasAberto] = useState(false);
   const [campoOrdenacao] = useState<CampoOrdenacao>("none");
@@ -355,19 +355,6 @@ export default function Produtos() {
           setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
         }
       }
-      useEffect(() => {
-        const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
-        if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
-          setTipoVisualizacao(visualizacaoSalva);
-        }
-      }, []);
-
-      useEffect(() => {
-        const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
-        if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
-          setTipoVisualizacao(visualizacaoSalva);
-        }
-      }, []);
 
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         headers: { "user-id": usuarioValor },
@@ -396,6 +383,14 @@ export default function Produtos() {
       document.head.removeChild(style);
     };
   }, [modoDark]);
+
+
+  useEffect(() => {
+    const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
+    if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
+      setTipoVisualizacao(visualizacaoSalva);
+    }
+  }, []);
 
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("client_key");
@@ -1602,7 +1597,7 @@ export default function Produtos() {
                   </div>
                 ) : (
                   <div className="space-y-3 mb-6">
-                    {produtosAtuais.map((produto, index) => (
+                    {produtosAtuais.map((produto) => (
                       <div
                         key={produto.id}
                         className={`${modoDark ? "bg-slate-800/50" : "bg-white/80"} rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"} p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
