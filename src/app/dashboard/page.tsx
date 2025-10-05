@@ -156,14 +156,14 @@ export default function Dashboard() {
       root.style.setProperty("--cor-borda", "#1E4976");
       root.style.setProperty("--cor-caixa-destaque", "#1976D2");
     } else {
-      root.style.setProperty("--cor-fundo", "#cccccc");
+      root.style.setProperty("--cor-fundo", "#E0DCDC");
       root.style.setProperty("--cor-fonte", "#0F172A");
       root.style.setProperty("--cor-subtitulo", "#6B7280");
       root.style.setProperty("--cor-fundo-bloco", "#ecececec");
       root.style.setProperty("--cor-borda", "#E2E8F0");
       root.style.setProperty("--cor-caixa-destaque", "#0284C7");
     }
-    document.body.style.backgroundColor = ativado ? "#0A1929" : "#cccccc";
+    document.body.style.backgroundColor = ativado ? "#0A1929" : "#E0DCDC";
   };
 
   async function fetchTodasCategorias() {

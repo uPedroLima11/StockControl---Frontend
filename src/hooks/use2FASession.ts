@@ -56,19 +56,20 @@ export function use2FASession() {
     };
 
     const verificarERedirecionar = async () => {
-        const resultado = await verificarSessao2FA();
+        try {
+            const resultado = await verificarSessao2FA();
 
-        if (!resultado.sessaoValida) {
+            if (!resultado.sessaoValida && resultado.motivo === "Token inválido") {
+                Cookies.remove("token");
+                localStorage.removeItem("client_key");
 
-            Cookies.remove("token");
-            localStorage.removeItem("client_key");
-
-            addNotification("Sua sessão expirou. Faça login novamente.", "error");
-
-            setTimeout(() => {
-                router.push("/login");
-            }, 2000);
-        } else {
+                addNotification("Sua sessão expirou. Faça login novamente.", "error");
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2000);
+            }
+        } catch (error) {
+            console.error("Erro ao verificar sessão:", error);
         }
     };
 

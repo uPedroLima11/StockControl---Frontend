@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { use2FASession } from "@/hooks/use2FASession";
 import CustomNotification from "./NotificacaoCustom";
 import Cookies from "js-cookie";
-import LoginNotificationHandler from "./LoginNotificacao"; 
+import LoginNotificationHandler from "./LoginNotificacao";
 
 export default function LayoutWrapper({
   children,
@@ -25,7 +25,8 @@ export default function LayoutWrapper({
     pathname === "/esqueci" ||
     pathname === "/alteracao" ||
     pathname.startsWith("/catalogo/");
-  const [modoDark, setModoDark] = useState(false);
+
+  const [modoDark, setModoDark] = useState<boolean | undefined>(undefined);
 
   const isPublicPage =
     pathname === "/login" ||
@@ -57,27 +58,43 @@ export default function LayoutWrapper({
   }, [pathname, isPublicPage, isHome, verificarERedirecionar]);
 
   useEffect(() => {
-    if (!isNoDarkModePage) {
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-      aplicarTema(ativado);
-    } else {
-      setModoDark(false);
-      aplicarTema(false);
+    if (typeof window !== "undefined") {
+      if (!isNoDarkModePage) {
+        const temaSalvo = localStorage.getItem("modoDark");
+        const ativado = temaSalvo === "true";
+        setModoDark(ativado);
+        aplicarTema(ativado);
+      } else {
+        setModoDark(false);
+        aplicarTema(false);
+      }
     }
-  }, [pathname]);
+  }, [pathname, isNoDarkModePage]);
 
   const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#0A1929");
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#E0DCDC");
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
+      if (ativado) {
+        root.classList.add("dark");
+        root.style.setProperty("--cor-fundo", "#0A1929");
+      } else {
+        root.classList.remove("dark");
+        root.style.setProperty("--cor-fundo", "#E0DCDC");
+      }
     }
   };
+
+  if (modoDark === undefined && !isNoDarkModePage && !isPublicPage && !isHome) {
+    return (
+      <div className="flex">
+        <div className="flex-1 overflow-y-auto max-h-screen bg-gray-200">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isHome) {
     return (
@@ -118,8 +135,12 @@ export default function LayoutWrapper({
       <LoginNotificationHandler />
       <Sidebar />
       <main
-        className="flex-1 overflow-y-auto max-h-screen bg-white"
-        style={{ backgroundColor: modoDark ? "#0A1929" : "#E0DCDC" }}
+        className="flex-1 overflow-y-auto max-h-screen bg-white transition-colors duration-300"
+        style={{
+          backgroundColor: modoDark === undefined
+            ? '#E0DCDC' 
+            : modoDark ? '#0A1929' : '#E0DCDC'
+        }}
       >
         {children}
       </main>

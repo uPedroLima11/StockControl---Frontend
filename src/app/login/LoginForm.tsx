@@ -78,7 +78,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
           localStorage.setItem('login_success_message', 'Login realizado com sucesso!');
           localStorage.setItem('login_success_type', 'success');
 
-          Cookies.set("token", responseData.token, { expires: 1 });
+          Cookies.set("token", responseData.token, { expires: 7 });
           logar(responseData);
           localStorage.setItem("client_key", JSON.stringify(responseData.id));
           router.push("/dashboard");

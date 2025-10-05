@@ -63,7 +63,7 @@ function LoginContent() {
           localStorage.setItem('login_success_message', 'Email verificado e login realizado com sucesso!');
           localStorage.setItem('login_success_type', 'success');
           
-          Cookies.set("token", responseData.token, { expires: 1 });
+          Cookies.set("token", responseData.token, { expires: 7 });
           logar(responseData);
           localStorage.setItem("client_key", JSON.stringify(responseData.id));
           window.location.href = "/dashboard";
