@@ -42,20 +42,34 @@ export default function Dashboard() {
   const produtosPorPagina = 5;
   const coresCategorias = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6", "#E74C3C", "#2ECC71"];
 
-  const calcularAngulosPizza = (categorias: CategoriaDistribuicao[]) => {
+  const calcularPorcentagensPizza = (categorias: CategoriaDistribuicao[]) => {
     const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
     if (total === 0) return categorias.map(() => 0);
 
-    let anguloAcumulado = 0;
-    return categorias.map((cat) => {
-      const porcentagem = (cat.quantidade / total) * 100;
-      const anguloInicio = anguloAcumulado;
-      anguloAcumulado += (porcentagem / 100) * 360;
-      return anguloInicio;
-    });
+    return categorias.map(cat => (cat.quantidade / total) * 100);
   };
 
-  const angulosPizza = calcularAngulosPizza(distribuicaoCategorias);
+  const porcentagensPizza = calcularPorcentagensPizza(distribuicaoCategorias);
+
+  const calcularPathSegmento = (porcentagem: number, offsetAcumulado: number, raio: number = 45) => {
+    if (porcentagem === 0) return '';
+
+    const anguloOffset = offsetAcumulado * 3.6;
+    const anguloExtent = porcentagem * 3.6;
+
+    const startAngle = (anguloOffset - 90) * (Math.PI / 180);
+    const endAngle = (anguloOffset + anguloExtent - 90) * (Math.PI / 180);
+
+    const x1 = 50 + raio * Math.cos(startAngle);
+    const y1 = 50 + raio * Math.sin(startAngle);
+    const x2 = 50 + raio * Math.cos(endAngle);
+    const y2 = 50 + raio * Math.sin(endAngle);
+
+    const largeArcFlag = anguloExtent > 180 ? 1 : 0;
+
+    return `M 50 50 L ${x1} ${y1} A ${raio} ${raio} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+  };
+
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -576,19 +590,38 @@ export default function Dashboard() {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex items-center justify-center">
                     <div className="relative w-32 h-32">
-                      <svg width="128" height="128" viewBox="0 0 100 100" className="transform -rotate-90">
+                      <svg width="128" height="128" viewBox="0 0 100 100">
                         {distribuicaoCategorias.map((item, index) => {
-                          const porcentagem = totalItens > 0 ? (item.quantidade / totalItens) * 100 : 0;
-                          const anguloInicio = angulosPizza[index];
+                          const porcentagem = porcentagensPizza[index];
+                          if (porcentagem === 0) return null;
 
-                          return <circle key={index} cx="50" cy="50" r="45" fill="transparent" stroke={item.cor} strokeWidth="10" strokeDasharray={`${porcentagem} ${100 - porcentagem}`} strokeDashoffset={100 - anguloInicio} className="transition-all duration-500" />;
+                          let offsetAcumulado = 0;
+                          for (let i = 0; i < index; i++) {
+                            offsetAcumulado += porcentagensPizza[i];
+                          }
+
+                          return (
+                            <path
+                              key={index}
+                              d={calcularPathSegmento(porcentagem, offsetAcumulado)}
+                              fill={item.cor}
+                              stroke="var(--cor-fundo-bloco)"
+                              strokeWidth="1"
+                              className="transition-all duration-500"
+                            />
+                          );
                         })}
+
+                        <circle cx="50" cy="50" r="35" fill="var(--cor-fundo-bloco)" />
                       </svg>
+
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-bold text-center">
+                        <span className="text-sm font-bold text-center" style={{ color: "var(--cor-fonte)" }}>
                           {totalItens}
                           <br />
-                          <span className="text-xs">{t("financeiro.itens")}</span>
+                          <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
+                            {t("financeiro.itens")}
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -652,9 +685,9 @@ export default function Dashboard() {
                   <p className="text-xl font-semibold mb-1" style={{ color: "var(--cor-fonte)" }}>
                     {item.formato === "currency"
                       ? item.valor.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR", {
-                          style: "currency",
-                          currency: i18n.language === "en" ? "USD" : "BRL",
-                        })
+                        style: "currency",
+                        currency: i18n.language === "en" ? "USD" : "BRL",
+                      })
                       : item.valor}
                   </p>
                   <p className="text-sm text-gray-500">{item.label}</p>
