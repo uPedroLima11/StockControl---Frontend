@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cores } from "@/utils/cores";
 
 interface CustomNotificationProps {
   message: string;

@@ -1366,7 +1366,7 @@ export default function Produtos() {
                   </div>
                   {totalPaginas > 1 && (
                     <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl px-3 py-2`}>
-                      <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === 1 ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                      <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-1 cursor-pointer rounded-lg transition-all duration-300 ${paginaAtual === 1 ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
                         <FaAngleLeft className="text-sm" />
                       </button>
 
@@ -1374,7 +1374,7 @@ export default function Produtos() {
                         {paginaAtual}/{totalPaginas}
                       </span>
 
-                      <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                      <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-1 cursor-pointer rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
                         <FaAngleRight className="text-sm" />
                       </button>
                     </div>
@@ -1392,7 +1392,7 @@ export default function Produtos() {
                 <div className={`hidden lg:flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl p-1`}>
                   <button
                     onClick={() => alterarVisualizacao("cards")}
-                    className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
+                    className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
                       ? "bg-blue-500 text-white"
                       : `${bgHover} ${textPrimary}`
                       }`}
@@ -1410,8 +1410,8 @@ export default function Produtos() {
 
                   <button
                     onClick={() => alterarVisualizacao("lista")}
-                    className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
-                      ? "bg-blue-500 text-white"
+                    className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
+                      ? "bg-blue-500  text-white"
                       : `${bgHover} ${textPrimary}`
                       }`}
                     title={t("visualizacao.tooltipLista")}
@@ -1534,9 +1534,9 @@ export default function Produtos() {
                                 e.stopPropagation();
                                 toggleCatalogo(produto.id, produto.noCatalogo);
                               }}
-                              className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
+                              className={`p-1 cursor-pointer ${modoDark ? " hover:bg-yellow-500/20 cursor-pointer" : "hover:bg-yellow-100 cursor-pointer"} rounded transition-colors`}
                             >
-                              {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
+                              {produto.noCatalogo ? <FaStar className=" text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base  hover:text-yellow-500`} />}
                             </button>
                           )}
                         </div>
@@ -1634,7 +1634,7 @@ export default function Produtos() {
                                       e.stopPropagation();
                                       toggleCatalogo(produto.id, produto.noCatalogo);
                                     }}
-                                    className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
+                                    className={`p-1 ${modoDark ? "cursor-pointer hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
                                   >
                                     {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
                                   </button>
