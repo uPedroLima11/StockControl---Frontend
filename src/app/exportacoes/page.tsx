@@ -134,6 +134,7 @@ export default function Exportacoes() {
 
   useEffect(() => {
     if (activeTab === "historico" && empresaId) {
+      console.log("Buscando histórico para empresa:", empresaId);
       fetchExportHistory();
     }
   }, [activeTab, empresaId]);
@@ -259,18 +260,24 @@ export default function Exportacoes() {
       const usuarioSalvo = localStorage.getItem("client_key");
       const usuarioValor = usuarioSalvo ? usuarioSalvo.replace(/"/g, "") : "";
 
+      console.log("Fazendo request para histórico...");
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/export/history/${empresaId}`, {
         headers: {
           "user-id": usuarioValor,
         },
       });
 
+      console.log("Response status:", response.status);
+
       if (response.ok) {
         const history = await response.json();
+        console.log("Histórico recebido:", history);
         setExportHistory(history);
         setPaginaAtual(1);
       } else {
-        console.error("Erro na resposta:", response.status);
+        console.error("Erro na resposta:", response.status, response.statusText);
+        const errorText = await response.text();
+        console.error("Detalhes do erro:", errorText);
       }
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
@@ -297,6 +304,19 @@ export default function Exportacoes() {
         period: t("periodoNaoEspecificado"),
       };
     }
+    const parts = descricao.split(" | ");
+
+    if (parts.length >= 2) {
+      const entityMatch = parts[0].match(/Exportação de (\w+)/);
+      const userMatch = parts[1].match(/Usuário: (.+)/);
+      const periodMatch = parts[2] ? parts[2].match(/Período: (.+)/) : null;
+
+      return {
+        entity: entityMatch ? entityMatch[1] : t("desconhecido"),
+        user: userMatch ? userMatch[1] : t("desconhecido"),
+        period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado"),
+      };
+    }
 
     try {
       const parsed = JSON.parse(descricao);
@@ -306,31 +326,6 @@ export default function Exportacoes() {
         period: parsed.periodo === "Todos os dados" ? t("periodoNaoEspecificado") : parsed.periodo,
       };
     } catch {
-      const parts = descricao.split(" | ");
-
-      if (parts.length === 2) {
-        const entityMatch = parts[0].match(/Exportação de (\w+)/);
-        const periodMatch = parts[1].match(/Período: (.+)/);
-
-        return {
-          entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-          user: t("desconhecido"),
-          period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado"),
-        };
-      }
-
-      if (parts.length >= 3) {
-        const entityMatch = parts[0].match(/Exportação de (\w+)/);
-        const userMatch = parts[1].match(/Usuário: (.+)/);
-        const periodMatch = parts[2].match(/Período: (.+)/);
-
-        return {
-          entity: entityMatch ? entityMatch[1] : t("desconhecido"),
-          user: userMatch ? userMatch[1] : t("desconhecido"),
-          period: periodMatch ? periodMatch[1] : t("periodoNaoEspecificado"),
-        };
-      }
-
       const entityMatch = descricao.match(/Exportação de (\w+)/);
       return {
         entity: entityMatch ? entityMatch[1] : t("desconhecido"),
@@ -339,7 +334,6 @@ export default function Exportacoes() {
       };
     }
   };
-
   const indexUltimoItem = paginaAtual * itensPorPagina;
   const indexPrimeiroItem = indexUltimoItem - itensPorPagina;
   const itensAtuais = exportHistory.slice(indexPrimeiroItem, indexUltimoItem);
