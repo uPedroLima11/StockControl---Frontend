@@ -12,9 +12,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { Produto } from "@/utils/types";
 
 const permissoesCache = new Map<string, { permissoes: Record<string, boolean>; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; 
+const CACHE_DURATION = 5 * 60 * 1000;
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -45,16 +46,16 @@ export default function Sidebar() {
   const carregarPermissoesOtimizado = useCallback(async (userId: string): Promise<Record<string, boolean>> => {
     const cacheKey = `permissoes_${userId}`;
     const cached = permissoesCache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.permissoes;
     }
 
     try {
       const permissoesParaVerificar = [
-        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", 
-        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", 
-        "exportar_dados", "inventario_visualizar", "pedidos_visualizar", 
+        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar",
+        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar",
+        "exportar_dados", "inventario_visualizar", "pedidos_visualizar",
         "pedidos_criar"
       ];
 
@@ -68,7 +69,7 @@ export default function Sidebar() {
       });
 
       const resultados = await Promise.all(promises);
-      
+
       const permissoes: Record<string, boolean> = {};
       resultados.forEach(({ permissao, temPermissao }) => {
         permissoes[permissao] = temPermissao;
@@ -154,7 +155,7 @@ export default function Sidebar() {
     document.head.appendChild(style);
 
     const userId = carregarConfiguracoesIniciais();
-    
+
     if (userId) {
       carregarPermissoesOtimizado(userId).then(permissoes => {
         setPermissoesUsuario(permissoes);
@@ -275,7 +276,7 @@ export default function Sidebar() {
             body: JSON.stringify({ usuarioId }),
           });
         }
-      } catch {}
+      } catch { }
     },
     [usuarioId, usuarioInteragiu]
   );
@@ -321,7 +322,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch {}
+    } catch { }
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -364,7 +365,7 @@ export default function Sidebar() {
           }
         }
       }
-    } catch {}
+    } catch { }
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
   const carregarDadosUsuario = useCallback(async (userId: string) => {
@@ -659,13 +660,35 @@ function PainelNotificacoes({
         return parseInt(idMatch1[1]);
       }
 
+
+      if (descricao.includes("estoque") || descricao.includes("unidades") || descricao.includes("QTD Min")) {
+
+        if (notificacao.produtoId) {
+          return notificacao.produtoId;
+        }
+
+        const linhas = descricao.split('\n');
+        for (const linha of linhas) {
+          const numeros = linha.match(/\b\d{1,6}\b/g);
+          if (numeros) {
+            for (const numStr of numeros) {
+              const num = parseInt(numStr);
+              if (num > 10 && num < 1000000) {
+                return num;
+              }
+            }
+          }
+        }
+      }
+
       const todosNumeros = descricao.match(/\d+/g);
       if (todosNumeros && todosNumeros.length > 0) {
-        for (const numeroStr of todosNumeros) {
-          const numero = parseInt(numeroStr);
-          if (numero > 0 && numero < 100000) {
-            return numero;
-          }
+        const possiveisIds = todosNumeros
+          .map(numStr => parseInt(numStr))
+          .filter(num => num > 10 && num < 1000000 && !descricao.includes(`${num} unidades`));
+
+        if (possiveisIds.length > 0) {
+          return possiveisIds[0];
         }
       }
 
@@ -675,25 +698,47 @@ function PainelNotificacoes({
     }
   };
 
-  const handleFazerPedido = (notificacao: NotificacaoI) => {
+  const handleFazerPedido = async (notificacao: NotificacaoI) => {
     const produtoId = extrairProdutoIdDaNotificacao(notificacao);
 
     if (produtoId) {
       aoFechar();
-
-      router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
+      setTimeout(() => {
+        router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
+      }, 300);
     } else {
       const primeiraLinha = notificacao.descricao.split("\n")[0];
       const palavras = primeiraLinha.split(" ");
-      const possivelNomeProduto = palavras.slice(2, -2).join(" ");
+
+      let possivelNomeProduto = "";
+      if (primeiraLinha.includes("O produto")) {
+        possivelNomeProduto = primeiraLinha.split("O produto")[1]?.split("está com")[0]?.trim() || "";
+      } else if (primeiraLinha.includes("Product")) {
+        possivelNomeProduto = primeiraLinha.split("Product")[1]?.split("is")[0]?.trim() || "";
+      }
 
       aoFechar();
 
-      router.push("/pedidos?abrirModal=true");
+      if (possivelNomeProduto) {
+        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
+        if (produtosResponse.ok) {
+          const todosProdutos = await produtosResponse.json();
+          const produtoEncontrado = todosProdutos.find((p: Produto) =>
+            p.nome.toLowerCase().includes(possivelNomeProduto.toLowerCase())
+          );
+
+          if (produtoEncontrado) {
+            setTimeout(() => {
+              router.push(`/pedidos?produto=${produtoEncontrado.id}&abrirModal=true`);
+            }, 300);
+            return;
+          }
+        }
+      }
 
       setTimeout(() => {
-        alert(`Redirecionando para pedidos. Produto: ${possivelNomeProduto || "Não identificado"}`);
-      }, 1000);
+        router.push("/pedidos?abrirModal=true");
+      }, 300);
     }
   };
 
@@ -796,7 +841,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch {}
+      } catch { }
     },
     [usuarioId, onNotificacoesAtualizadas]
   );

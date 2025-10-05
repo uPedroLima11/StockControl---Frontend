@@ -1,6 +1,7 @@
 import { ConviteI } from "./convite";
 
 export interface NotificacaoI {
+  produtoId: any;
   id: string;
   titulo: string;
   descricao: string;
