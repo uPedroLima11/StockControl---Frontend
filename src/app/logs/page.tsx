@@ -631,7 +631,6 @@ export default function Logs() {
   const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
   const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
   const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
-  const bgInput = modoDark ? "bg-slate-700/50" : "bg-gray-100";
   const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
   const bgSelected = modoDark ? "bg-blue-500/20" : "bg-blue-100";
 

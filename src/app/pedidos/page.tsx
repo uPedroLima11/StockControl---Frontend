@@ -66,7 +66,7 @@ export default function Pedidos() {
   const { t } = useTranslation("pedidos");
   const router = useRouter();
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
-  const [recarregarPedidos, setRecarregarPedidos] = useState(0);
+  const [recarregarPedidos] = useState(0);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -792,12 +792,6 @@ export default function Pedidos() {
     setModoVisualizacao(false); 
   };
 
-  const handleAbrirEditarStatus = (pedido: PedidoI) => {
-    setPedidoSelecionado(pedido);
-    setModalTipo("detalhes");
-    setModalAberto(true);
-    setModoVisualizacao(false);
-  };
 
   const atualizarObservacao = (produtoId: number, observacao: string) => {
     setItensCriacao(itensCriacao.map((item) => (item.produtoId === produtoId ? { ...item, observacao } : item)));
@@ -1005,19 +999,7 @@ export default function Pedidos() {
     setModalAberto(false);
   };
 
-  const handleAbrirModalDetalhes = (pedido: PedidoI) => {
-    setPedidoSelecionado(pedido);
-    setQuantidadesAtendidas({});
-    pedido.itens.forEach((item) => {
-      setQuantidadesAtendidas((prev) => ({
-        ...prev,
-        [item.id]: item.quantidadeAtendida,
-      }));
-    });
-    setModalTipo("detalhes");
-    setModalAberto(true);
-    setModoVisualizacao(false); 
-  };
+ 
 
   const handleConfirmarCancelamento = (pedidoId: string) => {
     Swal.fire({
@@ -1181,7 +1163,6 @@ export default function Pedidos() {
   const podeCriar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
   const podeEditar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_editar;
   const podeGerenciarStatus = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_gerenciar_status;
-  const podeEnviarEmail = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.pedidos_criar;
 
   if (!podeVisualizar) {
     return (
