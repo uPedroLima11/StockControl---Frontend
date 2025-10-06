@@ -77,7 +77,12 @@ export default function Logs() {
 
   const carregarLogsComFiltro = async (pagina: number, empresaId: string, tipo?: string, busca?: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=1000&empresaId=${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=15&empresaId=${empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Erro ao carregar logs");
@@ -127,7 +132,12 @@ export default function Logs() {
 
   const carregarEstatisticasDetalhadas = async (empresaId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=1000&empresaId=${empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=15&empresaId=${empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("token")}`,
+        },
+      });
 
       if (response.ok) {
         const data: LogsResponse = await response.json();
@@ -169,7 +179,12 @@ export default function Logs() {
     await Promise.all(
       Array.from(usuariosUnicos).map(async (usuarioId: string) => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Cookies.get("token")}`,
+            },
+          });
           const usuario = await response.json();
           if (usuario && usuario.nome) {
             usuariosMap[usuarioId] = usuario.nome;
@@ -217,7 +232,12 @@ export default function Logs() {
           return;
         }
 
-        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const usuarioData = await responseUsuario.json();
 
         if (!usuarioData || !usuarioData.empresaId) {
