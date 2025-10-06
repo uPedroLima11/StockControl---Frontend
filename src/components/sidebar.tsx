@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 const permissoesCache = new Map<string, { permissoes: Record<string, boolean>; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; 
+const CACHE_DURATION = 5 * 60 * 1000;
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -45,16 +45,16 @@ export default function Sidebar() {
   const carregarPermissoesOtimizado = useCallback(async (userId: string): Promise<Record<string, boolean>> => {
     const cacheKey = `permissoes_${userId}`;
     const cached = permissoesCache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.permissoes;
     }
 
     try {
       const permissoesParaVerificar = [
-        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", 
-        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", 
-        "exportar_dados", "inventario_visualizar", "pedidos_visualizar", 
+        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar",
+        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar",
+        "exportar_dados", "inventario_visualizar", "pedidos_visualizar",
         "pedidos_criar"
       ];
 
@@ -68,7 +68,7 @@ export default function Sidebar() {
       });
 
       const resultados = await Promise.all(promises);
-      
+
       const permissoes: Record<string, boolean> = {};
       resultados.forEach(({ permissao, temPermissao }) => {
         permissoes[permissao] = temPermissao;
@@ -104,7 +104,7 @@ export default function Sidebar() {
     const id = carregarUsuarioId();
     if (id) {
       setUsuarioId(id);
-      
+
       carregarPermissoesOtimizado(id).then(permissoes => {
         setPermissoesUsuario(permissoes);
         setPermissoesCarregadas(true);
@@ -269,7 +269,7 @@ export default function Sidebar() {
             body: JSON.stringify({ usuarioId }),
           });
         }
-      } catch {}
+      } catch { }
     },
     [usuarioId, usuarioInteragiu]
   );
@@ -315,7 +315,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch {}
+    } catch { }
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -358,7 +358,7 @@ export default function Sidebar() {
           }
         }
       }
-    } catch {}
+    } catch { }
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
   const carregarDadosUsuario = useCallback(async () => {
@@ -448,18 +448,22 @@ export default function Sidebar() {
       );
     }
 
+    const handleLinkClick = () => {
+      setEstaAberto(false);
+    };
+
     return (
       <>
-        <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} />
-        {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} />}
-        {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} />}
-        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} />}
-        {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} />}
-        {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} />}
-        {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} />}
-        {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} />}
-        {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} />}
-        {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} cores={cores} />}
+        <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} onLinkClick={handleLinkClick} />
+        {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} cores={cores} onLinkClick={handleLinkClick} />}
       </>
     );
   };
@@ -512,18 +516,26 @@ export default function Sidebar() {
 
             {renderizarLinksComPermissao()}
 
-            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} />
-            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} />
-            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} />
+            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
+            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
+            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
 
-            <Link href="/empresa" className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]">
+            <Link
+              href="/empresa"
+              className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  setEstaAberto(false);
+                }
+              }}
+            >
               <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
                 <Image src={fotoEmpresa || "/contadefault.png"} alt={t("company_photo")} width={48} height={48} className="object-cover w-full h-full" />
               </div>
               <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
             </Link>
 
-            <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} cores={cores} />
+            <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
           </nav>
         </div>
 
@@ -533,8 +545,7 @@ export default function Sidebar() {
             <span className="text-sm md:inline cursor-pointer">{modoDark ? t("dark_mode") : t("light_mode")}</span>
           </button>
 
-          {possuiEmpresa && !empresaAtivada && <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} />}
-
+          {possuiEmpresa && !empresaAtivada && <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} onLinkClick={() => setEstaAberto(false)} />}
           <button
             onClick={() => {
               permissoesCache.clear();
@@ -580,6 +591,7 @@ function LinkSidebar({
   icon,
   label,
   cores,
+  onLinkClick,
 }: {
   href: string;
   icon: React.ReactNode;
@@ -592,9 +604,20 @@ function LinkSidebar({
     azulNeon: string;
     cinzaEscuro: string;
   };
+  onLinkClick?: () => void;
 }) {
+  const handleClick = () => {
+    if (window.innerWidth < 768 && onLinkClick) {
+      onLinkClick();
+    }
+  };
+
   return (
-    <Link href={href} className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]">
+    <Link
+      href={href}
+      className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
+      onClick={handleClick}
+    >
       <span className="text-lg" style={{ color: cores.azulNeon }}>
         {icon}
       </span>
@@ -816,7 +839,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch {}
+      } catch { }
     },
     [usuarioId, onNotificacoesAtualizadas]
   );

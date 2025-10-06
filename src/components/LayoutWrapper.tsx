@@ -77,9 +77,11 @@ export default function LayoutWrapper({
       if (ativado) {
         root.classList.add("dark");
         root.style.setProperty("--cor-fundo", "#0A1929");
+        document.body.style.backgroundColor = "#0A1929";
       } else {
         root.classList.remove("dark");
         root.style.setProperty("--cor-fundo", "#E0DCDC");
+        document.body.style.backgroundColor = "#E0DCDC";
       }
     }
   };
@@ -123,7 +125,12 @@ export default function LayoutWrapper({
   }
 
   return (
-    <div className="flex">
+    <div 
+      className="flex min-h-screen"
+      style={{
+        backgroundColor: modoDark ? '#0A1929' : '#E0DCDC'
+      }}
+    >
       {notifications.map((notification) => (
         <CustomNotification
           key={notification.id}
@@ -135,11 +142,9 @@ export default function LayoutWrapper({
       <LoginNotificationHandler />
       <Sidebar />
       <main
-        className="flex-1 overflow-y-auto max-h-screen bg-white transition-colors duration-300"
+        className="flex-1 overflow-y-auto max-h-screen transition-colors duration-300"
         style={{
-          backgroundColor: modoDark === undefined
-            ? '#E0DCDC' 
-            : modoDark ? '#0A1929' : '#E0DCDC'
+          backgroundColor: modoDark ? '#0A1929' : '#E0DCDC'
         }}
       >
         {children}
