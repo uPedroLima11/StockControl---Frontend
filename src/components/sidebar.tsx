@@ -16,6 +16,13 @@ import Cookies from "js-cookie";
 const permissoesCache = new Map<string, { permissoes: Record<string, boolean>; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000;
 
+const somNotificacaoCache = {
+  ultimoSomTocado: 0,
+  timeoutId: null as NodeJS.Timeout | null,
+  BLOQUEIO_SOM_MS: 60000,
+};
+
+
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
   const [estaAberto, setEstaAberto] = useState(false);
@@ -41,6 +48,63 @@ export default function Sidebar() {
     azulNeon: "#00B4D8",
     cinzaEscuro: "#1A2027",
   };
+
+  const tocarSomNotificacaoUnica = useCallback(async () => {
+    if (!usuarioId || !usuarioInteragiu) {
+      return false;
+    }
+
+    const somAtivado = localStorage.getItem("somNotificacao") !== "false";
+    if (!somAtivado) {
+      return false;
+    }
+
+    const agora = Date.now();
+    const tempoDesdeUltimoSom = agora - somNotificacaoCache.ultimoSomTocado;
+
+    if (tempoDesdeUltimoSom < somNotificacaoCache.BLOQUEIO_SOM_MS) {
+      console.log(`Som bloqueado. Último som tocado há ${Math.round(tempoDesdeUltimoSom / 1000)} segundos`);
+      return false;
+    }
+
+    try {
+      const audio = new Audio("/notification-sound.mp3");
+      audio.volume = 0.3;
+
+      const somTocado = await new Promise<boolean>(async (resolve) => {
+        try {
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+            resolve(true);
+          } else {
+            resolve(true);
+          }
+        } catch {
+          resolve(false);
+        }
+      });
+
+      if (somTocado) {
+        somNotificacaoCache.ultimoSomTocado = agora;
+
+        if (somNotificacaoCache.timeoutId) {
+          clearTimeout(somNotificacaoCache.timeoutId);
+        }
+
+        somNotificacaoCache.timeoutId = setTimeout(() => {
+          somNotificacaoCache.ultimoSomTocado = 0;
+        }, somNotificacaoCache.BLOQUEIO_SOM_MS);
+
+        console.log("Som de notificação tocado (modo único)");
+        return true;
+      }
+    } catch (error) {
+      console.error("Erro ao tocar som:", error);
+    }
+
+    return false;
+  }, [usuarioId, usuarioInteragiu]);
 
   const carregarPermissoesOtimizado = useCallback(async (userId: string): Promise<Record<string, boolean>> => {
     const cacheKey = `permissoes_${userId}`;
@@ -230,94 +294,6 @@ export default function Sidebar() {
     }
   }, []);
 
-  const tocarSomNotificacao = useCallback(
-    async (notificacaoId: string) => {
-      if (!usuarioId || !usuarioInteragiu) {
-        return;
-      }
-
-      const somAtivado = localStorage.getItem("somNotificacao") !== "false";
-      if (!somAtivado) {
-        return;
-      }
-
-      try {
-        const audio = new Audio("/notification-sound.mp3");
-        audio.volume = 0.3;
-
-        const somTocado = await new Promise<boolean>(async (resolve) => {
-          try {
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-              await playPromise;
-              resolve(true);
-            } else {
-              resolve(true);
-            }
-          } catch {
-            resolve(false);
-          }
-        });
-
-        if (somTocado) {
-          await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ usuarioId }),
-          });
-        }
-      } catch { }
-    },
-    [usuarioId, usuarioInteragiu]
-  );
-
-  const agruparNotificacoesInteligente = (notificacoes: NotificacaoI[]): { chave: string; notificacoes: NotificacaoI[] }[] => {
-    if (notificacoes.length === 0) return [];
-
-    const notificacoesOrdenadas = [...notificacoes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-    const grupos: NotificacaoI[][] = [];
-    let grupoAtual: NotificacaoI[] = [notificacoesOrdenadas[0]];
-
-    for (let i = 1; i < notificacoesOrdenadas.length; i++) {
-      const notificacaoAtual = notificacoesOrdenadas[i];
-      const notificacaoAnterior = notificacoesOrdenadas[i - 1];
-
-      const diferencaTempo = new Date(notificacaoAtual.createdAt).getTime() - new Date(notificacaoAnterior.createdAt).getTime();
-
-      if (diferencaTempo < 2 * 60 * 1000) {
-        grupoAtual.push(notificacaoAtual);
-      } else {
-        grupos.push([...grupoAtual]);
-        grupoAtual = [notificacaoAtual];
-      }
-    }
-
-    grupos.push(grupoAtual);
-
-    return grupos.map((notificacoesGrupo, index) => ({
-      chave: `lote-${index + 1}`,
-      notificacoes: notificacoesGrupo,
-    }));
-  };
-
-  const marcarSomTocado = async (notificacaoId: string) => {
-    if (!usuarioId) return;
-
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_URL_API}/notificacao/${notificacaoId}/marcar-som-tocado`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ usuarioId }),
-      });
-    } catch { }
-  };
-
   const verificarNotificacoes = useCallback(async () => {
     if (!usuarioId) return;
 
@@ -331,35 +307,23 @@ export default function Sidebar() {
 
       const notificacoesNaoLidas = notificacoes.filter((n: NotificacaoI) => !n.lida);
 
+      const notificacoesAnteriores = notificacoesNaoLidasRef.current;
+      const novasNotificacoes = notificacoesNaoLidas.filter(
+        novaNot => !notificacoesAnteriores.some(antigaNot => antigaNot.id === novaNot.id)
+      );
+
       notificacoesNaoLidasRef.current = notificacoesNaoLidas;
       setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
 
-      if (usuarioInteragiu) {
-        const notificacoesParaTocarSom = notificacoesNaoLidas.filter((n: NotificacaoI) => {
-          if (n.empresaId) {
-            return !n.somTocado;
-          }
-          return !n.lida;
-        });
+      if (usuarioInteragiu && novasNotificacoes.length > 0) {
+        console.log(`${novasNotificacoes.length} nova(s) notificação(ões) detectada(s)`);
 
-        if (notificacoesParaTocarSom.length > 0) {
-          const notificacoesAgrupadas = agruparNotificacoesInteligente(notificacoesParaTocarSom);
-
-          for (const grupo of notificacoesAgrupadas) {
-            await tocarSomNotificacao(grupo.notificacoes[0].id);
-
-            for (const notificacao of grupo.notificacoes) {
-              await marcarSomTocado(notificacao.id);
-            }
-
-            if (notificacoesAgrupadas.length > 1) {
-              await new Promise((resolve) => setTimeout(resolve, 500));
-            }
-          }
-        }
+        await tocarSomNotificacaoUnica();
       }
-    } catch { }
-  }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
+    } catch (error) {
+      console.error("Erro ao verificar notificações:", error);
+    }
+  }, [usuarioId, tocarSomNotificacaoUnica, usuarioInteragiu]);
 
   const carregarDadosUsuario = useCallback(async () => {
     if (!usuarioId) return;
