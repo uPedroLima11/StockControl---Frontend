@@ -879,7 +879,7 @@ export default function Clientes() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm">{t("email")}</label>
+                <label className="block mb-1 text-sm">{t("email")} <span className="text-red-500">*</span></label>
                 <input
                   placeholder={t("email")}
                   value={form.email || ""}

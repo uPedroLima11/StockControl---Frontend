@@ -1225,7 +1225,7 @@ export default function Fornecedores() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm">{t("telefone")}</label>
+                <label className="block mb-1 text-sm">{t("telefone")} <span className="text-red-500">*</span></label>
                 <input
                   placeholder={t("telefone")}
                   value={form.telefone || ""}

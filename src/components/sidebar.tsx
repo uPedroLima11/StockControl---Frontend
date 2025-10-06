@@ -12,10 +12,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { Produto } from "@/utils/types";
 
 const permissoesCache = new Map<string, { permissoes: Record<string, boolean>; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000;
+const CACHE_DURATION = 5 * 60 * 1000; 
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -46,16 +45,16 @@ export default function Sidebar() {
   const carregarPermissoesOtimizado = useCallback(async (userId: string): Promise<Record<string, boolean>> => {
     const cacheKey = `permissoes_${userId}`;
     const cached = permissoesCache.get(cacheKey);
-
+    
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.permissoes;
     }
 
     try {
       const permissoesParaVerificar = [
-        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar",
-        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar",
-        "exportar_dados", "inventario_visualizar", "pedidos_visualizar",
+        "usuarios_visualizar", "produtos_visualizar", "vendas_visualizar", 
+        "clientes_visualizar", "fornecedores_visualizar", "logs_visualizar", 
+        "exportar_dados", "inventario_visualizar", "pedidos_visualizar", 
         "pedidos_criar"
       ];
 
@@ -69,7 +68,7 @@ export default function Sidebar() {
       });
 
       const resultados = await Promise.all(promises);
-
+      
       const permissoes: Record<string, boolean> = {};
       resultados.forEach(({ permissao, temPermissao }) => {
         permissoes[permissao] = temPermissao;
@@ -88,12 +87,7 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    const carregarConfiguracoesIniciais = () => {
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativo = temaSalvo === "true";
-      setModoDark(ativo);
-      aplicarTema(ativo);
-
+    const carregarUsuarioId = () => {
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (usuarioSalvo) {
@@ -107,6 +101,21 @@ export default function Sidebar() {
       return null;
     };
 
+    const id = carregarUsuarioId();
+    if (id) {
+      setUsuarioId(id);
+      
+      carregarPermissoesOtimizado(id).then(permissoes => {
+        setPermissoesUsuario(permissoes);
+        setPermissoesCarregadas(true);
+      }).catch(error => {
+        console.error("Erro ao carregar permissões:", error);
+        setPermissoesCarregadas(true);
+      });
+    }
+  }, [carregarPermissoesOtimizado]);
+
+  useEffect(() => {
     const handleInteracao = () => {
       setUsuarioInteragiu(true);
       document.removeEventListener("click", handleInteracao);
@@ -116,78 +125,18 @@ export default function Sidebar() {
     document.addEventListener("click", handleInteracao);
     document.addEventListener("keydown", handleInteracao);
 
-    const style = document.createElement("style");
-    style.textContent = `
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      
-      html::-webkit-scrollbar-track {
-        background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-        border-radius: 5px;
-        border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-      }
-      
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-      }
-      
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-      }
-      
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-          border-radius: 3px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    const userId = carregarConfiguracoesIniciais();
-
-    if (userId) {
-      carregarPermissoesOtimizado(userId).then(permissoes => {
-        setPermissoesUsuario(permissoes);
-        setPermissoesCarregadas(true);
-      }).catch(error => {
-        console.error("Erro ao carregar permissões:", error);
-        setPermissoesCarregadas(true);
-      });
-
-      carregarDadosUsuario(userId);
-    }
-
     return () => {
       document.removeEventListener("click", handleInteracao);
       document.removeEventListener("keydown", handleInteracao);
-      document.head.removeChild(style);
     };
-  }, [modoDark, carregarPermissoesOtimizado]);
+  }, []);
 
   useEffect(() => {
-    if (!usuarioId) return;
-
-    const intervaloNotificacoes = setInterval(() => {
-      verificarNotificacoes();
-    }, 15000);
-
-    verificarNotificacoes();
-
-    return () => {
-      clearInterval(intervaloNotificacoes);
-    };
-  }, [usuarioId]);
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativo = temaSalvo === "true";
+    setModoDark(ativo);
+    aplicarTema(ativo);
+  }, []);
 
   const aplicarTema = (ativado: boolean) => {
     const root = document.documentElement;
@@ -213,6 +162,50 @@ export default function Sidebar() {
     aplicarTema(novoTema);
     window.location.reload();
   };
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+    html::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    html::-webkit-scrollbar-track {
+      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb {
+      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+      border-radius: 5px;
+      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+    }
+    
+    html::-webkit-scrollbar-thumb:hover {
+      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+    }
+    
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+    }
+    
+    @media (max-width: 768px) {
+      html::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+        border-radius: 3px;
+      }
+    }
+  `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
@@ -276,7 +269,7 @@ export default function Sidebar() {
             body: JSON.stringify({ usuarioId }),
           });
         }
-      } catch { }
+      } catch {}
     },
     [usuarioId, usuarioInteragiu]
   );
@@ -322,7 +315,7 @@ export default function Sidebar() {
         },
         body: JSON.stringify({ usuarioId }),
       });
-    } catch { }
+    } catch {}
   };
 
   const verificarNotificacoes = useCallback(async () => {
@@ -365,18 +358,20 @@ export default function Sidebar() {
           }
         }
       }
-    } catch { }
+    } catch {}
   }, [usuarioId, tocarSomNotificacao, usuarioInteragiu]);
 
-  const carregarDadosUsuario = useCallback(async (userId: string) => {
+  const carregarDadosUsuario = useCallback(async () => {
+    if (!usuarioId) return;
+
     try {
-      const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${userId}`);
+      const respostaUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
       if (respostaUsuario.status === 200) {
         const dadosUsuario = await respostaUsuario.json();
         logar(dadosUsuario);
       }
 
-      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${userId}`, {
+      const respostaEmpresa = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/usuario/${usuarioId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -406,7 +401,31 @@ export default function Sidebar() {
       setFotoEmpresa("/contadefault.png");
       setNomeEmpresa(t("create_company"));
     }
-  }, [logar, verificarNotificacoes, verificarAtivacaoEmpresa, t]);
+  }, [usuarioId, logar, verificarNotificacoes, verificarAtivacaoEmpresa, t]);
+
+  useEffect(() => {
+    if (!usuarioId) return;
+
+    const carregarTudo = async () => {
+      await carregarDadosUsuario();
+    };
+
+    carregarTudo();
+  }, [usuarioId, carregarDadosUsuario]);
+
+  useEffect(() => {
+    if (!usuarioId) return;
+
+    const intervaloNotificacoes = setInterval(() => {
+      verificarNotificacoes();
+    }, 15000);
+
+    verificarNotificacoes();
+
+    return () => {
+      clearInterval(intervaloNotificacoes);
+    };
+  }, [usuarioId, verificarNotificacoes]);
 
   const alternarSidebar = () => {
     setEstaAberto(!estaAberto);
@@ -660,35 +679,13 @@ function PainelNotificacoes({
         return parseInt(idMatch1[1]);
       }
 
-
-      if (descricao.includes("estoque") || descricao.includes("unidades") || descricao.includes("QTD Min")) {
-
-        if (notificacao.produtoId) {
-          return Number(notificacao.produtoId);
-        }
-
-        const linhas = descricao.split('\n');
-        for (const linha of linhas) {
-          const numeros = linha.match(/\b\d{1,6}\b/g);
-          if (numeros) {
-            for (const numStr of numeros) {
-              const num = parseInt(numStr);
-              if (num > 10 && num < 1000000) {
-                return num;
-              }
-            }
-          }
-        }
-      }
-
       const todosNumeros = descricao.match(/\d+/g);
       if (todosNumeros && todosNumeros.length > 0) {
-        const possiveisIds = todosNumeros
-          .map(numStr => parseInt(numStr))
-          .filter(num => num > 10 && num < 1000000 && !descricao.includes(`${num} unidades`));
-
-        if (possiveisIds.length > 0) {
-          return possiveisIds[0];
+        for (const numeroStr of todosNumeros) {
+          const numero = parseInt(numeroStr);
+          if (numero > 0 && numero < 100000) {
+            return numero;
+          }
         }
       }
 
@@ -698,45 +695,25 @@ function PainelNotificacoes({
     }
   };
 
-  const handleFazerPedido = async (notificacao: NotificacaoI) => {
+  const handleFazerPedido = (notificacao: NotificacaoI) => {
     const produtoId = extrairProdutoIdDaNotificacao(notificacao);
 
     if (produtoId) {
       aoFechar();
-      setTimeout(() => {
-        router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
-      }, 300);
+
+      router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
     } else {
       const primeiraLinha = notificacao.descricao.split("\n")[0];
-      let possivelNomeProduto = "";
-      if (primeiraLinha.includes("O produto")) {
-        possivelNomeProduto = primeiraLinha.split("O produto")[1]?.split("está com")[0]?.trim() || "";
-      } else if (primeiraLinha.includes("Product")) {
-        possivelNomeProduto = primeiraLinha.split("Product")[1]?.split("is")[0]?.trim() || "";
-      }
+      const palavras = primeiraLinha.split(" ");
+      const possivelNomeProduto = palavras.slice(2, -2).join(" ");
 
       aoFechar();
 
-      if (possivelNomeProduto) {
-        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`);
-        if (produtosResponse.ok) {
-          const todosProdutos = await produtosResponse.json();
-          const produtoEncontrado = todosProdutos.find((p: Produto) =>
-            p.nome.toLowerCase().includes(possivelNomeProduto.toLowerCase())
-          );
-
-          if (produtoEncontrado) {
-            setTimeout(() => {
-              router.push(`/pedidos?produto=${produtoEncontrado.id}&abrirModal=true`);
-            }, 300);
-            return;
-          }
-        }
-      }
+      router.push("/pedidos?abrirModal=true");
 
       setTimeout(() => {
-        router.push("/pedidos?abrirModal=true");
-      }, 300);
+        alert(`Redirecionando para pedidos. Produto: ${possivelNomeProduto || "Não identificado"}`);
+      }, 1000);
     }
   };
 
@@ -839,7 +816,7 @@ function PainelNotificacoes({
 
         setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         onNotificacoesAtualizadas();
-      } catch { }
+      } catch {}
     },
     [usuarioId, onNotificacoesAtualizadas]
   );
