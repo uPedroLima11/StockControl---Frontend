@@ -57,6 +57,8 @@ export default function Fornecedores() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
         headers: {
           "user-id": usuarioId,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -87,6 +89,8 @@ export default function Fornecedores() {
           const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`, {
             headers: {
               "user-id": usuarioId,
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
             },
           });
 
@@ -123,7 +127,12 @@ export default function Fornecedores() {
       if (!usuarioSalvo) return;
       const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
@@ -136,6 +145,8 @@ export default function Fornecedores() {
       const responseFornecedores = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
         headers: {
           "user-id": usuarioValor,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
       const fornecedoresData = await responseFornecedores.json();
@@ -339,6 +350,7 @@ export default function Fornecedores() {
         body: formData,
         headers: {
           "user-id": usuarioValor,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -346,7 +358,6 @@ export default function Fornecedores() {
         const data = await response.json();
         return data.fotoUrl;
       } else {
-        console.error("Erro no upload da foto:", await response.text());
         return null;
       }
     } catch (error) {
@@ -373,6 +384,7 @@ export default function Fornecedores() {
         body: formData,
         headers: {
           "user-id": usuarioValor,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -446,6 +458,7 @@ export default function Fornecedores() {
           headers: {
             "Content-Type": "application/json",
             "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify({
             nome: form.nome.trim(),
@@ -558,6 +571,7 @@ export default function Fornecedores() {
           headers: {
             "Content-Type": "application/json",
             "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify({
             nome: form.nome.trim(),
@@ -627,6 +641,8 @@ export default function Fornecedores() {
             method: "DELETE",
             headers: {
               "user-id": usuarioValor,
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
             },
           });
           Swal.fire(t("mensagens.deletado"), t("mensagens.produtoExcluido"), "success");
@@ -1225,7 +1241,9 @@ export default function Fornecedores() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm">{t("telefone")} <span className="text-red-500">*</span></label>
+                <label className="block mb-1 text-sm">
+                  {t("telefone")} <span className="text-red-500">*</span>
+                </label>
                 <input
                   placeholder={t("telefone")}
                   value={form.telefone || ""}
