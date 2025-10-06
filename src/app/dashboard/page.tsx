@@ -34,7 +34,7 @@ const cores = {
     sucesso: "#10B981",
     erro: "#EF4444",
     alerta: "#F59E0B",
-    gradiente: "linear-gradient(135deg, #0A1929 0%, #132F4C 50%, #1E4976 100%)"
+    gradiente: "linear-gradient(135deg, #0A1929 0%, #132F4C 50%, #1E4976 100%)",
   },
   light: {
     fundo: "#E0DCDC",
@@ -49,7 +49,7 @@ const cores = {
     sucesso: "#10B981",
     erro: "#EF4444",
     alerta: "#F59E0B",
-    gradiente: "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%)"
+    gradiente: "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%)",
   },
 };
 
@@ -75,18 +75,9 @@ export default function Dashboard() {
   const produtosPorPagina = 5;
   const temaAtual = modoDark ? cores.dark : cores.light;
 
-  const coresCategorias = [
-    temaAtual.primario,
-    temaAtual.secundario,
-    temaAtual.sucesso,
-    temaAtual.alerta,
-    temaAtual.erro,
-    "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6"
-  ];
+  const coresCategorias = [temaAtual.primario, temaAtual.secundario, temaAtual.sucesso, temaAtual.alerta, temaAtual.erro, "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6"];
 
-  const bgGradient = modoDark 
-    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
 
   const textPrimary = modoDark ? "text-white" : "text-slate-900";
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
@@ -105,11 +96,11 @@ export default function Dashboard() {
   const calcularPorcentagensPizza = useCallback((categorias: CategoriaDistribuicao[]) => {
     const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
     if (total === 0) return categorias.map(() => 0);
-    return categorias.map(cat => (cat.quantidade / total) * 100);
+    return categorias.map((cat) => (cat.quantidade / total) * 100);
   }, []);
 
   const calcularPathSegmento = useCallback((porcentagem: number, offsetAcumulado: number, raio: number = 45) => {
-    if (porcentagem === 0) return '';
+    if (porcentagem === 0) return "";
 
     if (porcentagem === 100) {
       return `<circle cx="50" cy="50" r="${raio}" fill="transparent" stroke="currentColor" stroke-width="10"/>`;
@@ -246,7 +237,12 @@ export default function Dashboard() {
 
   async function fetchTodasCategorias() {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+      });
       if (response.ok) {
         const categorias = await response.json();
         return categorias.map((cat: { nome: string }) => cat.nome);
@@ -260,7 +256,12 @@ export default function Dashboard() {
 
   async function fetchDashboardData(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) {
@@ -268,15 +269,7 @@ export default function Dashboard() {
         return;
       }
 
-      await Promise.all([
-        fetchContagem(usuarioId),
-        fetchProdutos(usuarioId),
-        fetchFornecedores(usuarioId),
-        fetchVendas(usuarioId),
-        fetchFuncionarios(usuarioId),
-        fetchTopProdutos(usuarioId),
-        fetchDistribuicaoCategorias(usuarioId)
-      ]);
+      await Promise.all([fetchContagem(usuarioId), fetchProdutos(usuarioId), fetchFornecedores(usuarioId), fetchVendas(usuarioId), fetchFuncionarios(usuarioId), fetchTopProdutos(usuarioId), fetchDistribuicaoCategorias(usuarioId)]);
     } catch (error) {
       console.error("Erro ao buscar dados da dashboard:", error);
     }
@@ -299,13 +292,23 @@ export default function Dashboard() {
 
   async function fetchContagem(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
 
       const [responseVendas, responseProdutos] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`),
+        fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }),
         fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/contagem/${usuario.empresaId}`, {
           headers: {
             "Content-Type": "application/json",
@@ -332,12 +335,22 @@ export default function Dashboard() {
 
   async function fetchFuncionarios(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
 
-      const responseFuncionarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/contagem/${usuario.empresaId}`);
+      const responseFuncionarios = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/contagem/${usuario.empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (responseFuncionarios.ok) {
         const data = await responseFuncionarios.json();
         setContagemFuncionarios(data.quantidade || 0);
@@ -350,12 +363,22 @@ export default function Dashboard() {
 
   async function fetchFornecedores(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
 
-      const responseFornecedor = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/contagem/${usuario.empresaId}`);
+      const responseFornecedor = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/contagem/${usuario.empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (responseFornecedor.ok) {
         const data = await responseFornecedor.json();
         setContagemFornecedores(data._count?.id || 0);
@@ -368,7 +391,12 @@ export default function Dashboard() {
 
   async function fetchProdutos(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
@@ -412,7 +440,12 @@ export default function Dashboard() {
 
   async function fetchVendas(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) {
@@ -421,7 +454,12 @@ export default function Dashboard() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         const vendas = data.vendas || [];
@@ -443,12 +481,22 @@ export default function Dashboard() {
 
   async function fetchTopProdutos(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/top-produtos/${usuario.empresaId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/top-produtos/${usuario.empresaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -493,7 +541,12 @@ export default function Dashboard() {
 
   async function fetchDistribuicaoCategorias(usuarioId: string) {
     try {
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      });
       const usuario = await responseUsuario.json();
 
       if (!usuario.empresaId) return;
@@ -573,7 +626,7 @@ export default function Dashboard() {
         setVendas30Dias(valorConvertido);
       } catch (error) {
         console.error("Erro ao buscar cotação:", error);
-        setVendas30Dias(total / 5); 
+        setVendas30Dias(total / 5);
       }
     }
   }
@@ -668,7 +721,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
-                      {stat.isCurrency 
+                      {stat.isCurrency
                         ? stat.value.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR", {
                             style: "currency",
                             currency: i18n.language === "en" ? "USD" : "BRL",
@@ -714,9 +767,7 @@ export default function Dashboard() {
                           className="h-2 rounded-full transition-all duration-1000"
                           style={{
                             width: `${porcentagem}%`,
-                            background: modoDark 
-                              ? "linear-gradient(90deg, #3B82F6, #0EA5E9)"
-                              : "linear-gradient(90deg, #1976D2, #0284C7)",
+                            background: modoDark ? "linear-gradient(90deg, #3B82F6, #0EA5E9)" : "linear-gradient(90deg, #1976D2, #0284C7)",
                           }}
                         />
                       </div>
@@ -752,16 +803,7 @@ export default function Dashboard() {
                         offsetAcumulado += porcentagensPizza[i];
                       }
 
-                      return (
-                        <path
-                          key={index}
-                          d={calcularPathSegmento(porcentagem, offsetAcumulado)}
-                          fill={item.cor}
-                          stroke={temaAtual.card}
-                          strokeWidth="2"
-                          className="transition-all duration-500"
-                        />
-                      );
+                      return <path key={index} d={calcularPathSegmento(porcentagem, offsetAcumulado)} fill={item.cor} stroke={temaAtual.card} strokeWidth="2" className="transition-all duration-500" />;
                     })}
                     <circle cx="50" cy="50" r="35" fill={temaAtual.card} />
                   </svg>
@@ -769,14 +811,12 @@ export default function Dashboard() {
                     <span className={`text-sm font-bold text-center ${textPrimary}`}>
                       {totalItens}
                       <br />
-                      <span className={`text-xs ${textMuted}`}>
-                        {t("financeiro.itens")}
-                      </span>
+                      <span className={`text-xs ${textMuted}`}>{t("financeiro.itens")}</span>
                     </span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex-1 space-y-3">
                 {distribuicaoCategorias.map((item, index) => {
                   const porcentagem = totalItens > 0 ? ((item.quantidade / totalItens) * 100).toFixed(0) : "0";
@@ -805,13 +845,7 @@ export default function Dashboard() {
               <FaExclamationTriangle className={`text-xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
             </div>
             <h2 className={`text-lg font-bold ${textPrimary}`}>{t("estoqueBaixo.titulo")}</h2>
-            {produtosEstoqueBaixo.length > 0 && (
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                modoDark ? "bg-red-500/20 text-red-400" : "bg-red-100 text-red-600"
-              }`}>
-                {produtosEstoqueBaixo.length}
-              </span>
-            )}
+            {produtosEstoqueBaixo.length > 0 && <span className={`px-2 py-1 rounded-full text-xs font-bold ${modoDark ? "bg-red-500/20 text-red-400" : "bg-red-100 text-red-600"}`}>{produtosEstoqueBaixo.length}</span>}
           </div>
           <div className="hidden md:block">
             {produtosEstoqueBaixo.length > 0 ? (
@@ -827,11 +861,7 @@ export default function Dashboard() {
                   </thead>
                   <tbody>
                     {produtosAtuais.map((produto, index) => (
-                      <tr
-                        key={produto.id}
-                        className={`border-b ${borderColor} ${bgHover} transition-all duration-200 animate-fade-in-up`}
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
+                      <tr key={produto.id} className={`border-b ${borderColor} ${bgHover} transition-all duration-200 animate-fade-in-up`} style={{ animationDelay: `${index * 100}ms` }}>
                         <td className="py-3 px-4 text-start">
                           <div className="flex items-center gap-3">
                             <FaBox className={textMuted} />
@@ -863,25 +893,14 @@ export default function Dashboard() {
                 </table>
                 {totalPaginas > 1 && (
                   <div className="flex justify-center items-center gap-3 mt-6">
-                    <button
-                      onClick={() => mudarPagina(paginaAtual - 1)}
-                      disabled={paginaAtual === 1}
-                      className={`p-2 rounded-xl transition-all duration-300 ${
-                        paginaAtual === 1 
-                          ? `${bgCard} ${textMuted} cursor-not-allowed` 
-                          : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
-                      }`}
-                    >
+                    <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1 ? `${bgCard} ${textMuted} cursor-not-allowed` : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                       <FaAngleLeft />
                     </button>
 
                     <div className="flex gap-1">
                       {[...Array(totalPaginas)].map((_, index) => {
                         const pagina = index + 1;
-                        const mostrarPagina = 
-                          pagina === 1 || 
-                          pagina === totalPaginas || 
-                          (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
+                        const mostrarPagina = pagina === 1 || pagina === totalPaginas || (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
 
                         if (!mostrarPagina) {
                           if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
@@ -895,30 +914,14 @@ export default function Dashboard() {
                         }
 
                         return (
-                          <button
-                            key={pagina}
-                            onClick={() => mudarPagina(pagina)}
-                            className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${
-                              pagina === paginaAtual
-                                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105"
-                                : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
-                            }`}
-                          >
+                          <button key={pagina} onClick={() => mudarPagina(pagina)} className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105" : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                             {pagina}
                           </button>
                         );
                       })}
                     </div>
 
-                    <button
-                      onClick={() => mudarPagina(paginaAtual + 1)}
-                      disabled={paginaAtual === totalPaginas}
-                      className={`p-2 rounded-xl transition-all duration-300 ${
-                        paginaAtual === totalPaginas
-                          ? `${bgCard} ${textMuted} cursor-not-allowed`
-                          : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
-                      }`}
-                    >
+                    <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas ? `${bgCard} ${textMuted} cursor-not-allowed` : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`}`}>
                       <FaAngleRight />
                     </button>
                   </div>
@@ -939,12 +942,7 @@ export default function Dashboard() {
               </div>
             ) : (
               produtosAtuais.map((produto, index) => (
-                <div
-                  key={produto.id}
-                  className={`border rounded-xl p-4 transition-all duration-200 cursor-pointer ${bgCard} ${borderColor} animate-fade-in-up`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                  onClick={() => toggleExpandirProduto(produto.id)}
-                >
+                <div key={produto.id} className={`border rounded-xl p-4 transition-all duration-200 cursor-pointer ${bgCard} ${borderColor} animate-fade-in-up`} style={{ animationDelay: `${index * 100}ms` }} onClick={() => toggleExpandirProduto(produto.id)}>
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -967,19 +965,11 @@ export default function Dashboard() {
                       }}
                       className={`p-1 ${bgHover} rounded-lg transition-colors`}
                     >
-                      {produtoExpandido === produto.id ? (
-                        <FaChevronUp className={textMuted} />
-                      ) : (
-                        <FaChevronDown className={textMuted} />
-                      )}
+                      {produtoExpandido === produto.id ? <FaChevronUp className={textMuted} /> : <FaChevronDown className={textMuted} />}
                     </button>
                   </div>
 
-                  <div
-                    className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${
-                      produtoExpandido === produto.id ? "max-h-96" : "max-h-0"
-                    }`}
-                  >
+                  <div className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`}>
                     <div className={`pt-3 border-t ${borderColor}`}>
                       <div className="flex items-center gap-2">
                         {produto.quantidade < (produto.quantidadeMin || 0) ? (

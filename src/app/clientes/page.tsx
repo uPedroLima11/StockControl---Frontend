@@ -55,6 +55,8 @@ export default function Clientes() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
         headers: {
           "user-id": usuarioId,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -127,6 +129,7 @@ export default function Clientes() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, {
           headers: {
             "user-id": usuarioValor,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
 
@@ -155,7 +158,12 @@ export default function Clientes() {
         console.error("Erro ao carregar permissões:", error);
       }
 
-      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+      const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+      });
       const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
       setTipoUsuario(usuario.tipo);
@@ -165,7 +173,12 @@ export default function Clientes() {
         setEmpresaAtivada(ativada);
       }
 
-      const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
+      const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+      });
       const clientesData = await responseClientes.json();
       const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setClientes(clientesOrdenados);
@@ -354,6 +367,7 @@ export default function Clientes() {
         headers: {
           "Content-Type": "application/json",
           "user-id": usuarioValor || "",
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
         body: JSON.stringify({
           ...form,
@@ -409,6 +423,7 @@ export default function Clientes() {
           headers: {
             "Content-Type": "application/json",
             "user-id": usuarioValor || "",
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           body: JSON.stringify(form),
         });
@@ -467,6 +482,7 @@ export default function Clientes() {
             method: "DELETE",
             headers: {
               "user-id": usuarioValor,
+              Authorization: `Bearer ${Cookies.get("token")}`,
             },
           });
           Swal.fire(t("sucesso.excluir.titulo"), t("sucesso.excluir.mensagem"), "success");
