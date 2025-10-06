@@ -31,7 +31,7 @@ export default function Vendas() {
     totalVendas: 0,
     produtosVendidos: 0,
     clientesAtendidos: 0,
-    ticketMedio: 0
+    ticketMedio: 0,
   });
 
   const { t, i18n } = useTranslation("vendas");
@@ -49,16 +49,16 @@ export default function Vendas() {
 
   const formatarMoeda = (valor: number) => {
     if (i18n.language === "en") {
-      return `$${(valor / cotacaoDolar).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      return `$${(valor / cotacaoDolar).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const mostrarPreco = (preco: number) => {
     if (i18n.language === "en") {
-      return `$${(preco / cotacaoDolar).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      return `$${(preco / cotacaoDolar).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return `R$ ${preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `R$ ${preco.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const converterPrecoParaReal = (preco: number) => {
@@ -89,6 +89,7 @@ export default function Vendas() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/tem-permissao/${permissaoChave}`, {
         headers: {
           "user-id": usuarioId,
+          Authorization: `Bearer ${Cookies.get("token")}`,
         },
       });
 
@@ -115,6 +116,7 @@ export default function Vendas() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioId}/permissoes`, {
           headers: {
             "user-id": usuarioId,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
 
@@ -180,7 +182,12 @@ export default function Vendas() {
           console.error("Erro ao buscar cotação do dólar:", error);
         }
 
-        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
+        const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const usuario = await responseUsuario.json();
 
         if (!usuario || !usuario.empresaId) {
@@ -207,12 +214,22 @@ export default function Vendas() {
         const produtosDaEmpresa = todosProdutos.filter((p) => p.empresaId === usuario.empresaId && p.quantidade > 0);
         setProdutos(produtosDaEmpresa);
 
-        const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`);
+        const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const clientesData = await responseClientes.json();
         const clientesDaEmpresa = clientesData.clientes?.filter((c: ClienteI) => c.empresaId === usuario.empresaId) || [];
         setClientes(clientesDaEmpresa);
 
-        const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`);
+        const responseVendas = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${usuario.empresaId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         if (!responseVendas.ok) {
           throw new Error("Erro ao carregar vendas");
         }
@@ -232,10 +249,15 @@ export default function Vendas() {
           totalVendas: totalVendasAtual,
           produtosVendidos,
           clientesAtendidos: clientesUnicos,
-          ticketMedio
+          ticketMedio,
         });
 
-        const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
+        const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         const totalData = await responseTotal.json();
 
         let total = 0;
@@ -534,7 +556,12 @@ export default function Vendas() {
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
 
         for (const item of carrinho.filter((i) => i.quantidade > 0)) {
-          const responseSaldo = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${item.produto.id}/saldo`);
+          const responseSaldo = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/${item.produto.id}/saldo`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          });
 
           if (responseSaldo.ok) {
             const { saldo } = await responseSaldo.json();
@@ -563,6 +590,7 @@ export default function Vendas() {
             headers: {
               "Content-Type": "application/json",
               "user-id": usuarioValor,
+              Authorization: `Bearer ${Cookies.get("token")}`,
             },
             body: JSON.stringify({
               empresaId,
@@ -600,7 +628,12 @@ export default function Vendas() {
               Authorization: `Bearer ${Cookies.get("token")}`,
             },
           }).then((res) => res.json()),
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`).then((res) => res.json()),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/${empresaId}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          }).then((res) => res.json()),
         ]).then(([produtosData, vendasData]) => {
           const produtosDaEmpresa = produtosData.filter((p: ProdutoI) => p.empresaId === empresaId);
           setProdutos(produtosDaEmpresa);
@@ -617,7 +650,7 @@ export default function Vendas() {
             totalVendas: totalVendasAtual,
             produtosVendidos,
             clientesAtendidos: clientesUnicos,
-            ticketMedio
+            ticketMedio,
           });
         });
       } catch (err) {
@@ -635,9 +668,7 @@ export default function Vendas() {
     });
   };
 
-  const produtosFiltrados = produtos.filter((produto) =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()));
 
   const indexUltimoProduto = paginaAtual * produtosPorPagina;
   const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
@@ -653,9 +684,7 @@ export default function Vendas() {
     return total + precoReal * item.quantidade;
   }, 0);
 
-  const bgGradient = modoDark
-    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
 
   const textPrimary = modoDark ? "text-white" : "text-slate-900";
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
@@ -780,24 +809,10 @@ export default function Vendas() {
 
                   <div className="flex items-center gap-3">
                     <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl p-1`}>
-                      <button
-                        onClick={() => alterarVisualizacao("cards")}
-                        className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
-                          ? "bg-blue-500 text-white"
-                          : `${bgHover} ${textPrimary}`
-                          }`}
-                        title="Visualização em Cards"
-                      >
+                      <button onClick={() => alterarVisualizacao("cards")} className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards" ? "bg-blue-500 text-white" : `${bgHover} ${textPrimary}`}`} title="Visualização em Cards">
                         <FaTh className="text-sm" />
                       </button>
-                      <button
-                        onClick={() => alterarVisualizacao("lista")}
-                        className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
-                          ? "bg-blue-500 text-white"
-                          : `${bgHover} ${textPrimary}`
-                          }`}
-                        title="Visualização em Lista"
-                      >
+                      <button onClick={() => alterarVisualizacao("lista")} className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista" ? "bg-blue-500 text-white" : `${bgHover} ${textPrimary}`}`} title="Visualização em Lista">
                         <FaList className="text-sm" />
                       </button>
                     </div>
@@ -844,13 +859,7 @@ export default function Vendas() {
                     {produtosAtuais.map((produto, index) => (
                       <div
                         key={produto.id}
-                        className={`group ${modoDark
-                          ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
-                          : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
-                          } rounded-xl border ${modoDark
-                            ? "border-blue-500/20 hover:border-blue-500/40"
-                            : "border-blue-200 hover:border-blue-300"
-                          } p-3 transition-all duration-500 card-hover backdrop-blur-sm`}
+                        className={`group ${modoDark ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"} rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-3 transition-all duration-500 card-hover backdrop-blur-sm`}
                         style={{
                           animationDelay: `${index * 100}ms`,
                         }}
@@ -867,22 +876,13 @@ export default function Vendas() {
                             }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" :
-                            produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" :
-                              "bg-green-500/90 text-white"
-                            }`}>
-                            {produto.quantidade}
-                          </div>
+                          <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" : produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" : "bg-green-500/90 text-white"}`}>{produto.quantidade}</div>
                         </div>
 
-                        <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-xs leading-tight`}>
-                          {produto.nome}
-                        </h3>
+                        <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-xs leading-tight`}>{produto.nome}</h3>
 
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-bold text-cyan-500">
-                            {mostrarPreco(produto.preco)}
-                          </span>
+                          <span className="text-sm font-bold text-cyan-500">{mostrarPreco(produto.preco)}</span>
                           <span className={`text-xs ${produto.quantidade <= 0 ? "text-red-500" : produto.quantidade <= 5 ? "text-yellow-500" : "text-green-500"}`}>
                             {produto.quantidade} {t("unidades")}
                           </span>
@@ -910,10 +910,7 @@ export default function Vendas() {
                     {produtosAtuais.map((produto, index) => (
                       <div
                         key={produto.id}
-                        className={`group flex items-center gap-3 p-3 rounded-xl border ${modoDark
-                          ? "bg-slate-800/50 border-blue-500/20 hover:border-blue-500/40"
-                          : "bg-white/80 border-blue-200 hover:border-blue-300"
-                          } transition-all duration-300 backdrop-blur-sm`}
+                        className={`group flex items-center gap-3 p-3 rounded-xl border ${modoDark ? "bg-slate-800/50 border-blue-500/20 hover:border-blue-500/40" : "bg-white/80 border-blue-200 hover:border-blue-300"} transition-all duration-300 backdrop-blur-sm`}
                         style={{
                           animationDelay: `${index * 100}ms`,
                         }}
@@ -929,22 +926,13 @@ export default function Vendas() {
                               (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
                           />
-                          <div className={`absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" :
-                            produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" :
-                              "bg-green-500/90 text-white"
-                            }`}>
-                            {produto.quantidade}
-                          </div>
+                          <div className={`absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" : produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" : "bg-green-500/90 text-white"}`}>{produto.quantidade}</div>
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-bold ${textPrimary} line-clamp-1 group-hover:text-blue-500 transition-colors text-sm`}>
-                            {produto.nome}
-                          </h3>
+                          <h3 className={`font-bold ${textPrimary} line-clamp-1 group-hover:text-blue-500 transition-colors text-sm`}>{produto.nome}</h3>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm font-bold text-cyan-500">
-                              {mostrarPreco(produto.preco)}
-                            </span>
+                            <span className="text-sm font-bold text-cyan-500">{mostrarPreco(produto.preco)}</span>
                             <span className={`text-xs ${produto.quantidade <= 0 ? "text-red-500" : produto.quantidade <= 5 ? "text-yellow-500" : "text-green-500"}`}>
                               {produto.quantidade} {t("unidades")}
                             </span>
@@ -976,11 +964,7 @@ export default function Vendas() {
                     <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: temaAtual.texto }}>
                       <FaShoppingCart className={modoDark ? "text-blue-400" : "text-blue-500"} />
                       {t("carrinho")}
-                      {carrinho.length > 0 && (
-                        <span className={`px-2 py-1 rounded-full text-xs ${modoDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-100 text-blue-600"}`}>
-                          {carrinho.length}
-                        </span>
-                      )}
+                      {carrinho.length > 0 && <span className={`px-2 py-1 rounded-full text-xs ${modoDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-100 text-blue-600"}`}>{carrinho.length}</span>}
                     </h2>
                   </div>
 
@@ -995,10 +979,7 @@ export default function Vendas() {
                     <div className="p-4">
                       <div className="max-h-64 overflow-y-auto scroll-custom space-y-3">
                         {carrinho.map((item) => (
-                          <div
-                            key={item.produto.id}
-                            className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}
-                          >
+                          <div key={item.produto.id} className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}>
                             <div className="flex items-center gap-3 mb-2">
                               <Image
                                 src={item.produto.foto || "/out.jpg"}
@@ -1020,37 +1001,20 @@ export default function Vendas() {
 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => atualizarQuantidade(item.produto.id, item.quantidade - 1)}
-                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"
-                                    }`}
-                                >
+                                <button onClick={() => atualizarQuantidade(item.produto.id, item.quantidade - 1)} className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"}`}>
                                   <FaMinus className={`text-xs ${textMuted}`} />
                                 </button>
 
-                                <span className={`px-3 py-1 rounded-lg ${bgInput} ${textPrimary} text-sm font-medium min-w-[40px] text-center`}>
-                                  {item.quantidade}
-                                </span>
+                                <span className={`px-3 py-1 rounded-lg ${bgInput} ${textPrimary} text-sm font-medium min-w-[40px] text-center`}>{item.quantidade}</span>
 
-                                <button
-                                  onClick={() => atualizarQuantidade(item.produto.id, item.quantidade + 1)}
-                                  disabled={item.quantidade >= item.produto.quantidade}
-                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"
-                                    }`}
-                                >
+                                <button onClick={() => atualizarQuantidade(item.produto.id, item.quantidade + 1)} disabled={item.quantidade >= item.produto.quantidade} className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"}`}>
                                   <FaPlus className={`text-xs ${textMuted}`} />
                                 </button>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <span className={`font-bold text-sm ${textPrimary}`}>
-                                  {formatarMoeda(converterPrecoParaReal(item.produto.preco) * item.quantidade)}
-                                </span>
-                                <button
-                                  onClick={() => removerDoCarrinho(item.produto.id)}
-                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-red-500/20 text-red-400" : "hover:bg-red-100 text-red-500"
-                                    }`}
-                                >
+                                <span className={`font-bold text-sm ${textPrimary}`}>{formatarMoeda(converterPrecoParaReal(item.produto.preco) * item.quantidade)}</span>
+                                <button onClick={() => removerDoCarrinho(item.produto.id)} className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-red-500/20 text-red-400" : "hover:bg-red-100 text-red-500"}`}>
                                   <FaRegTrashAlt size={12} />
                                 </button>
                               </div>
@@ -1061,20 +1025,10 @@ export default function Vendas() {
 
                       <div className="mt-4 pt-4 border-t" style={{ borderColor: temaAtual.borda }}>
                         <div className="mb-4">
-                          <label className={`block mb-2 text-sm font-medium ${textPrimary}`}>
-                            {t("cliente")}
-                          </label>
+                          <label className={`block mb-2 text-sm font-medium ${textPrimary}`}>{t("cliente")}</label>
                           <div className="relative" ref={menuClientesRef}>
-                            <button
-                              onClick={() => setMenuClientesAberto(!menuClientesAberto)}
-                              className={`w-full flex items-center justify-between ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 cursor-pointer`}
-                            >
-                              <span className="text-sm">
-                                {clienteSelecionado
-                                  ? clientes.find(c => c.id === clienteSelecionado)?.nome
-                                  : t("naoInformarCliente")
-                                }
-                              </span>
+                            <button onClick={() => setMenuClientesAberto(!menuClientesAberto)} className={`w-full flex items-center justify-between ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 cursor-pointer`}>
+                              <span className="text-sm">{clienteSelecionado ? clientes.find((c) => c.id === clienteSelecionado)?.nome : t("naoInformarCliente")}</span>
                               <FaChevronDown className={`text-xs transition-transform duration-300 ${menuClientesAberto ? "rotate-180" : ""}`} />
                             </button>
 
@@ -1092,8 +1046,7 @@ export default function Vendas() {
                                 {clientes.map((cliente) => (
                                   <div
                                     key={cliente.id}
-                                    className={`p-2 text-sm cursor-pointer transition-all duration-200 ${bgHover} ${textPrimary} ${clienteSelecionado === cliente.id ? (modoDark ? "bg-blue-500/20" : "bg-blue-100") : ""
-                                      }`}
+                                    className={`p-2 text-sm cursor-pointer transition-all duration-200 ${bgHover} ${textPrimary} ${clienteSelecionado === cliente.id ? (modoDark ? "bg-blue-500/20" : "bg-blue-100") : ""}`}
                                     onClick={() => {
                                       setClienteSelecionado(cliente.id);
                                       setMenuClientesAberto(false);
@@ -1109,9 +1062,7 @@ export default function Vendas() {
 
                         <div className="flex justify-between items-center mb-4">
                           <span className={textPrimary}>{t("subtotal")}:</span>
-                          <span className={`text-lg font-bold ${textPrimary}`}>
-                            {formatarMoeda(totalCarrinho)}
-                          </span>
+                          <span className={`text-lg font-bold ${textPrimary}`}>{formatarMoeda(totalCarrinho)}</span>
                         </div>
 
                         <button
@@ -1158,43 +1109,29 @@ export default function Vendas() {
                     <div className="p-4">
                       <div className="space-y-3">
                         {vendas.slice(0, 5).map((venda) => (
-                          <div
-                            key={venda.id}
-                            className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}
-                          >
+                          <div key={venda.id} className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}>
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex-1 min-w-0">
-                                <p className={`font-medium text-sm ${textPrimary} truncate`}>
-                                  {venda.produto?.nome || "Produto desconhecido"}
-                                </p>
-                                <p className={`text-xs ${textMuted}`}>
-                                  {venda.cliente?.nome || t("clienteNaoInformado")}
-                                </p>
+                                <p className={`font-medium text-sm ${textPrimary} truncate`}>{venda.produto?.nome || "Produto desconhecido"}</p>
+                                <p className={`text-xs ${textMuted}`}>{venda.cliente?.nome || t("clienteNaoInformado")}</p>
                               </div>
-                              <span className={`text-xs px-2 py-1 rounded-full ${modoDark ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600"
-                                }`}>
-                                {venda.quantidade}x
-                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${modoDark ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600"}`}>{venda.quantidade}x</span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className={`text-xs ${textMuted}`}>
-                                {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
-                              </span>
-                              <span className={`font-bold text-sm ${textPrimary}`}>
-                                {formatarMoeda(venda.valorVenda || 0)}
-                              </span>
+                              <span className={`text-xs ${textMuted}`}>{venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}</span>
+                              <span className={`font-bold text-sm ${textPrimary}`}>{formatarMoeda(venda.valorVenda || 0)}</span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    </div >
   );
 }
