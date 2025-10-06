@@ -1,5 +1,7 @@
 {
     "titulo": "Gestão de Pedidos",
+    "subtitulo": "Gerencie todos os pedidos da sua empresa",
+    "pedidos": "Pedidos",
     "buscarPedidos": "Buscar pedidos...",
     "todosStatus": "Todos os Status",
     "novoPedido": "Novo Pedido",
@@ -16,10 +18,12 @@
     "estoqueAtualizadoSucesso": "Estoque atualizado com sucesso!",
     "erroConcluirPedidoEstoque": "Erro ao concluir pedido com estoque",
     "quantidadesPreenchidas": "Quantidades Preenchidas",
+    "labelStatus": "Status",
     "quantidadesPreenchidasTexto": "Todas as quantidades foram preenchidas com os valores solicitados",
     "empresaNaoAtivada": {
         "titulo": "Empresa Não Ativada",
-        "mensagem": "Sua empresa precisa ser ativada para gerenciar pedidos."
+        "mensagem": "Sua empresa precisa ser ativada para gerenciar pedidos.",
+        "botao": "Ativar Empresa"
     },
     "status": {
         "pendente": "Pendente",
@@ -33,12 +37,13 @@
     "ultimaAtualizacao": "Última Atualização",
     "solicitante": "Solicitante",
     "total": "Total",
-    "itens": "Itens",
+    "itens": "itens",
     "produtos": "Produtos",
     "unidades": "unidades",
     "valorMedio": "Valor Médio",
     "observacoes": "Observações",
     "maisItens": "mais itens",
+    "mais": "mais",
     "detalhes": "Detalhes",
     "enviarEmail": "Enviar Email",
     "enviandoEmail": "Enviando...",
@@ -85,5 +90,33 @@
     "pedidoCriadoSucesso": "Pedido criado com sucesso!",
     "erroCriarPedido": "Erro ao criar pedido",
     "quantidadesAtualizadasSucesso": "Quantidades atualizadas com sucesso!",
-    "erroAtualizarQuantidades": "Erro ao atualizar quantidades"
+    "erroAtualizarQuantidades": "Erro ao atualizar quantidades",
+    "acessoRestrito": "Acesso Restrito",
+    "acessoRestritoMensagem": "Você não tem permissão para acessar esta página.",
+    "subtituloCriar": "Crie um novo pedido para seu fornecedor",
+    "resumoPedido": "Resumo do Pedido",
+    "quantidadeTotal": "Quantidade Total",
+    "adicioneProdutos": "Adicione produtos ao pedido",
+    "confirmarCancelamento": {
+        "titulo": "Confirmar Cancelamento",
+        "mensagem": "Deseja confirmar o cancelamento do pedido?",
+        "sim": "Sim, cancelar",
+        "nao": "Não"
+    },
+    "stats": {
+        "total": "Total",
+        "pendentes": "Pendentes",
+        "processando": "Processando",
+        "concluidos": "Concluídos",
+        "cancelados": "Cancelados"
+    },
+    "numero": "Número",
+    "data": "Data",
+    "acoes": "Ações",
+    "comeceAdicionando": "Comece adicionando seu primeiro pedido",
+    "criarPrimeiroPedido": "Criar Primeiro Pedido",
+    "quantidade": "Quantidade",
+    "precoUnitario": "Preço Unitário",
+    "editarStatus": "Editar Status",
+    "dataInvalida": "Data inválida"
 }
