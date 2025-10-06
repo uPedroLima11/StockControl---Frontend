@@ -29,7 +29,7 @@ export default function Esqueci() {
 
   useEffect(() => {
     setAnimacaoAtiva(true);
-    
+
     const style = document.createElement('style');
     style.textContent = `
       @keyframes float {
@@ -157,7 +157,7 @@ export default function Esqueci() {
   ];
 
   return (
-    <div 
+    <div
       className={`min-h-screen flex ${poppins.className}`}
       style={{ background: temaAtual.gradiente }}
     >
@@ -169,7 +169,7 @@ export default function Esqueci() {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
-          <Link 
+          <Link
             href="/"
             className="flex items-center gap-3 mb-12 group"
           >
@@ -184,14 +184,14 @@ export default function Esqueci() {
               Recupere seu
               <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent"> acesso</span>
             </h1>
-            
+
             <p className="text-xl text-gray-300 mb-12 max-w-md">
               Vamos te ajudar a recuperar o acesso à sua conta de forma rápida e segura.
             </p>
 
             <div className="space-y-6">
               {beneficios.map((beneficio, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-4 text-gray-300 group"
                   style={{ transitionDelay: `${index * 200}ms` }}
@@ -208,12 +208,12 @@ export default function Esqueci() {
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div 
+        <div
           ref={containerRef}
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex justify-center mb-8">
-            <Link 
+            <Link
               href="/"
               className="flex items-center gap-3 group"
             >
@@ -224,10 +224,10 @@ export default function Esqueci() {
             </Link>
           </div>
 
-          <div 
+          <div
             className={`bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-sm rounded-3xl p-8 border border-red-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
-            <Link 
+            <Link
               href="/login"
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
             >
@@ -256,13 +256,13 @@ export default function Esqueci() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiEnvelope className="text-gray-400 group-hover:text-red-400 transition-colors" />
                   </div>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     {...register("email", {
                       required: true,
                       pattern: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/
-                    })} 
-                    required 
+                    })}
+                    required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 group-hover:border-red-400/50"
                     placeholder="seu@email.com"
                     style={{
@@ -282,8 +282,8 @@ export default function Esqueci() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={carregando}
                 className="w-full cursor-pointer group relative bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -306,8 +306,8 @@ export default function Esqueci() {
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
                 Lembrou sua senha?{" "}
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="text-red-400 hover:text-red-300 font-semibold transition-colors"
                 >
                   Fazer login
