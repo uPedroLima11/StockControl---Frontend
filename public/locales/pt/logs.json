@@ -1,12 +1,14 @@
 {
-  "logs":{  
+  "logs": {
+    "titulo": "Logs do Sistema",
+    "subtitulo": "Acompanhe todas as atividades e eventos do sistema",
+    "registros": "registros",
     "historicoTitulo": "Histórico de Logs",
     "produto": "Produto",
     "quantidade": "Quantidade",
     "cliente": "Cliente",
     "cliente_nao_informado": "Não Informado",
-    "titulo": "Logs",
-    "placeholder_busca": "Buscar Logs",
+    "placeholder_busca": "Buscar por descrição...",
     "usuario": "Usuário",
     "tipo": "Tipo",
     "pedido": "Pedido",
@@ -22,17 +24,23 @@
     "periodo": "Período",
     "periodo_todos": "Todos os dados",
     "nenhum_log_encontrado": "Nenhum log encontrado",
+    "nenhum_log_mensagem": "Não foram encontrados logs correspondentes aos seus critérios de busca",
     "nenhumaMovimentacao": "Nenhuma movimentação encontrada",
     "usuario_nao_encontrado": "Usuário não encontrado",
     "usuario_nao_informado": "Não Informado",
     "carregando": "Carregando...",
     "status": "Status",
+    "total": "Total",
+    "todos_tipos": "Todos os tipos",
+    "limpar": "Limpar",
+    "limpar_filtros": "Limpar Filtros",
     "acesso_negado": {
       "titulo": "Acesso Negado",
       "mensagem": "Você não tem permissão para acessar esta página",
       "permissao_necessaria": "Permissão necessária"
     },
     "tipos_logs": {
+      "titulo": "Filtrar por Tipo",
       "CRIACAO": "Criação",
       "ATUALIZACAO": "Atualização",
       "EXCLUSAO": "Exclusão",
@@ -56,7 +64,7 @@
     },
     "descricoes": {
       "produto_exportado": "Produto Exportado: {{nome}} (Período: {{periodo}})",
-      "produto_vendido": "Produto Vendido: {{nome}} (Quantidade: {{quantidade}})",
+      "produto_vendido": "Produto Vendido: {{nome}} | Quantidade: {{quantidade}}",
       "produto_excluido": "Produto Excluído: {{nome}}",
       "produto_atualizado": "Produto Atualizado: {{nome}}",
       "produto_criado": "Produto Criado: {{nome}}",
@@ -68,5 +76,7 @@
       "pedido_concluido_estoque": "Pedido {{pedidoNumero}} concluído e estoque atualizado",
       "email_enviado_fornecedor": "Email enviado para {{fornecedorNome}} ({{fornecedorEmail}}) sobre pedido {{pedidoNumero}}"
     }
-  }
+  },
+  "acessoRestrito": "Acesso Restrito",
+  "acessoRestritoMensagem": "Você não tem permissão para acessar esta funcionalidade."
 }
