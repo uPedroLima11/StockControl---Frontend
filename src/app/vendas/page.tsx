@@ -2,8 +2,8 @@
 
 import { ProdutoI } from "@/utils/types/produtos";
 import { ClienteI } from "@/utils/types/clientes";
-import { useEffect, useState } from "react";
-import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight, FaLock } from "react-icons/fa";
+import { useEffect, useState, useRef } from "react";
+import { FaSearch, FaShoppingCart, FaRegTrashAlt, FaAngleLeft, FaAngleRight, FaLock, FaPlus, FaMinus, FaUser, FaChartLine, FaHistory, FaBox, FaCheck, FaChevronDown, FaTh, FaList } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { VendaI } from "@/utils/types/vendas";
 import { cores } from "@/utils/cores";
@@ -27,11 +27,58 @@ export default function Vendas() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [empresaAtivada, setEmpresaAtivada] = useState<boolean>(false);
-  const produtosPorPagina = 10;
-  const { t } = useTranslation("vendas");
+  const [stats, setStats] = useState({
+    totalVendas: 0,
+    produtosVendidos: 0,
+    clientesAtendidos: 0,
+    ticketMedio: 0
+  });
+
+  const { t, i18n } = useTranslation("vendas");
+  const [cotacaoDolar, setCotacaoDolar] = useState(5.0);
+
+  type TipoVisualizacao = "cards" | "lista";
+  const [tipoVisualizacao, setTipoVisualizacao] = useState<TipoVisualizacao>("cards");
+
+  const produtosPorPagina = 12;
   const router = useRouter();
+  const menuClientesRef = useRef<HTMLDivElement>(null);
+  const [menuClientesAberto, setMenuClientesAberto] = useState(false);
 
   const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const formatarMoeda = (valor: number) => {
+    if (i18n.language === "en") {
+      return `$${(valor / cotacaoDolar).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const mostrarPreco = (preco: number) => {
+    if (i18n.language === "en") {
+      return `$${(preco / cotacaoDolar).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `R$ ${preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const converterPrecoParaReal = (preco: number) => {
+    if (i18n.language === "en") {
+      return preco * cotacaoDolar;
+    }
+    return preco;
+  };
+
+  useEffect(() => {
+    const visualizacaoSalva = localStorage.getItem("vendas_visualizacao") as TipoVisualizacao;
+    if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {
+      setTipoVisualizacao(visualizacaoSalva);
+    }
+  }, []);
+
+  const alterarVisualizacao = (novoTipo: TipoVisualizacao) => {
+    setTipoVisualizacao(novoTipo);
+    localStorage.setItem("vendas_visualizacao", novoTipo);
+  };
 
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
     try {
@@ -125,6 +172,14 @@ export default function Vendas() {
       await carregarPermissoes(usuarioValor);
 
       try {
+        try {
+          const valorDolar = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+          const cotacaoJson = await valorDolar.json();
+          setCotacaoDolar(parseFloat(cotacaoJson.USDBRL.bid));
+        } catch (error) {
+          console.error("Erro ao buscar cotação do dólar:", error);
+        }
+
         const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`);
         const usuario = await responseUsuario.json();
 
@@ -168,6 +223,18 @@ export default function Vendas() {
         const vendasOrdenadas = vendasDaEmpresa.sort((a: VendaI, b: VendaI) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
         setVendas(vendasOrdenadas);
 
+        const produtosVendidos = vendasDaEmpresa.reduce((total: number, venda: VendaI) => total + (venda.quantidade || 0), 0);
+        const clientesUnicos = new Set(vendasDaEmpresa.map((venda: VendaI) => venda.clienteId).filter(Boolean)).size;
+        const totalVendasAtual = vendasDaEmpresa.reduce((total: number, venda: VendaI) => total + (venda.valorVenda || 0), 0);
+        const ticketMedio = vendasDaEmpresa.length > 0 ? totalVendasAtual / vendasDaEmpresa.length : 0;
+
+        setStats({
+          totalVendas: totalVendasAtual,
+          produtosVendidos,
+          clientesAtendidos: clientesUnicos,
+          ticketMedio
+        });
+
         const responseTotal = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda/contagem/${usuario.empresaId}`);
         const totalData = await responseTotal.json();
 
@@ -189,6 +256,8 @@ export default function Vendas() {
           icon: "error",
           title: t("erroCarregarDados"),
           text: t("tenteNovamente"),
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         setVendas([]);
         setTotalVendas(0);
@@ -201,46 +270,124 @@ export default function Vendas() {
 
     const style = document.createElement("style");
     style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      .animate-slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+      }
+      
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+        
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      .glow-effect {
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .glow-effect::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+      }
+      
+      .glow-effect:hover::before {
+        left: 100%;
+      }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(45deg, ${modoDark ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
+        padding: 1px;
+        border-radius: 16px;
+      }
+      
+      .gradient-border > div {
+        background: ${modoDark ? "#1E293B" : "#FFFFFF"};
+        border-radius: 15px;
+      }
+      
+      .scroll-custom {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      
+      .scroll-custom::-webkit-scrollbar {
         width: 6px;
       }
       
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      .scroll-custom::-webkit-scrollbar-track {
+        background: ${modoDark ? "#1E293B" : "#F1F5F9"};
         border-radius: 3px;
       }
-    }
+      
+      .scroll-custom::-webkit-scrollbar-thumb {
+        background: ${modoDark ? "#3B82F6" : "#94A3B8"};
+        border-radius: 3px;
+      }
+      
+      .scroll-custom::-webkit-scrollbar-thumb:hover {
+        background: ${modoDark ? "#2563EB" : "#64748B"};
+      }
     `;
     document.head.appendChild(style);
 
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuClientesRef.current && !menuClientesRef.current.contains(event.target as Node)) {
+        setMenuClientesAberto(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
       document.head.removeChild(style);
     };
-  }, [t, modoDark]);
+  }, [t, modoDark, totalVendas, i18n.language]);
 
   useEffect(() => {
     if (carrinho.length > 0) {
@@ -251,7 +398,6 @@ export default function Vendas() {
   }, [carrinho]);
 
   const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.vendas_visualizar;
-
   const podeRealizarVendas = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.vendas_realizar;
 
   const verificarAtivacaoEmpresa = async (empresaId: string) => {
@@ -269,7 +415,6 @@ export default function Vendas() {
       const empresaData = await response.json();
 
       const ativada = empresaData.ChaveAtivacao !== null && empresaData.ChaveAtivacao !== undefined;
-
       setEmpresaAtivada(ativada);
       return ativada;
     } catch (error) {
@@ -285,6 +430,8 @@ export default function Vendas() {
       icon: "warning",
       confirmButtonText: t("empresaNaoAtivada.botao"),
       confirmButtonColor: "#3085d6",
+      background: modoDark ? temaAtual.card : "#FFFFFF",
+      color: modoDark ? temaAtual.texto : temaAtual.texto,
     }).then((result) => {
       if (result.isConfirmed) {
         router.push("/ativacao");
@@ -313,6 +460,8 @@ export default function Vendas() {
           icon: "warning",
           title: t("avisoEstoque"),
           text: t("quantidadeMaiorQueEstoque"),
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     } else {
@@ -323,42 +472,38 @@ export default function Vendas() {
           icon: "warning",
           title: t("avisoEstoque"),
           text: t("produtoSemEstoque"),
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     }
   };
 
-  const atualizarQuantidade = (produtoId: string, novaQuantidade: number | "") => {
+  const atualizarQuantidade = (produtoId: string, novaQuantidade: number) => {
     const produto = produtos.find((p) => p.id === produtoId);
 
     setCarrinho((prevCarrinho) => {
       return prevCarrinho
         .map((item) => {
           if (item.produto.id === produtoId) {
-            if (novaQuantidade === "" || isNaN(Number(novaQuantidade))) {
-              return { ...item, quantidade: 0 };
-            }
+            if (novaQuantidade < 0) return { ...item, quantidade: 0 };
 
-            const quantidadeNum = Number(novaQuantidade);
-
-            if (produto && quantidadeNum > produto.quantidade) {
+            if (produto && novaQuantidade > produto.quantidade) {
               Swal.fire({
                 icon: "warning",
                 title: t("avisoEstoque"),
                 text: t("quantidadeMaiorQueEstoque"),
+                background: modoDark ? temaAtual.card : "#FFFFFF",
+                color: modoDark ? temaAtual.texto : temaAtual.texto,
               });
               return { ...item, quantidade: produto.quantidade };
             }
 
-            if (quantidadeNum < 0) {
-              return { ...item, quantidade: 0 };
-            }
-
-            return { ...item, quantidade: quantidadeNum };
+            return { ...item, quantidade: novaQuantidade };
           }
           return item;
         })
-        .filter((item) => item.quantidade >= 0);
+        .filter((item) => item.quantidade > 0);
     });
   };
 
@@ -377,6 +522,8 @@ export default function Vendas() {
         icon: "error",
         title: t("erro"),
         text: carrinho.length === 0 ? t("carrinhoVazio") : t("quantidadeZeroErro"),
+        background: modoDark ? temaAtual.card : "#FFFFFF",
+        color: modoDark ? temaAtual.texto : temaAtual.texto,
       });
       return;
     }
@@ -396,6 +543,8 @@ export default function Vendas() {
                 icon: "error",
                 title: t("estoqueInsuficiente"),
                 text: `${item.produto.nome}: ${t("saldoDisponivel")} ${saldo}`,
+                background: modoDark ? temaAtual.card : "#FFFFFF",
+                color: modoDark ? temaAtual.texto : temaAtual.texto,
               });
               return;
             }
@@ -404,8 +553,12 @@ export default function Vendas() {
 
         const itemsToSell = carrinho.filter((item) => item.quantidade > 0);
 
-        const vendasPromises = itemsToSell.map((item) =>
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
+        const vendasPromises = itemsToSell.map((item) => {
+          const precoReal = converterPrecoParaReal(item.produto.preco);
+          const valorVenda = precoReal * item.quantidade;
+          const valorCompra = precoReal * 0.8 * item.quantidade;
+
+          return fetch(`${process.env.NEXT_PUBLIC_URL_API}/venda`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -415,14 +568,14 @@ export default function Vendas() {
               empresaId,
               produtoId: Number(item.produto.id),
               quantidade: item.quantidade,
-              valorVenda: item.produto.preco * item.quantidade,
-              valorCompra: item.produto.preco * 0.8 * item.quantidade,
+              valorVenda: valorVenda,
+              valorCompra: valorCompra,
               usuarioId: usuarioValor,
               clienteId: clienteSelecionado,
               clienteNome: clientes.find((c) => c.id === clienteSelecionado)?.nome || null,
             }),
-          })
-        );
+          });
+        });
 
         await Promise.all(vendasPromises);
 
@@ -432,6 +585,8 @@ export default function Vendas() {
           title: t("vendaSucesso"),
           showConfirmButton: false,
           timer: 1500,
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
 
         setCarrinho([]);
@@ -452,6 +607,18 @@ export default function Vendas() {
 
           const vendasOrdenadas = (vendasData.vendas || []).sort((a: VendaI, b: VendaI) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
           setVendas(vendasOrdenadas);
+
+          const produtosVendidos = vendasOrdenadas.reduce((total: number, venda: VendaI) => total + (venda.quantidade || 0), 0);
+          const clientesUnicos = new Set(vendasOrdenadas.map((venda: VendaI) => venda.clienteId).filter(Boolean)).size;
+          const totalVendasAtual = vendasOrdenadas.reduce((total: number, venda: VendaI) => total + (venda.valorVenda || 0), 0);
+          const ticketMedio = vendasOrdenadas.length > 0 ? totalVendasAtual / vendasOrdenadas.length : 0;
+
+          setStats({
+            totalVendas: totalVendasAtual,
+            produtosVendidos,
+            clientesAtendidos: clientesUnicos,
+            ticketMedio
+          });
         });
       } catch (err) {
         console.error("Erro ao finalizar venda:", err);
@@ -459,6 +626,8 @@ export default function Vendas() {
           icon: "error",
           title: "Erro!",
           text: t("erroFinalizarVenda"),
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       } finally {
         setCarregando(false);
@@ -466,7 +635,9 @@ export default function Vendas() {
     });
   };
 
-  const produtosFiltrados = produtos.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()));
+  const produtosFiltrados = produtos.filter((produto) =>
+    produto.nome.toLowerCase().includes(busca.toLowerCase())
+  );
 
   const indexUltimoProduto = paginaAtual * produtosPorPagina;
   const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
@@ -477,453 +648,553 @@ export default function Vendas() {
     setPaginaAtual(novaPagina);
   };
 
-  const totalCarrinho = carrinho.reduce((total, item) => total + item.produto.preco * item.quantidade, 0);
+  const totalCarrinho = carrinho.reduce((total, item) => {
+    const precoReal = converterPrecoParaReal(item.produto.preco);
+    return total + precoReal * item.quantidade;
+  }, 0);
+
+  const bgGradient = modoDark
+    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+
+  const textPrimary = modoDark ? "text-white" : "text-slate-900";
+  const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
+  const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
+  const bgInput = modoDark ? "bg-slate-700/50" : "bg-gray-100";
+  const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
+  const bgStats = modoDark ? "bg-slate-800/50" : "bg-white/80";
 
   if (!podeVisualizar) {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="w-full max-w-6xl">
-          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-            {t("titulo")}
-          </h1>
-          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-            {t("semPermissaoVisualizar")}
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center px-4`}>
+        <div className="text-center">
+          <div className={`w-24 h-24 mx-auto mb-6 ${modoDark ? "bg-red-500/20" : "bg-red-100"} rounded-full flex items-center justify-center`}>
+            <FaLock className={`text-3xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (carregando && !empresaId) {
-    return (
-      <div className="flex justify-center items-center h-screen" style={{ backgroundColor: temaAtual.fundo }}>
-        <p style={{ color: temaAtual.texto }}>{t("carregando")}</p>
-      </div>
-    );
-  }
-
-  if (!empresaId || produtos.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8 h-60" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="w-full max-w-6xl text-center">
-          <h1 className="text-center text-xl md:text-2xl font-mono mb-6" style={{ color: temaAtual.texto }}>
-            {t("titulo")}
-          </h1>
-          <div
-            className="border rounded-xl p-8 shadow"
-            style={{
-              backgroundColor: temaAtual.card,
-              borderColor: temaAtual.borda,
-            }}
-          >
-            <p className="text-lg" style={{ color: temaAtual.texto }}>
-              {t("naoPossuiProdutos")}
-            </p>
-          </div>
+          <h1 className={`text-2xl font-bold ${textPrimary} mb-4`}>{t("acessoRestrito")}</h1>
+          <p className={textSecondary}>{t("acessoRestritoMensagem")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-      <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-          {t("titulo")}
-        </h1>
+    <div className={`min-h-screen ${bgGradient}`}>
+      <div className="flex">
+        <div className="flex-1 min-w-0">
+          <div className="px-4 sm:px-6 py-8 w-full max-w-7xl mx-auto">
+            <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${modoDark ? "bg-slate-800/30" : "bg-white/30"} backdrop-blur-sm border ${borderColor}`}>
+              <div className="absolute inset-0">
+                <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
+              </div>
 
-        {empresaId && !empresaAtivada && (
-          <div
-            className="mb-6 p-4 rounded-lg flex items-center gap-3"
-            style={{
-              backgroundColor: temaAtual.primario + "20",
-              color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`,
-            }}
-          >
-            <FaLock className="text-xl" />
-            <div>
-              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <div className="relative z-10 text-center">
+                <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
+                  {t("titulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t("vendas")}</span>
+                </h1>
+                <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>{t("subtitulo")}</p>
+              </div>
+            </section>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[
+                {
+                  label: t("stats.totalVendas"),
+                  value: formatarMoeda(stats.totalVendas),
+                  icon: FaChartLine,
+                  color: "from-blue-500 to-cyan-500",
+                  bgColor: modoDark ? "bg-blue-500/10" : "bg-blue-50",
+                },
+                {
+                  label: t("stats.produtosVendidos"),
+                  value: stats.produtosVendidos.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR"),
+                  icon: FaBox,
+                  color: "from-green-500 to-emerald-500",
+                  bgColor: modoDark ? "bg-green-500/10" : "bg-green-50",
+                },
+                {
+                  label: t("stats.clientesAtendidos"),
+                  value: stats.clientesAtendidos.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR"),
+                  icon: FaUser,
+                  color: "from-purple-500 to-pink-500",
+                  bgColor: modoDark ? "bg-purple-500/10" : "bg-purple-50",
+                },
+                {
+                  label: t("stats.ticketMedio"),
+                  value: formatarMoeda(stats.ticketMedio),
+                  icon: FaHistory,
+                  color: "from-orange-500 to-red-500",
+                  bgColor: modoDark ? "bg-orange-500/10" : "bg-orange-50",
+                },
+              ].map((stat, index) => (
+                <div key={index} className="gradient-border animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                  <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={`text-xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>{stat.value}</div>
+                        <div className={textMuted}>{stat.label}</div>
+                      </div>
+                      <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                        <stat.icon className={`text-xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div className="flex items-center gap-4">
-            <div
-              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
-              style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
-              }}
-            >
-              <input
-                type="text"
-                placeholder={t("buscarProduto")}
-                className="outline-none placeholder-gray-400 font-mono text-sm bg-transparent"
-                style={{
-                  color: temaAtual.texto,
-                }}
-                value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setPaginaAtual(1);
-                }}
-              />
-              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
-            </div>
-            {totalPaginas > 1 && (
-              <div className="flex items-center gap-2">
-                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
-                  <FaAngleLeft />
-                </button>
-
-                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
-                  {paginaAtual}/{totalPaginas}
-                </span>
-
-                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
-                  <FaAngleRight />
-                </button>
+            {empresaId && !empresaAtivada && (
+              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30" : "bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200"}`}>
+                <div className={`p-2 ${modoDark ? "bg-orange-500/20" : "bg-orange-100"} rounded-xl`}>
+                  <FaLock className={`text-xl ${modoDark ? "text-orange-400" : "text-orange-500"}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-bold ${textPrimary} text-sm`}>{t("empresaNaoAtivada.alertaTitulo")}</p>
+                  <p className={textMuted}>{t("empresaNaoAtivada.alertaMensagem")}</p>
+                </div>
               </div>
             )}
-          </div>
 
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm md:text-base" style={{ color: temaAtual.texto }}>
-              {t("totalVendas")}: R$ {totalVendas.toFixed(2).replace(".", ",")}
-            </span>
-          </div>
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                  <div className="relative flex-1 max-w-md">
+                    <div className={`absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 transition-opacity duration-300`}></div>
+                    <div className={`relative flex items-center ${bgCard} rounded-xl px-4 py-3 border ${borderColor} backdrop-blur-sm`}>
+                      <FaSearch className={`${modoDark ? "text-blue-400" : "text-blue-500"} mr-3 text-sm`} />
+                      <input
+                        type="text"
+                        placeholder={t("buscarProduto")}
+                        value={busca}
+                        onChange={(e) => {
+                          setBusca(e.target.value);
+                          setPaginaAtual(1);
+                        }}
+                        className={`bg-transparent border-none outline-none ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} w-full text-sm`}
+                      />
+                    </div>
+                  </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="lg:col-span-2">
-            <div
-              className="border rounded-xl shadow"
-              style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
-              }}
-            >
-              <div className="hidden md:block">
-                <table className="w-full text-sm font-mono">
-                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
-                    <tr style={{ color: temaAtual.texto }}>
-                      <th className="py-3 px-4 text-left">{t("produto")}</th>
-                      <th className="text-center">{t("estoque")}</th>
-                      <th className="text-center">{t("preco")}</th>
-                      {podeRealizarVendas && <th className="text-center">{t("acoes")}</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {produtosAtuais.map((produto) => (
-                      <tr
+                  <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl p-1`}>
+                      <button
+                        onClick={() => alterarVisualizacao("cards")}
+                        className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
+                          ? "bg-blue-500 text-white"
+                          : `${bgHover} ${textPrimary}`
+                          }`}
+                        title="Visualização em Cards"
+                      >
+                        <FaTh className="text-sm" />
+                      </button>
+                      <button
+                        onClick={() => alterarVisualizacao("lista")}
+                        className={`p-2 rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
+                          ? "bg-blue-500 text-white"
+                          : `${bgHover} ${textPrimary}`
+                          }`}
+                        title="Visualização em Lista"
+                      >
+                        <FaList className="text-sm" />
+                      </button>
+                    </div>
+
+                    {totalPaginas > 1 && (
+                      <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl px-3 py-2`}>
+                        <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === 1 ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                          <FaAngleLeft className="text-sm" />
+                        </button>
+
+                        <span className={`${textPrimary} text-sm mx-2`}>
+                          {paginaAtual}/{totalPaginas}
+                        </span>
+
+                        <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-1 rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                          <FaAngleRight className="text-sm" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {carregando ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[...Array(6)].map((_, index) => (
+                      <div key={index} className={`${bgCard} rounded-xl p-4 animate-pulse border ${borderColor}`}>
+                        <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-xl h-32 mb-3`}></div>
+                        <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded h-3 mb-2`}></div>
+                        <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded h-3 w-2/3 mb-3`}></div>
+                        <div className={`${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded h-6 mb-2`}></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : produtosAtuais.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className={`w-24 h-24 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
+                      <FaBox className={`text-2xl ${textMuted}`} />
+                    </div>
+                    <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t("nenhumProdutoEncontrado")}</h3>
+                    <p className={`${textMuted} mb-4 text-sm`}>{t("comeceAdicionando")}</p>
+                  </div>
+                ) : tipoVisualizacao === "cards" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {produtosAtuais.map((produto, index) => (
+                      <div
                         key={produto.id}
-                        className="border-b transition cursor-pointer"
+                        className={`group ${modoDark
+                          ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
+                          : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
+                          } rounded-xl border ${modoDark
+                            ? "border-blue-500/20 hover:border-blue-500/40"
+                            : "border-blue-200 hover:border-blue-300"
+                          } p-3 transition-all duration-500 card-hover backdrop-blur-sm`}
                         style={{
-                          color: temaAtual.texto,
-                          borderColor: temaAtual.borda,
-                          backgroundColor: temaAtual.card,
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = modoDark ? cores.dark.hover : cores.light.hover;
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLTableRowElement).style.backgroundColor = temaAtual.card;
+                          animationDelay: `${index * 100}ms`,
                         }}
                       >
-                        <td className="py-3 px-4 flex items-center gap-2">
+                        <div className="relative mb-2 overflow-hidden rounded-lg">
                           <Image
                             src={produto.foto || "/out.jpg"}
-                            width={30}
-                            height={30}
-                            className="rounded"
+                            width={150}
+                            height={100}
+                            className="w-full h-24 object-cover transition-transform duration-500 group-hover:scale-110"
                             alt={produto.nome}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
                           />
-                          <span>{produto.nome}</span>
-                        </td>
-                        <td className="py-3 px-4 text-center">{produto.quantidade}</td>
-                        <td className="py-3 px-4 text-center">R$ {produto.preco.toFixed(2).replace(".", ",")}</td>
-                        {podeRealizarVendas && (
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
-                              disabled={produto.quantidade < 1}
-                              className="px-3 transition-all duration-200 hover:scale-105 py-1 cursor-pointer rounded flex items-center gap-1"
-                              style={{
-                                backgroundColor: temaAtual.primario,
-                                color: "#FFFFFF",
-                                border: `1px solid ${temaAtual.primario}`,
-                                opacity: produto.quantidade < 1 ? 0.5 : 1,
-                              }}
-                            >
-                              <FaShoppingCart size={12} />
-                              {t("adicionar")}
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="md:hidden space-y-2 p-2">
-                {produtosAtuais.map((produto) => (
-                  <div
-                    key={produto.id}
-                    className="border rounded-lg p-3 transition-all"
-                    style={{
-                      backgroundColor: temaAtual.card,
-                      borderColor: temaAtual.borda,
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor = modoDark ? `${cores.dark.hover}40` : `${cores.light.hover}`;
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor = temaAtual.card;
-                    }}
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex items-center gap-2">
-                        <Image
-                          src={produto.foto || "/out.jpg"}
-                          width={40}
-                          height={40}
-                          className="rounded"
-                          alt={produto.nome}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/out.jpg";
-                          }}
-                        />
-                        <div>
-                          <p className="font-medium" style={{ color: temaAtual.texto }}>
-                            {produto.nome}
-                          </p>
-                          <div className="flex gap-4 mt-1">
-                            <span className="text-xs" style={{ color: temaAtual.placeholder }}>
-                              {t("estoque")}: {produto.quantidade}
-                            </span>
-                            <span className="text-xs" style={{ color: temaAtual.placeholder }}>
-                              {t("preco")}: R$ {produto.preco.toFixed(2).replace(".", ",")}
-                            </span>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" :
+                            produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" :
+                              "bg-green-500/90 text-white"
+                            }`}>
+                            {produto.quantidade}
                           </div>
                         </div>
+
+                        <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-xs leading-tight`}>
+                          {produto.nome}
+                        </h3>
+
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-bold text-cyan-500">
+                            {mostrarPreco(produto.preco)}
+                          </span>
+                          <span className={`text-xs ${produto.quantidade <= 0 ? "text-red-500" : produto.quantidade <= 5 ? "text-yellow-500" : "text-green-500"}`}>
+                            {produto.quantidade} {t("unidades")}
+                          </span>
+                        </div>
+
+                        {podeRealizarVendas && (
+                          <button
+                            onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
+                            disabled={produto.quantidade < 1}
+                            className="w-full px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center gap-1 text-xs font-semibold hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                              background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                              color: "#FFFFFF",
+                            }}
+                          >
+                            <FaShoppingCart size={12} />
+                            {t("adicionar")}
+                          </button>
+                        )}
                       </div>
-
-                      {podeRealizarVendas && (
-                        <button
-                          onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
-                          disabled={produto.quantidade < 1}
-                          className="p-2  rounded-full"
-                          style={{
-                            color: temaAtual.primario,
-                            opacity: produto.quantidade < 1 ? 0.5 : 1,
-                          }}
-                        >
-                          <FaShoppingCart size={16} />
-                        </button>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 md:space-y-6">
-            <div
-              className="border rounded-xl p-3 md:p-4 shadow"
-              style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
-              }}
-            >
-              <h2 className="text-lg font-bold mb-3 md:mb-4 flex items-center gap-2" style={{ color: temaAtual.texto }}>
-                <FaShoppingCart /> {t("carrinho")}
-              </h2>
-
-              {carrinho.length === 0 ? (
-                <p className="text-center py-4 text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
-                  {t("carrinhoVazio")}
-                </p>
-              ) : (
-                <>
-                  <div className="max-h-64 md:max-h-96 overflow-y-auto">
-                    {carrinho.map((item) => (
+                ) : (
+                  <div className="space-y-2">
+                    {produtosAtuais.map((produto, index) => (
                       <div
-                        key={item.produto.id}
-                        className="flex justify-between items-center py-2 border-b"
+                        key={produto.id}
+                        className={`group flex items-center gap-3 p-3 rounded-xl border ${modoDark
+                          ? "bg-slate-800/50 border-blue-500/20 hover:border-blue-500/40"
+                          : "bg-white/80 border-blue-200 hover:border-blue-300"
+                          } transition-all duration-300 backdrop-blur-sm`}
                         style={{
-                          borderColor: temaAtual.borda,
+                          animationDelay: `${index * 100}ms`,
                         }}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="relative flex-shrink-0">
                           <Image
-                            src={item.produto.foto || "/out.jpg"}
-                            width={30}
-                            height={30}
-                            className="rounded"
-                            alt={item.produto.nome}
+                            src={produto.foto || "/out.jpg"}
+                            width={60}
+                            height={60}
+                            className="w-15 h-15 object-cover rounded-lg"
+                            alt={produto.nome}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "/out.jpg";
                             }}
                           />
-                          <div>
-                            <span className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
-                              {item.produto.nome}
-                            </span>
-                            <div
-                              className="text-xs"
-                              style={{
-                                color: item.quantidade >= item.produto.quantidade ? "#EF4444" : temaAtual.placeholder,
-                              }}
-                            >
-                              {t("estoqueDisponivel")}: {item.produto.quantidade}
-                              {item.quantidade >= item.produto.quantidade && <span className="ml-1">({t("semEstoqueAdicional")})</span>}
-                            </div>
+                          <div className={`absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= 0 ? "bg-red-500/90 text-white" :
+                            produto.quantidade <= 5 ? "bg-yellow-500/90 text-white" :
+                              "bg-green-500/90 text-white"
+                            }`}>
+                            {produto.quantidade}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            min="0"
-                            max={item.produto.quantidade}
-                            value={item.quantidade}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === "") {
-                                atualizarQuantidade(item.produto.id, 0);
-                              } else if (/^\d+$/.test(value)) {
-                                const numValue = parseInt(value, 10);
-                                if (item.quantidade === 0) {
-                                  atualizarQuantidade(item.produto.id, numValue);
-                                } else {
-                                  atualizarQuantidade(item.produto.id, numValue);
-                                }
-                              }
-                            }}
-                            onBlur={(e) => {
-                              if (e.target.value === "" || !/^\d+$/.test(e.target.value)) {
-                                atualizarQuantidade(item.produto.id, 0);
-                              }
-                            }}
-                            className="w-12 md:w-16 p-1 rounded text-center"
-                            style={{
-                              backgroundColor: temaAtual.card,
-                              color: temaAtual.texto,
-                              border: `1px solid ${temaAtual.borda}`,
-                            }}
-                          />
-
-                          <span className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
-                            R$ {(item.produto.preco * item.quantidade).toFixed(2).replace(".", ",")}
-                          </span>
-
-                          <button onClick={() => removerDoCarrinho(item.produto.id)} className="p-1 cursor-pointer rounded-full text-red-500 hover:text-red-700">
-                            <FaRegTrashAlt size={14} />
-                          </button>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-bold ${textPrimary} line-clamp-1 group-hover:text-blue-500 transition-colors text-sm`}>
+                            {produto.nome}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm font-bold text-cyan-500">
+                              {mostrarPreco(produto.preco)}
+                            </span>
+                            <span className={`text-xs ${produto.quantidade <= 0 ? "text-red-500" : produto.quantidade <= 5 ? "text-yellow-500" : "text-green-500"}`}>
+                              {produto.quantidade} {t("unidades")}
+                            </span>
+                          </div>
                         </div>
+
+                        {podeRealizarVendas && (
+                          <button
+                            onClick={() => handleAcaoProtegida(() => adicionarAoCarrinho(produto))}
+                            disabled={produto.quantidade < 1}
+                            className="px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center gap-1 text-xs font-semibold hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                            style={{
+                              background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                              color: "#FFFFFF",
+                            }}
+                          >
+                            <FaShoppingCart size={12} />
+                            {t("adicionar")}
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
-
-                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t" style={{ borderColor: temaAtual.borda }}>
-                    <div className="mb-3 md:mb-4">
-                      <label className="block mb-1 text-sm" style={{ color: temaAtual.texto }}>
-                        {t("cliente")}
-                      </label>
-                      <select
-                        value={clienteSelecionado || ""}
-                        onChange={(e) => setClienteSelecionado(e.target.value || null)}
-                        className="w-full cursor-pointer p-2 rounded border text-sm md:text-base"
-                        style={{
-                          backgroundColor: temaAtual.card,
-                          color: temaAtual.texto,
-                          borderColor: temaAtual.borda,
-                        }}
-                      >
-                        <option value="">{t("naoInformarCliente")}</option>
-                        {clientes.map((cliente) => (
-                          <option key={cliente.id} value={cliente.id}>
-                            {cliente.nome}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex justify-between mb-2" style={{ color: temaAtual.texto }}>
-                      <span>{t("subtotal")}:</span>
-                      <span>R$ {totalCarrinho.toFixed(2).replace(".", ",")}</span>
-                    </div>
-
-                    <button
-                      onClick={finalizarVenda}
-                      disabled={carregando}
-                      className="w-full py-2 rounded-lg font-medium mt-2 md:mt-4 cursor-pointer text-sm md:text-base transition"
-                      style={{
-                        backgroundColor: temaAtual.primario,
-                        color: "#FFFFFF",
-                        opacity: carregando ? 0.7 : 1,
-                      }}
-                    >
-                      {carregando ? t("processando") : t("finalizarVenda")}
-                    </button>
+                )}
+              </div>
+              <div className="space-y-6">
+                <div className={`rounded-2xl border ${borderColor} ${bgCard} backdrop-blur-sm overflow-hidden`}>
+                  <div className="p-4 border-b" style={{ borderColor: temaAtual.borda }}>
+                    <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                      <FaShoppingCart className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                      {t("carrinho")}
+                      {carrinho.length > 0 && (
+                        <span className={`px-2 py-1 rounded-full text-xs ${modoDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-100 text-blue-600"}`}>
+                          {carrinho.length}
+                        </span>
+                      )}
+                    </h2>
                   </div>
-                </>
-              )}
-            </div>
 
-            <div
-              className="border rounded-xl p-3 md:p-4 shadow"
-              style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
-              }}
-            >
-              <h2 className="text-lg font-bold mb-3 md:mb-4" style={{ color: temaAtual.texto }}>
-                {t("vendasRecentes")}
-              </h2>
+                  {carrinho.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <div className={`w-16 h-16 mx-auto mb-4 ${modoDark ? "bg-slate-700/50" : "bg-slate-100"} rounded-full flex items-center justify-center`}>
+                        <FaShoppingCart className={`text-2xl ${textMuted}`} />
+                      </div>
+                      <p className={textMuted}>{t("carrinhoVazio")}</p>
+                    </div>
+                  ) : (
+                    <div className="p-4">
+                      <div className="max-h-64 overflow-y-auto scroll-custom space-y-3">
+                        {carrinho.map((item) => (
+                          <div
+                            key={item.produto.id}
+                            className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <Image
+                                src={item.produto.foto || "/out.jpg"}
+                                width={40}
+                                height={40}
+                                className="rounded-lg"
+                                alt={item.produto.nome}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "/out.jpg";
+                                }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-medium text-sm ${textPrimary} truncate`}>{item.produto.nome}</p>
+                                <p className={`text-xs ${textMuted}`}>
+                                  {mostrarPreco(item.produto.preco)} × {item.quantidade}
+                                </p>
+                              </div>
+                            </div>
 
-              {vendas.length === 0 ? (
-                <p className="text-center py-4 text-sm md:text-base" style={{ color: temaAtual.placeholder }}>
-                  {t("semVendas")}
-                </p>
-              ) : (
-                <div className="space-y-2 md:space-y-3">
-                  {vendas.slice(0, 5).map((venda) => (
-                    <div key={venda.id} className="border-b pb-2" style={{ borderColor: temaAtual.borda }}>
-                      <div className="flex justify-between items-center py-2">
-                        <div>
-                          <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
-                            {venda.produto?.nome || "Produto desconhecido"}
-                          </p>
-                          <p className="text-xs" style={{ color: temaAtual.placeholder }}>
-                            {venda.cliente?.nome || t("clienteNaoInformado")} • {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
-                          </p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => atualizarQuantidade(item.produto.id, item.quantidade - 1)}
+                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"
+                                    }`}
+                                >
+                                  <FaMinus className={`text-xs ${textMuted}`} />
+                                </button>
+
+                                <span className={`px-3 py-1 rounded-lg ${bgInput} ${textPrimary} text-sm font-medium min-w-[40px] text-center`}>
+                                  {item.quantidade}
+                                </span>
+
+                                <button
+                                  onClick={() => atualizarQuantidade(item.produto.id, item.quantidade + 1)}
+                                  disabled={item.quantidade >= item.produto.quantidade}
+                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${modoDark ? "hover:bg-slate-700" : "hover:bg-slate-200"
+                                    }`}
+                                >
+                                  <FaPlus className={`text-xs ${textMuted}`} />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <span className={`font-bold text-sm ${textPrimary}`}>
+                                  {formatarMoeda(converterPrecoParaReal(item.produto.preco) * item.quantidade)}
+                                </span>
+                                <button
+                                  onClick={() => removerDoCarrinho(item.produto.id)}
+                                  className={`p-1 rounded-lg cursor-pointer transition-all duration-200 hover:scale-110 ${modoDark ? "hover:bg-red-500/20 text-red-400" : "hover:bg-red-100 text-red-500"
+                                    }`}
+                                >
+                                  <FaRegTrashAlt size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t" style={{ borderColor: temaAtual.borda }}>
+                        <div className="mb-4">
+                          <label className={`block mb-2 text-sm font-medium ${textPrimary}`}>
+                            {t("cliente")}
+                          </label>
+                          <div className="relative" ref={menuClientesRef}>
+                            <button
+                              onClick={() => setMenuClientesAberto(!menuClientesAberto)}
+                              className={`w-full flex items-center justify-between ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} transition-all duration-300 cursor-pointer`}
+                            >
+                              <span className="text-sm">
+                                {clienteSelecionado
+                                  ? clientes.find(c => c.id === clienteSelecionado)?.nome
+                                  : t("naoInformarCliente")
+                                }
+                              </span>
+                              <FaChevronDown className={`text-xs transition-transform duration-300 ${menuClientesAberto ? "rotate-180" : ""}`} />
+                            </button>
+
+                            {menuClientesAberto && (
+                              <div className={`absolute top-full left-0 mt-2 w-full ${modoDark ? "bg-slate-800/95" : "bg-white/95"} border ${borderColor} rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-sm max-h-48 overflow-y-auto`}>
+                                <div
+                                  className={`p-2 text-sm cursor-pointer transition-all duration-200 ${bgHover} ${textPrimary}`}
+                                  onClick={() => {
+                                    setClienteSelecionado(null);
+                                    setMenuClientesAberto(false);
+                                  }}
+                                >
+                                  {t("naoInformarCliente")}
+                                </div>
+                                {clientes.map((cliente) => (
+                                  <div
+                                    key={cliente.id}
+                                    className={`p-2 text-sm cursor-pointer transition-all duration-200 ${bgHover} ${textPrimary} ${clienteSelecionado === cliente.id ? (modoDark ? "bg-blue-500/20" : "bg-blue-100") : ""
+                                      }`}
+                                    onClick={() => {
+                                      setClienteSelecionado(cliente.id);
+                                      setMenuClientesAberto(false);
+                                    }}
+                                  >
+                                    {cliente.nome}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm md:text-base" style={{ color: temaAtual.texto }}>
-                            {venda.quantidade} x R$ {(venda.produto?.preco || 0).toFixed(2).replace(".", ",")}
-                          </p>
-                          <p className="font-medium text-sm md:text-base" style={{ color: temaAtual.primario }}>
-                            R$ {(venda.valorVenda || 0).toFixed(2).replace(".", ",")}
-                          </p>
+
+                        <div className="flex justify-between items-center mb-4">
+                          <span className={textPrimary}>{t("subtotal")}:</span>
+                          <span className={`text-lg font-bold ${textPrimary}`}>
+                            {formatarMoeda(totalCarrinho)}
+                          </span>
                         </div>
+
+                        <button
+                          onClick={finalizarVenda}
+                          disabled={carregando || totalCarrinho === 0}
+                          className="w-full py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          style={{
+                            background: modoDark ? "linear-gradient(135deg, #10B981, #059669)" : "linear-gradient(135deg, #10B981, #059669)",
+                            color: "#FFFFFF",
+                          }}
+                        >
+                          {carregando ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              {t("processando")}
+                            </>
+                          ) : (
+                            <>
+                              <FaCheck size={14} />
+                              {t("finalizarVenda")}
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+                <div className={`rounded-2xl border ${borderColor} ${bgCard} backdrop-blur-sm overflow-hidden`}>
+                  <div className="p-4 border-b" style={{ borderColor: temaAtual.borda }}>
+                    <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                      <FaHistory className={modoDark ? "text-purple-400" : "text-purple-500"} />
+                      {t("vendasRecentes")}
+                    </h2>
+                  </div>
+
+                  {vendas.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <div className={`w-16 h-16 mx-auto mb-4 ${modoDark ? "bg-slate-700/50" : "bg-slate-100"} rounded-full flex items-center justify-center`}>
+                        <FaHistory className={`text-2xl ${textMuted}`} />
+                      </div>
+                      <p className={textMuted}>{t("semVendas")}</p>
+                    </div>
+                  ) : (
+                    <div className="p-4">
+                      <div className="space-y-3">
+                        {vendas.slice(0, 5).map((venda) => (
+                          <div
+                            key={venda.id}
+                            className={`p-3 rounded-xl border ${borderColor} ${bgHover} transition-all duration-300`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-medium text-sm ${textPrimary} truncate`}>
+                                  {venda.produto?.nome || "Produto desconhecido"}
+                                </p>
+                                <p className={`text-xs ${textMuted}`}>
+                                  {venda.cliente?.nome || t("clienteNaoInformado")}
+                                </p>
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full ${modoDark ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600"
+                                }`}>
+                                {venda.quantidade}x
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className={`text-xs ${textMuted}`}>
+                                {venda.createdAt ? new Date(venda.createdAt).toLocaleDateString() : "Data desconhecida"}
+                              </span>
+                              <span className={`font-bold text-sm ${textPrimary}`}>
+                                {formatarMoeda(venda.valorVenda || 0)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </div >
   );
 }
