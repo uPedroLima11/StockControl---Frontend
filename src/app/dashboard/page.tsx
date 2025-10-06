@@ -3,26 +3,8 @@
 import { ProdutoI } from "@/utils/types/produtos";
 import { VendaI } from "@/utils/types/vendas";
 import { useEffect, useState, useCallback } from "react";
-import { 
-  LuShieldAlert, 
-  LuTriangleAlert,
-  LuTrendingUp,
-  LuPackage,
-  LuUsers,
-  LuShoppingCart,
-  LuDollarSign,
-  LuChartBar,
-} from "react-icons/lu";
-import { 
-  FaChevronDown, 
-  FaChevronUp, 
-  FaAngleLeft, 
-  FaAngleRight,
-  FaBox,
-  FaWarehouse,
-  FaChartLine,
-  FaExclamationTriangle
-} from "react-icons/fa";
+import { LuShieldAlert, LuTriangleAlert, LuTrendingUp, LuPackage, LuUsers, LuShoppingCart, LuDollarSign, LuChartBar } from "react-icons/lu";
+import { FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaBox, FaExclamationTriangle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Cookies from "js-cookie";
 
@@ -73,11 +55,11 @@ const cores = {
 
 export default function Dashboard() {
   const [contagemProduto, setContagemProduto] = useState(0);
-  const [contagemEstoque, setContagemEstoque] = useState(0);
-  const [contagemValor, setContagemValor] = useState(0);
-  const [contagemLucro, setContagemLucro] = useState(0);
+  const [, setContagemEstoque] = useState(0);
+  const [, setContagemValor] = useState(0);
+  const [, setContagemLucro] = useState(0);
   const [contagemVendas, setContagemVendas] = useState(0);
-  const [contagemFornecedores, setContagemFornecedores] = useState(0);
+  const [, setContagemFornecedores] = useState(0);
   const [contagemFuncionarios, setContagemFuncionarios] = useState(0);
   const [vendas30Dias, setVendas30Dias] = useState(0);
   const [todasVendas, setTodasVendas] = useState<VendaI[]>([]);
