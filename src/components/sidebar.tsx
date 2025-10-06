@@ -421,7 +421,7 @@ export default function Sidebar() {
         <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} onLinkClick={handleLinkClick} />
         {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} onLinkClick={handleLinkClick} />}
         {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/inventario" icon={<FaHistory />} label={t("inventory")} cores={cores} onLinkClick={handleLinkClick} />}
+        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/movimentacoes" icon={<FaHistory />} label={t("inventory")} cores={cores} onLinkClick={handleLinkClick} />}
         {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} onLinkClick={handleLinkClick} />}
         {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} onLinkClick={handleLinkClick} />}
         {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} onLinkClick={handleLinkClick} />}
@@ -514,6 +514,7 @@ export default function Sidebar() {
             onClick={() => {
               permissoesCache.clear();
               localStorage.removeItem("client_key");
+              Cookies.remove("token");
               window.location.href = "/";
             }}
             className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
