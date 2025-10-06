@@ -51,7 +51,7 @@ export default function PedidosPage() {
       secundario: "#00B4D8",
     },
     light: {
-      fundo: "#cccccc",
+      fundo: "#E0DCDC",
       texto: "#0F172A",
       card: "#FFFFFF",
       borda: "#E2E8F0",
@@ -858,7 +858,7 @@ export default function PedidosPage() {
   return (
     <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: temaAtual.fundo }}>
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-left" style={{ color: temaAtual.texto }}>
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-left mt-16 md:mt-0" style={{ color: temaAtual.texto }}>
           {t("titulo")}
         </h1>
 

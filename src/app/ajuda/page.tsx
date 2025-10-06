@@ -1,6 +1,6 @@
 "use client";
 
-import { FaSearch, FaBook, FaLightbulb, FaExclamationTriangle, FaHome, FaPlus, FaBox, FaBell, FaBuilding, FaUsers, FaDollarSign, FaCheck, FaInfo, FaHistory, FaShoppingCart, FaKey, FaLink, FaUserShield, FaStore, FaLock, FaUserTag, FaTruck } from "react-icons/fa";
+import { FaSearch, FaBook, FaExclamationTriangle, FaHome, FaPlus, FaBox, FaBell, FaBuilding, FaUsers, FaDollarSign, FaCheck, FaInfo, FaHistory, FaShoppingCart, FaKey, FaLink, FaUserShield, FaStore, FaLock, FaUserTag, FaTruck } from "react-icons/fa";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cores } from "@/utils/cores";
 import Image from "next/image";
@@ -783,9 +783,8 @@ export default function Ajuda() {
         <div className="w-full max-w-6xl mx-auto px-4">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-4 mb-4">
-              <FaBook className="text-4xl" style={{ color: temaAtual.primario }} />
               <h1 className="text-3xl font-bold">{t("titulo")}</h1>
-              <FaLightbulb className="text-4xl" style={{ color: temaAtual.primario }} />
+              <FaBook className="text-4xl" style={{ color: temaAtual.primario }} />
             </div>
             <p className="text-lg" style={{ color: temaAtual.placeholder }}>
               {t("subtitulo")}

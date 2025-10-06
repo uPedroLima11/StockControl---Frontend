@@ -2,11 +2,28 @@
 
 import { ProdutoI } from "@/utils/types/produtos";
 import { VendaI } from "@/utils/types/vendas";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { LuShieldAlert, LuTriangleAlert } from "react-icons/lu";
+import { useEffect, useState, useCallback } from "react";
+import { 
+  LuShieldAlert, 
+  LuTriangleAlert,
+  LuTrendingUp,
+  LuPackage,
+  LuUsers,
+  LuShoppingCart,
+  LuDollarSign,
+  LuChartBar,
+} from "react-icons/lu";
+import { 
+  FaChevronDown, 
+  FaChevronUp, 
+  FaAngleLeft, 
+  FaAngleRight,
+  FaBox,
+  FaWarehouse,
+  FaChartLine,
+  FaExclamationTriangle
+} from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Cookies from "js-cookie";
 
 interface CategoriaDistribuicao {
@@ -21,11 +38,44 @@ interface ProdutoVenda {
   vendas: number;
 }
 
+const cores = {
+  dark: {
+    fundo: "#0A1929",
+    texto: "#FFFFFF",
+    card: "#132F4C",
+    borda: "#1E4976",
+    primario: "#1976D2",
+    secundario: "#00B4D8",
+    placeholder: "#9CA3AF",
+    hover: "#1E4976",
+    ativo: "#1976D2",
+    sucesso: "#10B981",
+    erro: "#EF4444",
+    alerta: "#F59E0B",
+    gradiente: "linear-gradient(135deg, #0A1929 0%, #132F4C 50%, #1E4976 100%)"
+  },
+  light: {
+    fundo: "#E0DCDC",
+    texto: "#0F172A",
+    card: "#FFFFFF",
+    borda: "#E2E8F0",
+    primario: "#1976D2",
+    secundario: "#0284C7",
+    placeholder: "#64748B",
+    hover: "#F1F5F9",
+    ativo: "#0284C7",
+    sucesso: "#10B981",
+    erro: "#EF4444",
+    alerta: "#F59E0B",
+    gradiente: "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%)"
+  },
+};
+
 export default function Dashboard() {
   const [contagemProduto, setContagemProduto] = useState(0);
-  const [, setContagemEstoque] = useState(0);
-  const [, setContagemValor] = useState(0);
-  const [, setContagemLucro] = useState(0);
+  const [contagemEstoque, setContagemEstoque] = useState(0);
+  const [contagemValor, setContagemValor] = useState(0);
+  const [contagemLucro, setContagemLucro] = useState(0);
   const [contagemVendas, setContagemVendas] = useState(0);
   const [contagemFornecedores, setContagemFornecedores] = useState(0);
   const [contagemFuncionarios, setContagemFuncionarios] = useState(0);
@@ -37,10 +87,32 @@ export default function Dashboard() {
   const [distribuicaoCategorias, setDistribuicaoCategorias] = useState<CategoriaDistribuicao[]>([]);
   const [produtoExpandido, setProdutoExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation("dashboard");
 
   const produtosPorPagina = 5;
-  const coresCategorias = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6", "#E74C3C", "#2ECC71"];
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const coresCategorias = [
+    temaAtual.primario,
+    temaAtual.secundario,
+    temaAtual.sucesso,
+    temaAtual.alerta,
+    temaAtual.erro,
+    "#6A0572", "#9EE6CF", "#45B7D1", "#F9A1BC", "#9B59B6"
+  ];
+
+  const bgGradient = modoDark 
+    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+
+  const textPrimary = modoDark ? "text-white" : "text-slate-900";
+  const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
+  const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
+  const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
+  const bgStats = modoDark ? "bg-slate-800/50" : "bg-white/80";
 
   const calcularTotalUnidadesVendidas = (vendas: VendaI[]): number => {
     return vendas.reduce((total, venda) => {
@@ -48,16 +120,13 @@ export default function Dashboard() {
     }, 0);
   };
 
-  const calcularPorcentagensPizza = (categorias: CategoriaDistribuicao[]) => {
+  const calcularPorcentagensPizza = useCallback((categorias: CategoriaDistribuicao[]) => {
     const total = categorias.reduce((sum, cat) => sum + cat.quantidade, 0);
     if (total === 0) return categorias.map(() => 0);
-
     return categorias.map(cat => (cat.quantidade / total) * 100);
-  };
+  }, []);
 
-  const porcentagensPizza = calcularPorcentagensPizza(distribuicaoCategorias);
-
-  const calcularPathSegmento = (porcentagem: number, offsetAcumulado: number, raio: number = 45) => {
+  const calcularPathSegmento = useCallback((porcentagem: number, offsetAcumulado: number, raio: number = 45) => {
     if (porcentagem === 0) return '';
 
     if (porcentagem === 100) {
@@ -78,93 +147,120 @@ export default function Dashboard() {
     const largeArcFlag = anguloExtent > 180 ? 1 : 0;
 
     return `M 50 50 L ${x1} ${y1} A ${raio} ${raio} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-  };
-
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get("token");
-
     if (!token) {
       window.location.href = "/login";
+      return;
     }
 
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativado = temaSalvo === "true";
-    setModoDark(ativado);
-    aplicarTema(ativado);
+    const initialize = async () => {
+      setLoading(true);
+      const temaSalvo = localStorage.getItem("modoDark");
+      const ativado = temaSalvo === "true";
+      setModoDark(ativado);
 
-    const usuarioSalvo = localStorage.getItem("client_key");
-    if (usuarioSalvo) {
-      const usuarioValor = usuarioSalvo.replace(/"/g, "");
-      fetchDashboardData(usuarioValor);
-    }
-
-    const interval = setInterval(() => {
       const usuarioSalvo = localStorage.getItem("client_key");
       if (usuarioSalvo) {
         const usuarioValor = usuarioSalvo.replace(/"/g, "");
-        fetchContagem(usuarioValor);
-        fetchVendas(usuarioValor);
+        await fetchDashboardData(usuarioValor);
       }
-    }, 30000);
+
+      setLoading(false);
+    };
+
+    initialize();
 
     const style = document.createElement("style");
     style.textContent = `
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      html::-webkit-scrollbar-track {
-        background: ${ativado ? "#132F4C" : "#F8FAFC"};
-      }
-      html::-webkit-scrollbar-thumb {
-        background: ${ativado ? "#132F4C" : "#90CAF9"}; 
-        border-radius: 5px;
-        border: 2px solid ${ativado ? "#132F4C" : "#F8FAFC"};
-      }
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${ativado ? "#132F4C" : "#64B5F6"}; 
-      }
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${ativado ? "#132F4C" : "#90CAF9"} ${ativado ? "#0A1830" : "#F8FAFC"};
-      }
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${ativado ? "#132F4C" : "#F8FAFC"};
-          border-radius: 3px;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      .animate-slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+      }
+      
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+        
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      .glow-effect {
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .glow-effect::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+      }
+      
+      .glow-effect:hover::before {
+        left: 100%;
+      }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(45deg, ${modoDark ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
+        padding: 1px;
+        border-radius: 16px;
+      }
+      
+      .gradient-border > div {
+        background: ${modoDark ? "#1E293B" : "#FFFFFF"};
+        border-radius: 15px;
       }
     `;
     document.head.appendChild(style);
 
     return () => {
-      clearInterval(interval);
       document.head.removeChild(style);
     };
-  }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.style.setProperty("--cor-fundo", "#0A1929");
-      root.style.setProperty("--cor-fonte", "#FFFFFF");
-      root.style.setProperty("--cor-subtitulo", "#9CA3AF");
-      root.style.setProperty("--cor-fundo-bloco", "#132F4C");
-      root.style.setProperty("--cor-borda", "#1E4976");
-      root.style.setProperty("--cor-caixa-destaque", "#1976D2");
-    } else {
-      root.style.setProperty("--cor-fundo", "#E0DCDC");
-      root.style.setProperty("--cor-fonte", "#0F172A");
-      root.style.setProperty("--cor-subtitulo", "#6B7280");
-      root.style.setProperty("--cor-fundo-bloco", "#ecececec");
-      root.style.setProperty("--cor-borda", "#E2E8F0");
-      root.style.setProperty("--cor-caixa-destaque", "#0284C7");
-    }
-    document.body.style.backgroundColor = ativado ? "#0A1929" : "#E0DCDC";
-  };
+  }, [modoDark]);
 
   async function fetchTodasCategorias() {
     try {
@@ -190,7 +286,15 @@ export default function Dashboard() {
         return;
       }
 
-      await Promise.all([fetchContagem(usuarioId), fetchProdutos(usuarioId), fetchFornecedores(usuarioId), fetchVendas(usuarioId), fetchFuncionarios(usuarioId), fetchTopProdutos(usuarioId), fetchDistribuicaoCategorias(usuarioId)]);
+      await Promise.all([
+        fetchContagem(usuarioId),
+        fetchProdutos(usuarioId),
+        fetchFornecedores(usuarioId),
+        fetchVendas(usuarioId),
+        fetchFuncionarios(usuarioId),
+        fetchTopProdutos(usuarioId),
+        fetchDistribuicaoCategorias(usuarioId)
+      ]);
     } catch (error) {
       console.error("Erro ao buscar dados da dashboard:", error);
     }
@@ -231,7 +335,6 @@ export default function Dashboard() {
       if (responseVendas.ok) {
         const totalData = await responseVendas.json();
         setContagemLucro(totalData.total || 0);
-
       }
 
       if (responseProdutos.ok) {
@@ -481,11 +584,15 @@ export default function Dashboard() {
     if (i18n.language === "pt") {
       setVendas30Dias(total);
     } else {
-      const cotacao = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
-      const cotacaoJson = await cotacao.json();
-      const valorConvertido = total / parseFloat(cotacaoJson.USDBRL.bid);
-
-      setVendas30Dias(valorConvertido);
+      try {
+        const cotacao = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+        const cotacaoJson = await cotacao.json();
+        const valorConvertido = total / parseFloat(cotacaoJson.USDBRL.bid);
+        setVendas30Dias(valorConvertido);
+      } catch (error) {
+        console.error("Erro ao buscar cotação:", error);
+        setVendas30Dias(total / 5); 
+      }
     }
   }
 
@@ -494,9 +601,7 @@ export default function Dashboard() {
   };
 
   const produtosCriticos = produtos.filter((produto) => produto.quantidade < (produto.quantidadeMin || 0) && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0);
-
   const produtosAtencao = produtos.filter((produto) => produto.quantidade >= (produto.quantidadeMin || 0) && produto.quantidade < (produto.quantidadeMin || 0) + 5 && produto.quantidadeMin !== undefined && produto.quantidadeMin > 0);
-
   const produtosEstoqueBaixo = [...produtosCriticos, ...produtosAtencao];
 
   const indexUltimoProduto = paginaAtual * produtosPorPagina;
@@ -510,392 +615,407 @@ export default function Dashboard() {
   };
 
   const totalItens = distribuicaoCategorias.reduce((sum, cat) => sum + cat.quantidade, 0);
+  const porcentagensPizza = calcularPorcentagensPizza(distribuicaoCategorias);
 
-  return (
-    <div className="px-2 sm:px-4 pt-8 min-h-screen" style={{ backgroundColor: "var(--cor-fundo)" }}>
-      <div
-        className="justify-center w-full max-w-6xl rounded-2xl px-4 sm:px-8 md:px-12 py-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 mx-auto mb-8 shadow-xl"
-        style={{
-          background: modoDark ? "linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)" : "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)",
-          border: `1px solid ${modoDark ? "#1E4976" : "#E2E8F0"}`,
-        }}
-      >
-        <Image alt="icone" src="/icone.png" width={100} height={100} quality={100} priority className="object-contain filter brightness-0 invert" />
-        <div className="text-white text-center md:text-left">
-          <h1 className="text-3xl font-bold">STOCKCONTROL</h1>
-          <p className="text-base mt-1 opacity-90">
-            {t("intro.linha1")} <br />
-            {t("intro.linha2")}
-          </p>
+  const statsCards = [
+    {
+      label: t("atividades.contagemVendas"),
+      value: contagemVendas,
+      icon: LuShoppingCart,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: modoDark ? "bg-blue-500/10" : "bg-blue-50",
+    },
+    {
+      label: t("atividades.lucroMensal"),
+      value: vendas30Dias,
+      icon: LuDollarSign,
+      color: "from-green-500 to-emerald-500",
+      bgColor: modoDark ? "bg-green-500/10" : "bg-green-50",
+      isCurrency: true,
+    },
+    {
+      label: t("atividades.contagemItens"),
+      value: contagemProduto,
+      icon: LuPackage,
+      color: "from-purple-500 to-pink-500",
+      bgColor: modoDark ? "bg-purple-500/10" : "bg-purple-50",
+    },
+    {
+      label: t("atividades.contagemFuncionarios"),
+      value: contagemFuncionarios,
+      icon: LuUsers,
+      color: "from-orange-500 to-red-500",
+      bgColor: modoDark ? "bg-orange-500/10" : "bg-orange-50",
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className={`mt-4 ${textPrimary}`}>Carregando dashboard...</p>
         </div>
       </div>
+    );
+  }
 
-      <div className="flex justify-center px-2 sm:px-4 pb-10">
-        <div className="w-full max-w-6xl space-y-6">
-          <h1 className="text-center text-2xl font-mono mb-6" style={{ color: "var(--cor-fonte)" }}>
-            {t("dashboardTitulo")}
-          </h1>
-          <div
-            className="border rounded-xl p-6 shadow-md transition-all duration-300"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: "var(--cor-borda)",
-            }}
-          >
-            <h2
-              className="text-lg font-semibold mb-4 border-b pb-2"
-              style={{
-                color: "var(--cor-fonte)",
-                borderColor: "var(--cor-borda)",
-              }}
-            >
-              📊 {t("financeiro.titulo")}
-            </h2>
+  return (
+    <div className={`min-h-screen ${bgGradient} pb-8`}>
+      <div className="px-4 sm:px-6 py-8 w-full max-w-7xl mx-auto">
+        <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${bgCard} backdrop-blur-sm border ${borderColor}`}>
+          <div className="absolute inset-0">
+            <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+            <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+            <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div
-                className="p-4 rounded-lg"
-                style={{
-                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
-                }}
-              >
-                <h3 className="font-medium mb-3 flex items-center gap-2">
-                  <span>🏆</span> {t("financeiro.topProdutos")}
-                </h3>
-                <div className="space-y-3">
-                  {produtosTopVendas.length > 0 ? (
-                    produtosTopVendas.map((produto) => {
-                      const maxVendas = Math.max(...produtosTopVendas.map((p) => p.vendas));
-                      const porcentagem = maxVendas > 0 ? (produto.vendas / maxVendas) * 100 : 0;
-                      return (
-                        <div key={produto.id} className="space-y-1 group relative">
-                          <div className="flex justify-between text-sm">
-                            <span className="truncate max-w-[160px]" title={produto.nome}>
-                              {produto.nome}
-                            </span>
-                            <span className="font-medium whitespace-nowrap">
-                              {produto.vendas} {t("financeiro.unidades")}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-300 rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full transition-all duration-300"
-                              style={{
-                                width: `${porcentagem}%`,
-                                backgroundColor: modoDark ? "#1976D2" : "#0284C7",
-                              }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-center text-sm text-gray-500">{t("financeiro.semDados")}</div>
-                  )}
+          <div className="relative z-10 text-center">
+            <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
+              {t("dashboardTitulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">STOCKCONTROL</span>
+            </h1>
+            <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>
+              {t("intro.linha1")} {t("intro.linha2")}
+            </p>
+          </div>
+        </section>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {statsCards.map((stat, index) => (
+            <div key={index} className="gradient-border animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm card-hover`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                      {stat.isCurrency 
+                        ? stat.value.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR", {
+                            style: "currency",
+                            currency: i18n.language === "en" ? "USD" : "BRL",
+                          })
+                        : stat.value}
+                    </div>
+                    <div className={textMuted}>{stat.label}</div>
+                  </div>
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <stat.icon className={`text-xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
+                  </div>
                 </div>
               </div>
-              <div
-                className="p-4 rounded-lg"
-                style={{
-                  backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                  border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
-                }}
-              >
-                <h3 className="font-medium mb-3 flex items-center gap-2">
-                  <span>📦</span> {t("financeiro.categorias")}
-                </h3>
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex items-center justify-center">
-                    <div className="relative w-32 h-32">
-                      <svg width="128" height="128" viewBox="0 0 100 100">
-                        {distribuicaoCategorias.map((item, index) => {
-                          const porcentagem = porcentagensPizza[index];
-                          if (porcentagem === 0) return null;
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className={`rounded-2xl ${bgCard} border ${borderColor} p-6 backdrop-blur-sm card-hover`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`p-2 rounded-lg ${modoDark ? "bg-blue-500/20" : "bg-blue-100"}`}>
+                <LuTrendingUp className={`text-xl ${modoDark ? "text-blue-400" : "text-blue-500"}`} />
+              </div>
+              <h2 className={`text-lg font-bold ${textPrimary}`}>{t("financeiro.topProdutos")}</h2>
+            </div>
 
-                          let offsetAcumulado = 0;
-                          for (let i = 0; i < index; i++) {
-                            offsetAcumulado += porcentagensPizza[i];
-                          }
+            <div className="space-y-4">
+              {produtosTopVendas.length > 0 ? (
+                produtosTopVendas.map((produto, index) => {
+                  const maxVendas = Math.max(...produtosTopVendas.map((p) => p.vendas));
+                  const porcentagem = maxVendas > 0 ? (produto.vendas / maxVendas) * 100 : 0;
+                  return (
+                    <div key={produto.id} className="space-y-2 animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className={`font-medium ${textPrimary} truncate flex-1 mr-4`} title={produto.nome}>
+                          {produto.nome}
+                        </span>
+                        <span className={`font-bold ${textPrimary} whitespace-nowrap`}>
+                          {produto.vendas} {t("financeiro.unidades")}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-300 rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full transition-all duration-1000"
+                          style={{
+                            width: `${porcentagem}%`,
+                            background: modoDark 
+                              ? "linear-gradient(90deg, #3B82F6, #0EA5E9)"
+                              : "linear-gradient(90deg, #1976D2, #0284C7)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className={`text-center py-8 ${textMuted}`}>
+                  <LuPackage className="text-4xl mx-auto mb-3 opacity-50" />
+                  <p>{t("financeiro.semDados")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className={`rounded-2xl ${bgCard} border ${borderColor} p-6 backdrop-blur-sm card-hover`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`p-2 rounded-lg ${modoDark ? "bg-purple-500/20" : "bg-purple-100"}`}>
+                <LuChartBar className={`text-xl ${modoDark ? "text-purple-400" : "text-purple-500"}`} />
+              </div>
+              <h2 className={`text-lg font-bold ${textPrimary}`}>{t("financeiro.categorias")}</h2>
+            </div>
 
-                          if (porcentagem === 100) {
+            <div className="flex flex-col lg:flex-row gap-6 items-center">
+              <div className="flex items-center justify-center">
+                <div className="relative w-32 h-32">
+                  <svg width="128" height="128" viewBox="0 0 100 100">
+                    {distribuicaoCategorias.map((item, index) => {
+                      const porcentagem = porcentagensPizza[index];
+                      if (porcentagem === 0) return null;
+
+                      let offsetAcumulado = 0;
+                      for (let i = 0; i < index; i++) {
+                        offsetAcumulado += porcentagensPizza[i];
+                      }
+
+                      return (
+                        <path
+                          key={index}
+                          d={calcularPathSegmento(porcentagem, offsetAcumulado)}
+                          fill={item.cor}
+                          stroke={temaAtual.card}
+                          strokeWidth="2"
+                          className="transition-all duration-500"
+                        />
+                      );
+                    })}
+                    <circle cx="50" cy="50" r="35" fill={temaAtual.card} />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-sm font-bold text-center ${textPrimary}`}>
+                      {totalItens}
+                      <br />
+                      <span className={`text-xs ${textMuted}`}>
+                        {t("financeiro.itens")}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex-1 space-y-3">
+                {distribuicaoCategorias.map((item, index) => {
+                  const porcentagem = totalItens > 0 ? ((item.quantidade / totalItens) * 100).toFixed(0) : "0";
+                  return (
+                    <div key={index} className="flex items-center justify-between text-sm animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.cor }} />
+                        <span className={`font-medium ${textPrimary} truncate max-w-[100px]`} title={item.categoria}>
+                          {item.categoria}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={textPrimary}>{item.quantidade}</span>
+                        <span className={textMuted}>({porcentagem}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={`rounded-2xl ${bgCard} border ${borderColor} p-6 backdrop-blur-sm card-hover`}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-2 rounded-lg ${modoDark ? "bg-red-500/20" : "bg-red-100"}`}>
+              <FaExclamationTriangle className={`text-xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
+            </div>
+            <h2 className={`text-lg font-bold ${textPrimary}`}>{t("estoqueBaixo.titulo")}</h2>
+            {produtosEstoqueBaixo.length > 0 && (
+              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                modoDark ? "bg-red-500/20 text-red-400" : "bg-red-100 text-red-600"
+              }`}>
+                {produtosEstoqueBaixo.length}
+              </span>
+            )}
+          </div>
+          <div className="hidden md:block">
+            {produtosEstoqueBaixo.length > 0 ? (
+              <>
+                <table className="w-full text-sm text-left">
+                  <thead className={`border-b ${borderColor}`}>
+                    <tr className={textPrimary}>
+                      <th className="py-3 px-4 text-start font-semibold">{t("estoqueBaixo.colunas.produto")}</th>
+                      <th className="py-3 px-4 text-center font-semibold">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
+                      <th className="py-3 px-4 text-center font-semibold">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
+                      <th className="py-3 px-4 text-center font-semibold">{t("Estado")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {produtosAtuais.map((produto, index) => (
+                      <tr
+                        key={produto.id}
+                        className={`border-b ${borderColor} ${bgHover} transition-all duration-200 animate-fade-in-up`}
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        <td className="py-3 px-4 text-start">
+                          <div className="flex items-center gap-3">
+                            <FaBox className={textMuted} />
+                            <span className={textPrimary}>{produto.nome}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span className={`font-bold ${textPrimary}`}>{produto.quantidade}</span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span className={textPrimary}>{produto.quantidadeMin || 0}</span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {produto.quantidade < (produto.quantidadeMin || 0) ? (
+                            <div className="flex items-center justify-center gap-2 text-red-400">
+                              <LuShieldAlert size={18} />
+                              <span className="font-medium">{t("estoqueBaixo.estadoCritico")}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2 text-yellow-400">
+                              <LuTriangleAlert size={18} />
+                              <span className="font-medium">{t("estoqueBaixo.estadoAtencao")}</span>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {totalPaginas > 1 && (
+                  <div className="flex justify-center items-center gap-3 mt-6">
+                    <button
+                      onClick={() => mudarPagina(paginaAtual - 1)}
+                      disabled={paginaAtual === 1}
+                      className={`p-2 rounded-xl transition-all duration-300 ${
+                        paginaAtual === 1 
+                          ? `${bgCard} ${textMuted} cursor-not-allowed` 
+                          : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
+                      }`}
+                    >
+                      <FaAngleLeft />
+                    </button>
+
+                    <div className="flex gap-1">
+                      {[...Array(totalPaginas)].map((_, index) => {
+                        const pagina = index + 1;
+                        const mostrarPagina = 
+                          pagina === 1 || 
+                          pagina === totalPaginas || 
+                          (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
+
+                        if (!mostrarPagina) {
+                          if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
                             return (
-                              <g key={index} dangerouslySetInnerHTML={{
-                                __html: calcularPathSegmento(porcentagem, offsetAcumulado)
-                              }} style={{ color: item.cor }} />
+                              <span key={pagina} className={`px-3 py-1 ${textMuted}`}>
+                                ...
+                              </span>
                             );
                           }
+                          return null;
+                        }
 
-                          return (
-                            <path
-                              key={index}
-                              d={calcularPathSegmento(porcentagem, offsetAcumulado)}
-                              fill={item.cor}
-                              stroke="var(--cor-fundo-bloco)"
-                              strokeWidth="1"
-                              className="transition-all duration-500"
-                            />
-                          );
-                        })}
-                        <circle cx="50" cy="50" r="35" fill="var(--cor-fundo-bloco)" />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-bold text-center" style={{ color: "var(--cor-fonte)" }}>
-                          {totalItens}
-                          <br />
-                          <span className="text-xs" style={{ color: "var(--cor-subtitulo)" }}>
-                            {t("financeiro.itens")}
-                          </span>
+                        return (
+                          <button
+                            key={pagina}
+                            onClick={() => mudarPagina(pagina)}
+                            className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${
+                              pagina === paginaAtual
+                                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105"
+                                : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
+                            }`}
+                          >
+                            {pagina}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => mudarPagina(paginaAtual + 1)}
+                      disabled={paginaAtual === totalPaginas}
+                      className={`p-2 rounded-xl transition-all duration-300 ${
+                        paginaAtual === totalPaginas
+                          ? `${bgCard} ${textMuted} cursor-not-allowed`
+                          : `${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
+                      }`}
+                    >
+                      <FaAngleRight />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className={`text-center py-8 ${textMuted}`}>
+                <FaBox className="text-4xl mx-auto mb-3 opacity-50" />
+                <p>{t("estoqueBaixo.nenhumProduto")}</p>
+              </div>
+            )}
+          </div>
+          <div className="md:hidden space-y-3">
+            {produtosEstoqueBaixo.length === 0 ? (
+              <div className={`text-center p-6 rounded-xl ${bgCard} ${borderColor} border`}>
+                <FaBox className="text-3xl mx-auto mb-3 opacity-50" />
+                <p className={textMuted}>{t("estoqueBaixo.nenhumProduto")}</p>
+              </div>
+            ) : (
+              produtosAtuais.map((produto, index) => (
+                <div
+                  key={produto.id}
+                  className={`border rounded-xl p-4 transition-all duration-200 cursor-pointer ${bgCard} ${borderColor} animate-fade-in-up`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                  onClick={() => toggleExpandirProduto(produto.id)}
+                >
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FaBox className={textMuted} />
+                        <p className={`font-semibold ${textPrimary}`}>{produto.nome}</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className={textMuted}>
+                          {t("estoqueBaixo.colunas.estoqueAtual")}: <span className={`font-bold ${textPrimary}`}>{produto.quantidade}</span>
+                        </span>
+                        <span className={textMuted}>
+                          {t("estoqueBaixo.colunas.estoqueIdeal")}: <span className={textPrimary}>{produto.quantidadeMin || 0}</span>
                         </span>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex-1 space-y-3">
-                    {distribuicaoCategorias.map((item, index) => {
-                      const porcentagem = totalItens > 0 ? ((item.quantidade / totalItens) * 100).toFixed(0) : "0";
-                      return (
-                        <div key={index} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.cor }} />
-                            <span className="font-medium truncate max-w-[80px]" title={item.categoria}>
-                              {item.categoria}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span>{item.quantidade}</span>
-                            <span className="text-gray-500">({porcentagem}%)</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="border rounded-xl p-6 shadow-md transition-all duration-300"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: "var(--cor-borda)",
-            }}
-          >
-            <h2
-              className="text-lg font-semibold mb-4 border-b pb-2"
-              style={{
-                color: "var(--cor-fonte)",
-                borderColor: "var(--cor-borda)",
-              }}
-            >
-              {t("atividades.titulo")}
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
-              {[
-                { valor: contagemVendas, label: t("atividades.contagemVendas"), formato: "number" },
-                { valor: vendas30Dias, label: t("atividades.lucroMensal"), formato: "currency" },
-                { valor: contagemFornecedores, label: t("atividades.contagemFornecedores"), formato: "number" },
-                { valor: contagemProduto, label: t("atividades.contagemItens"), formato: "number" },
-                { valor: contagemFuncionarios, label: t("atividades.contagemFuncionarios"), formato: "number" },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="p-3 rounded-lg"
-                  style={{
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
-                  }}
-                >
-                  <p className="text-xl font-semibold mb-1" style={{ color: "var(--cor-fonte)" }}>
-                    {item.formato === "currency"
-                      ? item.valor.toLocaleString(i18n.language === "en" ? "en-US" : "pt-BR", {
-                        style: "currency",
-                        currency: i18n.language === "en" ? "USD" : "BRL",
-                      })
-                      : item.valor}
-                  </p>
-                  <p className="text-sm text-gray-500">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div
-            className="border rounded-xl p-6 shadow-md transition-all duration-300"
-            style={{
-              backgroundColor: "var(--cor-fundo-bloco)",
-              borderColor: "var(--cor-borda)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = modoDark ? "0 12px 30px rgba(25, 118, 210, 0.25)" : "0 12px 30px rgba(2, 132, 199, 0.2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
-            }}
-          >
-            <h2
-              className="text-lg font-semibold mb-4 border-b pb-2"
-              style={{
-                color: "var(--cor-fonte)",
-                borderColor: "var(--cor-borda)",
-              }}
-            >
-              {t("estoqueBaixo.titulo")}
-            </h2>
-
-            <div className="hidden md:block">
-              <table className="min-w-full text-sm text-left">
-                <thead className="border-b" style={{ borderColor: "var(--cor-borda)" }}>
-                  <tr style={{ color: "var(--cor-fonte)" }} className="font-semibold">
-                    <th className="py-3 px-4 text-start">{t("estoqueBaixo.colunas.produto")}</th>
-                    <th className="py-3 px-4 text-center">{t("estoqueBaixo.colunas.estoqueAtual")}</th>
-                    <th className="py-3 px-4 text-center">{t("estoqueBaixo.colunas.estoqueIdeal")}</th>
-                    <th className="py-3 px-4 text-center">{t("Estado")}</th>
-                  </tr>
-                </thead>
-                <tbody style={{ color: "var(--cor-fonte)" }}>
-                  {produtosAtuais.map((produto) => (
-                    <tr
-                      key={produto.id}
-                      className="border-b transition-all duration-200 cursor-pointer"
-                      style={{ borderColor: "var(--cor-borda)" }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = modoDark ? "rgba(25, 118, 210, 0.15)" : "rgba(2, 132, 199, 0.1)";
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpandirProduto(produto.id);
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }}
+                      className={`p-1 ${bgHover} rounded-lg transition-colors`}
                     >
-                      <td className="py-3 px-4 text-start">{produto.nome}</td>
-                      <td className="py-3 px-4 text-center">{produto.quantidade}</td>
-                      <td className="py-3 px-4 text-center">{produto.quantidadeMin || 0}</td>
-                      <td className="flex items-center justify-center py-3 px-4 text-center">
-                        {produto.quantidade < (produto.quantidadeMin || 0) ? (
-                          <div className="flex items-center gap-1 text-red-400">
-                            <LuShieldAlert size={18} /> {t("estoqueBaixo.estadoCritico")}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1 text-yellow-400">
-                            <LuTriangleAlert size={18} /> {t("estoqueBaixo.estadoAtencao")}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      {produtoExpandido === produto.id ? (
+                        <FaChevronUp className={textMuted} />
+                      ) : (
+                        <FaChevronDown className={textMuted} />
+                      )}
+                    </button>
+                  </div>
 
-            <div className="md:hidden space-y-3">
-              {produtosAtuais.length === 0 ? (
-                <div
-                  className="p-4 text-center rounded-lg"
-                  style={{
-                    color: "var(--cor-subtitulo)",
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                    border: `1px solid ${modoDark ? "rgba(25, 118, 210, 0.3)" : "rgba(2, 132, 199, 0.3)"}`,
-                  }}
-                >
-                  {t("estoqueBaixo.nenhumProduto")}
-                </div>
-              ) : (
-                produtosAtuais.map((produto) => (
                   <div
-                    key={produto.id}
-                    className="border rounded-lg p-4 transition-all duration-200 cursor-pointer"
-                    style={{
-                      backgroundColor: "var(--cor-fundo-bloco)",
-                      borderColor: "var(--cor-borda)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = modoDark ? "rgba(25, 118, 210, 0.15)" : "rgba(2, 132, 199, 0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--cor-fundo-bloco)";
-                    }}
-                    onClick={() => toggleExpandirProduto(produto.id)}
+                    className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${
+                      produtoExpandido === produto.id ? "max-h-96" : "max-h-0"
+                    }`}
                   >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="font-semibold" style={{ color: "var(--cor-fonte)" }}>
-                            {produto.nome}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm">
-                          <span style={{ color: "var(--cor-subtitulo)" }}>
-                            {t("estoqueBaixo.colunas.estoqueAtual")}: {produto.quantidade}
-                          </span>
-                          <span style={{ color: "var(--cor-subtitulo)" }}>
-                            {t("estoqueBaixo.colunas.estoqueIdeal")}: {produto.quantidadeMin || 0}
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleExpandirProduto(produto.id);
-                        }}
-                        className="p-1"
-                        style={{ color: "var(--cor-subtitulo)" }}
-                      >
-                        {produtoExpandido === produto.id ? <FaChevronUp /> : <FaChevronDown />}
-                      </button>
-                    </div>
-
-                    <div className={`mt-3 text-sm overflow-hidden transition-all duration-200 ${produtoExpandido === produto.id ? "max-h-96" : "max-h-0"}`} style={{ color: "var(--cor-fonte)" }}>
-                      <div className="pt-3 border-t" style={{ borderColor: "var(--cor-borda)" }}>
-                        <div className="flex items-center gap-2">
-                          {produto.quantidade < (produto.quantidadeMin || 0) ? (
-                            <>
-                              <LuShieldAlert size={18} className="text-red-400" />
-                              <span className="text-red-400">{t("estoqueBaixo.estadoCritico")}</span>
-                            </>
-                          ) : (
-                            <>
-                              <LuTriangleAlert size={18} className="text-yellow-400" />
-                              <span className="text-yellow-400">{t("estoqueBaixo.estadoAtencao")}</span>
-                            </>
-                          )}
-                        </div>
+                    <div className={`pt-3 border-t ${borderColor}`}>
+                      <div className="flex items-center gap-2">
+                        {produto.quantidade < (produto.quantidadeMin || 0) ? (
+                          <>
+                            <LuShieldAlert size={18} className="text-red-400" />
+                            <span className="text-red-400 font-medium">{t("estoqueBaixo.estadoCritico")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <LuTriangleAlert size={18} className="text-yellow-400" />
+                            <span className="text-yellow-400 font-medium">{t("estoqueBaixo.estadoAtencao")}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            {produtosEstoqueBaixo.length > produtosPorPagina && (
-              <div className="flex justify-center items-center gap-4 mt-6">
-                <button
-                  onClick={() => mudarPagina(paginaAtual - 1)}
-                  disabled={paginaAtual === 1}
-                  className={`p-2 rounded-full transition-colors ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
-                  style={{
-                    color: "var(--cor-fonte)",
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                  }}
-                >
-                  <FaAngleLeft />
-                </button>
-
-                <span className="text-sm font-mono" style={{ color: "var(--cor-fonte)" }}>
-                  {paginaAtual}/{totalPaginas}
-                </span>
-
-                <button
-                  onClick={() => mudarPagina(paginaAtual + 1)}
-                  disabled={paginaAtual === totalPaginas}
-                  className={`p-2 rounded-full transition-colors ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:bg-opacity-20"}`}
-                  style={{
-                    color: "var(--cor-fonte)",
-                    backgroundColor: modoDark ? "rgba(25, 118, 210, 0.1)" : "rgba(2, 132, 199, 0.1)",
-                  }}
-                >
-                  <FaAngleRight />
-                </button>
-              </div>
+                </div>
+              ))
             )}
           </div>
         </div>
