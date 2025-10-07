@@ -2,7 +2,7 @@
 import { cores } from "@/utils/cores";
 import { ClienteI } from "@/utils/types/clientes";
 import { useEffect, useState } from "react";
-import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaChevronDown, FaChevronUp, FaEdit, FaEye, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaSearch, FaPhoneAlt, FaLock, FaMapMarkerAlt, FaEdit, FaEye, FaAngleLeft, FaAngleRight, FaUserPlus, FaUsers, FaTimes } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -80,40 +80,115 @@ export default function Clientes() {
 
     const style = document.createElement("style");
     style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+        
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(45deg, ${modoDark ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
+        padding: 1px;
+        border-radius: 16px;
+      }
+      
+      .gradient-border > div {
+        background: ${modoDark ? "#1E293B" : "#FFFFFF"};
+        border-radius: 15px;
+      }
+      
+      .scroll-custom {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      
+      .scroll-custom::-webkit-scrollbar {
         width: 6px;
       }
       
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      .scroll-custom::-webkit-scrollbar-track {
+        background: ${modoDark ? "#1E293B" : "#F1F5F9"};
         border-radius: 3px;
       }
-    }
-  `;
+      
+      .scroll-custom::-webkit-scrollbar-thumb {
+        background: ${modoDark ? "#3B82F6" : "#94A3B8"};
+        border-radius: 3px;
+      }
+      
+      .scroll-custom::-webkit-scrollbar-thumb:hover {
+        background: ${modoDark ? "#2563EB" : "#64748B"};
+      }
+      
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      html::-webkit-scrollbar {
+        width: 10px;
+      }
+      
+      html::-webkit-scrollbar-track {
+        background: ${modoDark ? "#132F4C" : "#F8FAFC"};
+      }
+      
+      html::-webkit-scrollbar-thumb {
+        background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
+        border-radius: 5px;
+        border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+      }
+      
+      html::-webkit-scrollbar-thumb:hover {
+        background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
+      }
+      
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
+      }
+      
+      @media (max-width: 768px) {
+        html::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        html::-webkit-scrollbar-thumb {
+          border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
+          border-radius: 3px;
+        }
+      }
+    `;
     document.head.appendChild(style);
 
     const carregarDados = async () => {
@@ -160,9 +235,9 @@ export default function Clientes() {
 
       const responseUsuario = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${usuarioValor}`, {
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
       });
       const usuario = await responseUsuario.json();
       setEmpresaId(usuario.empresaId);
@@ -175,9 +250,9 @@ export default function Clientes() {
 
       const responseClientes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/clientes`, {
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
       });
       const clientesData = await responseClientes.json();
       const clientesOrdenados = (clientesData.clientes || []).sort((a: ClienteI, b: ClienteI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -250,6 +325,8 @@ export default function Clientes() {
       icon: "warning",
       confirmButtonText: t("empresaNaoAtivada.botao"),
       confirmButtonColor: "#3085d6",
+      background: modoDark ? temaAtual.card : "#FFFFFF",
+      color: modoDark ? temaAtual.texto : temaAtual.texto,
     }).then((result) => {
       if (result.isConfirmed) {
         router.push("/ativacao");
@@ -314,14 +391,13 @@ export default function Clientes() {
 
   if (!podeVisualizar) {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="w-full max-w-6xl">
-          <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-            {t("titulo")}
-          </h1>
-          <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-            {t("semPermissaoVisualizar")}
+      <div className={`min-h-screen ${modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100"} flex items-center justify-center px-4`}>
+        <div className="text-center">
+          <div className={`w-24 h-24 mx-auto mb-6 ${modoDark ? "bg-red-500/20" : "bg-red-100"} rounded-full flex items-center justify-center`}>
+            <FaLock className={`text-3xl ${modoDark ? "text-red-400" : "text-red-500"}`} />
           </div>
+          <h1 className={`text-2xl font-bold ${modoDark ? "text-white" : "text-slate-900"} mb-4`}>{t("acessoRestrito")}</h1>
+          <p className={modoDark ? "text-gray-300" : "text-slate-600"}>{t("semPermissaoVisualizar")}</p>
         </div>
       </div>
     );
@@ -351,6 +427,8 @@ export default function Clientes() {
           text: `${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}`,
           icon: "warning",
           confirmButtonColor: "#013C3C",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         return;
       }
@@ -380,6 +458,8 @@ export default function Clientes() {
           text: t("sucesso.adicionarCliente"),
           icon: "success",
           confirmButtonColor: "#013C3C",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         setModalAberto(false);
         window.location.reload();
@@ -389,6 +469,8 @@ export default function Clientes() {
           title: t("erro.titulo"),
           text: t("erro.mensagem"),
           confirmButtonColor: "#013C3C",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     });
@@ -408,6 +490,8 @@ export default function Clientes() {
           text: `${t("nome")} ${t("modal.camposObrigatorios.texto", "é obrigatório")}`,
           icon: "warning",
           confirmButtonColor: "#013C3C",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
         return;
       }
@@ -433,6 +517,8 @@ export default function Clientes() {
             text: "Cliente atualizado com sucesso!",
             icon: "success",
             confirmButtonColor: "#013C3C",
+            background: modoDark ? temaAtual.card : "#FFFFFF",
+            color: modoDark ? temaAtual.texto : temaAtual.texto,
           });
           setModalVisualizar(null);
           window.location.reload();
@@ -446,6 +532,8 @@ export default function Clientes() {
           title: "Oops...",
           text: "Algo deu errado ao atualizar o cliente.",
           confirmButtonColor: "#013C3C",
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     });
@@ -474,6 +562,8 @@ export default function Clientes() {
         cancelButtonColor: "#d33",
         confirmButtonText: t("confirmacao.excluir.confirmar"),
         cancelButtonText: t("confirmacao.excluir.cancelar"),
+        background: modoDark ? temaAtual.card : "#FFFFFF",
+        color: modoDark ? temaAtual.texto : temaAtual.texto,
       });
 
       if (result.isConfirmed) {
@@ -503,6 +593,8 @@ export default function Clientes() {
         title: t("info.semTelefone.titulo"),
         text: t("info.semTelefone.mensagem"),
         confirmButtonColor: "#3085d6",
+        background: modoDark ? temaAtual.card : "#FFFFFF",
+        color: modoDark ? temaAtual.texto : temaAtual.texto,
       });
       return;
     }
@@ -548,275 +640,213 @@ export default function Clientes() {
     });
   }
 
-  const toggleExpandirCliente = (id: string) => {
-    setClienteExpandido(clienteExpandido === id ? null : id);
-  };
+  const bgGradient = modoDark
+    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+
+  const textPrimary = modoDark ? "text-white" : "text-slate-900";
+  const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
+  const textMuted = modoDark ? "text-gray-400" : "text-black";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-gray-50/80";
+  const borderColor = modoDark ? "border-blue-500/30" : "border-blue-400";
+  const bgInput = modoDark ? "bg-slate-700/50" : "bg-gray-200";
+  const bgStats = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo }}>
-      <div className="w-full max-w-6xl">
-        <h1 className="text-center text-xl md:text-2xl font-mono mb-3 md:mb-6" style={{ color: temaAtual.texto }}>
-          {t("titulo")}
-        </h1>
+    <div className={`min-h-screen ${bgGradient}`}>
+      <div className="flex">
+        <div className="flex-1 min-w-0">
+          <div className="px-4 sm:px-6 py-8 w-full max-w-7xl mx-auto">
+            <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${modoDark ? "bg-slate-800/30" : "bg-white/30"} backdrop-blur-sm border ${borderColor}`}>
+              <div className="absolute inset-0">
+                <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
+              </div>
 
-        {empresaId && !empresaAtivada && (
-          <div
-            className="mb-6 p-4 rounded-lg flex items-center gap-3"
-            style={{
-              backgroundColor: temaAtual.primario + "20",
-              color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`,
-            }}
-          >
-            <FaLock className="text-xl" />
-            <div>
-              <p className="font-bold">{t("empresaNaoAtivada.alertaTitulo")}</p>
-              <p>{t("empresaNaoAtivada.alertaMensagem")}</p>
+              <div className="relative z-10 text-center">
+                <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
+                  {t("titulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t("clientes")}</span>
+                </h1>
+                <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>{t("subtitulo")}</p>
+              </div>
+            </section>
+
+            <div className="flex justify-start mb-6">
+              <div className="gradient-border animate-fade-in-up w-full max-w-xs">
+                <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className={`text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-1`}>
+                        {clientesDaEmpresa.length}
+                      </div>
+                      <div className={textMuted}>{t("stats.total")}</div>
+                    </div>
+                    <div className={`p-2 rounded-lg ${modoDark ? "bg-blue-500/10" : "bg-blue-50"}`}>
+                      <FaUsers className={`text-xl bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent`} />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-3 md:mb-6">
-          <div className="flex items-center gap-4">
-            <div
-              className="flex items-center border rounded-full px-3 md:px-4 py-1 md:py-2 shadow-sm flex-1"
-              style={{
-                backgroundColor: temaAtual.card,
-                borderColor: temaAtual.borda,
-              }}
-            >
-              <input
-                type="text"
-                placeholder={t("buscar")}
-                className="outline-none font-mono text-sm bg-transparent placeholder-gray-400"
-                style={{
-                  color: temaAtual.texto,
-                }}
-                value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setPaginaAtual(1);
-                }}
-              />
-              <FaSearch className="ml-2" style={{ color: temaAtual.primario }} />
-            </div>
-            {totalPaginas > 1 && (
-              <div className="flex items-center gap-2">
-                <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-2 rounded-full ${paginaAtual === 1 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
-                  <FaAngleLeft />
-                </button>
-
-                <span className="text-sm font-mono" style={{ color: temaAtual.texto }}>
-                  {paginaAtual}/{totalPaginas}
-                </span>
-
-                <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-2 rounded-full ${paginaAtual === totalPaginas ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"}`} style={{ color: temaAtual.texto }}>
-                  <FaAngleRight />
-                </button>
+            {empresaId && !empresaAtivada && (
+              <div className={`mb-4 p-4 rounded-2xl flex items-center gap-3 ${modoDark ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30" : "bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200"}`}>
+                <div className={`p-2 ${modoDark ? "bg-orange-500/20" : "bg-orange-100"} rounded-xl`}>
+                  <FaLock className={`text-xl ${modoDark ? "text-orange-400" : "text-orange-500"}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-bold ${textPrimary} text-sm`}>{t("empresaNaoAtivada.alertaTitulo")}</p>
+                  <p className={textMuted}>{t("empresaNaoAtivada.alertaMensagem")}</p>
+                </div>
               </div>
             )}
-          </div>
 
-          {podeCriar && empresaAtivada && (
-            <button
-              onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
-              className="px-6 py-2 border-2 rounded-lg transition-all duration-200 hover:scale-105 cursor-pointer font-mono text-sm"
-              style={{
-                backgroundColor: temaAtual.primario,
-                borderColor: temaAtual.primario,
-                color: "#FFFFFF",
-              }}
-            >
-              {t("novoCliente")}
-            </button>
-          )}
-        </div>
+            <div className="flex flex-col lg:flex-row gap-4 mb-6 items-start lg:items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full">
+                <div className="relative flex-1 max-w-md">
+                  <div className={`absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 transition-opacity duration-300`}></div>
+                  <div className={`relative flex items-center ${bgCard} rounded-xl px-4 py-3 border ${borderColor} backdrop-blur-sm`}>
+                    <FaSearch className={`${modoDark ? "text-blue-400" : "text-blue-500"} mr-3 text-sm`} />
+                    <input
+                      type="text"
+                      placeholder={t("buscar")}
+                      value={busca}
+                      onChange={(e) => {
+                        setBusca(e.target.value);
+                        setPaginaAtual(1);
+                      }}
+                      className={`bg-transparent border-none outline-none ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} w-full text-sm`}
+                    />
+                  </div>
+                </div>
 
-        <div
-          className="border rounded-xl shadow"
-          style={{
-            backgroundColor: temaAtual.card,
-            borderColor: temaAtual.borda,
-          }}
-        >
-          {!empresaId || clientesDaEmpresa.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-              {t("nenhumClienteEncontrado")}
-            </div>
-          ) : clientesFiltrados.length === 0 ? (
-            <div className="p-4 text-center" style={{ color: temaAtual.texto }}>
-              {t("nenhumClienteEncontradoBusca")}
-            </div>
-          ) : (
-            <>
-              <div className="hidden md:block">
-                <table className="w-full text-sm font-mono">
-                  <thead className="border-b" style={{ borderColor: temaAtual.borda }}>
-                    <tr style={{ color: temaAtual.texto }}>
-                      <th className="py-3 px-4 text-center">{t("nome")}</th>
-                      <th className="py-3 px-4 text-center">{t("email")}</th>
-                      <th className="py-3 px-4 text-center">{t("telefone")}</th>
-                      <th className="py-3 px-4 text-center">{t("endereco")}</th>
-                      <th className="py-3 px-4 text-center">{t("adicionadoEm")}</th>
-                      <th className="py-3 px-4 text-center">{t("contato")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {clientesAtuais.map((cliente: ClienteI) => (
-                      <tr
-                        key={cliente.id}
-                        className="border-b transition-all duration-200 cursor-pointer"
-                        style={{
-                          color: temaAtual.texto,
-                          borderColor: temaAtual.borda,
-                          backgroundColor: temaAtual.card,
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = temaAtual.hover;
-                          e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = temaAtual.card;
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
-                      >
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(cliente);
-                            setForm(cliente);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          {cliente.nome}
-                        </td>
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(cliente);
-                            setForm(cliente);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          {cliente.email || "-"}
-                        </td>
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(cliente);
-                            setForm(cliente);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          {formatarTelefone(cliente.telefone || "")}
-                        </td>
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(cliente);
-                            setForm(cliente);
-                          }}
-                          className="py-3 px-4 text-center max-w-[200px] truncate"
-                          title={formatarEndereco(cliente) || "-"}
-                        >
-                          <div className="flex items-center justify-center gap-1">
-                            <FaMapMarkerAlt />
-                            <span className="truncate">{formatarEndereco(cliente) || "-"}</span>
-                          </div>
-                        </td>
-                        <td
-                          onClick={() => {
-                            setModalVisualizar(cliente);
-                            setForm(cliente);
-                          }}
-                          className="py-3 px-4 text-center"
-                        >
-                          {formatarData(cliente.createdAt)}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <FaPhoneAlt onClick={() => handleEntrarContato(cliente)} color="#25D366" size={32} className="cursor-pointer m-auto border-2 p-1 rounded-2xl transition hover:scale-110" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {totalPaginas > 1 && (
+                    <div className={`flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl px-3 py-2`}>
+                      <button onClick={() => mudarPagina(paginaAtual - 1)} disabled={paginaAtual === 1} className={`p-1 cursor-pointer rounded-lg transition-all duration-300 ${paginaAtual === 1 ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                        <FaAngleLeft className="text-sm" />
+                      </button>
+
+                      <span className={`${textPrimary} text-sm mx-2`}>
+                        {paginaAtual}/{totalPaginas}
+                      </span>
+
+                      <button onClick={() => mudarPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas} className={`p-1 cursor-pointer rounded-lg transition-all duration-300 ${paginaAtual === totalPaginas ? `${textMuted} cursor-not-allowed` : `${textPrimary} ${bgHover} hover:scale-105`}`}>
+                        <FaAngleRight className="text-sm" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="md:hidden space-y-2 p-2">
-                {clientesAtuais.map((cliente) => (
-                  <div
-                    key={cliente.id}
-                    className="border rounded-lg p-3 transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: temaAtual.card,
-                      borderColor: temaAtual.borda,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = temaAtual.hover;
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = modoDark ? "0 4px 12px rgba(30, 73, 118, 0.3)" : "0 4px 12px rgba(2, 132, 199, 0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = temaAtual.card;
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                    onClick={() => toggleExpandirCliente(cliente.id)}
+              <div className="flex items-center gap-3 mt-4 lg:mt-0">
+                {podeCriar && empresaAtivada && (
+                  <button
+                    onClick={() => handleAcaoProtegida(() => setModalAberto(true))}
+                    className="px-4 py-3 bg-gradient-to-r cursor-pointer from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm"
                   >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold truncate" style={{ color: temaAtual.texto }}>
-                            {cliente.nome}
-                          </span>
+                    <FaUserPlus className="text-sm" />
+                    {t("novoCliente")}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {!empresaId || clientesDaEmpresa.length === 0 ? (
+              <div className="text-center py-12">
+                <div className={`w-24 h-24 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
+                  <FaUsers className={`text-2xl ${textMuted}`} />
+                </div>
+                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t("nenhumClienteEncontrado")}</h3>
+                <p className={`${textMuted} mb-4 text-sm`}>{t("comeceAdicionando")}</p>
+                {podeCriar && empresaAtivada && (
+                  <button onClick={() => setModalAberto(true)} className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm">
+                    <FaUserPlus />
+                    {t("adicionarPrimeiroCliente")}
+                  </button>
+                )}
+              </div>
+            ) : clientesFiltrados.length === 0 ? (
+              <div className="text-center py-12">
+                <div className={`w-24 h-24 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
+                  <FaSearch className={`text-2xl ${textMuted}`} />
+                </div>
+                <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t("nenhumClienteEncontradoBusca")}</h3>
+                <p className={`${textMuted} mb-4 text-sm`}>{t("tenteOutroTermo")}</p>
+              </div>
+            ) : (
+              <div className="space-y-3 mb-6">
+                {clientesAtuais.map((cliente) => {
+                  return (
+                    <div
+                      key={cliente.id}
+                      className={`${modoDark
+                        ? "bg-slate-800/50"
+                        : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
+                        } rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"
+                        } p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-cyan-500`}>
+                              <span className="text-lg font-bold text-white">
+                                {cliente.nome.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs" style={{ color: temaAtual.placeholder }}>
-                          <span>{formatarData(cliente.createdAt)}</span>
-                        </div>
-                      </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
+                            <div>
+                              <h3 className={`font-bold ${textPrimary} line-clamp-1 text-sm`}>{cliente.nome}</h3>
+                              <p className={`${textMuted} text-xs line-clamp-2 mt-1`}>{cliente.email || t("semEmail")}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white`}>
+                                {formatarTelefone(cliente.telefone || "")}
+                              </span>
+                            </div>
+                          </div>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEntrarContato(cliente);
-                          }}
-                          className="text-green-500 hover:text-green-300 p-1 transition"
-                        >
-                          <FaPhoneAlt />
-                        </button>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpandirCliente(cliente.id);
-                          }}
-                          className="p-1 transition"
-                          style={{ color: temaAtual.primario }}
-                        >
-                          {clienteExpandido === cliente.id ? <FaChevronUp /> : <FaChevronDown />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className={`mt-2 text-sm overflow-hidden transition-all duration-200 ${clienteExpandido === cliente.id ? "max-h-96" : "max-h-0"}`} style={{ color: temaAtual.texto }}>
-                      <div className="pt-2 border-t space-y-2" style={{ borderColor: temaAtual.borda }}>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("email")}:</span>
-                          <span>{cliente.email || "-"}</span>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div>
+                              <span className={textMuted}>{t("adicionadoEm")}: </span>
+                              <span className={textPrimary}>{formatarData(cliente.createdAt)}</span>
+                            </div>
+                            <div>
+                              <span className={textMuted}>{t("ultimaAtualizacao")}: </span>
+                              <span className={textPrimary}>{formatarData(cliente.updatedAt)}</span>
+                            </div>
+                            <div>
+                              <span className={textMuted}>{t("endereco")}: </span>
+                              <span className={`flex items-center gap-1 ${textPrimary}`}>
+                                <FaMapMarkerAlt className="text-xs" />
+                                {formatarEndereco(cliente) || t("semEndereco")}
+                              </span>
+                            </div>
+                            <div>
+                              <span className={textMuted}>{t("contato")}: </span>
+                              <span className={`${cliente.telefone ? "text-green-500" : "text-red-500"} font-medium`}>
+                                {cliente.telefone ? t("disponivel") : t("indisponivel")}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("telefone")}:</span>
-                          <span>{formatarTelefone(cliente.telefone || "")}</span>
-                        </div>
-                        <div className="flex">
-                          <span className="font-semibold min-w-[80px]">{t("endereco")}:</span>
-                          <span className="flex items-center gap-1">
-                            <FaMapMarkerAlt />
-                            {formatarEndereco(cliente) || "-"}
-                          </span>
-                        </div>
+                        <div className="flex gap-2 min-w-[120px]">
+                          <button
+                            onClick={() => handleEntrarContato(cliente)}
+                            disabled={!cliente.telefone}
+                            className={`p-2 rounded-lg cursor-pointer transition-all duration-300 flex items-center justify-center ${cliente.telefone
+                              ? "bg-green-500 hover:bg-green-600 text-white"
+                              : "bg-gray-400 cursor-not-allowed text-white"
+                              }`}
+                          >
+                            <FaPhoneAlt className="text-xs" />
+                          </button>
 
-                        <div className="flex justify-end gap-2 pt-2">
                           {podeEditar ? (
                             <button
                               onClick={(e) => {
@@ -824,13 +854,10 @@ export default function Clientes() {
                                 setModalVisualizar(cliente);
                                 setForm(cliente);
                               }}
-                              className="flex items-center gap-1 px-3 py-1 rounded text-sm transition"
-                              style={{
-                                backgroundColor: temaAtual.primario,
-                                color: "#FFFFFF",
-                              }}
+                              className="px-2 py-1 rounded-lg cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
                             >
-                              <FaEdit /> {t("editar")}
+                              <FaEdit className="text-xs" />
+                              {t("editar")}
                             </button>
                           ) : (
                             <button
@@ -839,237 +866,246 @@ export default function Clientes() {
                                 setModalVisualizar(cliente);
                                 setForm(cliente);
                               }}
-                              className="flex items-center gap-1 px-3 py-1 rounded text-sm transition"
-                              style={{
-                                backgroundColor: temaAtual.primario,
-                                color: "#FFFFFF",
-                              }}
+                              className="px-2 py-1 rounded-lg cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
                             >
-                              <FaEye /> {t("visualizar")}
+                              <FaEye className="text-xs" />
+                              {t("visualizar")}
                             </button>
                           )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            </>
-          )}
+            )}
+
+            {totalPaginas > 1 && (
+              <div className="flex justify-center items-center gap-3 mt-6">
+                <button
+                  onClick={() => mudarPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === 1
+                    ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed`
+                    : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`
+                    }`}
+                >
+                  <FaAngleLeft className="text-sm" />
+                </button>
+
+                <div className="flex gap-1">
+                  {[...Array(totalPaginas)].map((_, index) => {
+                    const pagina = index + 1;
+                    const mostrarPagina = pagina === 1 || pagina === totalPaginas || (pagina >= paginaAtual - 1 && pagina <= paginaAtual + 1);
+
+                    if (!mostrarPagina) {
+                      if (pagina === paginaAtual - 2 || pagina === paginaAtual + 2) {
+                        return (
+                          <span key={pagina} className={`px-2 py-1 ${textMuted} text-sm`}>
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={pagina}
+                        onClick={() => mudarPagina(pagina)}
+                        className={`px-3 py-1 rounded-xl transition-all duration-300 text-sm ${pagina === paginaAtual
+                          ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-105"
+                          : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor} hover:scale-105`
+                          }`}
+                      >
+                        {pagina}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => mudarPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className={`p-2 rounded-xl transition-all duration-300 ${paginaAtual === totalPaginas
+                    ? `${modoDark ? "bg-slate-800/30" : "bg-slate-100"} ${textMuted} cursor-not-allowed`
+                    : `${modoDark ? "bg-blue-500/10 hover:bg-blue-500/20" : "bg-blue-50 hover:bg-blue-100"} ${textPrimary} border ${borderColor} hover:scale-105`
+                    }`}
+                >
+                  <FaAngleRight className="text-sm" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {(modalAberto || modalVisualizar) && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-2" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
-          <div
-            className="p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
-            style={{
-              backgroundColor: temaAtual.card,
-              color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`,
-            }}
-          >
-            <h2 className="text-lg md:text-xl font-bold mb-4">{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block mb-1 text-sm">
-                  {t("nome")} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  placeholder={t("nome")}
-                  value={form.nome || ""}
-                  onChange={handleNomeChange}
-                  className="w-full rounded p-2 border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    borderColor: temaAtual.borda,
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
+          <div className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm`} onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className={`text-xl font-bold ${textPrimary}`}>{modalVisualizar ? t("visualizarCliente") : t("novoCliente")}</h2>
+                <button
+                  onClick={() => {
+                    setModalAberto(false);
+                    setModalVisualizar(null);
                   }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={20}
-                />
-                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite"}
-                </div>
+                  className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
+                >
+                  <FaTimes className="text-lg" />
+                </button>
               </div>
 
-              <div>
-                <label className="block mb-1 text-sm">{t("email")} <span className="text-red-500">*</span></label>
-                <input
-                  placeholder={t("email")}
-                  value={form.email || ""}
-                  onChange={handleEmailChange}
-                  className="w-full rounded p-2 border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    borderColor: temaAtual.borda,
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={45}
-                />
-                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite"}
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-1 text-sm">{t("telefone")}</label>
-                <input
-                  placeholder={t("telefone")}
-                  value={form.telefone || ""}
-                  onChange={handleTelefoneChange}
-                  className="w-full rounded p-2 border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    borderColor: temaAtual.borda,
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={11}
-                />
-                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {telefoneCaracteres}/11 {telefoneCaracteres === 11 && " - Limite"}
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-1 text-sm">{t("endereco")}</label>
-                <input
-                  placeholder={t("endereco")}
-                  value={form.endereco || ""}
-                  onChange={handleEnderecoChange}
-                  className="w-full rounded p-2 border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    borderColor: temaAtual.borda,
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={50}
-                />
-                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite"}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-4">
                 <div>
-                  <label className="block mb-1 text-sm">{t("cidade")}</label>
+                  <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
+                    {t("nome")} <span className="text-red-400">*</span>
+                  </label>
                   <input
-                    placeholder={t("cidade")}
-                    value={form.cidade || ""}
-                    onChange={handleCidadeChange}
-                    className="w-full rounded p-2 border"
-                    style={{
-                      backgroundColor: temaAtual.card,
-                      color: temaAtual.texto,
-                      borderColor: temaAtual.borda,
-                    }}
+                    placeholder={t("nome")}
+                    value={form.nome || ""}
+                    onChange={handleNomeChange}
+                    className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
                     maxLength={20}
                   />
                   <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                    {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite"}
+                    {nomeCaracteres}/20 {nomeCaracteres === 20 && " - Limite"}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm">{t("estado")}</label>
+                  <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("email")}</label>
                   <input
-                    placeholder={t("estado")}
-                    value={form.estado || ""}
-                    onChange={handleEstadoChange}
-                    className="w-full rounded p-2 border"
-                    style={{
-                      backgroundColor: temaAtual.card,
-                      color: temaAtual.texto,
-                      borderColor: temaAtual.borda,
-                    }}
+                    placeholder={t("email")}
+                    value={form.email || ""}
+                    onChange={handleEmailChange}
+                    className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
                     disabled={Boolean(!podeEditar && modalVisualizar)}
-                    maxLength={2}
+                    maxLength={45}
                   />
                   <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                    {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite"}
+                    {emailCaracteres}/45 {emailCaracteres === 45 && " - Limite"}
+                  </div>
+                </div>
+
+                <div>
+                  <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("telefone")}</label>
+                  <input
+                    placeholder={t("telefone")}
+                    value={form.telefone || ""}
+                    onChange={handleTelefoneChange}
+                    className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    maxLength={11}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {telefoneCaracteres}/11 {telefoneCaracteres === 11 && " - Limite"}
+                  </div>
+                </div>
+
+                <div>
+                  <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("endereco")}</label>
+                  <input
+                    placeholder={t("endereco")}
+                    value={form.endereco || ""}
+                    onChange={handleEnderecoChange}
+                    className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    maxLength={50}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {enderecoCaracteres}/50 {enderecoCaracteres === 50 && " - Limite"}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("cidade")}</label>
+                    <input
+                      placeholder={t("cidade")}
+                      value={form.cidade || ""}
+                      onChange={handleCidadeChange}
+                      className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                      disabled={Boolean(!podeEditar && modalVisualizar)}
+                      maxLength={20}
+                    />
+                    <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                      {cidadeCaracteres}/20 {cidadeCaracteres === 20 && " - Limite"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("estado")}</label>
+                    <input
+                      placeholder={t("estado")}
+                      value={form.estado || ""}
+                      onChange={handleEstadoChange}
+                      className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                      disabled={Boolean(!podeEditar && modalVisualizar)}
+                      maxLength={2}
+                    />
+                    <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                      {estadoCaracteres}/2 {estadoCaracteres === 2 && " - Limite"}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>{t("cep")}</label>
+                  <input
+                    placeholder={t("cep")}
+                    value={form.cep || ""}
+                    onChange={handleCepChange}
+                    className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
+                    disabled={Boolean(!podeEditar && modalVisualizar)}
+                    maxLength={10}
+                  />
+                  <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
+                    {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite"}
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block mb-1 text-sm">{t("cep")}</label>
-                <input
-                  placeholder={t("cep")}
-                  value={form.cep || ""}
-                  onChange={handleCepChange}
-                  className="w-full rounded p-2 border"
-                  style={{
-                    backgroundColor: temaAtual.card,
-                    color: temaAtual.texto,
-                    borderColor: temaAtual.borda,
-                  }}
-                  disabled={Boolean(!podeEditar && modalVisualizar)}
-                  maxLength={10}
-                />
-                <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
-                  {cepCaracteres}/10 {cepCaracteres === 10 && " - Limite"}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between mt-6 flex-wrap gap-2">
-              <button
-                onClick={() => {
-                  setModalAberto(false);
-                  setModalVisualizar(null);
-                }}
-                className="hover:underline cursor-pointer text-sm px-3 py-2 rounded transition"
-                style={{
-                  color: temaAtual.texto,
-                  backgroundColor: temaAtual.hover,
-                }}
-              >
-                {t("fechar")}
-              </button>
-              {modalVisualizar ? (
-                podeEditar && (
-                  <>
-                    <button
-                      onClick={handleSalvarCliente}
-                      className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
-                      style={{
-                        backgroundColor: "#10B981",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {t("salvar")}
-                    </button>
-                    {podeExcluir && (
-                      <button
-                        onClick={handleDelete}
-                        className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
-                        style={{
-                          backgroundColor: "#EF4444",
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        {t("excluir")}
-                      </button>
-                    )}
-                  </>
-                )
-              ) : (
+              <div className="flex justify-between gap-2 pt-4 border-t border-blue-500/20">
                 <button
-                  onClick={handleAdicionarCliente}
-                  className="px-4 py-2 rounded hover:opacity-90 cursor-pointer text-sm transition"
-                  style={{
-                    backgroundColor: "#10B981",
-                    color: "#FFFFFF",
+                  onClick={() => {
+                    setModalAberto(false);
+                    setModalVisualizar(null);
                   }}
+                  className={`px-4 py-2 cursor-pointer ${bgCard} ${bgHover} border ${borderColor} ${textPrimary} rounded-xl transition-all duration-300 hover:scale-105 text-sm`}
                 >
-                  {t("adicionarCliente")}
+                  {t("fechar")}
                 </button>
-              )}
+                {modalVisualizar ? (
+                  podeEditar && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSalvarCliente}
+                        className="px-4 py-2 cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-300 hover:scale-105 text-sm"
+                      >
+                        {t("salvar")}
+                      </button>
+                      {podeExcluir && (
+                        <button
+                          onClick={handleDelete}
+                          className="px-4 py-2 cursor-pointer bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl transition-all duration-300 hover:scale-105 text-sm"
+                        >
+                          {t("excluir")}
+                        </button>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <button
+                    onClick={handleAdicionarCliente}
+                    className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all duration-300 hover:scale-105 text-sm"
+                  >
+                    {t("adicionarCliente")}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

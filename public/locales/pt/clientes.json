@@ -1,10 +1,14 @@
 {
-  "titulo": "Clientes",
+  "titulo": "Gestão de",
+  "clientes": "Clientes",
+  "subtitulo": "Gerencie os clientes da sua empresa",
   "buscar": "Buscar clientes...",
   "novoCliente": "Novo Cliente",
   "visualizarCliente": "Visualizar Cliente",
   "adicionarCliente": "Adicionar Cliente",
+  "adicionarPrimeiroCliente": "Adicionar Primeiro Cliente",
   "editar": "Editar",
+  "visualizar": "Visualizar",
   "fechar": "Fechar",
   "salvar": "Salvar",
   "excluir": "Excluir",
@@ -16,10 +20,22 @@
   "estado": "Estado",
   "cep": "CEP",
   "adicionadoEm": "Adicionado em",
+  "ultimaAtualizacao": "Última atualização",
   "contato": "Contato",
   "nenhumClienteEncontrado": "Nenhum cliente encontrado.",
   "nenhumClienteEncontradoBusca": "Nenhum cliente encontrado para esta busca.",
+  "comeceAdicionando": "Comece adicionando novos clientes à sua empresa",
+  "tenteOutroTermo": "Tente usar outro termo de busca",
   "semPermissaoVisualizar": "Você não possui permissão para visualizar clientes.",
+  "semEmail": "Sem e-mail",
+  "semEndereco": "Sem endereço",
+  "disponivel": "Disponível",
+  "indisponivel": "Indisponível",
+  
+  "stats": {
+    "total": "Total de Clientes"
+  },
+
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",
     "mensagem": "Para acessar todas as funcionalidades, ative sua empresa.",
@@ -27,6 +43,7 @@
     "alertaTitulo": "Empresa não ativada!",
     "alertaMensagem": "Algumas ações estão desabilitadas até que sua empresa seja ativada."
   },
+
   "sucesso": {
     "adicionarCliente": "Cliente adicionado com sucesso!",
     "excluir": {
@@ -34,6 +51,7 @@
       "mensagem": "O cliente foi excluído com sucesso."
     }
   },
+
   "erro": {
     "titulo": "Oops...",
     "mensagem": "Algo deu errado, tente novamente.",
@@ -42,6 +60,7 @@
       "mensagem": "Não foi possível deletar o cliente."
     }
   },
+
   "confirmacao": {
     "excluir": {
       "titulo": "Tem certeza?",
@@ -50,16 +69,20 @@
       "cancelar": "Cancelar"
     }
   },
+
   "info": {
     "semTelefone": {
       "titulo": "Sem telefone",
       "mensagem": "Este cliente não possui um número de telefone cadastrado."
     }
   },
-   "validacao": {
-    "camposObrigatorios": "Campos obrigatórios",
-    "preenchaCampos": "Por favor, preencha os seguintes campos:",
-    "campoObrigatorio": "é obrigatório",
-    "nomeObrigatorio": "O nome é obrigatório"
-  }
+
+  "modal": {
+    "camposObrigatorios": {
+      "titulo": "Campos obrigatórios",
+      "texto": "é obrigatório"
+    }
+  },
+
+  "acessoRestrito": "Acesso Restrito"
 }
