@@ -1,26 +1,46 @@
 {
   "titulo": "Fornecedores",
+  "fornecedores": "Fornecedores",
+  "subtitulo": "Gerencie todos os fornecedores da sua empresa",
   "buscar": "Buscar fornecedores",
+  "buscarPlaceholder": "Buscar por nome, email, CNPJ...",
   "selecionarImagem": "Selecionar Imagem",
   "novoFornecedor": "Novo Fornecedor",
   "nenhumFornecedorEncontrado": "Nenhum fornecedor foi encontrado.",
+  "nenhumFornecedorEncontradoBusca": "Nenhum fornecedor encontrado para sua busca.",
+  "comeceAdicionando": "Comece adicionando seu primeiro fornecedor",
+  "criarPrimeiroFornecedor": "Criar primeiro fornecedor",
   "foto": "Foto",
   "nome": "Nome",
+  "nomePlaceholder": "Digite o nome do fornecedor",
   "cnpj": "CNPJ",
+  "cnpjPlaceholder": "00.000.000/0000-00",
   "email": "E-mail",
+  "emailPlaceholder": "email@exemplo.com",
   "escolherArquivo": "Escolher Arquivo",
   "nenhumArquivoEscolhido": "Nenhum arquivo foi escolhido",
   "telefone": "Telefone",
+  "telefonePlaceholder": "(00) 00000-0000",
   "categoria": "Categoria",
+  "categoriaPlaceholder": "Ex: Eletrônicos, Roupas...",
+  "semCategoria": "Sem categoria",
   "adicionadoEm": "Adicionado em",
   "contato": "Contato",
   "visualizarFornecedor": "Visualizar Fornecedor",
+  "editarFornecedor": "Editar Fornecedor",
   "afiliarFornecedor": "Afiliar Fornecedor",
   "editar": "Editar",
+  "ver": "Ver",
   "fechar": "Fechar",
   "salvar": "Salvar",
+  "atualizar": "Atualizar",
   "excluir": "Excluir",
+  "cancelar": "Cancelar",
+  "enviando": "Enviando...",
+  "limpar": "Limpar",
   "semPermissaoVisualizar": "Você não possui permissão para visualizar fornecedores.",
+  "acessoRestrito": "Acesso Restrito",
+  "acessoRestritoMensagem": "Você não tem permissão para acessar esta página.",
   "empresaNaoAtivada": {
     "titulo": "Empresa não ativada",
     "mensagem": "Por favor, ative sua empresa para realizar esta ação.",
@@ -50,5 +70,56 @@
     "preenchaCampos": "Por favor, preencha os seguintes campos:",
     "campoObrigatorio": "é obrigatório",
     "nomeObrigatorio": "O nome é obrigatório"
-  }
+  },
+  "erroCamposObrigatorios": {
+    "titulo": "Campos obrigatórios",
+    "mensagem": "Preencha os campos obrigatórios:"
+  },
+  "fornecedorCriadoSucesso": {
+    "titulo": "Fornecedor criado com sucesso!"
+  },
+  "fornecedorAtualizadoSucesso": {
+    "titulo": "Fornecedor atualizado com sucesso!"
+  },
+  "fornecedorExcluidoSucesso": {
+    "titulo": "Fornecedor excluído!",
+    "mensagem": "Fornecedor removido com sucesso."
+  },
+  "confirmacaoExclusao": {
+    "titulo": "Tem certeza?",
+    "mensagem": "Esta ação não pode ser revertida!",
+    "botaoConfirmar": "Sim, excluir!",
+    "botaoCancelar": "Cancelar"
+  },
+  "stats": {
+    "total": "Total",
+    "comProdutos": "Com produtos",
+    "semProdutos": "Sem produtos",
+    "categorizados": "Categorizados"
+  },
+  "filtros": {
+    "filtrar": "Filtrar",
+    "titulo": "Filtros",
+    "ordenarPor": "Ordenar por",
+    "campo": "Campo",
+    "categoria": "Categoria",
+    "limparFiltros": "Limpar filtros",
+    "preco": "Preço",
+    "estoque": "Estoque",
+    "nome": "Nome",
+    "valor": "Valor",
+    "quantidade": "Quantidade",
+    "maiorQue": "Maior que",
+    "menorQue": "Menor que",
+    "aZ": "A → Z",
+    "zA": "Z → A",
+    "todasCategorias": "Todas categorias"
+  },
+  "visualizacao": {
+    "tooltipCards": "Visualização em cards",
+    "tooltipLista": "Visualização em lista"
+  },
+  "produtos": "produtos",
+  "semProdutos": "Sem produtos",
+  "visualizacaoLabel": "Visualização"
 }

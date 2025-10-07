@@ -258,7 +258,13 @@ export default function Produtos() {
         }
 
         const [responseFornecedores, responseCategorias] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, { headers: { "user-id": usuarioValor } }),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
+            headers:
+            {
+              "user-id": usuarioValor,
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            }
+          }),
           fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, { headers: { "user-id": usuarioValor } })
         ]);
 
@@ -419,7 +425,7 @@ export default function Produtos() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.head.removeChild(style);
     };
-  }, [modoDark, recarregarProdutos]); 
+  }, [modoDark, recarregarProdutos]);
 
   useEffect(() => {
     if (produtosOriginais.length > 0) {
@@ -1477,141 +1483,139 @@ export default function Produtos() {
                 {tipoVisualizacao === "cards" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
                     {produtosAtuais.map((produto, index) => (
-                        <div
+                      <div
                         key={produto.id}
-                        className={`group ${
-                          modoDark
+                        className={`group ${modoDark
                           ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
                           : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
-                        } rounded-xl border ${
-                          modoDark
-                          ? "border-blue-500/20 hover:border-blue-500/40"
-                          : "border-blue-200 hover:border-blue-300"
-                        } p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
+                          } rounded-xl border ${modoDark
+                            ? "border-blue-500/20 hover:border-blue-500/40"
+                            : "border-blue-200 hover:border-blue-300"
+                          } p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
                         style={{
                           animationDelay: `${index * 100}ms`,
                         }}
-                        >
+                      >
                         <div className="relative mb-3 overflow-hidden rounded-lg">
                           <Image
-                          src={produto.foto || "/out.jpg"}
-                          width={200}
-                          height={150}
-                          className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-110"
-                          alt={produto.nome}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/out.jpg";
-                          }}
+                            src={produto.foto || "/out.jpg"}
+                            width={200}
+                            height={150}
+                            className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-110"
+                            alt={produto.nome}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/out.jpg";
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${produto.quantidade <= (produto.quantidadeMin || 0) ? "bg-red-500/90 text-white" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "bg-yellow-500/90 text-white" : "bg-green-700 text-white"}`}>{produto.quantidade}</div>
                           {podeEditar && (
-                          <div className="absolute bottom-2 right-2 xl:hidden">
-                            <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setModalVisualizar(produto);
-                              setForm(produto);
-                            }}
-                            className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
-                            >
-                            <FaEdit className="text-xs" />
-                            </button>
-                          </div>
+                            <div className="absolute bottom-2 right-2 xl:hidden">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalVisualizar(produto);
+                                  setForm(produto);
+                                }}
+                                className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                              >
+                                <FaEdit className="text-xs" />
+                              </button>
+                            </div>
                           )}
                           <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1 xl:flex">
-                          <button
-                            onClick={() => {
-                            setModalVisualizar(produto);
-                            setForm(produto);
-                            }}
-                            className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
-                          >
-                            <FaEye className="text-xs" />
-                            {t("ver")}
-                          </button>
-                          {podeEditar && (
                             <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setModalVisualizar(produto);
-                              setForm(produto);
-                            }}
-                            className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm xl:flex hidden"
+                              onClick={() => {
+                                setModalVisualizar(produto);
+                                setForm(produto);
+                              }}
+                              className="flex-1 cursor-pointer bg-blue-600/90 hover:bg-blue-700/90 text-white py-1 px-2 rounded text-xs transition-all duration-300 transform hover:scale-105 backdrop-blur-sm flex items-center justify-center gap-1"
                             >
-                            <FaEdit className="text-xs" />
+                              <FaEye className="text-xs" />
+                              {t("ver")}
                             </button>
-                          )}
+                            {podeEditar && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalVisualizar(produto);
+                                  setForm(produto);
+                                }}
+                                className="cursor-pointer bg-green-600/90 hover:bg-green-700/90 text-white p-1 rounded transition-all duration-300 transform hover:scale-105 backdrop-blur-sm xl:flex hidden"
+                              >
+                                <FaEdit className="text-xs" />
+                              </button>
+                            )}
                           </div>
                         </div>
                         <h3 className={`font-bold ${textPrimary} mb-1 line-clamp-2 group-hover:text-blue-500 transition-colors text-sm leading-tight`}>{produto.nome}</h3>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
                           {podeGerenciarCatalogo && (
-                          <button
-                            onClick={(e) => {
-                            e.stopPropagation();
-                            toggleCatalogo(produto.id, produto.noCatalogo);
-                            }}
-                            className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
-                          >
-                            {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
-                          </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCatalogo(produto.id, produto.noCatalogo);
+                              }}
+                              className={`p-1 ${modoDark ? "hover:bg-yellow-500/20" : "hover:bg-yellow-100"} rounded transition-colors`}
+                            >
+                              {produto.noCatalogo ? <FaStar className="text-yellow-500 text-base" /> : <FaRegStar className={`${textMuted} text-base hover:text-yellow-500`} />}
+                            </button>
                           )}
                         </div>
 
                         <div className={`space-y-1 text-xs ${textMuted} mb-2`}>
                           <div className="flex justify-between">
-                          <span className="flex items-center gap-1">
-                            <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
-                            {t("categoria")}:
-                          </span>
-                          <span className={textPrimary}>
-                            {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
-                          </span>
+                            <span className="flex items-center gap-1">
+                              <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                              {t("categoria")}:
+                            </span>
+                            <span className={textPrimary}>
+                              {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                          <span className="flex items-center gap-1">
-                            <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
-                            {t("fornecedor")}:
-                          </span>
-                          <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
+                            <span className="flex items-center gap-1">
+                              <FaWarehouse className={modoDark ? "text-green-400" : "text-green-500"} />
+                              {t("fornecedor")}:
+                            </span>
+                            <span className={textPrimary}>{produto.fornecedor?.nome || "-"}</span>
                           </div>
                         </div>
 
                         <div className="mb-2">
                           <div className="flex justify-between text-xs mb-1">
-                          <span className={textMuted}>{t("estoque")}</span>
-                          <span className={textPrimary}>
-                            {produto.quantidade} {t("unidades")}
-                          </span>
+                            <span className={textMuted}>{t("estoque")}</span>
+                            <span className={textPrimary}>
+                              {produto.quantidade} {t("unidades")}
+                            </span>
                           </div>
                           <div className={`w-full ${modoDark ? "bg-slate-700" : "bg-slate-200"} rounded-full h-1.5`}>
-                          <div
-                            className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2 ? "bg-gradient-to-r from-green-500 to-emerald-500" : produto.quantidade > (produto.quantidadeMin || 0) ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-gradient-to-r from-red-500 to-pink-500"}`}
-                            style={{
-                            width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`,
-                            }}
-                          />
+                            <div
+                              className={`h-1.5 rounded-full transition-all duration-1000 ${produto.quantidade > (produto.quantidadeMin || 0) * 2 ? "bg-gradient-to-r from-green-500 to-emerald-500" : produto.quantidade > (produto.quantidadeMin || 0) ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-gradient-to-r from-red-500 to-pink-500"}`}
+                              style={{
+                                width: `${Math.min((produto.quantidade / ((produto.quantidadeMin || 1) * 3)) * 100, 100)}%`,
+                              }}
+                            />
                           </div>
                         </div>
 
                         {podeGerenciarEstoque && (
                           <div className="mt-2">
-                          <button
-                            onClick={() => abrirModalEstoque(produto)}
-                            className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
-                            style={{
-                            background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
-                            color: "#FFFFFF",
-                            }}
-                          >
-                            <FaBox size={14} />
-                            {t("estoque")}
-                          </button>
+                            <button
+                              onClick={() => abrirModalEstoque(produto)}
+                              className="w-full px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold hover:scale-105 shadow-lg"
+                              style={{
+                                background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              <FaBox size={14} />
+                              {t("estoque")}
+                            </button>
                           </div>
                         )}
-                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -1619,13 +1623,11 @@ export default function Produtos() {
                     {produtosAtuais.map((produto) => (
                       <div
                         key={produto.id}
-                        className={`${
-                          modoDark
-                            ? "bg-slate-800/50"
-                            : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
-                        } rounded-xl border ${
-                          modoDark ? "border-blue-500/20" : "border-blue-200"
-                        } p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
+                        className={`${modoDark
+                          ? "bg-slate-800/50"
+                          : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
+                          } rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"
+                          } p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                           <div className="flex-shrink-0">

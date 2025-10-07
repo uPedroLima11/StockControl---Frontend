@@ -216,7 +216,7 @@ export default function EstoquePage() {
   const textPrimary = modoDark ? "text-white" : "text-slate-900";
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
   const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
-  const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-gray-200/50";
   const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
   const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
 

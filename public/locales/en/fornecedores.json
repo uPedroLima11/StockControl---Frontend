@@ -1,32 +1,52 @@
 {
   "titulo": "Suppliers",
-  "buscar": "Search for suppliers",
-  "novoFornecedor": "Add New Supplier",
-  "nenhumFornecedorEncontrado": "No suppliers found.",
-  "foto": "Photograph",
-  "nome": "Full Name",
-  "cnpj": "CNPJ",
-  "escolherArquivo": "Select File",
-  "nenhumArquivoEscolhido": "No file selected",
+  "fornecedores": "Suppliers",
+  "subtitulo": "Manage all your company suppliers",
+  "buscar": "Search suppliers",
+  "buscarPlaceholder": "Search by name, email, CNPJ...",
   "selecionarImagem": "Select Image",
-  "email": "Email Address",
-  "telefone": "Telephone",
+  "novoFornecedor": "New Supplier",
+  "nenhumFornecedorEncontrado": "No suppliers found.",
+  "nenhumFornecedorEncontradoBusca": "No suppliers found for your search.",
+  "comeceAdicionando": "Start by adding your first supplier",
+  "criarPrimeiroFornecedor": "Create first supplier",
+  "foto": "Photo",
+  "nome": "Name",
+  "nomePlaceholder": "Enter supplier name",
+  "cnpj": "CNPJ",
+  "cnpjPlaceholder": "00.000.000/0000-00",
+  "email": "Email",
+  "emailPlaceholder": "email@example.com",
+  "escolherArquivo": "Choose File",
+  "nenhumArquivoEscolhido": "No file chosen",
+  "telefone": "Phone",
+  "telefonePlaceholder": "(00) 00000-0000",
   "categoria": "Category",
-  "adicionadoEm": "Date Added",
+  "categoriaPlaceholder": "Ex: Electronics, Clothing...",
+  "semCategoria": "No category",
+  "adicionadoEm": "Added on",
   "contato": "Contact",
-  "visualizarFornecedor": "View Supplier Details",
-  "afiliarFornecedor": "Affiliate Supplier",
+  "visualizarFornecedor": "View Supplier",
+  "editarFornecedor": "Edit Supplier",
+  "afiliarFornecedor": "Add Supplier",
   "editar": "Edit",
+  "ver": "View",
   "fechar": "Close",
   "salvar": "Save",
+  "atualizar": "Update",
   "excluir": "Delete",
-  "semPermissaoVisualizar": "You do not have permission to view suppliers.",
+  "cancelar": "Cancel",
+  "enviando": "Uploading...",
+  "limpar": "Clear",
+  "semPermissaoVisualizar": "You don't have permission to view suppliers.",
+  "acessoRestrito": "Access Restricted",
+  "acessoRestritoMensagem": "You don't have permission to access this page.",
   "empresaNaoAtivada": {
-    "titulo": "Company Not Activated",
+    "titulo": "Company not activated",
     "mensagem": "Please activate your company to perform this action.",
-    "botao": "Activate Now",
-    "alertaTitulo": "Company Not Activated",
-    "alertaMensagem": "Certain actions are unavailable until the company is activated."
+    "botao": "Activate now",
+    "alertaTitulo": "Company not activated",
+    "alertaMensagem": "Some actions are disabled until company activation."
   },
   "mensagens": {
     "camposObrigatorios": "Required fields",
@@ -35,20 +55,71 @@
     "fornecedorAdicionado": "Supplier added successfully.",
     "fornecedorAtualizado": "Supplier updated successfully.",
     "erro": "Error",
-    "erroAdicionar": "Unable to add supplier.",
-    "erroAtualizar": "Unable to update supplier.",
-    "temCerteza": "Are you certain?",
-    "naoReverter": "This action is irreversible.",
+    "erroAdicionar": "Failed to add supplier.",
+    "erroAtualizar": "Failed to update supplier.",
+    "temCerteza": "Are you sure?",
+    "naoReverter": "This action cannot be undone.",
     "simDeletar": "Yes, delete",
     "cancelar": "Cancel",
     "deletado": "Deleted",
     "produtoExcluido": "Supplier removed successfully.",
-    "erroDeletar": "Unable to delete supplier."
+    "erroDeletar": "Failed to delete supplier."
   },
-   "validacao": {
+  "validacao": {
     "camposObrigatorios": "Required fields",
     "preenchaCampos": "Please fill in the following fields:",
     "campoObrigatorio": "is required",
     "nomeObrigatorio": "Name is required"
-  }
+  },
+  "erroCamposObrigatorios": {
+    "titulo": "Required fields",
+    "mensagem": "Fill in the required fields:"
+  },
+  "fornecedorCriadoSucesso": {
+    "titulo": "Supplier created successfully!"
+  },
+  "fornecedorAtualizadoSucesso": {
+    "titulo": "Supplier updated successfully!"
+  },
+  "fornecedorExcluidoSucesso": {
+    "titulo": "Supplier deleted!",
+    "mensagem": "Supplier removed successfully."
+  },
+  "confirmacaoExclusao": {
+    "titulo": "Are you sure?",
+    "mensagem": "This action cannot be undone!",
+    "botaoConfirmar": "Yes, delete!",
+    "botaoCancelar": "Cancel"
+  },
+  "stats": {
+    "total": "Total",
+    "comProdutos": "With products",
+    "semProdutos": "Without products",
+    "categorizados": "Categorized"
+  },
+  "filtros": {
+    "filtrar": "Filter",
+    "titulo": "Filters",
+    "ordenarPor": "Sort by",
+    "campo": "Field",
+    "categoria": "Category",
+    "limparFiltros": "Clear filters",
+    "preco": "Price",
+    "estoque": "Stock",
+    "nome": "Name",
+    "valor": "Value",
+    "quantidade": "Quantity",
+    "maiorQue": "Greater than",
+    "menorQue": "Less than",
+    "aZ": "A → Z",
+    "zA": "Z → A",
+    "todasCategorias": "All categories"
+  },
+  "visualizacao": {
+    "tooltipCards": "Card view",
+    "tooltipLista": "List view"
+  },
+  "produtos": "products",
+  "semProdutos": "No products",
+  "visualizacaoLabel": "Preview"
 }
