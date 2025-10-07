@@ -1,123 +1,154 @@
 {
-  "roles": {
-    "FUNCIONARIO": "Employee",
-    "ADMIN": "Administrator",
-    "PROPRIETARIO": "Owner"
-  },
-  "titulo": "Users",
-  "carregando": "Loading Users...",
-  "erro": "Error",
-  "erroBuscarUsuarios": "Error fetching users",
-  "erroDesconhecido": "Unknown error",
-  "convidarUsuario": "Invite User",
-  "enviarMensagem": "Send Message",
-  "nomeUsuario": "Username",
+  "titulo": "Management of",
+  "usuarios": "Users",
+  "subtitulo": "Manage your company users",
+  "buscarUsuario": "Search users...",
+  "nomeUsuario": "Name",
+  "email": "Email",
   "funcao": "Role",
   "criadoEm": "Created at",
-  "ultimaAtualizacao": "Last Updated",
-  "email": "Email",
+  "ultimaAtualizacao": "Last update",
   "acao": "Action",
-  "selecioneUsuario": "Select a user",
+  "editar": "Edit",
+  "permissoes": "Permissions",
+  "enviarMensagem": "Send Message",
+  "convidarUsuario": "Invite User",
+  "convidarPrimeiroUsuario": "Invite First User",
   "nenhumUsuario": "No users found",
-  "nenhumaEmpresa": "You don't belong to any company",
-  "semPermissaoVisualizarUsuarios": "You don't have permission to view users.",
+  "nenhumaEmpresa": "No company linked",
+  "carregando": "Loading...",
   "acessoNegado": "Access Denied",
-  "buscarUsuario": "Search User",
+  "semPermissaoVisualizarUsuarios": "You don't have permission to view the users screen.",
   "carregandoPermissoes": "Loading permissions...",
-  "editarUsuario": "Edit User",
+  "selecioneUsuario": "Select a user",
+  "ativo": "Active",
+  "inativo": "Inactive",
+  "status": "Status",
+  "acesso": "Access",
+  "limpar": "Clear",
+  "comeceConvidando": "Start by inviting new users to your company",
+  "nenhumUsuarioEncontrado": "No users found",
   "gerenciarPermissoes": "Manage Permissions",
-  "semPermissaoGerenciar": "No permission to manage",
-  "modal": {
-    "preenchaCamposObrigatorios": {
-    "titulo": "Required fields",
-    "texto": "Please fill the following required fields: {{campos}}",
-    "usuario": "User",
-    "tituloMensagem": "Message title",
-    "descricaoMensagem": "Message description"
+  
+  "stats": {
+    "total": "Total",
+    "proprietarios": "Owners",
+    "admins": "Administrators",
+    "funcionarios": "Employees"
   },
-    "permissaoNegada": {
-      "titulo": "Permission Denied",
-      "textoConvite": "You don't have permission to perform this action",
-      "textoExcluir": "You don't have permission to delete this user."
-    },
-    "desmarcarTodas": "Uncheck All",
-    "marcarTodas": "Check All",
-    "confirmar": "Confirm",
-    "conviteEnviado": {
-      "titulo": "Invite sent",
-      "texto": "Invite was successfully sent to {{email}}"
-    },
-    "usuarioVinculado": {
-      "titulo": "User already linked",
-      "texto": "The user is already linked to a company"
-    },
-    "botaoOk": "OK",
-    "mensagemEnviada": {
-      "titulo": "Message sent",
-      "texto": "Message was successfully sent to {{email}}"
-    },
-    "selecioneUsuario": {
-      "titulo": "Select a user",
-      "texto": "Please select a recipient for the message."
-    },
-    "naoPodeEnviarParaSi": {
-      "titulo": "Cannot send to yourself",
-      "texto": "You cannot send messages to yourself."
-    },
-    "erro": {
-      "titulo": "Error",
-      "textoEnviarNotificacao": "Could not send notification",
-      "textoInterno": "An internal error occurred",
-      "enviarConvite": "Error sending invite",
-      "alterarCargo": "Error changing role",
-      "removerUsuario": "Error removing user",
-      "usuarioNaoEncontrado": "User not found"
-    },
-    "camposObrigatorios": {
-      "titulo": "Required fields",
-      "texto": "Please fill all required fields"
-    },
-    "usuario": "User",
+
+  "roles": {
+    "PROPRIETARIO": "Owner",
+    "ADMIN": "Administrator",
+    "FUNCIONARIO": "Employee"
+  },
+
+  "filtros": {
+    "filtrar": "Filter",
+    "titulo": "Filters and Sorting",
+    "ordenarPor": "Sort by",
+    "campo": "Field",
+    "nome": "Name",
+    "funcao": "Role",
+    "dataCriacao": "Creation Date",
+    "limparFiltros": "Clear Filters"
+  },
+
+  "empresaNaoAtivada": {
+    "titulo": "Company Not Activated",
+    "mensagem": "Your company needs to be activated to manage users.",
+    "botao": "Activate Company",
+    "alertaTitulo": "Company not activated",
+    "alertaMensagem": "Activate your company to manage users"
+  },
+
+  "modal": {
     "convidarUsuario": "Invite User",
-    "emailUsuario": "User Email",
+    "emailUsuario": "User email",
     "cancelar": "Cancel",
-    "enviarConvite": "Send Invite",
     "enviando": "Sending...",
+    "enviarConvite": "Send Invite",
     "enviarMensagem": "Send Message",
-    "cargoAtualizado": "Role updated",
-    "cargoAtualizadoSucesso": "Role updated successfully",
     "de": "From",
     "para": "To",
     "tituloMensagem": "Message title",
     "descricaoMensagem": "Message description",
+    "tituloMensagemPlaceholder": "Enter the message title",
+    "descricaoMensagemPlaceholder": "Enter the message description",
     "editarUsuario": "Edit User",
+    "usuario": "User",
     "alterarCargo": "Change Role",
-    "funcionario": "Employee",
-    "admin": "Administrator",
-    "proprietario": "Owner",
     "salvarCargo": "Save Role",
     "remover": "Remove",
-    "removido": "Removed",
-    "confirmacaoRemocao": {
-      "titulo": "Are you sure?",
-      "texto": "Do you really want to remove user {{nome}} from the company?",
-      "confirmar": "Yes, remove",
-      "cancelar": "Cancel",
-      "sucesso": "User {{nome}} was successfully removed from the company",
-      "erro": "Could not remove the user"
-    },
-    "erroPermissao": {
-      "titulo": "Permission Denied",
-      "texto": "You don't have permission to perform this action"
-    },
-    "permissoesUsuario": "Permissions",
+    "permissoesUsuario": "User Permissions",
     "permissoesPersonalizadas": "Custom Permissions",
-    "permissoesPersonalizadasDescricao": "Enable to define specific permissions for this user",
+    "permissoesPersonalizadasDescricao": "Enable to customize this user's permissions individually",
+    "marcarTodas": "Select All",
+    "desmarcarTodas": "Deselect All",
+    "redefinirPadrao": "Reset to Default",
+    "salvarPermissoes": "Save Permissions",
+    "confirmar": "Confirm",
     "permissoesSalvas": "Permissions saved successfully!",
     "permissoesRedefinidas": "Permissions reset to default!",
     "erroSalvarPermissoes": "Error saving permissions",
     "erroRedefinirPermissoes": "Error resetting permissions",
-    "redefinirPadrao": "Reset to Default",
-    "salvarPermissoes": "Save Permissions"
-  }
+    "cargoAtualizado": "Role Updated",
+    "cargoAtualizadoSucesso": "User role updated successfully!",
+    "removido": "Removed!",
+    
+    "funcionario": "Employee",
+    "admin": "Administrator",
+    "proprietario": "Owner",
+
+    "conviteEnviado": {
+      "titulo": "Invite Sent!",
+      "texto": "Invite sent to {{email}}"
+    },
+
+    "usuarioVinculado": {
+      "titulo": "User Already Linked",
+      "texto": "This user is already linked to a company."
+    },
+
+    "permissaoNegada": {
+      "titulo": "Permission Denied",
+      "textoConvite": "You don't have permission to invite users.",
+      "textoExcluir": "You don't have permission to delete this user."
+    },
+
+    "confirmacaoRemocao": {
+      "titulo": "Confirm Removal",
+      "texto": "Are you sure you want to remove {{nome}} from the company?",
+      "confirmar": "Yes, Remove",
+      "cancelar": "Cancel",
+      "sucesso": "{{nome}} has been removed from the company!",
+      "erro": "Error removing user"
+    },
+
+    "preenchaCamposObrigatorios": {
+      "titulo": "Required Fields",
+      "texto": "Please fill in the following fields: {{campos}}",
+      "usuario": "Target user",
+      "tituloMensagem": "Message title",
+      "descricaoMensagem": "Message description"
+    },
+
+    "erro": {
+      "titulo": "Error!",
+      "enviarConvite": "Error sending invitation.",
+      "usuarioNaoEncontrado": "User not found.",
+      "removerUsuario": "Error removing user.",
+      "alterarCargo": "Error changing role."
+    },
+
+    "erroPermissao": {
+      "titulo": "Permission Denied",
+      "texto": "You don't have permission to perform this action."
+    },
+
+    "botaoOk": "OK"
+  },
+
+  "acessoRestrito": "Restricted Access",
+  "acessoRestritoMensagem": "You don't have permission to access this page."
 }
