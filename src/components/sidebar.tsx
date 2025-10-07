@@ -510,8 +510,10 @@ export default function Sidebar() {
             onClick={() => {
               permissoesCache.clear();
               localStorage.removeItem("client_key");
+              localStorage.removeItem("modoDark"); 
               Cookies.remove("token");
               window.location.href = "/";
+
             }}
             className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
           >
