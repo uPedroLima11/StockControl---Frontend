@@ -77,7 +77,7 @@ export default function Logs() {
 
   const carregarLogsComFiltro = async (pagina: number, empresaId: string, tipo?: string, busca?: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=15&empresaId=${empresaId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/logs?page=1&limit=25&empresaId=${empresaId}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${Cookies.get("token")}`,

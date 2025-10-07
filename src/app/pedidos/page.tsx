@@ -513,7 +513,15 @@ export default function Pedidos() {
     try {
       if (!empresaId) return;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/empresa/${empresaId}`);
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor/empresa/${empresaId}`, {
+        headers: {
+          "user-id": usuarioId,
+          authorization: `Bearer ${Cookies.get("token")}`,
+        }
+      });
       if (response.ok) {
         const fornecedoresData = await response.json();
         setFornecedores(fornecedoresData);
@@ -526,9 +534,15 @@ export default function Pedidos() {
   const carregarProdutos = async () => {
     try {
       if (!empresaId || produtosCarregados) return;
+      
+      const usuarioSalvo = localStorage.getItem("client_key");
+      if (!usuarioSalvo) return;
+      const usuarioId = usuarioSalvo.replace(/"/g, "");
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos/empresa/${empresaId}`, {
         method: "GET",
         headers: {
+          "user-id": usuarioId,
           "Content-Type": "application/json",
           Authorization: `Bearer ${Cookies.get("token")}`,
         },
@@ -746,7 +760,7 @@ export default function Pedidos() {
   const handleFecharModal = () => {
     setModalAberto(false);
     setItensCriacao([]);
-    setModoVisualizacao(false);  
+    setModoVisualizacao(false);
   };
 
   const adicionarItem = (produto: Produto) => {
@@ -789,7 +803,7 @@ export default function Pedidos() {
     setPedidoSelecionado(pedido);
     setModalTipo("detalhes");
     setModalAberto(true);
-    setModoVisualizacao(false); 
+    setModoVisualizacao(false);
   };
 
 
@@ -999,7 +1013,7 @@ export default function Pedidos() {
     setModalAberto(false);
   };
 
- 
+
 
   const handleConfirmarCancelamento = (pedidoId: string) => {
     Swal.fire({

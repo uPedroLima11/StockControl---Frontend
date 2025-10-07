@@ -63,7 +63,6 @@ export default function Sidebar() {
     const tempoDesdeUltimoSom = agora - somNotificacaoCache.ultimoSomTocado;
 
     if (tempoDesdeUltimoSom < somNotificacaoCache.BLOQUEIO_SOM_MS) {
-      console.log(`Som bloqueado. Último som tocado há ${Math.round(tempoDesdeUltimoSom / 1000)} segundos`);
       return false;
     }
 
@@ -96,7 +95,6 @@ export default function Sidebar() {
           somNotificacaoCache.ultimoSomTocado = 0;
         }, somNotificacaoCache.BLOQUEIO_SOM_MS);
 
-        console.log("Som de notificação tocado (modo único)");
         return true;
       }
     } catch (error) {
@@ -316,8 +314,6 @@ export default function Sidebar() {
       setTemNotificacaoNaoLida(notificacoesNaoLidas.length > 0);
 
       if (usuarioInteragiu && novasNotificacoes.length > 0) {
-        console.log(`${novasNotificacoes.length} nova(s) notificação(ões) detectada(s)`);
-
         await tocarSomNotificacaoUnica();
       }
     } catch (error) {

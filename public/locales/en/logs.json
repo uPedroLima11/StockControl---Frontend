@@ -29,8 +29,9 @@
     "usuario_nao_encontrado": "User not found",
     "usuario_nao_informado": "Not Informed",
     "carregando": "Loading...",
+    
     "status": "Status",
-    "total": "Total",
+    "total": "Last 25 logs",
     "todos_tipos": "All types",
     "limpar": "Clear",
     "limpar_filtros": "Clear Filters",
