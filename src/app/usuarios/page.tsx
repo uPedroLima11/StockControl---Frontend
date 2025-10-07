@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { FaSearch, FaCog, FaChevronDown, FaAngleLeft, FaAngleRight, FaEnvelope, FaUserPlus, FaLock, FaEdit, FaTrash, FaUser, FaUsers, FaFilter, FaTimes, FaCheck } from "react-icons/fa";
+import { FaSearch, FaChevronDown, FaAngleLeft, FaAngleRight, FaEnvelope, FaUserPlus, FaLock, FaEdit, FaTrash, FaUser, FaUsers, FaFilter, FaTimes, FaCheck } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
