@@ -521,7 +521,7 @@ export default function Home() {
                 <div className="relative inline-block mb-6">
                   <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
                   <Image
-                    src="/pedrolima.jpg"
+                    src="/linkedinphoto.png"
                     alt="Pedro Lima"
                     width={160}
                     height={160}
