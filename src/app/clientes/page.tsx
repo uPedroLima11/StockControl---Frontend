@@ -31,7 +31,7 @@ export default function Clientes() {
   });
   const [permissoesUsuario, setPermissoesUsuario] = useState<Record<string, boolean>>({});
   const [busca, setBusca] = useState("");
-  const [clienteExpandido, setClienteExpandido] = useState<string | null>(null);
+  const [, setClienteExpandido] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const clientesPorPagina = 10;
   const { t } = useTranslation("clientes");
