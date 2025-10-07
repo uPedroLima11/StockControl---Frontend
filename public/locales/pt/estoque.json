@@ -60,7 +60,7 @@
     "erroGenerico": "Erro ao processar transação",
     "erroConexao": "Erro de conexão com o servidor"
   },
-  
+
   "tiposMovimentacao": {
     "entrada": "Entrada",
     "saida": "Saída",

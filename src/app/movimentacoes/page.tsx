@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaSearch, FaHistory, FaBox, FaCheck, FaTimes, FaFilter, FaCalendar, FaChartLine, FaArrowUp, FaArrowDown, FaExchangeAlt } from "react-icons/fa";
+import { FaSearch, FaHistory, FaBox, FaCheck, FaTimes,  } from "react-icons/fa";
 import HistoricoEstoque from "@/components/HistoricoEstoque";
 import Cookies from "js-cookie";
-import { cores } from "@/utils/cores";
 import { useTranslation } from "react-i18next";
 
 interface Produto {
@@ -31,7 +30,6 @@ export default function EstoquePage() {
   const [direcaoOrdenacao] = useState<DirecaoOrdenacao>("desc");
   const { t } = useTranslation("estoque");
 
-  const temaAtual = modoDark ? cores.dark : cores.light;
 
   const usuarioTemPermissao = async (permissaoChave: string): Promise<boolean> => {
     try {
