@@ -193,8 +193,6 @@ export default function Fornecedores() {
                 f.Produto && f.Produto.length > 0
               ).length;
 
-              const semProdutos = fornecedoresDaEmpresa.length - comProdutos;
-
               const categorizados = fornecedoresDaEmpresa.filter((f: FornecedorI) =>
                 f.categoria && f.categoria.trim() !== ''
               ).length;
