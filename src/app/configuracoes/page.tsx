@@ -160,7 +160,7 @@ export default function Configuracoes() {
     if (!token) {
       window.location.href = "/login";
     }
-    
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativo = temaSalvo === "true";
     setModoDark(ativo);
@@ -276,7 +276,7 @@ export default function Configuracoes() {
 
                   <button
                     onClick={alternarTema}
-                    className="flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect"
+                    className="flex cursor-pointer items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect"
                     style={{
                       background: modoDark ? "linear-gradient(135deg, #374151 0%, #4B5563 100%)" : "linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)",
                       border: `1px solid ${borderColor}`
@@ -305,7 +305,7 @@ export default function Configuracoes() {
 
                   <button
                     onClick={alternarSomNotificacao}
-                    className="flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect"
+                    className="flex cursor-pointer items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect"
                     style={{
                       background: somNotificacao ? "linear-gradient(135deg, #10B981 0%, #059669 100%)" : "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
                       color: "#FFFFFF",
@@ -334,7 +334,7 @@ export default function Configuracoes() {
 
                   <button
                     onClick={toggleIdiomas}
-                    className="flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect mb-4"
+                    className="flex cursor-pointer items-center justify-between w-full p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect mb-4"
                     style={{
                       background: modoDark ? "linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%)" : "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
                       color: "#FFFFFF",
@@ -350,7 +350,7 @@ export default function Configuracoes() {
                     <div className="space-y-3 animate-fade-in-up">
                       <button
                         onClick={() => mudarIdioma("pt")}
-                        className="flex items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer glow-effect w-full"
+                        className="flex items-center cursor-pointer gap-4 p-3 rounded-xl transition-all duration-300 hover:scale-105  glow-effect w-full"
                         style={{
                           backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                           border: `1px solid ${borderColor}`
@@ -361,7 +361,7 @@ export default function Configuracoes() {
                       </button>
                       <button
                         onClick={() => mudarIdioma("en")}
-                        className="flex items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer glow-effect w-full"
+                        className="flex cursor-pointer items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:scale-105  glow-effect w-full"
                         style={{
                           backgroundColor: modoDark ? "#374151" : "#F3F4F6",
                           border: `1px solid ${borderColor}`
@@ -388,7 +388,7 @@ export default function Configuracoes() {
                       <p className={`text-sm font-medium ${textPrimary}`}>{t("security")}</p>
                       <p className={`text-xs ${textMuted} mt-1`}>{t("manage_security")}</p>
                     </div>
-                    
+
                     <a
                       href="/esqueci"
                       className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 hover:scale-105 glow-effect cursor-pointer ${textPrimary}`}
@@ -422,7 +422,7 @@ export default function Configuracoes() {
                   </div>
                   <div>
                     <p className={textMuted}>{t("version")}:</p>
-                    <p className={textPrimary}>v1.3.7</p>
+                    <p className={textPrimary}>v1.0 (Beta)</p>
                   </div>
                 </div>
               </div>
