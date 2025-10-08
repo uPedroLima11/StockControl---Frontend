@@ -15,25 +15,25 @@ export default function Configuracoes() {
   const { t } = useTranslation("settings");
 
 
-useEffect(() => {
-  const temaSalvo = localStorage.getItem("modoDark");
-  const ativado = temaSalvo === "true";
-  setModoDark(ativado);
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
 
-  const token = Cookies.get("token");
-  if (!token) {
-    window.location.href = "/login";
-  }
+    const token = Cookies.get("token");
+    if (!token) {
+      window.location.href = "/login";
+    }
 
-  const handleThemeChange = (e: CustomEvent) => {
-    setModoDark(e.detail.modoDark);
-  };
-  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
 
-  return () => {
-    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
-  };
-}, []);
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+    };
+  }, []);
 
   interface WindowWithAlternarTemaGlobal extends Window {
     alternarTemaGlobal?: () => void;
