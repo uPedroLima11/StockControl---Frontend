@@ -1,51 +1,73 @@
 {
-  "titulo": "Criar Empresa",
-  "carregando": "Carregando...",
-  "botaoCriar": "Criar Empresa",
-  "selecionarImagem": "Selecionar Imagem",
-  "erro": {
-    "titulo": "Oops... algo deu errado! tente novamente",
-    "mensagem": "Email já existente ou erro ao criar empresa."
-  },
-  "sucesso": {
-    "titulo": "Empresa criada com sucesso!",
-    "mensagem": "A empresa foi criada e adicionada ao sistema.",
-    "catalogoTitulo": "Seu catálogo:",
-    "botaoConfirmar": "Ir para Empresa"
-  },
-  "modal": {
-    "convite.Enviado.titulo": "Convite Enviado",
-    "convite.Enviado.texto": "Convite enviado com sucesso para o email fornecido."
-  },
-  "campos": {
-    "nome": "Nome da empresa",
-    "email": "Email da empresa",
-    "telefone": "Telefone",
-    "endereco": "Endereço",
-    "pais": "País",
-    "estado": "Estado",
-    "cidade": "Cidade",
-    "cep": "CEP",
-    "foto": "URL da Foto (opcional)",
-    "dominio": "Endereço do Seu Catálogo",
-    "dominioPlaceholder": "ex: meunegocio",
-    "dominioDescricao": "Este será o endereço do seu catálogo online: stockcontrol-six.vercel.app/seudominio",
-    "dominioExemplo": "seudominio"
-  },
-  "validacao": {
-    "nomeObrigatorio": "Nome é obrigatório",
-    "emailObrigatorio": "Email é obrigatório",
-    "emailInvalido": "Email inválido",
-    "dominioObrigatorio": "Domínio é obrigatório",
-    "dominioMinimo": "Domínio deve ter pelo menos 4 caracteres",
-    "limiteExcedido": "Limite excedido"
-  },
-  "erros": {
-    "dominioInvalidoTitulo": "Domínio inválido",
-    "dominioInvalidoTexto": "O domínio é obrigatório e deve ter pelo menos 4 caracteres",
-    "emailExistenteTitulo": "Email já cadastrado",
-    "emailExistenteTexto": "Este email já está em uso por outra empresa",
-    "verificacaoDominio": "Erro ao verificar domínio",
-    "verificacaoEmail": "Erro ao verificar email"
+    "titulo": "Criar",
+    "empresa": "Empresa",
+    "subtitulo": "Configure sua empresa e comece a vender",
+    "informacoesEmpresa": "Informações da Empresa",
+    "carregando": "Carregando...",
+    "campos": {
+      "nome": "Nome da Empresa",
+      "email": "Email Corporativo",
+      "telefone": "Telefone",
+      "endereco": "Endereço",
+      "pais": "País",
+      "estado": "Estado",
+      "cidade": "Cidade",
+      "cep": "CEP",
+      "dominio": "Domínio Personalizado",
+      "dominioPlaceholder": "exemplo-minha-empresa",
+      "dominioExemplo": "sua-empresa",
+      "foto": "Logo da Empresa"
+    },
+    "selecionarImagem": "Selecionar Imagem",
+    "botaoCriar": "Criar Empresa",
+    "informacoesImportantes": "Informações Importantes",
+    "statusValidacao": "Status de Validação",
+    "dicaDominio": {
+      "titulo": "Domínio Personalizado",
+      "mensagem": "Escolha um domínio único para seu catálogo online"
+    },
+    "dicaEmail": {
+      "titulo": "Email Corporativo",
+      "mensagem": "Use um email profissional para contato com clientes"
+    },
+    "dicaFoto": {
+      "titulo": "Logo da Empresa",
+      "mensagem": "Adicione uma imagem para identificar sua marca"
+    },
+    "status": {
+      "pendente": "Pendente",
+      "disponivel": "Disponível",
+      "indisponivel": "Indisponível",
+      "ocupado": "Em uso",
+      "preenchido": "Preenchido"
+    },
+    "validacao": {
+      "nomeObrigatorio": "Nome da empresa é obrigatório",
+      "emailObrigatorio": "Email corporativo é obrigatório",
+      "emailInvalido": "Por favor, insira um email válido",
+      "dominioObrigatorio": "Domínio personalizado é obrigatório",
+      "dominioMinimo": "Domínio deve ter pelo menos 4 caracteres",
+      "limiteExcedido": "Limite de caracteres excedido"
+    },
+    "erros": {
+      "dominioInvalidoTitulo": "Domínio Inválido",
+      "dominioInvalidoTexto": "Por favor, escolha um domínio válido com pelo menos 4 caracteres",
+      "emailExistenteTitulo": "Email Já Cadastrado",
+      "emailExistenteTexto": "Este email já está em uso. Por favor, use outro.",
+      "verificacaoDominio": "Erro ao verificar domínio",
+      "verificacaoEmail": "Erro ao verificar email"
+    },
+    "avisos": {
+      "uploadFotoFalhouTitulo": "Upload da Foto Falhou",
+      "uploadFotoFalhouTexto": "A foto não pôde ser enviada, mas você pode continuar sem ela"
+    },
+    "sucesso": {
+      "titulo": "Empresa Criada!",
+      "mensagem": "Sua empresa foi criada com sucesso. Redirecionando...",
+      "botaoConfirmar": "OK"
+    },
+    "erro": {
+      "titulo": "Erro",
+      "mensagem": "Ocorreu um erro ao criar a empresa. Tente novamente."
+    }
   }
-}
