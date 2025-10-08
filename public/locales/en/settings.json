@@ -1,15 +1,25 @@
 {
-    "settings": "Settings",
-    "change_language": "Change Language",
-    "language": "Language",
-    "faleconosco": "Contact Us",
-    "change_password": "Change Password",
-    "light_mode": "Light Mode",
-    "dark_mode": "Dark Mode",
-    "sound_on": "Sound: On",
-    "sound_off": "Sound: Off",
-    "preferences": "Preferences",
-    "preferences_desc": "Choose a category on the left to view and modify settings."
-      }
-      
-  
+  "settings": "Settings",
+  "preferences": "Preferences",
+  "preferences_desc": "Customize your StockControl experience according to your preferences",
+  "appearance": "Appearance",
+  "notifications": "Notifications",
+  "language": "Language",
+  "account": "Account",
+  "security": "Security",
+  "manage_security": "Manage your account security",
+  "dark_mode": "Dark Mode",
+  "light_mode": "Light Mode",
+  "sound_on": "Sound On",
+  "sound_off": "Sound Off",
+  "change_language": "Change Language",
+  "change_password": "Change Password",
+  "faleconosco": "Contact Us",
+  "active": "Active",
+  "inactive": "Inactive",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "theme": "Theme",
+  "version": "Version",
+  "system_info": "System Information"
+}

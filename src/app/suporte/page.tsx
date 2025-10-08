@@ -235,7 +235,6 @@ export default function Suporte() {
   const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
   const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
   const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
-  const bgHover = modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50";
 
   return (
     <div className={`min-h-screen ${bgGradient} pb-8`}>
