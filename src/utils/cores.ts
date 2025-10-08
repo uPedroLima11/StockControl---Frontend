@@ -15,7 +15,7 @@ export const cores = {
     gradiente: "linear-gradient(135deg, #0A1929 0%, #132F4C 50%, #1E4976 100%)"
   },
   light: {
-    fundo: "#E0DCDC",
+    fundo: "#e4ecf4",
     texto: "#0F172A",
     card: "#FFFFFF",
     borda: "#E2E8F0",

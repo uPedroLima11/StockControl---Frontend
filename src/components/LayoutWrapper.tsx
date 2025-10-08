@@ -63,7 +63,18 @@ export default function LayoutWrapper({
         const temaSalvo = localStorage.getItem("modoDark");
         const ativado = temaSalvo === "true";
         setModoDark(ativado);
-        aplicarTema(ativado);
+        
+        const handleThemeChange = (e: CustomEvent) => {
+          const novoTema = e.detail.modoDark;
+          setModoDark(novoTema);
+          aplicarTema(novoTema);
+        };
+
+        window.addEventListener('themeChanged', handleThemeChange as EventListener);
+        
+        return () => {
+          window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+        };
       } else {
         setModoDark(false);
         aplicarTema(false);
@@ -80,8 +91,8 @@ export default function LayoutWrapper({
         document.body.style.backgroundColor = "#0A1929";
       } else {
         root.classList.remove("dark");
-        root.style.setProperty("--cor-fundo", "#E0DCDC");
-        document.body.style.backgroundColor = "#E0DCDC";
+        root.style.setProperty("--cor-fundo", "#e4ecf4");
+        document.body.style.backgroundColor = "#e4ecf4";
       }
     }
   };
@@ -126,9 +137,9 @@ export default function LayoutWrapper({
 
   return (
     <div 
-      className="flex min-h-screen"
+      className="flex min-h-screen transition-colors duration-300"
       style={{
-        backgroundColor: modoDark ? '#0A1929' : '#E0DCDC'
+        backgroundColor: modoDark ? '#0A1929' : '#e4ecf4'
       }}
     >
       {notifications.map((notification) => (
@@ -144,7 +155,7 @@ export default function LayoutWrapper({
       <main
         className="flex-1 overflow-y-auto max-h-screen transition-colors duration-300"
         style={{
-          backgroundColor: modoDark ? '#0A1929' : '#E0DCDC'
+          backgroundColor: modoDark ? '#0A1929' : '#e4ecf4'
         }}
       >
         {children}

@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 
+declare global {
+  interface Window {
+    alternarTemaGlobal?: () => void;
+  }
+}
+
 export function ThemeManager() {
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -17,7 +23,7 @@ export function ThemeManager() {
       }
     };
 
-    const handleThemeChange = (e: CustomEvent) => {
+    const handleThemeChange = (e: CustomEvent<{ modoDark: boolean }>) => {
       const novoTema = e.detail.modoDark;
       aplicarTema(novoTema);
       aplicarCSSScrollbar(novoTema); 
@@ -39,12 +45,15 @@ export function ThemeManager() {
       }));
     };
 
-    (window as any).alternarTemaGlobal = alternarTemaGlobal;
+    window.alternarTemaGlobal = alternarTemaGlobal;
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('themeChanged', handleThemeChange as EventListener);
-      delete (window as any).alternarTemaGlobal;
+      
+      if (window.alternarTemaGlobal) {
+        delete window.alternarTemaGlobal;
+      }
       
       const styleTag = document.getElementById('scrollbar-global-style');
       if (styleTag) {
