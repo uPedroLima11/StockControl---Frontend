@@ -778,120 +778,168 @@ export default function Ajuda() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: temaAtual.fundo, color: temaAtual.texto }}>
-      <header className="pt-8 pb-4" style={{ backgroundColor: temaAtual.fundo }}>
-        <div className="w-full max-w-6xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <h1 className="text-3xl font-bold">{t("titulo")}</h1>
-              <FaBook className="text-4xl" style={{ color: temaAtual.primario }} />
-            </div>
-            <p className="text-lg" style={{ color: temaAtual.placeholder }}>
-              {t("subtitulo")}
-            </p>
-          </div>
-          <div ref={searchRef} className="relative max-w-2xl mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch style={{ color: temaAtual.placeholder }} />
-            </div>
-            <input
-              type="text"
-              placeholder={t("pesquisa.placeholder")}
-              value={busca}
-              onChange={handleSearchChange}
-              onFocus={() => setIsSearchFocused(true)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ backgroundColor: temaAtual.card, color: temaAtual.texto, borderColor: temaAtual.borda }}
-            />
-            {isSearchFocused && searchResults.length > 0 && (
-              <div className="absolute top-full mt-2 w-full max-h-80 overflow-y-auto rounded-lg shadow-lg z-10" style={{ backgroundColor: temaAtual.card, border: `1px solid ${temaAtual.borda}` }}>
-                {searchResults.map((result) => (
-                  <div key={result.item.id} onClick={() => handleSearchResultClick(result)} className="p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b" style={{ borderColor: temaAtual.borda }}>
-                    <div className="font-semibold text-sm" style={{ color: temaAtual.texto }}>
-                      {highlightMatches(result.item.title, busca)}
-                    </div>
-                    <div className="text-xs mt-1" style={{ color: temaAtual.placeholder }}>
-                      {generateSnippet(result.item.render, busca)}
-                    </div>
-                    <div className="text-xs mt-2 font-semibold" style={{ color: temaAtual.placeholder }}>
-                      {t("pesquisa.em")} {result.item.parentTitle}
-                    </div>
-                  </div>
-                ))}
+    <div className={`min-h-screen ${modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200"}`}>
+      <div className="flex">
+        <div className="flex-1 min-w-0">
+          <div className="px-4 sm:px-6 py-8 w-full max-w-7xl mx-auto">
+            <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${modoDark ? "bg-slate-800/30" : "bg-white/30"} backdrop-blur-sm border ${modoDark ? "border-blue-500/30" : "border-blue-200"}`}>
+              <div className="absolute inset-0">
+                <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
               </div>
-            )}
-          </div>
-        </div>
-      </header>
-      <div className="w-full max-w-6xl mx-auto px-4 pb-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="border rounded-xl p-4 sticky top-4" style={{ backgroundColor: temaAtual.card, borderColor: temaAtual.borda }}>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <FaHome />
-                {t("menu.topicos")}
-              </h3>
-              <nav className="space-y-2">
-                {menuItems.map((item) => (
-                  <a
-                    key={item.id}
-                    href={item.anchor ? `#${item.id}` : `#${item.targetId || item.id}`}
-                    onClick={() => {
-                      setTopicoAtivo(item.targetId || item.id);
-                      setBusca("");
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-left transition-colors ${topicoAtivo === (item.targetId || item.id) ? "font-semibold" : "font-normal"}`}
-                    style={{ backgroundColor: topicoAtivo === (item.targetId || item.id) ? temaAtual.ativo : "transparent", color: topicoAtivo === (item.targetId || item.id) ? "#fff" : temaAtual.texto }}
-                    onMouseEnter={(e) => {
-                      if (topicoAtivo !== (item.targetId || item.id)) {
-                        e.currentTarget.style.backgroundColor = temaAtual.hover;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (topicoAtivo !== (item.targetId || item.id)) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
-                  >
-                    {item.icone}
-                    <span>{item.titulo}</span>
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </aside>
-          <main className="flex-1 min-w-0">
-            <div className="space-y-8">
-              {topicos.map((topico, index) => (
-                <div
-                  key={topico.id}
-                  id={topico.id}
-                  ref={(el) => {
-                    topicRefs.current[index] = el;
-                  }}
-                  className="border rounded-xl shadow-lg overflow-hidden"
-                  style={{ backgroundColor: temaAtual.card, borderColor: temaAtual.borda }}
-                >
-                  <div className="w-full p-6">
-                    <div className="flex items-center gap-4">
-                      {topico.icone}
-                      <div>
-                        <h2 className="text-2xl font-bold">{topico.titulo}</h2>
-                        <p className="text-sm opacity-80 mt-1">{topico.descricao}</p>
+
+              <div className="relative z-10 text-center">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <h1 className={`text-3xl md:text-4xl font-bold ${modoDark ? "text-white" : "text-slate-900"}`}>
+                    {t("titulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t("ajuda")}</span>
+                  </h1>
+                  <FaBook className={`text-4xl ${modoDark ? "text-blue-400" : "text-blue-500"}`} />
+                </div>
+                <p className={`text-lg ${modoDark ? "text-gray-300" : "text-slate-600"} max-w-2xl mx-auto`}>{t("subtitulo")}</p>
+              </div>
+            </section>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <div className={`rounded-2xl border ${modoDark ? "border-blue-500/30" : "border-blue-200"} ${modoDark ? "bg-slate-800/50" : "bg-white/80"} backdrop-blur-sm overflow-hidden sticky top-4`}>
+                  <div className="p-4 border-b" style={{ borderColor: temaAtual.borda }}>
+                    <h3 className="font-semibold flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                      <FaHome className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                      {t("menu.topicos")}
+                    </h3>
+                  </div>
+                  <nav className="p-2">
+                    {menuItems.map((item) => (
+                      <a
+                        key={item.id}
+                        href={item.anchor ? `#${item.id}` : `#${item.targetId || item.id}`}
+                        onClick={() => {
+                          setTopicoAtivo(item.targetId || item.id);
+                          setBusca("");
+                        }}
+                        className={`w-full hover:scale-105 flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-300 mb-1 ${topicoAtivo === (item.targetId || item.id)
+                            ? "shadow-lg font-semibold"
+                            : "font-normal"
+                          }`}
+                        style={{
+                          backgroundColor: topicoAtivo === (item.targetId || item.id)
+                            ? temaAtual.primario
+                            : "transparent",
+                          color: topicoAtivo === (item.targetId || item.id)
+                            ? "#FFFFFF"
+                            : temaAtual.texto
+                        }}
+                      >
+                        <div className={`p-2 rounded-lg ${topicoAtivo === (item.targetId || item.id)
+                            ? "bg-white/20"
+                            : modoDark ? "bg-slate-700/50" : "bg-slate-100"
+                          }`}>
+                          {item.icone}
+                        </div>
+                        <span>{item.titulo}</span>
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+              <div className="lg:col-span-3 space-y-6">
+                <div className="relative" ref={searchRef}>
+                    <div className={`relative rounded-2xl border ${modoDark ? "border-blue-500/30" : "border-blue-200"} ${modoDark ? "bg-slate-800/50" : "bg-white/80"} backdrop-blur-sm overflow-hidden p-4`}>
+                    <div className="absolute inset-y-0 left-20 flex items-center pointer-events-none" style={{ left: "1cm" }}>
+                      <FaSearch className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder={t("pesquisa.placeholder")}
+                      value={busca}
+                      onChange={handleSearchChange}
+                      onFocus={() => setIsSearchFocused(true)}
+                      className="w-full pl-12 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{
+                      backgroundColor: temaAtual.card,
+                      color: temaAtual.texto,
+                      borderColor: temaAtual.borda
+                      }}
+                    />
+                    </div>
+                  {isSearchFocused && searchResults.length > 0 && (
+                    <div
+                      className={`absolute top-full mt-2 w-full max-h-80 overflow-y-auto rounded-xl shadow-2xl z-50 border backdrop-blur-sm ${modoDark ? "bg-slate-800/95" : "bg-white/95"
+                        }`}
+                      style={{ borderColor: temaAtual.borda }}
+                    >
+                      {searchResults.map((result, index) => (
+                        <div
+                          key={result.item.id}
+                          onClick={() => handleSearchResultClick(result)}
+                          className={`p-4 cursor-pointer transition-all duration-200 border-b ${modoDark ? "hover:bg-slate-700/50" : "hover:bg-slate-50"
+                            }`}
+                          style={{
+                            borderColor: temaAtual.borda,
+                            animationDelay: `${index * 100}ms`
+                          }}
+                        >
+                          <div className="font-semibold text-sm flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                            <div className={`p-1 rounded ${modoDark ? "bg-blue-500/20" : "bg-blue-100"
+                              }`}>
+                              {result.item.parentTitle === t("empresa.titulo") && <FaBuilding className="text-xs" />}
+                              {result.item.parentTitle === t("produtos.titulo") && <FaBox className="text-xs" />}
+                              {result.item.parentTitle === t("vendas.titulo") && <FaDollarSign className="text-xs" />}
+                              {result.item.parentTitle === t("pedidos.titulo") && <FaTruck className="text-xs" />}
+                            </div>
+                            {highlightMatches(result.item.title, busca)}
+                          </div>
+                          <div className="text-xs mt-1 line-clamp-2" style={{ color: temaAtual.placeholder }}>
+                            {generateSnippet(result.item.render, busca)}
+                          </div>
+                          <div className="text-xs mt-2 font-semibold flex items-center gap-1" style={{ color: temaAtual.primario }}>
+                            {t("pesquisa.em")} {result.item.parentTitle}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  {topicos.map((topico, index) => (
+                    <div
+                      key={topico.id}
+                      id={topico.id}
+                      ref={(el) => {
+                        topicRefs.current[index] = el;
+                      }}
+                      className={`relative bg-gradient-to-r ${modoDark ? "from-blue-500/5 to-cyan-500/5" : "from-blue-100/30 to-cyan-100/30"} rounded-2xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"} p-1  backdrop-blur-sm`}
+                      style={{ animationDelay: `${index * 200}ms` }}
+                    >
+                      <div className={`rounded-2xl ${modoDark ? "bg-slate-800/50" : "bg-white/80"} backdrop-blur-sm overflow-hidden`}>
+                        <div className="w-full p-6">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl ${modoDark ? "bg-blue-500/20" : "bg-blue-100"
+                              }`}>
+                              {topico.icone}
+                            </div>
+                            <div>
+                              <h2 className={`text-2xl font-bold ${modoDark ? "text-white" : "text-slate-900"}`}>{topico.titulo}</h2>
+                              <p className={`text-sm ${modoDark ? "text-gray-400" : "text-slate-500"} mt-1`}>{topico.descricao}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-6 border-t" style={{ borderColor: temaAtual.borda }}>
+                          <topico.componente />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="p-6 border-t" style={{ borderColor: temaAtual.borda }}>
-                    <topico.componente />
-                  </div>
+                  ))}
                 </div>
-              ))}
+                <footer className={`mt-12 text-center p-6 rounded-2xl border ${modoDark ? "border-blue-500/30" : "border-blue-200"} ${modoDark ? "bg-slate-800/50" : "bg-white/80"} backdrop-blur-sm`}>
+                  <p className={`text-sm ${modoDark ? "text-gray-400" : "text-slate-500"}`}>{t("footer.contato")}</p>
+                  <p className={`text-xs mt-2 ${modoDark ? "text-gray-400" : "text-slate-500"}`}>{t("footer.copyright", { ano: new Date().getFullYear() })}</p>
+                </footer>
+              </div>
             </div>
-            <footer className="mt-12 text-center" style={{ color: temaAtual.placeholder }}>
-              <p className="text-sm">{t("footer.contato")}</p>
-              <p className="text-xs mt-2">{t("footer.copyright", { ano: new Date().getFullYear() })}</p>
-            </footer>
-          </main>
+          </div>
         </div>
       </div>
     </div>

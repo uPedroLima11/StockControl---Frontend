@@ -1,178 +1,180 @@
 {
-    "titulo": "Central de Ajuda",
-    "subtitulo": "Guia completo para usar o StockControl",
-    "pesquisa": {
-      "placeholder": "Pesquisar em toda a ajuda...",
-      "em": "em"
+  "titulo": "Central de",
+  "ajuda": "Ajuda",
+  "subtitulo": "Guia completo para usar o StockControl",
+  "pesquisa": {
+    "placeholder": "Pesquisar em toda a ajuda...",
+    "em": "em"
+  },
+  "menu": {
+    "topicos": "Tópicos de Ajuda"
+  },
+  "footer": {
+    "contato": "Precisa de mais ajuda? Entre em contato com nosso suporte.",
+    "copyright": "StockControl © {{ano}} - Sistema de Gestão de Estoque"
+  },
+  "empresa": {
+    "titulo": "Gestão da Empresa",
+    "descricao": "Este módulo é o centro de comando do seu negócio. Aqui você define a identidade da empresa, gerencia o acesso da equipe e controla funcionalidades essenciais.",
+    "descricao_curta": "Criação, ativação, catálogo e gerenciamento de usuários.",
+    "fluxo": {
+      "titulo": "Fluxo de Configuração Inicial:",
+      "passo1": "Criar a empresa e definir domínio",
+      "passo2": "Ativar o sistema com chave",
+      "passo3": "Convidar usuários e definir funções",
+      "passo4": "Configurar o catálogo público"
     },
-    "menu": {
-      "topicos": "Tópicos de Ajuda"
-    },
-    "footer": {
-      "contato": "Precisa de mais ajuda? Entre em contato com nosso suporte.",
-      "copyright": "StockControl © {{ano}} - Sistema de Gestão de Estoque"
-    },
-    "empresa": {
-      "titulo": "Gestão da Empresa",
-      "descricao": "Este módulo é o centro de comando do seu negócio. Aqui você define a identidade da empresa, gerencia o acesso da equipe e controla funcionalidades essenciais.",
-      "descricao_curta": "Criação, ativação, catálogo e gerenciamento de usuários.",
-      "fluxo": {
-        "titulo": "Fluxo de Configuração Inicial:",
-        "passo1": "Criar a empresa e definir domínio",
-        "passo2": "Ativar o sistema com chave",
-        "passo3": "Convidar usuários e definir funções",
-        "passo4": "Configurar o catálogo público"
+    "secoes": {
+      "criacao": {
+        "titulo": "Criando sua Empresa",
+        "conteudo": "O primeiro passo é registrar sua empresa. Quem cria se torna Proprietário, com acesso total.",
+        "dominio_titulo": "O Campo \"Domínio\"",
+        "dominio_descricao": "Este campo define o link único do seu catálogo público (ex: .../catalogo/sua-empresa)."
       },
-      "secoes": {
-        "criacao": {
-          "titulo": "Criando sua Empresa",
-          "conteudo": "O primeiro passo é registrar sua empresa. Quem cria se torna Proprietário, com acesso total.",
-          "dominio_titulo": "O Campo \"Domínio\"",
-          "dominio_descricao": "Este campo define o link único do seu catálogo público (ex: .../catalogo/sua-empresa)."
-        },
-        "ativacao": {
-          "titulo": "Ativação do Sistema",
-          "conteudo": "Para desbloquear todas as funcionalidades, sua empresa precisa ser ativada na tela de Ativação.",
-          "necessario_titulo": "Necessário Chave de Ativação",
-          "necessario_descricao": "É preciso inserir uma chave válida para liberar o acesso completo. Sem ela, o uso é limitado."
-        },
-        "catalogo": {
-          "titulo": "Catálogo e Dados da Empresa",
-          "conteudo": "Na tela \"Empresa\", edite informações do seu negócio e gerencie seu catálogo público.",
-          "vitrine_titulo": "Sua Vitrine Online",
-          "vitrine_descricao": "O catálogo é uma página pública para clientes. Você pode ativá-lo ou desativá-lo a qualquer momento.",
-          "link_titulo": "Link de Acesso",
-          "link_descricao": "O link do catálogo usa o domínio escolhido e fica visível nesta tela para compartilhar."
-        },
-        "usuarios": {
-          "titulo": "Gerenciamento de Usuários",
-          "conteudo": "Na tela \"Usuários\", convide membros para sua equipe e gerencie o que cada um pode fazer.",
-          "cargos_titulo": "Cargos e Hierarquia",
-          "cargo_proprietario": "Proprietário: Acesso total.",
-          "cargo_admin": "Admin: Acesso administrativo.",
-          "cargo_funcionario": "Funcionário: Acesso básico para operações.",
-          "permissoes_titulo": "Permissões Personalizadas",
-          "permissoes_descricao": "Defina permissões específicas para cada usuário, como \"criar produtos\", para um controle mais fino."
-        }
-      }
-    },
-    "produtos": {
-      "titulo": "Gestão de Produtos",
-      "descricao": "O módulo de Gestão de Produtos é o coração do sistema de estoque. Aqui você cadastra e gerencia todos os produtos do seu negócio.",
-      "descricao_curta": "Guia completo sobre como cadastrar e gerenciar seus produtos.",
-      "fluxo": {
-        "titulo": "Fluxo Recomendado:",
-        "passo1": "Cadastrar produto",
-        "passo2": "Definir quantidade mínima",
-        "passo3": "Realizar movimentações",
-        "passo4": "Monitorar e vender"
+      "ativacao": {
+        "titulo": "Ativação do Sistema",
+        "conteudo": "Para desbloquear todas as funcionalidades, sua empresa precisa ser ativada na tela de Ativação.",
+        "necessario_titulo": "Necessário Chave de Ativação",
+        "necessario_descricao": "É preciso inserir uma chave válida para liberar o acesso completo. Sem ela, o uso é limitado."
       },
-      "secoes": {
-        "cadastro": {
-          "titulo": "Como Cadastrar um Novo Produto",
-          "conteudo": "Acesse a tela de produtos, clique em Novo Produto e preencha o formulário com dados obrigatórios e opcionais.",
-          "passo1": "Acessar Produtos",
-          "descricao1": "Navegue até o menu \"Produtos\".",
-          "passo2": "Clicar em \"Novo Produto\"",
-          "descricao2": "Localize o botão no canto superior direito.",
-          "passo3": "Preencher o Formulário",
-          "descricao3": "Complete os campos obrigatórios.",
-          "imagem_alt": "Botão para criar um novo produto"
-        },
-        "quantidade_minima": {
-          "titulo": "Entendendo a Quantidade Mínima",
-          "conteudo": "Defina uma quantidade mínima para receber alertas automáticos quando o estoque estiver em nível de atenção ou crítico.",
-          "label": "Quantidade Mínima",
-          "exemplo": "10 unidades",
-          "status": {
-            "atencao": "Atenção",
-            "descricao_atencao": "Estoque próximo do mínimo",
-            "critico": "Crítico",
-            "descricao_critico": "Estoque abaixo do mínimo",
-            "normal": "Normal",
-            "descricao_normal": "Estoque acima do seguro"
-          },
-          "notificacoes": {
-            "titulo": "Notificações Automáticas",
-            "descricao": "O sistema enviará alertas quando o estoque atingir níveis críticos."
-          }
-        },
-        "movimentacoes": {
-          "titulo": "Realizando Movimentações de Estoque",
-          "conteudo": "Após criar um produto, acesse-o e clique em Estoque para fazer movimentações.",
-          "descricao": "Após criar um produto, acesse-o e clique em \"Estoque\" para registrar entradas ou saídas, informando quantidade e motivo.",
-          "passo1": "Abra o Produto",
-          "descricao1": "Na lista, clique no produto desejado.",
-          "passo2": "Clique em \"Estoque\"",
-          "descricao2": "Acesse a tela de movimentações.",
-          "passo3": "Preencha os Dados",
-          "descricao3": "Informe tipo (Entrada/Saída), quantidade e motivo."
-        },
-        "historico": {
-          "titulo": "Visualizando o Histórico de Movimentações",
-          "descricao": "Existem duas formas de acessar o histórico de um produto. Ambas levam para a mesma tela de detalhes.",
-          "via_produtos": "Via Tela de Produtos",
-          "passo1_produtos": "Acesse a tela Produtos.",
-          "passo2_produtos": "Selecione o produto desejado.",
-          "passo3_produtos": "Clique em \"Estoque\".",
-          "passo4_produtos": "Na janela, clique em \"Histórico\".",
-          "via_inventario": "Via Inventário",
-          "passo1_inventario": "Acesse Inventário na barra lateral.",
-          "passo2_inventario": "Selecione o produto na lista.",
-          "passo3_inventario": "O histórico será exibido."
-        }
+      "catalogo": {
+        "titulo": "Catálogo e Dados da Empresa",
+        "conteudo": "Na tela \"Empresa\", edite informações do seu negócio e gerencie seu catálogo público.",
+        "vitrine_titulo": "Sua Vitrine Online",
+        "vitrine_descricao": "O catálogo é uma página pública para clientes. Você pode ativá-lo ou desativá-lo a qualquer momento.",
+        "link_titulo": "Link de Acesso",
+        "link_descricao": "O link do catálogo usa o domínio escolhido e fica visível nesta tela para compartilhar."
+      },
+      "usuarios": {
+        "titulo": "Gerenciamento de Usuários",
+        "conteudo": "Na tela \"Usuários\", convide membros para sua equipe e gerencie o que cada um pode fazer.",
+        "cargos_titulo": "Cargos e Hierarquia",
+        "cargo_proprietario": "Proprietário: Acesso total.",
+        "cargo_admin": "Admin: Acesso administrativo.",
+        "cargo_funcionario": "Funcionário: Acesso básico para operações.",
+        "permissoes_titulo": "Permissões Personalizadas",
+        "permissoes_descricao": "Defina permissões específicas para cada usuário, como \"criar produtos\", para um controle mais fino."
       }
+    }
+  },
+  "produtos": {
+    "titulo": "Gestão de Produtos",
+    "descricao": "O módulo de Gestão de Produtos é o coração do sistema de estoque. Aqui você cadastra e gerencia todos os produtos do seu negócio.",
+    "descricao_curta": "Guia completo sobre como cadastrar e gerenciar seus produtos.",
+    "fluxo": {
+      "titulo": "Fluxo Recomendado:",
+      "passo1": "Cadastrar produto",
+      "passo2": "Definir quantidade mínima",
+      "passo3": "Realizar movimentações",
+      "passo4": "Monitorar e vender"
     },
-    "vendas": {
-      "titulo": "Sistema de Vendas",
-      "descricao": "A tela de Vendas é o ponto central para registrar as saídas de produtos e interagir com sua base de clientes.",
-      "descricao_curta": "Guia sobre como registrar vendas e gerenciar clientes.",
-      "secoes": {
-        "realizando_venda": {
-          "titulo": "Realizando uma Venda",
-          "conteudo": "Adicione produtos ao carrinho, selecione o cliente e finalize. O sistema atualiza o estoque automaticamente.",
-          "descricao": "Adicione produtos ao carrinho, selecione o cliente e finalize. O sistema atualiza o estoque automaticamente.",
-          "pontos_titulo": "Pontos Importantes:",
-          "ponto1": "Apenas produtos com estoque são listados para venda.",
-          "ponto2": "A venda cria uma movimentação de saída no estoque.",
-          "ponto3": "O registro fica no histórico do produto com o motivo \"Venda\"."
-        },
-        "clientes": {
-          "titulo": "Gerenciando seus Clientes",
-          "conteudo": "Associe vendas a clientes para um controle apurado. Cadastre-os primeiro na tela de Clientes.",
-          "descricao": "Associe vendas a clientes para um controle apurado. Cadastre-os primeiro na tela de Clientes.",
-          "cadastro_titulo": "Cadastrando um Cliente",
-          "cadastro_descricao": "Em \"Clientes\", clique em \"Novo Cliente\" e preencha as informações.",
-          "associacao_titulo": "Associando a uma Venda",
-          "associacao_descricao": "Na tela de Vendas, use o campo de seleção para escolher um cliente antes de finalizar a compra."
-        }
-      }
-    },
-    "pedidos": {
-      "titulo": "Pedido de Estoque",
-      "descricao": "O módulo de Pedidos de Estoque formaliza a reposição de produtos com seus Fornecedores.",
-      "descricao_curta": "Aprenda a fazer pedidos de reposição para seus fornecedores.",
-      "secoes": {
-        "criacao": {
-          "titulo": "Como Criar um Novo Pedido",
-          "conteudo": "Para criar um pedido, você precisa ter produtos e fornecedores já cadastrados. O pedido é sempre vinculado a um fornecedor.",
-          "descricao": "Para criar um pedido, você precisa ter produtos e fornecedores já cadastrados. O pedido é sempre vinculado a um fornecedor.",
-          "passo1": "Selecione o Fornecedor",
-          "descricao1": "Escolha o fornecedor para filtrar os produtos associados a ele.",
-          "passo2": "Adicione Produtos",
-          "descricao2": "Adicione itens e ajuste as quantidades.",
-          "passo3": "Envie o Pedido",
-          "descricao3": "Ao criar, o pedido é enviado automaticamente por e-mail."
-        },
+    "secoes": {
+      "cadastro": {
+        "titulo": "Como Cadastrar um Novo Produto",
+        "conteudo": "Acesse a tela de produtos, clique em Novo Produto e preencha o formulário com dados obrigatórios e opcionais.",
+        "passo1": "Acessar Produtos",
+        "descricao1": "Navegue até o menu \"Produtos\".",
+        "passo2": "Clicar em \"Novo Produto\"",
+        "descricao2": "Localize o botão no canto superior direito.",
+        "passo3": "Preencher o Formulário",
+        "descricao3": "Complete os campos obrigatórios.",
+        "imagem_alt": "Botão para criar um novo produto"
+      },
+      "quantidade_minima": {
+        "titulo": "Entendendo a Quantidade Mínima",
+        "conteudo": "Defina uma quantidade mínima para receber alertas automáticos quando o estoque estiver em nível de atenção ou crítico.",
+        "label": "Quantidade Mínima",
+        "exemplo": "10 unidades",
         "status": {
-          "titulo": "Gerenciando o Status do Pedido",
-          "conteudo": "Acompanhe o pedido através dos seus status para manter o controle.",
-          "descricao": "Acompanhe o pedido através dos seus status para manter o controle.",
-          "pontos_titulo": "Pontos Importantes:",
-          "ponto1": "Status possíveis: Pendente, Processando, Concluído, Cancelado.",
-          "ponto2": "Ao concluir um pedido, o sistema faz a entrada automática no estoque.",
-          "ponto3": "Você pode acompanhar o histórico de cada pedido na tela de Pedidos."
+          "atencao": "Atenção",
+          "descricao_atencao": "Estoque próximo do mínimo",
+          "critico": "Crítico",
+          "descricao_critico": "Estoque abaixo do mínimo",
+          "normal": "Normal",
+          "descricao_normal": "Estoque acima do seguro"
+        },
+        "notificacoes": {
+          "titulo": "Notificações Automáticas",
+          "descricao": "O sistema enviará alertas quando o estoque atingir níveis críticos."
         }
+      },
+      "movimentacoes": {
+        "titulo": "Realizando Movimentações de Estoque",
+        "conteudo": "Após criar um produto, acesse-o e clique em Estoque para fazer movimentações.",
+        "descricao": "Após criar um produto, acesse-o e clique em \"Estoque\" para registrar entradas ou saídas, informando quantidade e motivo.",
+        "passo1": "Abra o Produto",
+        "descricao1": "Na lista, clique no produto desejado.",
+        "passo2": "Clique em \"Estoque\"",
+        "descricao2": "Acesse a tela de movimentações.",
+        "passo3": "Preencha os Dados",
+        "descricao3": "Informe tipo (Entrada/Saída), quantidade e motivo."
+      },
+      "historico": {
+        "titulo": "Visualizando o Histórico de Movimentações",
+        "conteudo": "Acompanhe todo o histórico de entradas e saídas dos seus produtos para manter um controle preciso do estoque.",
+        "descricao": "Existem duas formas de acessar o histórico de um produto. Ambas levam para a mesma tela de detalhes.",
+        "via_produtos": "Via Tela de Produtos",
+        "passo1_produtos": "Acesse a tela Produtos.",
+        "passo2_produtos": "Selecione o produto desejado.",
+        "passo3_produtos": "Clique em \"Estoque\".",
+        "passo4_produtos": "Na janela, clique em \"Histórico\".",
+        "via_inventario": "Via Inventário",
+        "passo1_inventario": "Acesse Inventário na barra lateral.",
+        "passo2_inventario": "Selecione o produto na lista.",
+        "passo3_inventario": "O histórico será exibido."
+      }
+    }
+  },
+  "vendas": {
+    "titulo": "Sistema de Vendas",
+    "descricao": "A tela de Vendas é o ponto central para registrar as saídas de produtos e interagir com sua base de clientes.",
+    "descricao_curta": "Guia sobre como registrar vendas e gerenciar clientes.",
+    "secoes": {
+      "realizando_venda": {
+        "titulo": "Realizando uma Venda",
+        "conteudo": "Adicione produtos ao carrinho, selecione o cliente e finalize. O sistema atualiza o estoque automaticamente.",
+        "descricao": "Adicione produtos ao carrinho, selecione o cliente e finalize. O sistema atualiza o estoque automaticamente.",
+        "pontos_titulo": "Pontos Importantes:",
+        "ponto1": "Apenas produtos com estoque são listados para venda.",
+        "ponto2": "A venda cria uma movimentação de saída no estoque.",
+        "ponto3": "O registro fica no histórico do produto com o motivo \"Venda\"."
+      },
+      "clientes": {
+        "titulo": "Gerenciando seus Clientes",
+        "conteudo": "Associe vendas a clientes para um controle apurado. Cadastre-os primeiro na tela de Clientes.",
+        "descricao": "Associe vendas a clientes para um controle apurado. Cadastre-os primeiro na tela de Clientes.",
+        "cadastro_titulo": "Cadastrando um Cliente",
+        "cadastro_descricao": "Em \"Clientes\", clique em \"Novo Cliente\" e preencha as informações.",
+        "associacao_titulo": "Associando a uma Venda",
+        "associacao_descricao": "Na tela de Vendas, use o campo de seleção para escolher um cliente antes de finalizar a compra."
+      }
+    }
+  },
+  "pedidos": {
+    "titulo": "Pedido de Estoque",
+    "descricao": "O módulo de Pedidos de Estoque formaliza a reposição de produtos com seus Fornecedores.",
+    "descricao_curta": "Aprenda a fazer pedidos de reposição para seus fornecedores.",
+    "secoes": {
+      "criacao": {
+        "titulo": "Como Criar um Novo Pedido",
+        "conteudo": "Para criar um pedido, você precisa ter produtos e fornecedores já cadastrados. O pedido é sempre vinculado a um fornecedor.",
+        "descricao": "Para criar um pedido, você precisa ter produtos e fornecedores já cadastrados. O pedido é sempre vinculado a um fornecedor.",
+        "passo1": "Selecione o Fornecedor",
+        "descricao1": "Escolha o fornecedor para filtrar os produtos associados a ele.",
+        "passo2": "Adicione Produtos",
+        "descricao2": "Adicione itens e ajuste as quantidades.",
+        "passo3": "Envie o Pedido",
+        "descricao3": "Ao criar, o pedido é enviado automaticamente por e-mail."
+      },
+      "status": {
+        "titulo": "Gerenciando o Status do Pedido",
+        "conteudo": "Acompanhe o pedido através dos seus status para manter o controle.",
+        "descricao": "Acompanhe o pedido através dos seus status para manter o controle.",
+        "pontos_titulo": "Pontos Importantes:",
+        "ponto1": "Status possíveis: Pendente, Processando, Concluído, Cancelado.",
+        "ponto2": "Ao concluir um pedido, o sistema faz a entrada automática no estoque.",
+        "ponto3": "Você pode acompanhar o histórico de cada pedido na tela de Pedidos."
       }
     }
   }
+}

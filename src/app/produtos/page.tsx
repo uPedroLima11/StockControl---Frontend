@@ -1383,7 +1383,7 @@ export default function Produtos() {
                     </div>
                   )}
                   {filtroCategoria && (
-                    <button onClick={() => aplicarFiltroCategoria(null)} className={`px-4 py-3 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-xl ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 flex items-center gap-2 text-sm`}>
+                    <button onClick={() => aplicarFiltroCategoria(null)} className={`px-4 cursor-pointer py-3 ${modoDark ? "bg-red-500/10 hover:bg-red-500/20" : "bg-red-50 hover:bg-red-100"} border ${modoDark ? "border-red-500/30" : "border-red-200"} rounded-xl ${modoDark ? "text-red-400" : "text-red-500"} transition-all duration-300 flex items-center gap-2 text-sm`}>
                       <FaTimes className="text-xs" />
                       {t("limpar")}
                     </button>
@@ -1444,7 +1444,7 @@ export default function Produtos() {
                 <h3 className={`text-xl font-bold ${textPrimary} mb-2`}>{t("nenhumProdutoEncontrado")}</h3>
                 <p className={`${textMuted} mb-4 text-sm`}>{filtroCategoria ? t("nenhumProdutoCategoria") : t("comeceAdicionando")}</p>
                 {podeCriar && empresaAtivada && (
-                  <button onClick={() => setModalAberto(true)} className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm">
+                  <button onClick={() => setModalAberto(true)} className="px-6 cursor-pointer py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105 text-sm">
                     <FaPlus />
                     {t("criarPrimeiroProduto")}
                   </button>

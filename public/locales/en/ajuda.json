@@ -1,178 +1,180 @@
 {
-    "titulo": "Help Center",
-    "subtitulo": "Complete guide to using StockControl",
-    "pesquisa": {
-      "placeholder": "Search throughout help...",
-      "em": "in"
+  "titulo": "",
+  "ajuda": "Help",
+  "subtitulo": "Complete guide to using StockControl",
+  "pesquisa": {
+    "placeholder": "Search all help...",
+    "em": "in"
+  },
+  "menu": {
+    "topicos": "Help Topics"
+  },
+  "footer": {
+    "contato": "Need more help? Contact our support team.",
+    "copyright": "StockControl © {{ano}} - Inventory Management System"
+  },
+  "empresa": {
+    "titulo": "Company Management",
+    "descricao": "This module is the command center of your business. Here you define the company identity, manage team access and control essential functionalities.",
+    "descricao_curta": "Creation, activation, catalog and user management.",
+    "fluxo": {
+      "titulo": "Initial Setup Flow:",
+      "passo1": "Create company and define domain",
+      "passo2": "Activate system with key",
+      "passo3": "Invite users and define roles",
+      "passo4": "Configure public catalog"
     },
-    "menu": {
-      "topicos": "Help Topics"
-    },
-    "footer": {
-      "contato": "Need more help? Contact our support.",
-      "copyright": "StockControl © {{ano}} - Inventory Management System"
-    },
-    "empresa": {
-      "titulo": "Company Management",
-      "descricao": "This module is the command center of your business. Here you define the company identity, manage team access and control essential features.",
-      "descricao_curta": "Creation, activation, catalog and user management.",
-      "fluxo": {
-        "titulo": "Initial Setup Flow:",
-        "passo1": "Create company and define domain",
-        "passo2": "Activate system with key",
-        "passo3": "Invite users and define roles",
-        "passo4": "Configure public catalog"
+    "secoes": {
+      "criacao": {
+        "titulo": "Creating Your Company",
+        "conteudo": "The first step is to register your company. The creator becomes Owner, with full access.",
+        "dominio_titulo": "The \"Domain\" Field",
+        "dominio_descricao": "This field defines the unique link for your public catalog (ex: .../catalog/your-company)."
       },
-      "secoes": {
-        "criacao": {
-          "titulo": "Creating Your Company",
-          "conteudo": "The first step is to register your company. The creator becomes Owner with full access.",
-          "dominio_titulo": "The \"Domain\" Field",
-          "dominio_descricao": "This field defines the unique link for your public catalog (ex: .../catalog/your-company)."
-        },
-        "ativacao": {
-          "titulo": "System Activation",
-          "conteudo": "To unlock all features, your company needs to be activated in the Activation screen.",
-          "necessario_titulo": "Activation Key Required",
-          "necessario_descricao": "A valid key must be inserted to unlock full access. Without it, usage is limited."
-        },
-        "catalogo": {
-          "titulo": "Catalog and Company Data",
-          "conteudo": "In the \"Company\" screen, edit your business information and manage your public catalog.",
-          "vitrine_titulo": "Your Online Showcase",
-          "vitrine_descricao": "The catalog is a public page for customers. You can activate or deactivate it at any time.",
-          "link_titulo": "Access Link",
-          "link_descricao": "The catalog link uses the chosen domain and is visible on this screen for sharing."
-        },
-        "usuarios": {
-          "titulo": "User Management",
-          "conteudo": "In the \"Users\" screen, invite team members and manage what each one can do.",
-          "cargos_titulo": "Roles and Hierarchy",
-          "cargo_proprietario": "Owner: Full access.",
-          "cargo_admin": "Admin: Administrative access.",
-          "cargo_funcionario": "Employee: Basic access for operations.",
-          "permissoes_titulo": "Custom Permissions",
-          "permissoes_descricao": "Define specific permissions for each user, such as \"create products\", for finer control."
-        }
-      }
-    },
-    "produtos": {
-      "titulo": "Product Management",
-      "descricao": "The Product Management module is the heart of the inventory system. Here you register and manage all your business products.",
-      "descricao_curta": "Complete guide on how to register and manage your products.",
-      "fluxo": {
-        "titulo": "Recommended Flow:",
-        "passo1": "Register product",
-        "passo2": "Define minimum quantity",
-        "passo3": "Perform movements",
-        "passo4": "Monitor and sell"
+      "ativacao": {
+        "titulo": "System Activation",
+        "conteudo": "To unlock all functionalities, your company needs to be activated in the Activation screen.",
+        "necessario_titulo": "Activation Key Required",
+        "necessario_descricao": "A valid key must be inserted to grant full access. Without it, usage is limited."
       },
-      "secoes": {
-        "cadastro": {
-          "titulo": "How to Register a New Product",
-          "conteudo": "Access the products screen, click New Product and fill out the form with required and optional data.",
-          "passo1": "Access Products",
-          "descricao1": "Navigate to the \"Products\" menu.",
-          "passo2": "Click \"New Product\"",
-          "descricao2": "Locate the button in the upper right corner.",
-          "passo3": "Fill out the Form",
-          "descricao3": "Complete the required fields.",
-          "imagem_alt": "Button to create a new product"
-        },
-        "quantidade_minima": {
-          "titulo": "Understanding Minimum Quantity",
-          "conteudo": "Set a minimum quantity to receive automatic alerts when stock reaches attention or critical levels.",
-          "label": "Minimum Quantity",
-          "exemplo": "10 units",
-          "status": {
-            "atencao": "Attention",
-            "descricao_atencao": "Stock near minimum",
-            "critico": "Critical",
-            "descricao_critico": "Stock below minimum",
-            "normal": "Normal",
-            "descricao_normal": "Stock above safe level"
-          },
-          "notificacoes": {
-            "titulo": "Automatic Notifications",
-            "descricao": "The system will send alerts when stock reaches critical levels."
-          }
-        },
-        "movimentacoes": {
-          "titulo": "Performing Stock Movements",
-          "conteudo": "After creating a product, access it and click Stock to perform movements.",
-          "descricao": "After creating a product, access it and click \"Stock\" to register entries or exits, informing quantity and reason.",
-          "passo1": "Open the Product",
-          "descricao1": "In the list, click on the desired product.",
-          "passo2": "Click \"Stock\"",
-          "descricao2": "Access the movements screen.",
-          "passo3": "Fill in the Data",
-          "descricao3": "Inform type (Entry/Exit), quantity and reason."
-        },
-        "historico": {
-          "titulo": "Viewing Movement History",
-          "descricao": "There are two ways to access a product's history. Both lead to the same details screen.",
-          "via_produtos": "Via Products Screen",
-          "passo1_produtos": "Access the Products screen.",
-          "passo2_produtos": "Select the desired product.",
-          "passo3_produtos": "Click \"Stock\".",
-          "passo4_produtos": "In the window, click \"History\".",
-          "via_inventario": "Via Inventory",
-          "passo1_inventario": "Access Inventory in the sidebar.",
-          "passo2_inventario": "Select the product in the list.",
-          "passo3_inventario": "The history will be displayed."
-        }
-      }
-    },
-    "vendas": {
-      "titulo": "Sales System",
-      "descricao": "The Sales screen is the central point for recording product exits and interacting with your customer base.",
-      "descricao_curta": "Guide on how to record sales and manage customers.",
-      "secoes": {
-        "realizando_venda": {
-          "titulo": "Making a Sale",
-          "conteudo": "Add products to cart, select customer and finish. The system automatically updates stock.",
-          "descricao": "Add products to cart, select customer and finish. The system automatically updates stock.",
-          "pontos_titulo": "Important Points:",
-          "ponto1": "Only products with stock are listed for sale.",
-          "ponto2": "The sale creates an exit movement in stock.",
-          "ponto3": "The record stays in the product history with the reason \"Sale\"."
-        },
-        "clientes": {
-          "titulo": "Managing Your Customers",
-          "conteudo": "Associate sales with customers for accurate control. Register them first in the Customers screen.",
-          "descricao": "Associate sales with customers for accurate control. Register them first in the Customers screen.",
-          "cadastro_titulo": "Registering a Customer",
-          "cadastro_descricao": "In \"Customers\", click \"New Customer\" and fill in the information.",
-          "associacao_titulo": "Associating with a Sale",
-          "associacao_descricao": "In the Sales screen, use the selection field to choose a customer before finishing the purchase."
-        }
-      }
-    },
-    "pedidos": {
-      "titulo": "Stock Orders",
-      "descricao": "The Stock Orders module formalizes product replenishment with your Suppliers.",
-      "descricao_curta": "Learn how to make replenishment orders to your suppliers.",
-      "secoes": {
-        "criacao": {
-          "titulo": "How to Create a New Order",
-          "conteudo": "To create an order, you need to have products and suppliers already registered. The order is always linked to a supplier.",
-          "descricao": "To create an order, you need to have products and suppliers already registered. The order is always linked to a supplier.",
-          "passo1": "Select the Supplier",
-          "descricao1": "Choose the supplier to filter associated products.",
-          "passo2": "Add Products",
-          "descricao2": "Add items and adjust quantities.",
-          "passo3": "Send the Order",
-          "descricao3": "When created, the order is automatically sent by email."
-        },
-        "status": {
-          "titulo": "Managing Order Status",
-          "conteudo": "Track the order through its status to maintain control.",
-          "descricao": "Track the order through its status to maintain control.",
-          "pontos_titulo": "Important Points:",
-          "ponto1": "Possible status: Pending, Processing, Completed, Cancelled.",
-          "ponto2": "When completing an order, the system automatically makes stock entry.",
-          "ponto3": "You can track each order's history in the Orders screen."
-        }
+      "catalogo": {
+        "titulo": "Catalog and Company Data",
+        "conteudo": "In the \"Company\" screen, edit your business information and manage your public catalog.",
+        "vitrine_titulo": "Your Online Showcase",
+        "vitrine_descricao": "The catalog is a public page for customers. You can activate or deactivate it at any time.",
+        "link_titulo": "Access Link",
+        "link_descricao": "The catalog link uses the chosen domain and is visible on this screen for sharing."
+      },
+      "usuarios": {
+        "titulo": "User Management",
+        "conteudo": "In the \"Users\" screen, invite team members and manage what each one can do.",
+        "cargos_titulo": "Roles and Hierarchy",
+        "cargo_proprietario": "Owner: Full access.",
+        "cargo_admin": "Admin: Administrative access.",
+        "cargo_funcionario": "Employee: Basic access for operations.",
+        "permissoes_titulo": "Custom Permissions",
+        "permissoes_descricao": "Define specific permissions for each user, such as \"create products\", for finer control."
       }
     }
+  },
+  "produtos": {
+    "titulo": "Product Management",
+    "descricao": "The Product Management module is the heart of the inventory system. Here you register and manage all your business products.",
+    "descricao_curta": "Complete guide on how to register and manage your products.",
+    "fluxo": {
+      "titulo": "Recommended Flow:",
+      "passo1": "Register product",
+      "passo2": "Set minimum quantity",
+      "passo3": "Perform movements",
+      "passo4": "Monitor and sell"
+    },
+    "secoes": {
+      "cadastro": {
+        "titulo": "How to Register a New Product",
+        "conteudo": "Access the products screen, click New Product and fill out the form with required and optional data.",
+        "passo1": "Access Products",
+        "descricao1": "Navigate to the \"Products\" menu.",
+        "passo2": "Click \"New Product\"",
+        "descricao2": "Locate the button in the upper right corner.",
+        "passo3": "Fill out the Form",
+        "descricao3": "Complete the required fields.",
+        "imagem_alt": "Button to create a new product"
+      },
+      "quantidade_minima": {
+        "titulo": "Understanding Minimum Quantity",
+        "conteudo": "Set a minimum quantity to receive automatic alerts when stock reaches attention or critical levels.",
+        "label": "Minimum Quantity",
+        "exemplo": "10 units",
+        "status": {
+          "atencao": "Attention",
+          "descricao_atencao": "Stock close to minimum",
+          "critico": "Critical",
+          "descricao_critico": "Stock below minimum",
+          "normal": "Normal",
+          "descricao_normal": "Stock above safe level"
+        },
+        "notificacoes": {
+          "titulo": "Automatic Notifications",
+          "descricao": "The system will send alerts when stock reaches critical levels."
+        }
+      },
+      "movimentacoes": {
+        "titulo": "Performing Stock Movements",
+        "conteudo": "After creating a product, access it and click Stock to make movements.",
+        "descricao": "After creating a product, access it and click \"Stock\" to register entries or exits, informing quantity and reason.",
+        "passo1": "Open the Product",
+        "descricao1": "In the list, click on the desired product.",
+        "passo2": "Click \"Stock\"",
+        "descricao2": "Access the movements screen.",
+        "passo3": "Fill out the Data",
+        "descricao3": "Inform type (Entry/Exit), quantity and reason."
+      },
+      "historico": {
+        "titulo": "Viewing Movement History",
+        "conteudo": "Track all entry and exit history of your products to maintain accurate inventory control.",
+        "descricao": "There are two ways to access a product's history. Both lead to the same details screen.",
+        "via_produtos": "Via Products Screen",
+        "passo1_produtos": "Access the Products screen.",
+        "passo2_produtos": "Select the desired product.",
+        "passo3_produtos": "Click \"Stock\".",
+        "passo4_produtos": "In the window, click \"History\".",
+        "via_inventario": "Via Inventory",
+        "passo1_inventario": "Access Inventory in the sidebar.",
+        "passo2_inventario": "Select the product from the list.",
+        "passo3_inventario": "The history will be displayed."
+      }
+    }
+  },
+  "vendas": {
+    "titulo": "Sales System",
+    "descricao": "The Sales screen is the central point for recording product sales and interacting with your customer base.",
+    "descricao_curta": "Guide on how to record sales and manage customers.",
+    "secoes": {
+      "realizando_venda": {
+        "titulo": "Making a Sale",
+        "conteudo": "Add products to cart, select customer and finalize. The system automatically updates inventory.",
+        "descricao": "Add products to cart, select customer and finalize. The system automatically updates inventory.",
+        "pontos_titulo": "Important Points:",
+        "ponto1": "Only products with stock are listed for sale.",
+        "ponto2": "The sale creates an exit movement in inventory.",
+        "ponto3": "The record stays in the product history with \"Sale\" reason."
+      },
+      "clientes": {
+        "titulo": "Managing Your Customers",
+        "conteudo": "Associate sales with customers for accurate control. Register them first in the Customers screen.",
+        "descricao": "Associate sales with customers for accurate control. Register them first in the Customers screen.",
+        "cadastro_titulo": "Registering a Customer",
+        "cadastro_descricao": "In \"Customers\", click \"New Customer\" and fill out the information.",
+        "associacao_titulo": "Associating with a Sale",
+        "associacao_descricao": "In the Sales screen, use the selection field to choose a customer before finalizing the purchase."
+      }
+    }
+  },
+  "pedidos": {
+    "titulo": "Stock Orders",
+    "descricao": "The Stock Orders module formalizes product replenishment with your Suppliers.",
+    "descricao_curta": "Learn how to make replenishment orders to your suppliers.",
+    "secoes": {
+      "criacao": {
+        "titulo": "How to Create a New Order",
+        "conteudo": "To create an order, you need to have products and suppliers already registered. The order is always linked to a supplier.",
+        "descricao": "To create an order, you need to have products and suppliers already registered. The order is always linked to a supplier.",
+        "passo1": "Select the Supplier",
+        "descricao1": "Choose the supplier to filter products associated with them.",
+        "passo2": "Add Products",
+        "descricao2": "Add items and adjust quantities.",
+        "passo3": "Send the Order",
+        "descricao3": "When created, the order is automatically sent by email."
+      },
+      "status": {
+        "titulo": "Managing Order Status",
+        "conteudo": "Track the order through its status to maintain control.",
+        "descricao": "Track the order through its status to maintain control.",
+        "pontos_titulo": "Important Points:",
+        "ponto1": "Possible statuses: Pending, Processing, Completed, Canceled.",
+        "ponto2": "When completing an order, the system automatically makes stock entry.",
+        "ponto3": "You can track each order's history in the Orders screen."
+      }
+    }
+  }
 }
