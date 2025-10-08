@@ -1,5 +1,7 @@
 {
-  "titulo": "Exportação de Dados",
+  "titulo": "Pagina de",
+  "exportacoes": "Exportações",
+  "subtitulo": "Exporte seus dados de forma simples e organizada",
   "abas": {
     "exportar": "Exportar Dados",
     "historico": "Histórico"
@@ -10,6 +12,7 @@
     "botao": "Ativar Agora"
   },
   "exportacaoSucesso": "Exportação realizada com sucesso!",
+  "exportando": "Exportando...",
   "erroExportacao": "Erro na exportação",
   "erroTitulo": "Erro!",
   "erroGenerico": "Não foi possível exportar os dados.",
@@ -42,18 +45,46 @@
     "usuarios": "Usuários",
     "movimentacoes": "Movimentações de Estoque"
   },
+  "descricoes": {
+    "produtos": "Exporte todos os produtos cadastrados no sistema com informações completas",
+    "vendas": "Relatório completo de vendas realizadas com dados detalhados",
+    "clientes": "Lista de clientes cadastrados com informações de contato",
+    "fornecedores": "Dados completos dos fornecedores e informações de contato",
+    "usuarios": "Exportar usuários do sistema com permissões e dados",
+    "movimentacoes": "Histórico completo de entradas e saídas do estoque"
+  },
   "botaoExportar": "Exportar Excel",
   "historico": {
     "titulo": "Histórico de Exportações",
     "carregando": "Carregando histórico...",
     "nenhumaExportacao": "Nenhuma exportação realizada",
-    "mostrando": "Mostrando {{inicio}}-{{fim}} de {{total}} exportações",
+    "nenhumResultado": "Nenhum resultado encontrado para os filtros aplicados",
+    "comeceExportando": "Comece exportando seus dados usando a aba 'Exportar Dados'",
+    "mostrando": "Mostrando {{inicio}} a {{fim}} de {{total}} exportações",
     "exportacaoDe": "Exportação de {{entidade}}",
+    "exportadoPor": "Exportado por",
+    "buscarPlaceholder": "Buscar no histórico...",
+    "filtros": {
+      "todos": "Todos os tipos",
+      "produtos": "Produtos",
+      "vendas": "Vendas",
+      "clientes": "Clientes",
+      "fornecedores": "Fornecedores",
+      "usuarios": "Usuários",
+      "movimentacoes": "Movimentações"
+    },
+    "limparFiltros": "Limpar Filtros",
     "detalhes": {
       "tipoDados": "Tipo de Dados",
       "exportadoPor": "Exportado por",
       "periodo": "Período",
       "dataExportacao": "Data da Exportação"
     }
+  },
+  "stats": {
+    "totalExportacoes": "Total de Exportações",
+    "ultimaSemana": "Última Semana",
+    "produtos": "Export. Produtos",
+    "vendas": "Export. Vendas"
   }
 }
