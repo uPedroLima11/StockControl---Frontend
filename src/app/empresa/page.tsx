@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck, FaBuilding, FaUsers, FaChartLine, FaSync, FaInfoCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import { useTranslation } from "react-i18next";
@@ -10,12 +10,14 @@ import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Image from "next/image";
 import Cookies from "js-cookie";
+import { FaShield } from "react-icons/fa6";
 
 type EmailStatus = {
   existe: boolean;
   carregando: boolean;
   mensagem: string;
 };
+
 interface Empresa {
   slug: string;
   id: string;
@@ -29,6 +31,8 @@ interface Empresa {
   cep?: string;
   foto?: string | null;
   catalogoPublico?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
@@ -49,6 +53,12 @@ export default function Empresa() {
   const [temPermissaoGerenciar, setTemPermissaoGerenciar] = useState(false);
   const [carregandoPermissao, setCarregandoPermissao] = useState(true);
   const [, setIsUploading] = useState(false);
+  const [stats, setStats] = useState({
+    totalProdutos: 0,
+    totalUsuarios: 0,
+    produtosCatalogo: 0,
+    estoqueBaixo: 0,
+  });
 
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
@@ -175,6 +185,8 @@ export default function Empresa() {
 
         setEmpresa(data);
         setFotoPreview(data.foto || null);
+
+        await carregarEstatisticas(data.id);
       } catch {
         router.push("/criarempresa");
       } finally {
@@ -182,51 +194,146 @@ export default function Empresa() {
       }
     };
 
+    const carregarEstatisticas = async (empresaId: string) => {
+      try {
+        const [produtosRes, usuariosRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/produtos`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/empresa/${empresaId}`, {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          })
+        ]);
+
+        if (produtosRes.ok) {
+          const todosProdutos = await produtosRes.json();
+          const produtosDaEmpresa = todosProdutos.filter((p: any) => p.empresaId === empresaId);
+          const produtosCatalogo = produtosDaEmpresa.filter((p: any) => p.noCatalogo);
+          const estoqueBaixo = produtosDaEmpresa.filter((p: any) => p.quantidade <= (p.quantidadeMin || 0));
+
+          setStats(prev => ({
+            ...prev,
+            totalProdutos: produtosDaEmpresa.length,
+            produtosCatalogo: produtosCatalogo.length,
+            estoqueBaixo: estoqueBaixo.length,
+          }));
+        }
+
+        if (usuariosRes.ok) {
+          const usuarios = await usuariosRes.json();
+          setStats(prev => ({
+            ...prev,
+            totalUsuarios: usuarios.length,
+          }));
+        } else if (usuariosRes.status === 404) {
+          const countRes = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/contagem/${empresaId}`, {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          });
+
+          if (countRes.ok) {
+            const data = await countRes.json();
+            setStats(prev => ({
+              ...prev,
+              totalUsuarios: data.quantidade,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar estatísticas:", error);
+      }
+    };
     fetchEmpresa();
 
     const style = document.createElement("style");
     style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    html::-webkit-scrollbar-track {
-      background: ${ativo ? "#132F4C" : "#F8FAFC"};
-    }
-    html::-webkit-scrollbar-thumb {
-      background: ${ativo ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-    }
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${ativo ? "#132F4C" : "#64B5F6"}; 
-    }
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${ativo ? "#132F4C" : "#90CAF9"} ${ativo ? "#0A1830" : "#F8FAFC"};
-    }
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
       }
-    }
+      
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      .animate-slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+      }
+      
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+        
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      .glow-effect {
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .glow-effect::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+      }
+      
+      .glow-effect:hover::before {
+        left: 100%;
+      }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(45deg, ${ativo ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
+        padding: 1px;
+        border-radius: 16px;
+      }
+      
+      .gradient-border > div {
+        background: ${ativo ? "#1E293B" : "#FFFFFF"};
+        border-radius: 15px;
+      }
     `;
     document.head.appendChild(style);
-
-    const fileInput = document.getElementById("fileInput") as HTMLInputElement;
-    if (fileInput) {
-      fileInput.addEventListener("change", (e) => {
-        const target = e.target as HTMLInputElement;
-        const fileName = target.files?.[0]?.name || t("nenhumArquivoEscolhido");
-        const displayElement = fileInput.nextElementSibling?.querySelector(".text-gray-500");
-        if (displayElement) {
-          displayElement.textContent = fileName;
-        }
-      });
-    }
 
     return () => {
       document.head.removeChild(style);
@@ -579,262 +686,314 @@ export default function Empresa() {
     }
   };
 
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+  const textPrimary = modoDark ? "text-white" : "text-slate-900";
+  const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
+  const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
+  const bgStats = modoDark ? "bg-slate-800/50" : "bg-white/80";
+
   if (loading || carregandoPermissao) {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-        <p className="font-mono" style={{ color: temaAtual.texto }}>
-          {t("carregando")}
-        </p>
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className={`w-16 h-16 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
+            <FaSync className={`text-2xl ${textPrimary} animate-spin`} />
+          </div>
+          <p className={`font-medium ${textPrimary}`}>{t("carregando")}</p>
+        </div>
       </div>
     );
   }
 
   if (!empresa) {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-        <p className="text-red-600 font-mono">{t("empresaNaoEncontrada")}</p>
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className={`w-16 h-16 mx-auto mb-4 ${bgCard} rounded-full flex items-center justify-center border ${borderColor}`}>
+            <FaBuilding className={`text-2xl ${textPrimary}`} />
+          </div>
+          <p className={`text-lg font-medium ${textPrimary} mb-2`}>{t("empresaNaoEncontrada")}</p>
+          <button
+            onClick={() => router.push("/criarempresa")}
+            className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center gap-2 mx-auto hover:scale-105"
+          >
+            <FaBuilding className="text-sm" />
+            {t("criarEmpresa")}
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-6 md:px-6 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-      <div className="w-full max-w-4xl">
-        <h1 className="text-center text-xl md:text-2xl font-semibold mb-6" style={{ color: temaAtual.texto }}>
-          {t("titulo")}
-        </h1>
+    <div className={`min-h-screen ${bgGradient}`}>
+      <div className="flex">
+        <div className="flex-1 min-w-0">
+          <div className="px-4 sm:px-6 py-8 w-full max-w-7xl mx-auto">
+            <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${bgCard} backdrop-blur-sm border ${borderColor}`}>
+              <div className="absolute inset-0">
+                <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
+              </div>
 
-        <div
-          className="p-5 md:p-6 rounded-xl shadow-lg mb-6"
-          style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-          }}
-        >
-          <div className="border-b mb-5 pb-5" style={{ borderColor: temaAtual.borda }}>
-            <h2 className="text-lg md:text-xl font-semibold mb-5 flex items-center gap-2" style={{ color: temaAtual.texto }}>
-              <FaGlobe className="text-lg" />
-              {t("dadosEmpresa")}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base">
-              {[
-                { label: t("campos.nome"), value: empresa.nome, key: "nome" },
-                { label: t("campos.email"), value: empresa.email, key: "email" },
-                { label: t("campos.telefone"), value: empresa.telefone || t("naoInformado"), key: "telefone" },
-                { label: t("campos.endereco"), value: empresa.endereco || t("naoInformado"), key: "endereco" },
-                { label: t("campos.pais"), value: empresa.pais || t("naoInformado"), key: "pais" },
-                { label: t("campos.estado"), value: empresa.estado || t("naoInformado"), key: "estado" },
-                { label: t("campos.cidade"), value: empresa.cidade || t("naoInformado"), key: "cidade" },
-                { label: t("campos.cep"), value: empresa.cep || t("naoInformado"), key: "cep" },
-              ].map((field) => (
-                <div
-                  key={field.key}
-                  className="p-3 rounded-lg"
-                  style={{
-                    backgroundColor: modoDark ? temaAtual.fundo : "#F8FAFC",
-                    border: modoDark ? "none" : `1px solid ${temaAtual.borda}`,
-                    boxShadow: modoDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)",
-                  }}
-                >
-                  <p
-                    style={{
-                      color: modoDark ? temaAtual.placeholder : "#64748B",
-                      fontSize: "0.875rem",
-                      marginBottom: "0.5rem",
-                      fontWeight: modoDark ? "normal" : "500",
-                    }}
-                  >
-                    {field.label}
-                  </p>
-                  <p
-                    style={{
-                      color: temaAtual.texto,
-                      fontSize: "0.95rem",
-                      fontWeight: field.key === "nome" ? "500" : "normal",
-                    }}
-                  >
-                    {field.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="md:w-2/5">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: temaAtual.texto }}>
-                  {t("logoEmpresa")}
-                </h2>
-                <div className="flex justify-start">
+              <div className="relative z-10 text-center">
+                <div className="flex items-center justify-center gap-4 mb-4">
                   {empresa.foto ? (
-                    <Image src={empresa.foto} alt={t("altLogoEmpresa")} width={120} height={120} className="rounded-lg border-2 object-contain" style={{ borderColor: temaAtual.borda }} />
+                    <Image
+                      src={empresa.foto}
+                      alt={t("altLogoEmpresa")}
+                      width={80}
+                      height={80}
+                      className="rounded-2xl border-2 object-cover shadow-lg"
+                      style={{ borderColor: temaAtual.borda }}
+                    />
                   ) : (
                     <div
-                      className="w-32 h-32 rounded-lg border-2 flex items-center justify-center"
+                      className="w-20 h-20 rounded-2xl border-2 flex items-center justify-center shadow-lg"
                       style={{
                         borderColor: temaAtual.borda,
                         backgroundColor: temaAtual.fundo,
                       }}
                     >
-                      <span style={{ color: temaAtual.placeholder }}>{t("semLogo")}</span>
+                      <FaBuilding className={`text-2xl ${textMuted}`} />
                     </div>
                   )}
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row md:flex-col gap-2 justify-start">
-                {temPermissaoGerenciar && (
-                  <button
-                    onClick={() => {
-                      setEmpresaEditada(empresa);
-                      setModalEdicaoAberto(true);
-                    }}
-                    className="flex items-center cursor-pointer justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 text-sm whitespace-nowrap"
-                    style={{
-                      backgroundColor: temaAtual.primario,
-                      color: "#FFFFFF",
-                      minWidth: "unset",
-                      width: "fit-content",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "0.9";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                    }}
-                  >
-                    <FaEdit className="text-xs" style={{ color: "#FFFFFF" }} />
-                    {t("editarDados")}
-                  </button>
-                )}
-
-                {tipoUsuario && (
-                  <button
-                    onClick={excluirOuSairDaEmpresa}
-                    className="flex transition-all duration-200 hover:scale-105 items-center justify-center cursor-pointer gap-1 px-3 py-2 rounded-lg text-sm whitespace-nowrap"
-                    style={{
-                      backgroundColor: tipoUsuario === "PROPRIETARIO" ? "#EF4444" : "#6B7280",
-                      color: "#FFFFFF",
-                      minWidth: "unset",
-                      width: "fit-content",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "0.9";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                    }}
-                  >
-                    {tipoUsuario === "PROPRIETARIO" ? <FaTrash className="text-xs" style={{ color: "#FFFFFF" }} /> : <FaSignOutAlt className="text-xs" style={{ color: "#FFFFFF" }} />}
-                    {t(tipoUsuario === "PROPRIETARIO" ? "deletarEmpresa" : "sairEmpresa")}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="md:w-full">
-              <div
-                className="p-5 rounded-xl"
-                style={{
-                  backgroundColor: temaAtual.card,
-                  border: `1px solid ${temaAtual.borda}`,
-                }}
-              >
-                <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg" style={{ color: temaAtual.texto }}>
-                  {empresa.catalogoPublico ? <FaEye className="text-xl" style={{ color: "#10B981" }} /> : <FaEyeSlash className="text-xl" style={{ color: "#EF4444" }} />}
-                  {t("catalogo.publico")}
-                </h3>
-
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                   <div>
-                    <span className="text-sm font-medium" style={{ color: temaAtual.texto }}>
-                      {t("catalogo.status")}: <strong style={{ color: empresa.catalogoPublico ? "#10B981" : "#EF4444" }}>{empresa.catalogoPublico ? t("catalogo.ativado") : t("catalogo.desativado")}</strong>
-                    </span>
+                    <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-2`}>
+                      {empresa.nome}
+                    </h1>
+                    <p className={`text-lg ${textSecondary}`}>{t("dadosEmpresa")}</p>
                   </div>
-                  {temPermissaoGerenciar && (
-                    <button onClick={toggleCatalogoPublico} disabled={atualizandoCatalogo} className={`px-4 py-2 transition-all duration-200 hover:scale-105 cursor-pointer rounded-lg text-sm font-medium ${empresa.catalogoPublico ? "bg-red-500 text-white hover:bg-red-600" : "bg-green-500 text-white hover:bg-green-600"} disabled:opacity-50 w-full md:w-auto`}>
-                      {atualizandoCatalogo ? t("catalogo.processando") : empresa.catalogoPublico ? t("catalogo.desativar") : t("catalogo.ativar")}
-                    </button>
-                  )}
+                </div>
+              </div>
+            </section>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[
+                {
+                  label: t("stats.totalProdutos"),
+                  value: stats.totalProdutos,
+                  icon: FaBuilding,
+                  color: "from-blue-500 to-cyan-500",
+                  bgColor: modoDark ? "bg-blue-500/10" : "bg-blue-50",
+                },
+                {
+                  label: t("stats.totalUsuarios"),
+                  value: stats.totalUsuarios,
+                  icon: FaUsers,
+                  color: "from-green-500 to-emerald-500",
+                  bgColor: modoDark ? "bg-green-500/10" : "bg-green-50",
+                },
+                {
+                  label: t("stats.produtosCatalogo"),
+                  value: stats.produtosCatalogo,
+                  icon: FaEye,
+                  color: "from-purple-500 to-pink-500",
+                  bgColor: modoDark ? "bg-purple-500/10" : "bg-purple-50",
+                },
+                {
+                  label: t("stats.estoqueBaixo"),
+                  value: stats.estoqueBaixo,
+                  icon: FaInfoCircle,
+                  color: "from-orange-500 to-red-500",
+                  bgColor: modoDark ? "bg-orange-500/10" : "bg-orange-50",
+                },
+              ].map((stat, index) => (
+                <div key={index} className="gradient-border animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                  <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>{stat.value}</div>
+                        <div className={textMuted}>{stat.label}</div>
+                      </div>
+                      <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                        <stat.icon className={`text-xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className={`rounded-2xl ${bgCard} backdrop-blur-sm border ${borderColor} p-6 card-hover`}>
+                  <h2 className={`text-xl font-bold ${textPrimary} mb-6 flex items-center gap-3`}>
+                    <FaGlobe className="text-blue-500" />
+                    {t("informacoesEmpresa")}
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { label: t("campos.nome"), value: empresa.nome, icon: FaBuilding },
+                      { label: t("campos.email"), value: empresa.email, icon: FaGlobe },
+                      { label: t("campos.telefone"), value: empresa.telefone || t("naoInformado"), icon: FaLink },
+                      { label: t("campos.endereco"), value: empresa.endereco || t("naoInformado"), icon: FaBuilding },
+                      { label: t("campos.pais"), value: empresa.pais || t("naoInformado"), icon: FaGlobe },
+                      { label: t("campos.estado"), value: empresa.estado || t("naoInformado"), icon: FaGlobe },
+                      { label: t("campos.cidade"), value: empresa.cidade || t("naoInformado"), icon: FaGlobe },
+                      { label: t("campos.cep"), value: empresa.cep || t("naoInformado"), icon: FaLink },
+                    ].map((field, index) => (
+                      <div
+                        key={index}
+                        className={`p-4 rounded-xl border ${borderColor} ${bgCard} transition-all duration-300 hover:scale-105 glow-effect`}
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <field.icon className={`text-sm ${modoDark ? "text-blue-400" : "text-blue-500"}`} />
+                          <span className={`text-sm font-medium ${textMuted}`}>{field.label}</span>
+                        </div>
+                        <p className={`font-medium ${textPrimary} break-words`}>{field.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className={`rounded-2xl ${bgCard} backdrop-blur-sm border ${borderColor} p-6 card-hover`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-3`}>
+                    {empresa.catalogoPublico ? <FaEye className="text-green-500" /> : <FaEyeSlash className="text-red-500" />}
+                    {t("catalogo.publico")}
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-medium ${textPrimary}`}>
+                        {t("catalogo.status")}:{" "}
+                        <span className={empresa.catalogoPublico ? "text-green-500" : "text-red-500"}>
+                          {empresa.catalogoPublico ? t("catalogo.ativado") : t("catalogo.desativado")}
+                        </span>
+                      </span>
+                    </div>
+
+                    {temPermissaoGerenciar && (
+                      <button
+                        onClick={toggleCatalogoPublico}
+                        disabled={atualizandoCatalogo}
+                        className={`w-full cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 ${empresa.catalogoPublico
+                            ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30"
+                            : "bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/30"
+                          } disabled:opacity-50 hover:scale-105`}
+                      >
+                        {atualizandoCatalogo ? (
+                          <FaSync className="animate-spin" />
+                        ) : empresa.catalogoPublico ? (
+                          <FaEyeSlash />
+                        ) : (
+                          <FaEye />
+                        )}
+                        {atualizandoCatalogo
+                          ? t("catalogo.processando")
+                          : empresa.catalogoPublico
+                            ? t("catalogo.desativar")
+                            : t("catalogo.ativar")}
+                      </button>
+                    )}
+
+                    <div className={`p-4 rounded-xl border ${borderColor} ${bgCard}`}>
+                      <p className={`text-sm font-medium ${textPrimary} mb-2`}>{t("catalogo.disponivelEm")}</p>
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <FaLink className="flex-shrink-0 text-blue-500" />
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm break-all font-mono transition hover:opacity-80 text-blue-500"
+                        >
+                          {`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
+                        </a>
+                      </div>
+                    </div>
+
+                    {!empresa.catalogoPublico && (
+                      <div
+                        className={`p-3 rounded-lg text-sm ${modoDark ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" : "bg-orange-50 text-orange-600 border border-orange-200"
+                          }`}
+                      >
+                        {t("catalogo.desativadoAviso")}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <p className="text-sm mb-3 font-medium" style={{ color: temaAtual.texto }}>
-                  {t("catalogo.disponivelEm")}
-                </p>
-                <div
-                  className="flex items-center gap-2 p-3 rounded-lg mb-3"
-                  style={{
-                    backgroundColor: temaAtual.fundo,
-                    border: `1px solid ${temaAtual.borda}`,
-                  }}
-                >
-                  <FaLink className="flex-shrink-0" style={{ color: temaAtual.primario }} />
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm break-all font-mono transition hover:opacity-80"
-                    style={{
-                      color: temaAtual.primario,
-                    }}
-                  >
-                    {`${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "https://stockcontrol-six.vercel.app")}/catalogo/${empresa.slug}`}
-                  </a>
+                <div className={`rounded-2xl ${bgCard} backdrop-blur-sm border ${borderColor} p-6 card-hover`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-3`}>
+                    <FaShield className="text-cyan-500" />
+                    {t("acoes")}
+                  </h3>
+
+                  <div className="space-y-3">
+                    {temPermissaoGerenciar && (
+                      <button
+                        onClick={() => {
+                          setEmpresaEditada(empresa);
+                          setModalEdicaoAberto(true);
+                        }}
+                        className="w-full cursor-pointer px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white flex items-center justify-center gap-2 hover:scale-105"
+                      >
+                        <FaEdit className="text-sm" />
+                        {t("editarDados")}
+                      </button>
+                    )}
+
+                    {tipoUsuario && (
+                      <button
+                        onClick={excluirOuSairDaEmpresa}
+                        className={`w-full cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 font-semibold text-white flex items-center justify-center gap-2 hover:scale-105 ${tipoUsuario === "PROPRIETARIO"
+                            ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                            : "bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600"
+                          }`}
+                      >
+                        {tipoUsuario === "PROPRIETARIO" ? <FaTrash className="text-sm" /> : <FaSignOutAlt className="text-sm" />}
+                        {t(tipoUsuario === "PROPRIETARIO" ? "deletarEmpresa" : "sairEmpresa")}
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                <p className="text-sm mb-2" style={{ color: temaAtual.texto }}>
-                  {t("catalogo.avisoClientes")}
-                </p>
-
-                {!empresa.catalogoPublico && (
-                  <p
-                    className="text-sm mt-2 p-3 rounded-lg"
-                    style={{
-                      backgroundColor: modoDark ? "#422727" : "#FEF2F2",
-                      color: modoDark ? "#FCA5A5" : "#DC2626",
-                      border: modoDark ? "none" : "1px solid #FECACA",
-                    }}
-                  >
-                    {t("catalogo.desativadoAviso")}
-                  </p>
-                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-
       {modalEdicaoAberto && empresaEditada && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
           <div
-            className="p-4 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className={`p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm border ${borderColor}`}
             style={{
               backgroundColor: temaAtual.card,
               color: temaAtual.texto,
-              border: `1px solid ${temaAtual.borda}`,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-semibold mb-3" style={{ color: temaAtual.texto }}>
-              {t("modal.editarEmpresa.titulo")}
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold" style={{ color: temaAtual.texto }}>
+                {t("modal.editarEmpresa.titulo")}
+              </h2>
+              <button
+                onClick={() => {
+                  setModalEdicaoAberto(false);
+                  setFotoFile(null);
+                  setFotoPreview(null);
+                  setEmailStatus({ existe: false, carregando: false, mensagem: "" });
+                }}
+                className={`p-2 cursor-pointer rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
+              >
+                <FaTimes className="text-lg" />
+              </button>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                   {t("campos.nome")}
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 rounded border"
+                  className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                    }`}
                   style={{
-                    backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.nome || ""}
                   onChange={(e) => handleInputChange("nome", e.target.value, 20, setNomeCaracteres)}
@@ -846,17 +1005,16 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                   {t("campos.email")}
                 </label>
                 <div className="relative">
                   <input
                     type="email"
-                    className="w-full px-3 py-2 rounded border pr-10"
+                    className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      } ${emailStatus.existe ? "border-red-500" : ""}`}
                     style={{
-                      backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${emailStatus.existe ? temaAtual.erro : temaAtual.borda}`,
                     }}
                     value={empresaEditada.email || ""}
                     onChange={(e) => handleInputChange("email", e.target.value, 60, setEmailCaracteres)}
@@ -867,7 +1025,11 @@ export default function Empresa() {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: temaAtual.primario }}></div>
                     </div>
                   )}
-                  {!emailStatus.carregando && empresaEditada.email && empresaEditada.email !== empresa?.email && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">{emailStatus.existe ? <FaTimes className="text-red-500" /> : <FaCheck className="text-green-500" />}</div>}
+                  {!emailStatus.carregando && empresaEditada.email && empresaEditada.email !== empresa?.email && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {emailStatus.existe ? <FaTimes className="text-red-500" /> : <FaCheck className="text-green-500" />}
+                    </div>
+                  )}
                 </div>
                 <div className="text-xs text-right mt-1" style={{ color: temaAtual.placeholder }}>
                   {emailCaracteres}/60 {emailCaracteres === 60 && " - Limite atingido"}
@@ -880,18 +1042,17 @@ export default function Empresa() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                     {t("campos.telefone")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 rounded border"
+                    className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      }`}
                     style={{
-                      backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.telefone || ""}
                     onChange={(e) => handleInputChange("telefone", e.target.value, 15, setTelefoneCaracteres)}
@@ -903,16 +1064,15 @@ export default function Empresa() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                     {t("campos.pais")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 rounded border"
+                    className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      }`}
                     style={{
-                      backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.pais || ""}
                     onChange={(e) => handleInputChange("pais", e.target.value, 20, setPaisCaracteres)}
@@ -925,16 +1085,15 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                   {t("campos.endereco")}
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 rounded border"
+                  className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                    }`}
                   style={{
-                    backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.endereco || ""}
                   onChange={(e) => handleInputChange("endereco", e.target.value, 50, setEnderecoCaracteres)}
@@ -945,18 +1104,17 @@ export default function Empresa() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                     {t("campos.cidade")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 rounded border"
+                    className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      }`}
                     style={{
-                      backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.cidade || ""}
                     onChange={(e) => handleInputChange("cidade", e.target.value, 20, setCidadeCaracteres)}
@@ -968,16 +1126,15 @@ export default function Empresa() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                  <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                     {t("campos.estado")}
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 rounded border"
+                    className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      }`}
                     style={{
-                      backgroundColor: temaAtual.card,
                       color: temaAtual.texto,
-                      border: `1px solid ${temaAtual.borda}`,
                     }}
                     value={empresaEditada.estado || ""}
                     onChange={(e) => handleInputChange("estado", e.target.value, 2, setEstadoCaracteres)}
@@ -990,16 +1147,15 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                   {t("campos.cep")}
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 rounded border"
+                  className={`w-full px-3 py-2 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-sm ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                    }`}
                   style={{
-                    backgroundColor: temaAtual.card,
                     color: temaAtual.texto,
-                    border: `1px solid ${temaAtual.borda}`,
                   }}
                   value={empresaEditada.cep || ""}
                   onChange={(e) => handleInputChange("cep", e.target.value, 10, setCepCaracteres)}
@@ -1011,7 +1167,7 @@ export default function Empresa() {
               </div>
 
               <div>
-                <label className="block mb-1 text-sm font-medium" style={{ color: temaAtual.texto }}>
+                <label className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
                   {t("logoEmpresa")}
                 </label>
                 <div className="relative">
@@ -1019,7 +1175,7 @@ export default function Empresa() {
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="w-full rounded p-2 opacity-0 absolute z-10 cursor-pointer"
+                    className="w-full rounded-xl p-2 opacity-0 absolute z-10 cursor-pointer"
                     style={{
                       backgroundColor: temaAtual.card,
                       border: `1px solid ${temaAtual.borda}`,
@@ -1027,10 +1183,9 @@ export default function Empresa() {
                     id="fileInput"
                   />
                   <div
-                    className="flex items-center justify-between p-2 rounded border text-sm"
+                    className={`flex items-center justify-between p-3 rounded-xl border text-sm transition-all duration-300 ${modoDark ? "bg-slate-700/50 border-slate-600" : "bg-white border-slate-300"
+                      }`}
                     style={{
-                      backgroundColor: temaAtual.card,
-                      border: `1px solid ${temaAtual.borda}`,
                       color: temaAtual.placeholder,
                     }}
                   >
@@ -1038,26 +1193,25 @@ export default function Empresa() {
                   </div>
                 </div>
 
-                {fotoPreview && (
-                  <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
-                      {t("preVisualizacao")}:
+                {(fotoPreview || empresa.foto) && (
+                  <div className="mt-3">
+                    <p className="text-sm mb-2 font-medium" style={{ color: temaAtual.texto }}>
+                      {fotoPreview ? t("preVisualizacao") : t("fotoAtual")}:
                     </p>
-                    <Image src={fotoPreview} alt="Preview" width={80} height={80} className="rounded border" style={{ borderColor: temaAtual.borda }} />
-                  </div>
-                )}
-                {empresa.foto && !fotoPreview && (
-                  <div className="mt-2">
-                    <p className="text-sm mb-1" style={{ color: temaAtual.texto }}>
-                      {t("fotoAtual")}:
-                    </p>
-                    <Image src={empresa.foto} alt="Foto atual" width={80} height={80} className="rounded border" style={{ borderColor: temaAtual.borda }} />
+                    <Image
+                      src={fotoPreview || empresa.foto || ""}
+                      alt={fotoPreview ? "Preview" : "Foto atual"}
+                      width={80}
+                      height={80}
+                      className="rounded-xl border object-cover"
+                      style={{ borderColor: temaAtual.borda }}
+                    />
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t" style={{ borderColor: temaAtual.borda }}>
               <button
                 onClick={() => {
                   setModalEdicaoAberto(false);
@@ -1065,39 +1219,15 @@ export default function Empresa() {
                   setFotoPreview(null);
                   setEmailStatus({ existe: false, carregando: false, mensagem: "" });
                 }}
-                className="px-4 py-2 cursor-pointer rounded transition"
-                style={{
-                  backgroundColor: temaAtual.card,
-                  color: temaAtual.texto,
-                  border: `1px solid ${temaAtual.borda}`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = temaAtual.hover;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = temaAtual.card;
-                }}
+                className={`px-4 cursor-pointer py-2 rounded-xl transition-all duration-300 font-medium border hover:scale-105 ${modoDark ? "bg-slate-700/50 border-slate-600 text-white hover:bg-slate-600/50" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 {t("modal.cancelar")}
               </button>
               <button
                 onClick={editarDadosEmpresa}
                 disabled={emailStatus.existe || emailStatus.carregando}
-                className="px-4 py-2 cursor-pointer rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: temaAtual.primario,
-                  color: "#FFFFFF",
-                }}
-                onMouseEnter={(e) => {
-                  if (!emailStatus.existe && !emailStatus.carregando) {
-                    e.currentTarget.style.opacity = "0.9";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!emailStatus.existe && !emailStatus.carregando) {
-                    e.currentTarget.style.opacity = "1";
-                  }
-                }}
+                className="px-4 py-2 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
               >
                 {t("modal.salvar")}
               </button>

@@ -1,30 +1,37 @@
 {
   "titulo": "Company",
-  "dadosEmpresa": "Company Information",
-  "naoInformado": "Not provided",
+  "dadosEmpresa": "Company Data",
+  "informacoesEmpresa": "Company Information",
+  "naoInformado": "Not informed",
   "carregando": "Loading...",
   "empresaNaoEncontrada": "Company not found.",
+  "criarEmpresa": "Create Company",
   "logoEmpresa": "Company Logo",
   "altLogoEmpresa": "Company logo",
   "alterarLogo": "Change logo",
-  "editarDados": "Edit information",
+  "editarDados": "Edit data",
   "deletarEmpresa": "Delete company",
   "sairEmpresa": "Leave company",
   "nenhumArquivoEscolhido": "No file chosen",
   "preVisualizacao": "Preview",
   "escolherArquivo": "Choose file",
-  "catalogoAtivado": "Catalog enabled",
-  "catalogoDesativado": "Catalog disabled",
+  "catalogoAtivado": "Catalog activated",
+  "catalogoDesativado": "Catalog deactivated",
   "catalogoAgoraPublico": "The catalog is now public.",
   "catalogoNaoPublico": "The catalog is no longer public.",
-  "sucessoTituloAtivado": "Catalog enabled",
-  "sucessoTituloDesativado": "Catalog disabled",
-  "sucessoTextoAtivado": "The catalog is now public.",
-  "sucessoTextoDesativado": "The catalog is no longer public.",
+  "empresaNaoAtivada": {
+    "titulo": "Company Not Activated",
+    "mensagem": "Activate your company to use data export"
+  },
   "semLogo": "No Photo",
-  "erroTitulo": "Error",
-  "erroTexto": "Could not change the catalog state.",
   "fotoAtual": "Current photo",
+  "acoes": "Actions",
+  "stats": {
+    "totalProdutos": "Total Products",
+    "totalUsuarios": "Total Users",
+    "produtosCatalogo": "Products in Catalog",
+    "estoqueBaixo": "Low Stock"
+  },
   "campos": {
     "nome": "Name",
     "email": "Email",
@@ -33,37 +40,31 @@
     "pais": "Country",
     "estado": "State",
     "cidade": "City",
-    "cep": "Postal Code"
+    "cep": "ZIP Code"
   },
   "catalogo": {
     "publico": "Public Catalog",
     "status": "Status",
-    "ativado": "Enabled",
-    "desativado": "Disabled",
-    "ativar": "Enable catalog",
-    "desativar": "Disable catalog",
+    "ativado": "Activated",
+    "desativado": "Deactivated",
+    "ativar": "Activate catalog",
+    "desativar": "Deactivate catalog",
     "processando": "Processing...",
     "disponivelEm": "Available at:",
-    "avisoClientes": "Share this link with your clients so they can access the catalog.",
-    "desativadoAviso": "The catalog is disabled and will not be accessible to clients.",
-    "catalogoAtivado": "Catalog enabled",
-    "catalogoDesativado": "Catalog disabled",
+    "avisoClientes": "Share this link with your customers to access the catalog.",
+    "desativadoAviso": "The catalog is deactivated and will not be accessible to customers.",
+    "catalogoAtivado": "Catalog activated",
+    "catalogoDesativado": "Catalog deactivated",
     "catalogoAgoraPublico": "The catalog is now public.",
-    "catalogoNaoPublico": "The catalog is no longer public.",
-    "sucessoTituloAtivado": "Catalog enabled",
-    "sucessoTituloDesativado": "Catalog disabled",
-    "sucessoTextoAtivado": "The catalog is now public.",
-    "sucessoTextoDesativado": "The catalog is no longer public.",
-    "erroTitulo": "Error",
-    "erroTexto": "Could not change the catalog state."
+    "catalogoNaoPublico": "The catalog is no longer public."
   },
   "avisos": {
     "uploadFotoFalhouTitulo": "Upload failed",
-    "uploadFotoFalhouTexto": "The company photo could not be uploaded."
+    "uploadFotoFalhouTexto": "Could not upload company photo."
   },
   "sucesso": {
-    "empresaAtualizada": "Company successfully updated",
-    "dadosAtualizados": "The data has been successfully updated."
+    "empresaAtualizada": "Company updated successfully",
+    "dadosAtualizados": "Data has been updated correctly."
   },
   "erros": {
     "usuarioNaoLogado": "User not logged in.",
@@ -73,15 +74,18 @@
     "erroExcluirEmpresa": "Error deleting company.",
     "erroSairEmpresa": "Error leaving company.",
     "erroProcessarExclusao": "Error processing deletion.",
-    "erroAlterarCatalogo": "Could not change the catalog state.",
+    "erroAlterarCatalogo": "Could not change catalog status.",
     "erro": "Error",
+    "emailExistenteTitulo": "Email already in use",
+    "emailExistenteTexto": "This email is already being used by another company. Please use another email.",
+    "verificacaoEmail": "Error verifying email.",
     "emailUsuarioExistenteTitulo": "Email already in use",
     "emailUsuarioExistenteTexto": "This email is already being used by a user. Please use another email."
   },
   "modal": {
-    "salvar": "Save",
     "cancelar": "Cancel",
-    "deletar": "Delete",
+    "confirmar": "Confirm",
+    "salvar": "Save",
     "editarEmpresa": {
       "titulo": "Edit Company"
     },

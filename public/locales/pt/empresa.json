@@ -1,9 +1,11 @@
 {
   "titulo": "Empresa",
   "dadosEmpresa": "Dados da Empresa",
+  "informacoesEmpresa": "Informações da Empresa",
   "naoInformado": "Não informado",
   "carregando": "Carregando...",
   "empresaNaoEncontrada": "Empresa não encontrada.",
+  "criarEmpresa": "Criar Empresa",
   "logoEmpresa": "Logo da Empresa",
   "altLogoEmpresa": "Logo da empresa",
   "alterarLogo": "Alterar logo",
@@ -23,6 +25,13 @@
   },
   "semLogo": "Sem Foto",
   "fotoAtual": "Foto atual",
+  "acoes": "Ações",
+  "stats": {
+    "totalProdutos": "Total de Produtos",
+    "totalUsuarios": "Total de Usuários",
+    "produtosCatalogo": "Produtos no Catálogo",
+    "estoqueBaixo": "Estoque Baixo"
+  },
   "campos": {
     "nome": "Nome",
     "email": "E-mail",
@@ -67,6 +76,9 @@
     "erroProcessarExclusao": "Erro ao processar a exclusão.",
     "erroAlterarCatalogo": "Não foi possível alterar o estado do catálogo.",
     "erro": "Erro",
+    "emailExistenteTitulo": "Email já em uso",
+    "emailExistenteTexto": "Este email já está sendo usado por outra empresa. Por favor, utilize outro email.",
+    "verificacaoEmail": "Erro ao verificar email.",
     "emailUsuarioExistenteTitulo": "Email já em uso",
     "emailUsuarioExistenteTexto": "Este email já está sendo usado por um usuário. Por favor, utilize outro email."
   },
