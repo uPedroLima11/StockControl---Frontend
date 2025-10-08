@@ -19,15 +19,27 @@ export default function Suporte() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
+  useEffect(() => {
     const token = Cookies.get("token");
 
     if (!token) {
       window.location.href = "/login";
     }
-
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativado = temaSalvo === "true";
-    setModoDark(ativado);
   }, []);
 
   useEffect(() => {

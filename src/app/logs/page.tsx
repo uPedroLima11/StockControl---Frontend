@@ -198,6 +198,22 @@ export default function Logs() {
 
     setNomesUsuarios(usuariosMap);
   };
+  
+useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -208,10 +224,6 @@ export default function Logs() {
 
     const initialize = async () => {
       setCarregando(true);
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (!usuarioSalvo) {

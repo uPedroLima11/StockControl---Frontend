@@ -101,6 +101,23 @@ export default function Pedidos() {
   const menuFiltrosRef = useRef<HTMLDivElement>(null);
   const temaAtual = modoDark ? cores.dark : cores.light;
 
+
+  useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
@@ -130,11 +147,6 @@ export default function Pedidos() {
 
     const initialize = async () => {
       setLoading(true);
-
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
       const usuarioSalvo = localStorage.getItem("client_key");
       if (!usuarioSalvo) {
         setLoading(false);

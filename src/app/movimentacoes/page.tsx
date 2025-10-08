@@ -56,6 +56,23 @@ export default function EstoquePage() {
 
   const podeVisualizar = tipoUsuario === "PROPRIETARIO" || permissoesUsuario.inventario_visualizar;
 
+
+  useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
   useEffect(() => {
     const token = Cookies.get("token");
 
@@ -103,9 +120,6 @@ export default function EstoquePage() {
     };
 
     const carregarTemaEProdutos = async () => {
-      const temaSalvo = localStorage.getItem("modoDark");
-      setModoDark(temaSalvo === "true");
-
       try {
         const usuarioSalvo = localStorage.getItem("client_key");
         if (!usuarioSalvo) return;

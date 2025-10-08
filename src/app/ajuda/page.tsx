@@ -37,46 +37,20 @@ export default function Ajuda() {
   const temaAtual = modoDark ? cores.dark : cores.light;
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
 
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+    const token = Cookies.get("token");
     if (!token) {
       window.location.href = "/login";
     }
-
-    const temaSalvo = localStorage.getItem("modoDark");
-    setModoDark(temaSalvo === "true");
-
-    const style = document.createElement("style");
-    style.textContent = `
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      html::-webkit-scrollbar-track {
-        background: ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
-      }
-      html::-webkit-scrollbar-thumb {
-        background: ${temaSalvo === "true" ? "#132F4C" : "#90CAF9"}; 
-        border-radius: 5px;
-        border: 2px solid ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
-      }
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${temaSalvo === "true" ? "#132F4C" : "#64B5F6"}; 
-      }
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${temaSalvo === "true" ? "#132F4C" : "#90CAF9"} ${temaSalvo === "true" ? "#0A1830" : "#F8FAFC"};
-      }
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
-        }
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${temaSalvo === "true" ? "#132F4C" : "#F8FAFC"};
-          border-radius: 3px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
 
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -101,7 +75,7 @@ export default function Ajuda() {
     });
 
     return () => {
-      document.head.removeChild(style);
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
       document.removeEventListener("mousedown", handleClickOutside);
       currentRefs.forEach((ref) => {
         if (ref) observer.unobserve(ref);

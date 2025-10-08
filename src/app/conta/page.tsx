@@ -29,15 +29,20 @@ export default function MinhaConta() {
   };
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
 
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+    const token = Cookies.get("token");
     if (!token) {
       window.location.href = "/login";
     }
-
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
 
     async function buscaUsuarios(idUsuario: string) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/${idUsuario}`);
@@ -86,149 +91,8 @@ export default function MinhaConta() {
       buscarDados(usuarioValor);
     }
 
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-      }
-      
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateX(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-      
-      .animate-float {
-        animation: float 6s ease-in-out infinite;
-      }
-      
-      .animate-fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
-      }
-      
-      .animate-slide-in {
-        animation: slideIn 0.4s ease-out forwards;
-      }
-      
-      .card-hover {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-        
-      .card-hover:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      }
-      
-      .glow-effect {
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .glow-effect::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: left 0.5s;
-      }
-      
-      .glow-effect:hover::before {
-        left: 100%;
-      }
-      
-      .gradient-border {
-        position: relative;
-        background: linear-gradient(45deg, ${ativo ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
-        padding: 1px;
-        border-radius: 16px;
-      }
-      
-      .gradient-border > div {
-        background: ${ativo ? "#1E293B" : "#FFFFFF"};
-        border-radius: 15px;
-      }
-      
-      .scroll-custom {
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      
-      .scroll-custom::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      .scroll-custom::-webkit-scrollbar-track {
-        background: ${ativo ? "#1E293B" : "#F1F5F9"};
-        border-radius: 3px;
-      }
-      
-      .scroll-custom::-webkit-scrollbar-thumb {
-        background: ${ativo ? "#3B82F6" : "#94A3B8"};
-        border-radius: 3px;
-      }
-      
-      .scroll-custom::-webkit-scrollbar-thumb:hover {
-        background: ${ativo ? "#2563EB" : "#64748B"};
-      }
-
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      
-      html::-webkit-scrollbar-track {
-        background: ${ativo ? "#132F4C" : "#F8FAFC"};
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        background: ${ativo ? "#132F4C" : "#90CAF9"}; 
-        border-radius: 5px;
-        border: 2px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-      }
-      
-      html::-webkit-scrollbar-thumb:hover {
-        background: ${ativo ? "#132F4C" : "#64B5F6"}; 
-      }
-      
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: ${ativo ? "#132F4C" : "#90CAF9"} ${ativo ? "#0A1830" : "#F8FAFC"};
-      }
-      
-      @media (max-width: 768px) {
-        html::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        html::-webkit-scrollbar-thumb {
-          border: 1px solid ${ativo ? "#132F4C" : "#F8FAFC"};
-          border-radius: 3px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
     return () => {
-      document.head.removeChild(style);
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
     };
   }, []);
 

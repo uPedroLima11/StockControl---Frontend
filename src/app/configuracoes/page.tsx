@@ -154,41 +154,33 @@ export default function Configuracoes() {
     }
   `;
 
-  useEffect(() => {
-    const token = Cookies.get("token");
 
-    if (!token) {
-      window.location.href = "/login";
-    }
+useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
 
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-    aplicarTema(ativo);
+  const token = Cookies.get("token");
+  if (!token) {
+    window.location.href = "/login";
+  }
 
-    const somSalvo = localStorage.getItem("somNotificacao");
-    setSomNotificacao(somSalvo === null || somSalvo === "true");
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
 
-    const style = document.createElement("style");
-    style.setAttribute('data-theme', 'dynamic');
-    style.textContent = gerarCSS(ativo);
-    document.head.appendChild(style);
-
-    return () => {
-      const styleElement = document.querySelector('style[data-theme]');
-      if (styleElement) {
-        document.head.removeChild(styleElement);
-      }
-    };
-  }, []);
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
 
   const alternarTema = () => {
-    const novoTema = !modoDark;
-    setModoDark(novoTema);
-    localStorage.setItem("modoDark", String(novoTema));
-    aplicarTema(novoTema);
-    atualizarCSS(novoTema);
+    if (typeof window !== 'undefined' && (window as any).alternarTemaGlobal) {
+      (window as any).alternarTemaGlobal();
+    }
   };
+
 
   const alternarSomNotificacao = () => {
     const novoSom = !somNotificacao;

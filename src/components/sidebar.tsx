@@ -193,81 +193,28 @@ export default function Sidebar() {
     };
   }, []);
 
-  useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-    aplicarTema(ativo);
-  }, []);
-
-  const aplicarTema = (ativado: boolean) => {
-    const root = document.documentElement;
-    if (ativado) {
-      root.classList.add("dark");
-      root.style.setProperty("--cor-fundo", "#0A1929");
-      root.style.setProperty("--cor-texto", "#FFFFFF");
-      document.body.style.backgroundColor = "#0A1929";
-      document.body.style.color = "#cccccc";
-    } else {
-      root.classList.remove("dark");
-      root.style.setProperty("--cor-fundo", "#cccccc");
-      root.style.setProperty("--cor-texto", "#0F172A");
-      document.body.style.backgroundColor = "#cccccc";
-      document.body.style.color = "#0F172A";
-    }
-  };
-
   const alternarTema = () => {
-    const novoTema = !modoDark;
-    setModoDark(novoTema);
-    localStorage.setItem("modoDark", String(novoTema));
-    aplicarTema(novoTema);
-    window.location.reload();
+    if (typeof window !== 'undefined' && (window as any).alternarTemaGlobal) {
+      (window as any).alternarTemaGlobal();
+    }
   };
 
   useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-    html::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    html::-webkit-scrollbar-track {
-      background: ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb {
-      background: ${modoDark ? "#132F4C" : "#90CAF9"}; 
-      border-radius: 5px;
-      border: 2px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-    }
-    
-    html::-webkit-scrollbar-thumb:hover {
-      background: ${modoDark ? "#132F4C" : "#64B5F6"}; 
-    }
-    
-    html {
-      scrollbar-width: thin;
-      scrollbar-color: ${modoDark ? "#132F4C" : "#90CAF9"} ${modoDark ? "#0A1830" : "#F8FAFC"};
-    }
-    
-    @media (max-width: 768px) {
-      html::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        border: 1px solid ${modoDark ? "#132F4C" : "#F8FAFC"};
-        border-radius: 3px;
-      }
-    }
-  `;
-    document.head.appendChild(style);
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
 
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [modoDark]);
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
@@ -510,7 +457,7 @@ export default function Sidebar() {
             onClick={() => {
               permissoesCache.clear();
               localStorage.removeItem("client_key");
-              localStorage.removeItem("modoDark"); 
+              localStorage.removeItem("modoDark");
               Cookies.remove("token");
               window.location.href = "/";
 

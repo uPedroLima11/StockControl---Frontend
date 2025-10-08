@@ -149,18 +149,31 @@ export default function Produtos() {
   );
 
   useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
+  useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
       window.location.href = "/login";
       return;
     }
 
+    
     const initialize = async () => {
       setLoading(true);
-
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
 
       const visualizacaoSalva = localStorage.getItem("produtos_visualizacao") as TipoVisualizacao;
       if (visualizacaoSalva && (visualizacaoSalva === "cards" || visualizacaoSalva === "lista")) {

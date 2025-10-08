@@ -122,6 +122,23 @@ export default function Dashboard() {
     return `M 50 50 L ${x1} ${y1} A ${raio} ${raio} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   }, []);
 
+
+  useEffect(() => {
+  const temaSalvo = localStorage.getItem("modoDark");
+  const ativado = temaSalvo === "true";
+  setModoDark(ativado);
+
+  const handleThemeChange = (e: CustomEvent) => {
+    setModoDark(e.detail.modoDark);
+  };
+
+  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+  
+  return () => {
+    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  };
+}, []);
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (!token) {
@@ -131,10 +148,6 @@ export default function Dashboard() {
 
     const initialize = async () => {
       setLoading(true);
-      const temaSalvo = localStorage.getItem("modoDark");
-      const ativado = temaSalvo === "true";
-      setModoDark(ativado);
-
       const usuarioSalvo = localStorage.getItem("client_key");
       if (usuarioSalvo) {
         const usuarioValor = usuarioSalvo.replace(/"/g, "");

@@ -77,9 +77,19 @@ export default function Empresa() {
   const [cidadeCaracteres, setCidadeCaracteres] = useState(0);
   const [cepCaracteres, setCepCaracteres] = useState(0);
 
-  useEffect(() => {
-    const token = Cookies.get("token");
 
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
+
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+    const token = Cookies.get("token");
     if (!token) {
       window.location.href = "/login";
     }
@@ -94,6 +104,10 @@ export default function Empresa() {
       setCidadeCaracteres(empresaEditada.cidade?.length || 0);
       setCepCaracteres(empresaEditada.cep?.length || 0);
     }
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+    };
   }, [modalEdicaoAberto, empresaEditada]);
 
   const handleInputChange = (field: keyof Empresa, value: string, maxLength: number, setCaracteres: React.Dispatch<React.SetStateAction<number>>) => {
@@ -108,10 +122,6 @@ export default function Empresa() {
   };
 
   useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-
     const verificarPermissaoGerenciar = async (userId: string) => {
       try {
         const temPermissao = await usuarioTemPermissao(userId, "empresa_gerenciar");
@@ -256,94 +266,6 @@ export default function Empresa() {
       }
     };
     fetchEmpresa();
-
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-      }
-      
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateX(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-      
-      .animate-float {
-        animation: float 6s ease-in-out infinite;
-      }
-      
-      .animate-fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
-      }
-      
-      .animate-slide-in {
-        animation: slideIn 0.4s ease-out forwards;
-      }
-      
-      .card-hover {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-        
-      .card-hover:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      }
-      
-      .glow-effect {
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .glow-effect::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: left 0.5s;
-      }
-      
-      .glow-effect:hover::before {
-        left: 100%;
-      }
-      
-      .gradient-border {
-        position: relative;
-        background: linear-gradient(45deg, ${ativo ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
-        padding: 1px;
-        border-radius: 16px;
-      }
-      
-      .gradient-border > div {
-        background: ${ativo ? "#1E293B" : "#FFFFFF"};
-        border-radius: 15px;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
   }, [logar, router, t]);
 
   useEffect(() => {
@@ -878,8 +800,8 @@ export default function Empresa() {
                         onClick={toggleCatalogoPublico}
                         disabled={atualizandoCatalogo}
                         className={`w-full cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 ${empresa.catalogoPublico
-                            ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30"
-                            : "bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/30"
+                          ? "bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30"
+                          : "bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/30"
                           } disabled:opacity-50 hover:scale-105`}
                       >
                         {atualizandoCatalogo ? (
@@ -947,8 +869,8 @@ export default function Empresa() {
                       <button
                         onClick={excluirOuSairDaEmpresa}
                         className={`w-full cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 font-semibold text-white flex items-center justify-center gap-2 hover:scale-105 ${tipoUsuario === "PROPRIETARIO"
-                            ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
-                            : "bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                          : "bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600"
                           }`}
                       >
                         {tipoUsuario === "PROPRIETARIO" ? <FaTrash className="text-sm" /> : <FaSignOutAlt className="text-sm" />}

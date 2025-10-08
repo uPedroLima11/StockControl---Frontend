@@ -236,8 +236,18 @@ export default function CriarEmpresa() {
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
+
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+    };
   }, []);
 
   useEffect(() => {
