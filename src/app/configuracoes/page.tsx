@@ -175,9 +175,13 @@ useEffect(() => {
   };
 }, []);
 
+  interface WindowWithAlternarTemaGlobal extends Window {
+    alternarTemaGlobal?: () => void;
+  }
+
   const alternarTema = () => {
-    if (typeof window !== 'undefined' && (window as any).alternarTemaGlobal) {
-      (window as any).alternarTemaGlobal();
+    if (typeof window !== 'undefined' && (window as WindowWithAlternarTemaGlobal).alternarTemaGlobal) {
+      (window as WindowWithAlternarTemaGlobal).alternarTemaGlobal!();
     }
   };
 

@@ -194,8 +194,11 @@ export default function Sidebar() {
   }, []);
 
   const alternarTema = () => {
-    if (typeof window !== 'undefined' && (window as any).alternarTemaGlobal) {
-      (window as any).alternarTemaGlobal();
+    if (
+      typeof window !== "undefined" &&
+      (window as Window & typeof globalThis).alternarTemaGlobal
+    ) {
+      (window as Window & typeof globalThis).alternarTemaGlobal!();
     }
   };
 
