@@ -7,7 +7,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import Swal from "sweetalert2";
 import { UsuarioI } from "@/utils/types/usuario";
 import { useTranslation } from "react-i18next";
-import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink, FaBuilding, FaMapMarkerAlt, FaPhone, FaGlobe, FaEnvelope, FaUser, FaCity, FaFlag, FaInfoCircle, FaCheckCircle } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCheck, FaTimes, FaLink, FaBuilding, FaMapMarkerAlt, FaPhone, FaEnvelope, FaUser, FaCity, FaFlag, FaInfoCircle, FaCheckCircle } from "react-icons/fa";
 import Cookies from "js-cookie";
 import Image from "next/image";
 

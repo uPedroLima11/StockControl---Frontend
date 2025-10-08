@@ -1,5 +1,4 @@
 {
-  "criarempresa": {
     "titulo": "Create",
     "empresa": "Company",
     "subtitulo": "Set up your company and start selling",
@@ -72,4 +71,3 @@
       "mensagem": "An error occurred while creating the company. Please try again."
     }
   }
-}
