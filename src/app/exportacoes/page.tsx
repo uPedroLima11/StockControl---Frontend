@@ -2,26 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  FaFileExcel,
-  FaDownload,
-  FaChevronDown,
-  FaChevronUp,
-  FaAngleLeft,
-  FaAngleRight,
-  FaLock,
-  FaHistory,
-  FaFilter,
-  FaCalendarAlt,
-  FaBox,
-  FaShoppingCart,
-  FaUsers,
-  FaTruck,
-  FaUserCog,
-  FaExchangeAlt,
-  FaSearch,
-  FaTimes
-} from "react-icons/fa";
+import { FaFileExcel, FaDownload, FaChevronDown, FaChevronUp, FaAngleLeft, FaAngleRight, FaLock, FaHistory, FaFilter, FaBox, FaShoppingCart, FaUsers, FaTruck, FaUserCog, FaExchangeAlt, FaSearch, FaTimes } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
@@ -918,7 +899,7 @@ export default function Exportacoes() {
                           </div>
                         )}
                         <div className="space-y-4">
-                          {itensAtuais.map((item, index) => {
+                          {itensAtuais.map((item) => {
                             const { entity, user, period } = parseExportDescription(item.descricao);
                             const isExpanded = expandedItems.has(item.id);
                             const IconComponent = entityIcons[entity as keyof typeof entityIcons] || FaFileExcel;
