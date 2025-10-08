@@ -1,52 +1,64 @@
 {
- "roles": {
+  "roles": {
     "FUNCIONARIO": "Employee",
     "ADMIN": "Admin",
     "PROPRIETARIO": "Owner"
-  }, 
-      "titulo": "My Account",
-      "email": "Email",
-      "senha": "Password",
-      "trocarSenha": "Change My Password",
-      "informacoesConta": "Account Information",
-      "editarPerfil": "Edit Profile",
-      "excluirConta": "Delete Account",
-      "adicionar": "Add",
-      "nome": "First Name",
-      "sobrenome": "Last Name",
-      "empresa": {
-        "nome": "Company Name",
-        "cargo": "Company Role",
-        "endereco": "Address",
-        "pais": "Country",
-        "estado": "State",
-        "cidade": "City",
-        "cep": "ZIP Code",
-        "telefone": "Phone",
-        "email": "Company Email"
-      },
-      "modal": {
-        "editarTitulo": "Edit Information",
-        "nome": "Name",
-        "email": "Email",
-        "cancelar": "Cancel",
-        "salvar": "Save",
-        "erro": {
-          "titulo": "Something went wrong!",
-          "emailExistente": "Email already exists!",
-          "excluirConta": "Could not delete account."
-        },
-        "sucesso": {
-          "titulo": "Changes saved successfully!"
-        },
-        "excluir": {
-          "titulo": "Are you sure?",
-          "texto": "This action cannot be undone!",
-          "confirmar": "Yes, delete it!",
-          "cancelar": "Cancel",
-          "sucesso": "Account deleted successfully!"
-        },
-        "botaoOk": "OK"
-      }
-    }
-  
+  },
+  "titulo": "My",
+  "minhaConta": "Data",
+  "gerencieSuasInformacoes": "Manage your personal and security information",
+  "email": "Email",
+  "emailAtual": "Current email",
+  "senha": "Password",
+  "trocarSenha": "Change My Password",
+  "gerencieSuaSenha": "Manage your access password",
+  "emailNaoEditavel": "Email cannot be edited for security reasons",
+  "informacoesConta": "Account Information",
+  "editarNome": "Edit Name",
+  "informacoesEmpresa": "Company Information",
+  "editarPerfil": "Edit Profile",
+  "excluirConta": "Delete Account",
+  "excluirContaDescricao": "This action will permanently delete your account and all associated data.",
+  "adicionar": "Add",
+  "nome": "Name",
+  "sobrenome": "Last Name",
+  "contaCriadaEm": "Account created on",
+  "ultimaAtualizacao": "Last updated",
+  "statusConta": "Account status",
+  "ativo": "Active",
+  "zonaPerigo": "Danger Zone",
+  "empresa": {
+    "nome": "Company Name",
+    "cargo": "Position in Company",
+    "endereco": "Address",
+    "pais": "Country",
+    "estado": "State",
+    "cidade": "City",
+    "cep": "ZIP Code",
+    "telefone": "Phone",
+    "email": "Company Email"
+  },
+  "modal": {
+    "editarTitulo": "Edit Information",
+    "nome": "Name",
+    "email": "Email",
+    "cancelar": "Cancel",
+    "salvar": "Save",
+    "erro": {
+      "titulo": "Something went wrong!",
+      "emailExistente": "Email already exists!",
+      "excluirConta": "Could not delete account."
+    },
+    "sucesso": {
+      "titulo": "Change completed successfully!"
+    },
+    "excluir": {
+      "titulo": "Are you sure?",
+      "texto": "This action cannot be undone!",
+      "confirmar": "Yes, delete!",
+      "cancelar": "Cancel",
+      "sucesso": "Account deleted successfully!"
+    },
+    "botaoOk": "Ok"
+  }
+}

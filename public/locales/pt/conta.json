@@ -1,52 +1,64 @@
 {
- "roles": {
+  "roles": {
     "FUNCIONARIO": "Funcionário",
     "ADMIN": "Admin",
     "PROPRIETARIO": "Proprietário"
   },
-      "titulo": "Minha conta",
-      "email": "Email",
-      "senha": "Senha",
-      "trocarSenha": "Trocar Minha Senha",
-      "informacoesConta": "Informações da Conta",
-      "editarPerfil": "Editar Perfil",
-      "excluirConta": "Excluir Conta",
-      "adicionar": "Adicionar",
-      "nome": "Nome",
-      "sobrenome": "Sobrenome",
-      "empresa": {
-        "nome": "Nome da Empresa",
-        "cargo": "Cargo na Empresa",
-        "endereco": "Endereço",
-        "pais": "País",
-        "estado": "Estado",
-        "cidade": "Cidade",
-        "cep": "CEP",
-        "telefone": "Telefone",
-        "email": "Email da Empresa"
-      },
-      "modal": {
-        "editarTitulo": "Editar Informações",
-        "nome": "Nome",
-        "email": "Email",
-        "cancelar": "Cancelar",
-        "salvar": "Salvar",
-        "erro": {
-          "titulo": "Algo deu errado!",
-          "emailExistente": "Email já existente!",
-          "excluirConta": "Não foi possível excluir a conta."
-        },
-        "sucesso": {
-          "titulo": "Alteração realizada com sucesso!"
-        },
-        "excluir": {
-          "titulo": "Tem certeza?",
-          "texto": "Essa ação não pode ser desfeita!",
-          "confirmar": "Sim, deletar!",
-          "cancelar": "Cancelar",
-          "sucesso": "Conta excluída com sucesso!"
-        },
-        "botaoOk": "Ok"
-      }
-    }
-  
+  "titulo": "Meus",
+  "minhaConta": "Dados",
+  "gerencieSuasInformacoes": "Gerencie suas informações pessoais e de segurança",
+  "email": "Email",
+  "emailAtual": "Email atual",
+  "senha": "Senha",
+  "trocarSenha": "Trocar Minha Senha",
+  "gerencieSuaSenha": "Gerencie sua senha de acesso",
+  "emailNaoEditavel": "O email não pode ser editado por questões de segurança",
+  "editarNome": "Editar nome",
+  "informacoesConta": "Informações da Conta",
+  "informacoesEmpresa": "Informações da Empresa",
+  "editarPerfil": "Editar Perfil",
+  "excluirConta": "Excluir Conta",
+  "excluirContaDescricao": "Esta ação excluirá permanentemente sua conta e todos os dados associados.",
+  "adicionar": "Adicionar",
+  "nome": "Nome",
+  "sobrenome": "Sobrenome",
+  "contaCriadaEm": "Conta criada em",
+  "ultimaAtualizacao": "Última atualização",
+  "statusConta": "Status da conta",
+  "ativo": "Ativo",
+  "zonaPerigo": "Zona de Perigo",
+  "empresa": {
+    "nome": "Nome da Empresa",
+    "cargo": "Cargo na Empresa",
+    "endereco": "Endereço",
+    "pais": "País",
+    "estado": "Estado",
+    "cidade": "Cidade",
+    "cep": "CEP",
+    "telefone": "Telefone",
+    "email": "Email da Empresa"
+  },
+  "modal": {
+    "editarTitulo": "Editar Informações",
+    "nome": "Nome",
+    "email": "Email",
+    "cancelar": "Cancelar",
+    "salvar": "Salvar",
+    "erro": {
+      "titulo": "Algo deu errado!",
+      "emailExistente": "Email já existente!",
+      "excluirConta": "Não foi possível excluir a conta."
+    },
+    "sucesso": {
+      "titulo": "Alteração realizada com sucesso!"
+    },
+    "excluir": {
+      "titulo": "Tem certeza?",
+      "texto": "Essa ação não pode ser desfeita!",
+      "confirmar": "Sim, deletar!",
+      "cancelar": "Cancelar",
+      "sucesso": "Conta excluída com sucesso!"
+    },
+    "botaoOk": "Ok"
+  }
+}
