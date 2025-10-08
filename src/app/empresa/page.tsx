@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck, FaBuilding, FaUsers, FaChartLine, FaSync, FaInfoCircle } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEdit, FaTrash, FaSignOutAlt, FaLink, FaGlobe, FaTimes, FaCheck, FaBuilding, FaUsers, FaSync, FaInfoCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useUsuarioStore } from "@/context/usuario";
 import { useTranslation } from "react-i18next";
@@ -212,9 +212,15 @@ export default function Empresa() {
 
         if (produtosRes.ok) {
           const todosProdutos = await produtosRes.json();
-          const produtosDaEmpresa = todosProdutos.filter((p: any) => p.empresaId === empresaId);
-          const produtosCatalogo = produtosDaEmpresa.filter((p: any) => p.noCatalogo);
-          const estoqueBaixo = produtosDaEmpresa.filter((p: any) => p.quantidade <= (p.quantidadeMin || 0));
+          interface Produto {
+            empresaId: string;
+            noCatalogo: boolean;
+            quantidade: number;
+            quantidadeMin?: number;
+          }
+          const produtosDaEmpresa = (todosProdutos as Produto[]).filter((p) => p.empresaId === empresaId);
+          const produtosCatalogo = produtosDaEmpresa.filter((p) => p.noCatalogo);
+          const estoqueBaixo = produtosDaEmpresa.filter((p) => p.quantidade <= (p.quantidadeMin || 0));
 
           setStats(prev => ({
             ...prev,
