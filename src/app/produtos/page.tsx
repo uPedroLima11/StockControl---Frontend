@@ -131,19 +131,22 @@ export default function Produtos() {
 
   const adjustTextareaHeight = useCallback((textarea: HTMLTextAreaElement) => {
     requestAnimationFrame(() => {
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
     });
   }, []);
 
-  const handleDescricaoChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    if (value.length <= 255) {
-      setForm(prev => ({ ...prev, descricao: value }));
-      setDescricaoCaracteres(value.length);
-      adjustTextareaHeight(e.target);
-    }
-  }, [adjustTextareaHeight]);
+  const handleDescricaoChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      if (value.length <= 255) {
+        setForm((prev) => ({ ...prev, descricao: value }));
+        setDescricaoCaracteres(value.length);
+        adjustTextareaHeight(e.target);
+      }
+    },
+    [adjustTextareaHeight]
+  );
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -176,7 +179,7 @@ export default function Produtos() {
         const carregarPermissoes = async () => {
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/${usuarioValor}/permissoes`, {
-              headers: { "user-id": usuarioValor }
+              headers: { "user-id": usuarioValor },
             });
             if (response.ok) {
               const dados: { permissoes: { chave: string; concedida: boolean }[] } = await response.json();
@@ -227,9 +230,7 @@ export default function Produtos() {
 
             if (responseProdutos.ok) {
               const todosProdutos = await responseProdutos.json();
-              const produtosDaEmpresa = todosProdutos
-                .filter((p: ProdutoI) => p.empresaId === usuario.empresaId)
-                .sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+              const produtosDaEmpresa = todosProdutos.filter((p: ProdutoI) => p.empresaId === usuario.empresaId).sort((a: ProdutoI, b: ProdutoI) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
               setProdutos(produtosDaEmpresa);
               setProdutosOriginais(produtosDaEmpresa);
@@ -259,13 +260,17 @@ export default function Produtos() {
 
         const [responseFornecedores, responseCategorias] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_URL_API}/fornecedor`, {
-            headers:
-            {
+            headers: {
               "user-id": usuarioValor,
               Authorization: `Bearer ${Cookies.get("token")}`,
-            }
+            },
           }),
-          fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, { headers: { "user-id": usuarioValor } })
+          fetch(`${process.env.NEXT_PUBLIC_URL_API}/categorias`, {
+            headers: {
+              "user-id": usuarioValor,
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          }),
         ]);
 
         if (responseFornecedores.ok) {
@@ -279,7 +284,6 @@ export default function Produtos() {
         }
 
         await carregarPermissoes();
-
       } catch (error) {
         console.error("Erro na inicialização:", error);
       } finally {
@@ -489,23 +493,13 @@ export default function Produtos() {
       if (descricaoRef.current) {
         requestAnimationFrame(() => {
           if (descricaoRef.current) {
-            descricaoRef.current.style.height = 'auto';
-            descricaoRef.current.style.height = descricaoRef.current.scrollHeight + 'px';
+            descricaoRef.current.style.height = "auto";
+            descricaoRef.current.style.height = descricaoRef.current.scrollHeight + "px";
           }
         });
       }
     }
-  }, [
-    produtosOriginais,
-    campoOrdenacao,
-    direcaoOrdenacao,
-    tipoFiltroAtivo,
-    direcaoFiltroAtivo,
-    valorFiltro,
-    modalVisualizar,
-    i18n.language,
-    cotacaoDolar
-  ]);
+  }, [produtosOriginais, campoOrdenacao, direcaoOrdenacao, tipoFiltroAtivo, direcaoFiltroAtivo, valorFiltro, modalVisualizar, i18n.language, cotacaoDolar]);
 
   useEffect(() => {
     if (modalAberto && !modalVisualizar) {
@@ -1183,9 +1177,7 @@ export default function Produtos() {
     );
   }
 
-  const bgGradient = modoDark
-    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-    : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
 
   const textPrimary = modoDark ? "text-white" : "text-slate-900";
   const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
@@ -1367,14 +1359,8 @@ export default function Produtos() {
                         <div className="p-2 max-h-48 overflow-y-auto scroll-custom">
                           <div className={`text-xs font-semibold ${textMuted} px-2 py-1 mb-1`}>{t("categoriasLabel")}</div>
                           {categorias.slice(0, 100).map((categoria) => (
-                            <div
-                              key={categoria.id}
-                              className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) ? `${bgSelected} scale-105 font-medium` : ""}`}
-                              onClick={() => aplicarFiltroCategoria(String(categoria.id))}
-                            >
-                              <span className={textPrimary}>
-                                {t(`categorias.${categoria.nome}`, { defaultValue: categoria.nome })}
-                              </span>
+                            <div key={categoria.id} className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${bgHover} hover:scale-105 text-sm ${filtroCategoria === String(categoria.id) ? `${bgSelected} scale-105 font-medium` : ""}`} onClick={() => aplicarFiltroCategoria(String(categoria.id))}>
+                              <span className={textPrimary}>{t(`categorias.${categoria.nome}`, { defaultValue: categoria.nome })}</span>
                             </div>
                           ))}
                         </div>
@@ -1407,14 +1393,7 @@ export default function Produtos() {
 
               <div className="flex items-center gap-3 mt-4 lg:mt-0">
                 <div className={`hidden lg:flex items-center gap-1 ${bgCard} border ${borderColor} rounded-xl p-1`}>
-                  <button
-                    onClick={() => alterarVisualizacao("cards")}
-                    className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards"
-                      ? "bg-blue-500 text-white"
-                      : `${bgHover} ${textPrimary}`
-                      }`}
-                    title={t("visualizacao.tooltipCards")}
-                  >
+                  <button onClick={() => alterarVisualizacao("cards")} className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "cards" ? "bg-blue-500 text-white" : `${bgHover} ${textPrimary}`}`} title={t("visualizacao.tooltipCards")}>
                     <div className="w-4 h-4 flex items-center justify-center">
                       <div className="grid grid-cols-2 gap-0.5 w-3 h-3">
                         <div className={`${tipoVisualizacao === "cards" ? "bg-white" : "bg-blue-500"} rounded-sm`}></div>
@@ -1425,14 +1404,7 @@ export default function Produtos() {
                     </div>
                   </button>
 
-                  <button
-                    onClick={() => alterarVisualizacao("lista")}
-                    className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista"
-                      ? "bg-blue-500 text-white"
-                      : `${bgHover} ${textPrimary}`
-                      }`}
-                    title={t("visualizacao.tooltipLista")}
-                  >
+                  <button onClick={() => alterarVisualizacao("lista")} className={`p-2 cursor-pointer rounded-lg transition-all duration-300 ${tipoVisualizacao === "lista" ? "bg-blue-500 text-white" : `${bgHover} ${textPrimary}`}`} title={t("visualizacao.tooltipLista")}>
                     <div className="w-4 h-4 flex items-center justify-center">
                       <div className="flex flex-col gap-0.5 w-3 h-3">
                         <div className={`${tipoVisualizacao === "lista" ? "bg-white" : "bg-blue-500"} rounded-sm h-1`}></div>
@@ -1485,13 +1457,7 @@ export default function Produtos() {
                     {produtosAtuais.map((produto, index) => (
                       <div
                         key={produto.id}
-                        className={`group ${modoDark
-                          ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5"
-                          : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
-                          } rounded-xl border ${modoDark
-                            ? "border-blue-500/20 hover:border-blue-500/40"
-                            : "border-blue-200 hover:border-blue-300"
-                          } p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
+                        className={`group ${modoDark ? "bg-gradient-to-br from-blue-500/5 to-cyan-500/5" : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"} rounded-xl border ${modoDark ? "border-blue-500/20 hover:border-blue-500/40" : "border-blue-200 hover:border-blue-300"} p-4 transition-all duration-500 card-hover backdrop-blur-sm`}
                         style={{
                           animationDelay: `${index * 100}ms`,
                         }}
@@ -1570,9 +1536,7 @@ export default function Produtos() {
                               <FaCog className={modoDark ? "text-blue-400" : "text-blue-500"} />
                               {t("categoria")}:
                             </span>
-                            <span className={textPrimary}>
-                              {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
-                            </span>
+                            <span className={textPrimary}>{produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="flex items-center gap-1">
@@ -1621,14 +1585,7 @@ export default function Produtos() {
                 ) : (
                   <div className="space-y-3 mb-6">
                     {produtosAtuais.map((produto) => (
-                      <div
-                        key={produto.id}
-                        className={`${modoDark
-                          ? "bg-slate-800/50"
-                          : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"
-                          } rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"
-                          } p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}
-                      >
+                      <div key={produto.id} className={`${modoDark ? "bg-slate-800/50" : "bg-gradient-to-br from-blue-100/30 to-cyan-100/30"} rounded-xl border ${modoDark ? "border-blue-500/20" : "border-blue-200"} p-4 transition-all duration-300 hover:shadow-lg backdrop-blur-sm`}>
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                           <div className="flex-shrink-0">
                             <Image
@@ -1649,12 +1606,7 @@ export default function Produtos() {
                                 <p className={`${textMuted} text-xs line-clamp-2 mt-1`}>{produto.descricao}</p>
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className="text-lg font-bold text-cyan-500">
-                                  {i18n.language === "pt"
-                                    ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-                                    : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })
-                                  }
-                                </span>
+                                <span className="text-lg font-bold text-cyan-500">{i18n.language === "pt" ? produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : (produto.preco / cotacaoDolar).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
                                 {podeGerenciarCatalogo && (
                                   <button
                                     onClick={(e) => {
@@ -1672,9 +1624,7 @@ export default function Produtos() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                               <div>
                                 <span className={textMuted}>{t("categoria")}: </span>
-                                <span className={textPrimary}>
-                                  {produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}
-                                </span>
+                                <span className={textPrimary}>{produto.categoria?.nome ? t(`categorias.${produto.categoria.nome}`, { defaultValue: produto.categoria.nome }) : "-"}</span>
                               </div>
                               <div>
                                 <span className={textMuted}>{t("fornecedor")}: </span>
@@ -1688,19 +1638,7 @@ export default function Produtos() {
                               </div>
                               <div>
                                 <span className={textMuted}>Status: </span>
-                                <span className={`${produto.quantidade <= (produto.quantidadeMin || 0)
-                                  ? "text-red-500"
-                                  : produto.quantidade <= (produto.quantidadeMin || 0) * 2
-                                    ? "text-yellow-500"
-                                    : "text-green-500"
-                                  } font-medium`}>
-                                  {produto.quantidade <= (produto.quantidadeMin || 0)
-                                    ? t("estoqueBaixo.estadoCritico")
-                                    : produto.quantidade <= (produto.quantidadeMin || 0) * 2
-                                      ? t("estoqueBaixo.estadoAtencao")
-                                      : t("emEstoque")
-                                  }
-                                </span>
+                                <span className={`${produto.quantidade <= (produto.quantidadeMin || 0) ? "text-red-500" : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? "text-yellow-500" : "text-green-500"} font-medium`}>{produto.quantidade <= (produto.quantidadeMin || 0) ? t("estoqueBaixo.estadoCritico") : produto.quantidade <= (produto.quantidadeMin || 0) * 2 ? t("estoqueBaixo.estadoAtencao") : t("emEstoque")}</span>
                               </div>
                             </div>
                           </div>
@@ -1731,10 +1669,7 @@ export default function Produtos() {
                             )}
 
                             {podeGerenciarEstoque && (
-                              <button
-                                onClick={() => abrirModalEstoque(produto)}
-                                className="px-3 py-2 rounded-lg cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1"
-                              >
+                              <button onClick={() => abrirModalEstoque(produto)} className="px-3 py-2 rounded-lg cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white text-xs transition-all duration-300 flex items-center justify-center gap-1">
                                 <FaBox className="text-xs" />
                                 {t("estoque")}
                               </button>
@@ -1746,7 +1681,6 @@ export default function Produtos() {
                   </div>
                 )}
               </>
-
             )}
             {totalPaginas > 1 && (
               <div className="flex justify-center items-center gap-3 mt-6 lg:hidden">
@@ -1837,21 +1771,8 @@ export default function Produtos() {
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
                           {t("descricao")} <span className="text-red-400">*</span>
                         </label>
-                        <textarea
-                          ref={descricaoRef}
-                          placeholder={t("descricaoPlaceholder")}
-                          value={form.descricao || ""}
-                          onChange={handleDescricaoChange}
-                          rows={3}
-                          className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-150 resize-none overflow-hidden text-sm`}
-                          disabled={Boolean(!podeEditar && modalVisualizar)}
-                          maxLength={255}
-                          style={{ minHeight: '80px' }}
-                        />
-                        <div className={`text-right text-xs ${textMuted} mt-1`}>
-                          {descricaoCaracteres}/255
-                        </div>
+                        <textarea ref={descricaoRef} placeholder={t("descricaoPlaceholder")} value={form.descricao || ""} onChange={handleDescricaoChange} rows={3} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-150 resize-none overflow-hidden text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} maxLength={255} style={{ minHeight: "80px" }} />
+                        <div className={`text-right text-xs ${textMuted} mt-1`}>{descricaoCaracteres}/255</div>
                       </div>
                       <div>
                         <label className={`block ${textPrimary} mb-2 font-medium text-sm`}>
@@ -1876,11 +1797,7 @@ export default function Produtos() {
                               {t("quantidadeMinima")} <span className="text-red-400">*</span>
                             </label>
                             <div className="relative">
-                              <FaQuestionCircle
-                                className={`${textMuted} cursor-pointer hover:text-blue-500 transition-colors`}
-                                size={12}
-                                onClick={() => setShowTooltip(true)}
-                              />
+                              <FaQuestionCircle className={`${textMuted} cursor-pointer hover:text-blue-500 transition-colors`} size={12} onClick={() => setShowTooltip(true)} />
                             </div>
                           </div>
                           {showTooltip && (
@@ -1889,30 +1806,17 @@ export default function Produtos() {
                                 <div className="p-6">
                                   <div className="flex justify-between items-center mb-4">
                                     <h3 className={`text-lg font-bold ${textPrimary}`}>{t("quantidadeMinima")}</h3>
-                                    <button
-                                      onClick={() => setShowTooltip(false)}
-                                      className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}
-                                    >
+                                    <button onClick={() => setShowTooltip(false)} className={`p-2 cursor-pointer ${bgHover} rounded-lg transition-colors ${textMuted} hover:${textPrimary}`}>
                                       <FaTimes className="text-lg" />
                                     </button>
                                   </div>
-                                  <div className={`${textPrimary} text-sm leading-relaxed text-center`}>
-                                    {t("quantidadeMinimaTooltip")}
-                                  </div>
+                                  <div className={`${textPrimary} text-sm leading-relaxed text-center`}>{t("quantidadeMinimaTooltip")}</div>
                                 </div>
                               </div>
                             </div>
                           )}
 
-                          <input
-                            placeholder={t("quantidadeMinimaPlaceholder")}
-                            type="number"
-                            min={0}
-                            value={form.quantidadeMin || ""}
-                            onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })}
-                            className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`}
-                            disabled={Boolean(!podeEditar && modalVisualizar)}
-                          />
+                          <input placeholder={t("quantidadeMinimaPlaceholder")} type="number" min={0} value={form.quantidadeMin || ""} onChange={(e) => setForm({ ...form, quantidadeMin: Number(e.target.value) })} className={`w-full ${bgInput} border ${borderColor} rounded-xl px-3 py-2 ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm`} disabled={Boolean(!podeEditar && modalVisualizar)} />
                         </div>
                       </div>
                       {(preview || form.foto) && (
@@ -2065,7 +1969,6 @@ export default function Produtos() {
               </div>
             )}
 
-
             {modalEstoqueAberto && produtoSelecionadoEstoque && (
               <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}>
                 <div className={`${modoDark ? "bg-slate-800 border-blue-500/30 shadow-blue-500/20" : "bg-white border-blue-200 shadow-blue-200"} border rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-sm`} onClick={(e) => e.stopPropagation()}>
@@ -2081,7 +1984,6 @@ export default function Produtos() {
                       setModalEstoqueAberto(false);
                       setProdutoSelecionadoEstoque(null);
                       recarregarListaProdutos();
-
                     }}
                   />
                 </div>
