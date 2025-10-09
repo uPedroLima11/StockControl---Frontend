@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { usuarioTemPermissao } from "@/utils/permissoes";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 
 const permissoesCache = new Map<string, { permissoes: Record<string, boolean>; timestamp: number }>();
@@ -21,7 +21,6 @@ const somNotificacaoCache = {
   timeoutId: null as NodeJS.Timeout | null,
   BLOQUEIO_SOM_MS: 60000,
 };
-
 
 export default function Sidebar() {
   const { t } = useTranslation("sidebar");
@@ -39,14 +38,46 @@ export default function Sidebar() {
   const [modoDark, setModoDark] = useState(false);
   const [usuarioInteragiu, setUsuarioInteragiu] = useState(false);
   const [permissoesCarregadas, setPermissoesCarregadas] = useState(false);
+  const pathname = usePathname();
 
   const cores = {
-    azulEscuro: "#0A1929",
-    azulMedio: "#132F4C",
-    azulClaro: "#1E4976",
-    azulBrilhante: "#1976D2",
-    azulNeon: "#00B4D8",
-    cinzaEscuro: "#1A2027",
+    dark: {
+      fundo: "#0A1929",
+      texto: "#FFFFFF",
+      card: "#132F4C",
+      borda: "#1E4976",
+      primario: "#1976D2",
+      secundario: "#00B4D8",
+      placeholder: "#9CA3AF",
+      hover: "#1E4976",
+      sucesso: "#22C55E",
+      erro: "#EF4444",
+      alerta: "#F59E0B",
+      active: "#3B82F6",
+    },
+    light: {
+      fundo: "#EDEDED",
+      texto: "#0F172A",
+      card: "#FFFFFF",
+      borda: "#E2E8F0",
+      primario: "#1976D2",
+      secundario: "#0284C7",
+      placeholder: "#6B7280",
+      hover: "#F1F5F9",
+      sucesso: "#22C55E",
+      erro: "#EF4444",
+      alerta: "#F59E0B",
+      active: "#3B82F6",
+    },
+  };
+
+  const temaAtual = modoDark ? cores.dark : cores.light;
+
+  const isLinkActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
   };
 
   const tocarSomNotificacaoUnica = useCallback(async () => {
@@ -203,21 +234,20 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-  const temaSalvo = localStorage.getItem("modoDark");
-  const ativado = temaSalvo === "true";
-  setModoDark(ativado);
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
 
-  const handleThemeChange = (e: CustomEvent) => {
-    setModoDark(e.detail.modoDark);
-  };
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
 
-  window.addEventListener('themeChanged', handleThemeChange as EventListener);
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
 
-  return () => {
-    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
-  };
-}, []);
-
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+    };
+  }, []);
 
   const verificarAtivacaoEmpresa = useCallback(async (empresaId: string): Promise<boolean> => {
     try {
@@ -364,60 +394,80 @@ export default function Sidebar() {
 
     return (
       <>
-        <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} cores={cores} onLinkClick={handleLinkClick} />
-        {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/movimentacoes" icon={<FaHistory />} label={t("inventory")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} cores={cores} onLinkClick={handleLinkClick} />}
-        {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} cores={cores} onLinkClick={handleLinkClick} />}
+        <LinkSidebar href="/dashboard" icon={<FaFileAlt />} label={t("dashboard")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/dashboard")} />
+        {permissoesUsuario.logs_visualizar && <LinkSidebar href="/logs" icon={<FaClipboardUser />} label={t("summary")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/logs")} />}
+        {permissoesUsuario.produtos_visualizar && <LinkSidebar href="/produtos" icon={<FaBoxOpen />} label={t("products")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/produtos")} />}
+        {permissoesUsuario.inventario_visualizar && <LinkSidebar href="/movimentacoes" icon={<FaHistory />} label={t("inventory")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/movimentacoes")} />}
+        {permissoesUsuario.pedidos_visualizar && <LinkSidebar href="/pedidos" icon={<FaClipboardList />} label={t("orders")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/pedidos")} />}
+        {permissoesUsuario.vendas_visualizar && <LinkSidebar href="/vendas" icon={<FaCartShopping />} label={t("sells")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/vendas")} />}
+        {permissoesUsuario.clientes_visualizar && <LinkSidebar href="/clientes" icon={<FaUsers />} label={t("clients")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/clientes")} />}
+        {permissoesUsuario.usuarios_visualizar && <LinkSidebar href="/usuarios" icon={<FaUser />} label={t("users")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/usuarios")} />}
+        {permissoesUsuario.fornecedores_visualizar && <LinkSidebar href="/fornecedores" icon={<FaTruck />} label={t("suppliers")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/fornecedores")} />}
+        {permissoesUsuario.exportar_dados && <LinkSidebar href="/exportacoes" icon={<FaFileExport />} label={t("exports")} temaAtual={temaAtual} onLinkClick={handleLinkClick} isActive={isLinkActive("/exportacoes")} />}
       </>
     );
   };
 
   return (
     <>
-      <button className="md:hidden fixed top-4 left-4 z-50 text-white bg-[#1976D2] p-3 rounded-full shadow-lg hover:bg-[#1565C0] transition-colors" onClick={alternarSidebar}>
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 p-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+        style={{
+          background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+          color: "#FFFFFF",
+        }}
+        onClick={alternarSidebar}
+      >
         <FaBars />
       </button>
 
       <aside
         className={`sidebar-scrollbar fixed top-0 h-screen w-64 flex flex-col justify-between rounded-tr-2xl rounded-br-2xl z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto md:translate-x-0 md:relative md:flex ${estaAberto ? "translate-x-0" : "-translate-x-full"}`}
         style={{
-          backgroundColor: cores.azulEscuro,
-          borderRight: `3px solid transparent`,
-          backgroundImage: `linear-gradient(${cores.azulEscuro}, ${cores.azulEscuro}), 
-              linear-gradient(135deg, ${cores.azulBrilhante}, ${cores.azulNeon})`,
-          backgroundOrigin: "border-box",
-          backgroundClip: "content-box, border-box",
-          boxShadow: "8px 0 20px rgba(0, 0, 0, 0.4)",
+          backgroundColor: temaAtual.fundo,
+          borderRight: `1px solid ${temaAtual.borda}`,
+          boxShadow: modoDark ? "8px 0 20px rgba(0, 0, 0, 0.4)" : "8px 0 20px rgba(0, 0, 0, 0.1)",
         }}
       >
         <div>
           <Link
             href="/"
-            className="py-4 flex justify-center items-center gap-2 border-b"
+            className="py-4 flex justify-center items-center gap-2 border-b no-underline"
             style={{
-              backgroundColor: cores.azulEscuro,
-              borderColor: cores.azulBrilhante,
-              borderBottomWidth: "2px",
+              backgroundColor: modoDark ? temaAtual.card : "linear-gradient(135deg, #f0f0f0, #e8e8e8)",
+               borderColor: temaAtual.borda,
+              textDecoration: 'none',
             }}
           >
-            <Image className="object-contain filter brightness-0 invert" src="/icone.png" alt="Logo" width={28} height={28} />
-            <span className="hidden md:block text-white font-mono text-sm">StockControl</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+              <Image
+                className="object-contain filter brightness-0 invert"
+                src="/icone.png"
+                alt="Logo"
+                width={20}
+                height={20}
+              />
+            </div>
+            <span className="hidden md:block font-semibold text-sm" style={{ color: temaAtual.texto }}>
+              StockControl
+            </span>
           </Link>
 
-          <nav className="flex flex-col items-start px-4 py-6 gap-3 text-white text-sm">
-            <button onClick={alternarNotificacoes} className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm" style={{ backgroundColor: temNotificacaoNaoLida ? cores.azulBrilhante + "20" : "transparent" }}>
+          <nav className="flex flex-col items-start px-4 py-6 gap-2 text-sm">
+            <button
+              onClick={alternarNotificacoes}
+              className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+              style={{
+                backgroundColor: temNotificacaoNaoLida ? temaAtual.primario + "20" : "transparent",
+                color: temaAtual.texto,
+              }}
+            >
               <span className="text-lg relative">
                 <FaBell />
                 {temNotificacaoNaoLida && (
                   <>
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8] animate-ping" />
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#00B4D8]" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-cyan-500 animate-ping" />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-cyan-500" />
                   </>
                 )}
               </span>
@@ -426,36 +476,73 @@ export default function Sidebar() {
 
             {renderizarLinksComPermissao()}
 
-            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
-            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
-            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
+            <LinkSidebar href="/suporte" icon={<FaHeadset />} label={t("support")} temaAtual={temaAtual} onLinkClick={() => setEstaAberto(false)} isActive={isLinkActive("/suporte")} />
+            <LinkSidebar href="/configuracoes" icon={<FaWrench />} label={t("settings")} temaAtual={temaAtual} onLinkClick={() => setEstaAberto(false)} isActive={isLinkActive("/configuracoes")} />
+            <LinkSidebar href="/conta" icon={<FaUser />} label={t("account")} temaAtual={temaAtual} onLinkClick={() => setEstaAberto(false)} isActive={isLinkActive("/conta")} />
 
             <Link
               href="/empresa"
-              className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
+              className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 no-underline"
+              style={{
+                color: temaAtual.texto,
+                backgroundColor: isLinkActive("/empresa") ? temaAtual.active + "20" : "transparent",
+                textDecoration: 'none',
+              }}
               onClick={() => {
                 if (window.innerWidth < 768) {
                   setEstaAberto(false);
                 }
               }}
             >
-              <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: cores.azulClaro, borderWidth: "1.8px", background: "#fff" }}>
-                <Image src={fotoEmpresa || "/contadefault.png"} alt={t("company_photo")} width={48} height={48} className="object-cover w-full h-full" />
+              <div
+                className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden border-2"
+                style={{
+                  borderColor: temaAtual.primario,
+                  background: temaAtual.card
+                }}
+              >
+                <Image
+                  src={fotoEmpresa || "/contadefault.png"}
+                  alt={t("company_photo")}
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
               </div>
-              <span className="text-sm md:inline ml-1">{nomeEmpresa || t("create_company")}</span>
+              <span className="text-sm md:inline font-medium">
+                {nomeEmpresa || t("create_company")}
+              </span>
             </Link>
 
-            <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} cores={cores} onLinkClick={() => setEstaAberto(false)} />
+            <LinkSidebar href="/ajuda" icon={<FaBook />} label={t("help_center")} temaAtual={temaAtual} onLinkClick={() => setEstaAberto(false)} isActive={isLinkActive("/ajuda")} />
           </nav>
         </div>
 
-        <div className="flex flex-col items-start px-4 pb-6 gap-4 text-white text-sm">
-          <button onClick={alternarTema} className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm">
-            <span className="text-lg">{modoDark ? <FaMoon /> : <FaSun />}</span>
-            <span className="text-sm md:inline cursor-pointer">{modoDark ? t("dark_mode") : t("light_mode")}</span>
+        <div className="flex flex-col items-start px-4 pb-6 gap-3 text-sm">
+          <button
+            onClick={alternarTema}
+            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            style={{ color: temaAtual.texto }}
+          >
+            <span className="text-lg">
+              {modoDark ? <FaMoon className="text-blue-400" /> : <FaSun className="text-yellow-500" />}
+            </span>
+            <span className="text-sm md:inline cursor-pointer">
+              {modoDark ? t("dark_mode") : t("light_mode")}
+            </span>
           </button>
 
-          {possuiEmpresa && !empresaAtivada && <LinkSidebar href="/ativacao" icon={<FaCheckDouble />} label={t("activation")} cores={cores} onLinkClick={() => setEstaAberto(false)} />}
+          {possuiEmpresa && !empresaAtivada && (
+            <LinkSidebar
+              href="/ativacao"
+              icon={<FaCheckDouble />}
+              label={t("activation")}
+              temaAtual={temaAtual}
+              onLinkClick={() => setEstaAberto(false)}
+              isActive={isLinkActive("/ativacao")}
+            />
+          )}
+
           <button
             onClick={() => {
               permissoesCache.clear();
@@ -463,9 +550,9 @@ export default function Sidebar() {
               localStorage.removeItem("modoDark");
               Cookies.remove("token");
               window.location.href = "/";
-
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C] text-white text-sm"
+            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            style={{ color: temaAtual.erro }}
           >
             <span className="text-lg">
               <FaSignOutAlt />
@@ -480,7 +567,7 @@ export default function Sidebar() {
           estaVisivel={mostrarNotificacoes}
           aoFechar={() => setMostrarNotificacoes(false)}
           nomeEmpresa={nomeEmpresa}
-          cores={cores}
+          temaAtual={temaAtual}
           usuarioId={usuarioId}
           onNotificacoesAtualizadas={verificarNotificacoes}
           permissoesUsuario={permissoesUsuario}
@@ -503,21 +590,16 @@ function LinkSidebar({
   href,
   icon,
   label,
-  cores,
+  temaAtual,
   onLinkClick,
+  isActive = false,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
-  cores: {
-    azulEscuro: string;
-    azulMedio: string;
-    azulClaro: string;
-    azulBrilhante: string;
-    azulNeon: string;
-    cinzaEscuro: string;
-  };
+  temaAtual: any;
   onLinkClick?: () => void;
+  isActive?: boolean;
 }) {
   const handleClick = () => {
     if (window.innerWidth < 768 && onLinkClick) {
@@ -528,10 +610,16 @@ function LinkSidebar({
   return (
     <Link
       href={href}
-      className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition hover:bg-[#132F4C]"
+      className={`flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105 no-underline ${isActive ? 'font-semibold' : ''
+        }`}
+      style={{
+        color: temaAtual.texto,
+        backgroundColor: isActive ? temaAtual.active + "40" : "transparent",
+        textDecoration: 'none',
+      }}
       onClick={handleClick}
     >
-      <span className="text-lg" style={{ color: cores.azulNeon }}>
+      <span className="text-lg" style={{ color: isActive ? temaAtual.active : temaAtual.primario }}>
         {icon}
       </span>
       <span className="text-sm md:inline">{label}</span>
@@ -539,11 +627,12 @@ function LinkSidebar({
   );
 }
 
+
 function PainelNotificacoes({
   estaVisivel,
   aoFechar,
   nomeEmpresa,
-  cores,
+  temaAtual,
   usuarioId,
   onNotificacoesAtualizadas,
   permissoesUsuario,
@@ -551,19 +640,11 @@ function PainelNotificacoes({
   estaVisivel: boolean;
   aoFechar: () => void;
   nomeEmpresa: string | null;
-  cores: {
-    azulEscuro: string;
-    azulMedio: string;
-    azulClaro: string;
-    azulBrilhante: string;
-    azulNeon: string;
-    cinzaEscuro: string;
-  };
+  temaAtual: any;
   usuarioId: string;
   onNotificacoesAtualizadas: () => void;
   permissoesUsuario: Record<string, boolean>;
 }) {
-  const [modoDark, setModoDark] = useState(false);
   const { t, i18n } = useTranslation("sidebar");
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
@@ -600,12 +681,6 @@ function PainelNotificacoes({
     return notificacao;
   };
 
-  useEffect(() => {
-    const temaSalvo = localStorage.getItem("modoDark");
-    const ativo = temaSalvo === "true";
-    setModoDark(ativo);
-  }, []);
-
   const extrairProdutoIdDaNotificacao = (notificacao: NotificacaoI): number | null => {
     try {
       const descricao = notificacao.descricao;
@@ -636,7 +711,6 @@ function PainelNotificacoes({
 
     if (produtoId) {
       aoFechar();
-
       router.push(`/pedidos?produto=${produtoId}&abrirModal=true`);
     } else {
       const primeiraLinha = notificacao.descricao.split("\n")[0];
@@ -644,7 +718,6 @@ function PainelNotificacoes({
       const possivelNomeProduto = palavras.slice(2, -2).join(" ");
 
       aoFechar();
-
       router.push("/pedidos?abrirModal=true");
 
       setTimeout(() => {
@@ -768,10 +841,6 @@ function PainelNotificacoes({
     });
   };
 
-  const bgColor = modoDark ? "#0F1E35" : "#FFFFFF";
-  const textColor = modoDark ? "#FFFFFF" : "#000000";
-  const closeButtonColor = modoDark ? "#FFFFFF" : "#6B7280";
-
   const getEmojiPorTipo = (titulo: string) => {
     if (titulo.includes("Crítico") || titulo.includes("CRÍTICO") || titulo.includes("Critical")) {
       return "🔴";
@@ -791,11 +860,9 @@ function PainelNotificacoes({
           key={notificacao.id}
           className="flex flex-col gap-2 p-4 rounded-lg mb-2"
           style={{
-            background: modoDark
-              ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
-              : "#ececec",
-            border: `1px solid ${cores.azulBrilhante}`,
-            color: textColor,
+            background: temaAtual.card,
+            border: `1px solid ${temaAtual.primario}`,
+            color: temaAtual.texto,
           }}
         >
           <div className="flex justify-between items-center mb-4">
@@ -806,7 +873,7 @@ function PainelNotificacoes({
             {t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.
           </p>
 
-          <div className="flex justify-between items-center text-xs" style={{ color: cores.azulBrilhante }}>
+          <div className="flex justify-between items-center text-xs" style={{ color: temaAtual.primario }}>
             <span>
               {t("from")}: {notificacao.convite?.empresa?.nome || t("unknown_company")}
             </span>
@@ -815,13 +882,11 @@ function PainelNotificacoes({
 
           <div className="flex gap-2 mt-2">
             <button
-              className="py-2 px-4 rounded-lg transition-colors flex-1"
+              className="py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 flex-1"
               style={{
-                backgroundColor: cores.azulBrilhante,
+                background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
                 color: "white",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
               onClick={() => notificacao.convite && responderConvite(notificacao.convite)}
             >
               {t("accept")}
@@ -843,11 +908,9 @@ function PainelNotificacoes({
           key={notificacao.id}
           className="flex flex-col gap-3 p-4 rounded-lg mb-2"
           style={{
-            background: modoDark
-              ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
-              : "#ececec",
-            border: `1px solid ${cores.azulBrilhante}`,
-            color: textColor,
+            background: temaAtual.card,
+            border: `1px solid ${temaAtual.primario}`,
+            color: temaAtual.texto,
           }}
         >
           <div className="flex justify-between items-center">
@@ -856,7 +919,11 @@ function PainelNotificacoes({
               <h3 className="font-bold text-base">{titulo}</h3>
             </div>
             {!notificacao.empresaId && (
-              <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
+              <button
+                onClick={() => deletarNotificacao(notificacao.id)}
+                className="hover:text-cyan-500 transition-colors"
+                style={{ color: temaAtual.texto }}
+              >
                 ✕
               </button>
             )}
@@ -886,7 +953,7 @@ function PainelNotificacoes({
             })}
           </div>
 
-          <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: cores.azulBrilhante }}>
+          <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: temaAtual.primario }}>
             <span>
               {t("Data")}: {formatarData(notificacao.createdAt)}
             </span>
@@ -894,20 +961,18 @@ function PainelNotificacoes({
 
           <div className="flex justify-between items-center mt-2">
             <span className="text-xs flex items-center gap-1">
-              {notificacao.lida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
+              {notificacao.lida ? <FaCheck color={temaAtual.primario} /> : <FaCheckDouble color={temaAtual.secundario} />}
               {notificacao.lida ? t("read") : t("unread")}
             </span>
 
             {permissoesUsuario.pedidos_criar && (
               <button
                 onClick={() => handleFazerPedido(notificacao)}
-                className="px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1 text-xs rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-1 cursor-pointer"
                 style={{
-                  backgroundColor: cores.azulBrilhante,
+                  background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
                   color: "#FFFFFF"
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
               >
                 <FaClipboardList size={10} />
                 {t("fazerPedido") || "Fazer Pedido"}
@@ -928,17 +993,19 @@ function PainelNotificacoes({
         key={notificacao.id}
         className="flex flex-col gap-2 p-4 rounded-lg mb-2"
         style={{
-          background: modoDark
-            ? "linear-gradient(135deg, #132F4C 0%, #1A3A5A 100%)"
-            : "#ececec",
-          border: `1px solid ${cores.azulBrilhante}`,
-          color: textColor,
+          background: temaAtual.card,
+          border: `1px solid ${temaAtual.primario}`,
+          color: temaAtual.texto,
         }}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold">{titulo}</h3>
           {!notificacao.empresaId && (
-            <button onClick={() => deletarNotificacao(notificacao.id)} className={`hover:text-[#00B4D8]`} style={{ color: closeButtonColor }}>
+            <button
+              onClick={() => deletarNotificacao(notificacao.id)}
+              className="hover:text-cyan-500 transition-colors"
+              style={{ color: temaAtual.texto }}
+            >
               ✕
             </button>
           )}
@@ -946,7 +1013,7 @@ function PainelNotificacoes({
 
         <p>{mensagem}</p>
 
-        <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: cores.azulBrilhante }}>
+        <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: temaAtual.primario }}>
           <span>
             {t("from")}: {nomeRemetente}
           </span>
@@ -957,7 +1024,7 @@ function PainelNotificacoes({
 
         <div className="flex justify-between items-center mt-2">
           <span className="text-xs flex items-center gap-1">
-            {notificacao.lida ? <FaCheck color={cores.azulBrilhante} /> : <FaCheckDouble color={cores.azulNeon} />}
+            {notificacao.lida ? <FaCheck color={temaAtual.primario} /> : <FaCheckDouble color={temaAtual.secundario} />}
             {notificacao.lida ? t("read") : t("unread")}
           </span>
         </div>
@@ -970,10 +1037,10 @@ function PainelNotificacoes({
       ref={panelRef}
       className={`fixed w-80 p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
       style={{
-        backgroundColor: bgColor,
-        borderTop: `2px solid ${cores.azulBrilhante}`,
-        boxShadow: modoDark ? "0 4px 25px rgba(25, 118, 210, 0.25)" : "0 4px 20px rgba(0, 0, 0, 0.2)",
-        color: textColor,
+        backgroundColor: temaAtual.card,
+        borderTop: `2px solid ${temaAtual.primario}`,
+        boxShadow: "0 4px 25px rgba(0, 0, 0, 0.15)",
+        color: temaAtual.texto,
       }}
     >
       <div className="flex justify-between items-center mb-4">
@@ -982,44 +1049,44 @@ function PainelNotificacoes({
           {!mostrarLidas && (
             <button
               onClick={marcarTodasComoLidas}
-              className="text-xs px-2 py-1 rounded transition-colors"
+              className="text-xs px-2 py-1 rounded transition-all duration-300 hover:scale-105"
               style={{
-                backgroundColor: cores.azulBrilhante,
+                background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
                 color: "white",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
             >
               {t("marcarLidas")}
             </button>
           )}
           <button
             onClick={alternarMostrarLidas}
-            className="text-xs px-2 py-1 rounded transition-colors"
+            className="text-xs px-2 py-1 rounded transition-all duration-300 hover:scale-105"
             style={{
-              backgroundColor: cores.azulBrilhante,
+              background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
               color: "white",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = cores.azulNeon)}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = cores.azulBrilhante)}
           >
             {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
           </button>
-          <button onClick={aoFechar} className={`hover:text-[#00B4D8] transition-colors`} style={{ color: closeButtonColor }}>
+          <button
+            onClick={aoFechar}
+            className="hover:text-cyan-500 transition-colors"
+            style={{ color: temaAtual.texto }}
+          >
             ✕
           </button>
         </div>
       </div>
       <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
         {mostrarLidas && (
-          <div className="text-center py-2 italic text-xs" style={{ color: cores.azulBrilhante }}>
+          <div className="text-center py-2 italic text-xs" style={{ color: temaAtual.primario }}>
             {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
           </div>
         )}
         {notificacoes.length > 0 ? (
           tabelaNotificacoes
         ) : (
-          <p className="text-center py-4" style={{ color: cores.azulBrilhante }}>
+          <p className="text-center py-4" style={{ color: temaAtual.primario }}>
             {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
           </p>
         )}
