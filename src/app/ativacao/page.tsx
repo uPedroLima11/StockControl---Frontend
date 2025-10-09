@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaCheckCircle, FaLock, FaShoppingCart } from "react-icons/fa";
+import { FaCheckCircle, FaLock, FaShoppingCart, FaKey, FaRocket } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { cores } from "@/utils/cores";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
+import { FaShield } from "react-icons/fa6";
 
 type TipoUsuario = "FUNCIONARIO" | "ADMIN" | "PROPRIETARIO";
 
@@ -27,6 +28,13 @@ export default function AtivacaoPage() {
   const router = useRouter();
 
   const temaAtual = modoDark ? cores.dark : cores.light;
+  const bgGradient = modoDark ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" : "bg-gradient-to-br from-slate-200 via-blue-50 to-slate-200";
+  const textPrimary = modoDark ? "text-white" : "text-slate-900";
+  const textSecondary = modoDark ? "text-gray-300" : "text-slate-600";
+  const textMuted = modoDark ? "text-gray-400" : "text-slate-500";
+  const bgCard = modoDark ? "bg-slate-800/50" : "bg-white/80";
+  const borderColor = modoDark ? "border-blue-500/30" : "border-blue-200";
+  const bgInput = modoDark ? "bg-slate-700/50" : "bg-gray-100";
 
   useEffect(() => {
     const temaSalvo = localStorage.getItem("modoDark");
@@ -92,6 +100,52 @@ export default function AtivacaoPage() {
     };
   }, [router, t]);
 
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(45deg, ${modoDark ? "#3B82F6, #0EA5E9, #1E293B" : "#1976D2, #0284C7, #E2E8F0"});
+        padding: 1px;
+        border-radius: 16px;
+      }
+      
+      .gradient-border > div {
+        background: ${modoDark ? "#1E293B" : "#FFFFFF"};
+        border-radius: 15px;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [modoDark]);
+
   const handleAtivar = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -134,6 +188,8 @@ export default function AtivacaoPage() {
         title: t("empresaAtivada") || "Empresa ativada!",
         text: t("empresaAtivadaMensagem") || "Sua empresa foi ativada com sucesso.",
         confirmButtonColor: temaAtual.primario,
+        background: modoDark ? temaAtual.card : "#FFFFFF",
+        color: modoDark ? temaAtual.texto : temaAtual.texto,
       });
 
       setEmpresaAtivada(true);
@@ -157,6 +213,8 @@ export default function AtivacaoPage() {
           title: "Erro na ativação",
           text: mensagemErro,
           confirmButtonColor: temaAtual.erro,
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       } else {
         Swal.fire({
@@ -164,6 +222,8 @@ export default function AtivacaoPage() {
           title: "Erro",
           text: t("erroGenerico") || "Erro desconhecido ao ativar empresa",
           confirmButtonColor: temaAtual.erro,
+          background: modoDark ? temaAtual.card : "#FFFFFF",
+          color: modoDark ? temaAtual.texto : temaAtual.texto,
         });
       }
     } finally {
@@ -173,39 +233,25 @@ export default function AtivacaoPage() {
 
   if (tipoUsuario && tipoUsuario !== "PROPRIETARIO") {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-        <div
-          className="w-full max-w-md p-6 rounded-lg text-center"
-          style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-          }}
-        >
-          <div className="flex justify-center mb-4">
-            <FaLock className="text-4xl" style={{ color: temaAtual.erro }} />
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center px-4`}>
+        <div className="gradient-border animate-fade-in-up">
+          <div className={`p-8 rounded-[15px] ${bgCard} backdrop-blur-sm text-center`}>
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl flex items-center justify-center">
+              <FaLock className="text-white text-3xl" />
+            </div>
+            <h2 className={`text-2xl font-bold ${textPrimary} mb-4`}>{t("acessoRestrito")}</h2>
+            <p className={`text-lg ${textSecondary} mb-6`}>{t("apenasProprietarios")}</p>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer hover:scale-105"
+              style={{
+                background: modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                color: "#FFFFFF",
+              }}
+            >
+              {t("voltarDashboard")}
+            </button>
           </div>
-          <h2 className="text-xl font-semibold mb-4" style={{ color: temaAtual.texto }}>
-            {t("acessoRestrito")}
-          </h2>
-          <p className="mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
-            {t("apenasProprietarios")}
-          </p>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="w-full px-4 py-2 rounded-lg transition font-medium"
-            style={{
-              backgroundColor: temaAtual.primario,
-              color: "#FFFFFF",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            {t("voltarDashboard")}
-          </button>
         </div>
       </div>
     );
@@ -213,154 +259,186 @@ export default function AtivacaoPage() {
 
   if (empresaAtivada && tipoUsuario === "PROPRIETARIO") {
     return (
-      <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-        <div
-          className="w-full max-w-md p-6 rounded-lg text-center"
-          style={{
-            backgroundColor: temaAtual.card,
-            border: `1px solid ${temaAtual.borda}`,
-          }}
-        >
-          <div className="flex justify-center mb-4">
-            <FaCheckCircle className="text-4xl" style={{ color: temaAtual.sucesso }} />
+      <div className={`min-h-screen ${bgGradient} flex items-center justify-center px-4`}>
+        <div className="gradient-border animate-fade-in-up">
+          <div className={`p-8 rounded-[15px] ${bgCard} backdrop-blur-sm text-center`}>
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+              <FaCheckCircle className="text-white text-3xl" />
+            </div>
+            <h2 className={`text-2xl font-bold ${textPrimary} mb-4`}>{t("empresaJaAtivada")}</h2>
+            <p className={`text-lg ${textSecondary} mb-6`}>{t("empresaJaAtivadaMensagem")}</p>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer hover:scale-105"
+              style={{
+                background: modoDark ? "linear-gradient(135deg, #10B981, #059669)" : "linear-gradient(135deg, #10B981, #059669)",
+                color: "#FFFFFF",
+              }}
+            >
+              {t("voltarDashboard")}
+            </button>
           </div>
-
-          <h2 className="text-xl font-semibold mb-4" style={{ color: temaAtual.texto }}>
-            {t("empresaJaAtivada")}
-          </h2>
-
-          <p className="mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
-            {t("empresaJaAtivadaMensagem")}
-          </p>
-
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="w-full px-4 py-2 cursor-pointer rounded-lg transition font-medium"
-            style={{
-              backgroundColor: temaAtual.primario,
-              color: "#FFFFFF",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            {t("voltarDashboard")}
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 md:px-4 py-4 md:py-8" style={{ backgroundColor: temaAtual.fundo, minHeight: "100vh" }}>
-      <div
-        className="w-full max-w-md p-6 rounded-lg"
-        style={{
-          backgroundColor: temaAtual.card,
-          border: `1px solid ${temaAtual.borda}`,
-        }}
-      >
-        <div className="flex justify-center mb-4">
-          <FaLock className="text-4xl" style={{ color: temaAtual.primario }} />
-        </div>
+    <div className={`min-h-screen ${bgGradient}`}>
+      <div className="flex">
+        <div className="flex-1 min-w-0">
+          <div className="px-4 sm:px-6 py-8 w-full max-w-4xl mx-auto">
+            <section className={`relative py-8 rounded-3xl mb-6 overflow-hidden ${bgCard} backdrop-blur-sm border ${borderColor}`}>
+              <div className="absolute inset-0">
+                <div className={`absolute top-0 left-10 w-32 h-32 ${modoDark ? "bg-blue-500/20" : "bg-blue-200/50"} rounded-full blur-3xl animate-float`}></div>
+                <div className={`absolute bottom-0 right-10 w-48 h-48 ${modoDark ? "bg-slate-700/20" : "bg-slate-300/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "2s" }}></div>
+                <div className={`absolute top-1/2 left-1/2 w-24 h-24 ${modoDark ? "bg-cyan-500/20" : "bg-cyan-200/50"} rounded-full blur-3xl animate-float`} style={{ animationDelay: "4s" }}></div>
+              </div>
 
-        <h2 className="text-xl font-semibold text-center mb-4" style={{ color: temaAtual.texto }}>
-          {t("ativacaoTitulo")}
-        </h2>
-
-        <p className="text-center mb-6 text-sm" style={{ color: temaAtual.placeholder }}>
-          {t("ativacaoDescricao")}
-        </p>
-
-        <form onSubmit={handleAtivar} className="space-y-4">
-          <div>
-            <label htmlFor="codigo" className="block mb-2 text-sm font-medium" style={{ color: temaAtual.texto }}>
-              {t("codigoAtivacao")}
-            </label>
-            <input
-              id="codigo"
-              type="text"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              className="w-full px-3 py-2 rounded border text-sm"
-              style={{
-                backgroundColor: temaAtual.card,
-                color: temaAtual.texto,
-                border: `1px solid ${temaAtual.borda}`,
-              }}
-              placeholder={t("codigoAtivacaoPlaceholder")}
-              required
-              disabled={loading}
-              onFocus={(e) => {
-                e.target.style.borderColor = temaAtual.primario;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = temaAtual.borda;
-              }}
-            />
-            <p className="mt-1 text-xs text-center" style={{ color: temaAtual.placeholder }}>
-              {t("codigoAtivacaoAjuda")}
-            </p>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-4 py-2 rounded-lg cursor-pointer transition font-medium flex items-center justify-center"
-              style={{
-                backgroundColor: loading ? temaAtual.placeholder : temaAtual.primario,
-                color: "#FFFFFF",
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.opacity = "0.9";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.opacity = "1";
-                }
-              }}
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  {t("ativando")}
+              <div className="relative z-10 text-center">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                  <FaKey className="text-white text-3xl" />
                 </div>
-              ) : (
-                t("ativarEmpresa")
-              )}
-            </button>
-          </div>
-        </form>
+                <h1 className={`text-3xl md:text-4xl font-bold ${textPrimary} mb-3`}>
+                  {t("ativacaoTitulo")} <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{t("licenca")}</span>
+                </h1>
+                <p className={`text-lg ${textSecondary} max-w-2xl mx-auto`}>{t("ativacaoDescricao")}</p>
+              </div>
+            </section>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className="gradient-border animate-fade-in-up">
+                  <div className={`p-6 rounded-[15px] ${bgCard} backdrop-blur-sm`}>
+                    <h2 className={`text-xl font-bold ${textPrimary} mb-6 flex items-center gap-2`}>
+                      <FaRocket className={modoDark ? "text-blue-400" : "text-blue-500"} />
+                      {t("ativarSuaEmpresa")}
+                    </h2>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm mb-2" style={{ color: temaAtual.placeholder }}>
-            {t("naoEfetuouPagamento")}
-          </p>
-          <Link
-            href="https://wa.me/+5553981185633"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-sm transition"
-            style={{
-              color: temaAtual.primario,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.8";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            <FaShoppingCart className="mr-2" />
-            <span className="font-medium">{t("cliqueAqui")}</span>
-            <span className="ml-1">{t("paraComprarAtivacao")}</span>
-          </Link>
+                    <form onSubmit={handleAtivar} className="space-y-6">
+                      <div>
+                        <label className={`block mb-3 text-sm font-medium items-center ${textPrimary}`}>
+                          <FaKey className="inline mr-2 text-sm" />
+                          {t("codigoAtivacao")}
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="codigo"
+                            type="text"
+                            value={codigo}
+                            onChange={(e) => setCodigo(e.target.value)}
+                            className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 ${bgInput} ${textPrimary} placeholder-${modoDark ? "gray-400" : "slate-500"} pr-10`}
+                            style={{
+                              border: `1px solid ${temaAtual.borda}`,
+                            }}
+                            placeholder={t("codigoAtivacaoPlaceholder")}
+                            required
+                            disabled={loading}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = temaAtual.primario;
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = temaAtual.borda;
+                            }}
+                          />
+                          <FaKey className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${textMuted}`} />
+                        </div>
+                        <p className={`mt-2 text-xs ${textMuted}`}>
+                          {t("codigoAtivacaoAjuda")}
+                        </p>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full px-4 py-3 md:py-2 rounded-xl font-semibold transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm md:text-base"
+                        style={{
+                          background: loading
+                            ? (modoDark ? "#4B5563" : "#9CA3AF")
+                            : modoDark ? "linear-gradient(135deg, #3B82F6, #0EA5E9)" : "linear-gradient(135deg, #1976D2, #0284C7)",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        {loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            {t("ativando")}
+                          </>
+                        ) : (
+                          <>
+                            <FaShield className="text-sm" />
+                            {t("ativarEmpresa")}
+                          </>
+                        )}
+                      </button>
+                    </form>
+                    <div className="mt-6 pt-6 border-t" style={{ borderColor: temaAtual.borda }}>
+                      <p className={`text-sm text-center mb-3 ${textMuted}`}>
+                        {t("naoEfetuouPagamento")}
+                      </p>
+                      <Link
+                        href="https://wa.me/+5553981185633"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300 cursor-pointer hover:scale-105 ${bgInput} ${textPrimary} text-xs md:text-sm`}
+                        style={{
+                          border: `1px solid ${temaAtual.borda}`,
+                        }}
+                      >
+                        <FaShoppingCart className={modoDark ? "text-green-400" : "text-green-500"} />
+                        <span className="font-medium">{t("cliqueAqui")}</span>
+                        <span className="hidden sm:inline">{t("paraComprarAtivacao")}</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className={`rounded-2xl border ${borderColor} ${bgCard} backdrop-blur-sm overflow-hidden`}>
+                  <div className="p-4 border-b" style={{ borderColor: temaAtual.borda }}>
+                    <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                      <FaCheckCircle className={modoDark ? "text-green-400" : "text-green-500"} />
+                      {t("vantagensAtivacao")}
+                    </h2>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <div className={`p-3 rounded-lg ${modoDark ? "bg-blue-500/10" : "bg-blue-50"} border ${modoDark ? "border-blue-500/20" : "border-blue-200"}`}>
+                        <h3 className={`font-bold text-sm ${textPrimary} mb-1`}>{t("vantagem1.titulo")}</h3>
+                        <p className={`text-xs ${textMuted}`}>{t("vantagem1.mensagem")}</p>
+                      </div>
+                      <div className={`p-3 rounded-lg ${modoDark ? "bg-green-500/10" : "bg-green-50"} border ${modoDark ? "border-green-500/20" : "border-green-200"}`}>
+                        <h3 className={`font-bold text-sm ${textPrimary} mb-1`}>{t("vantagem2.titulo")}</h3>
+                        <p className={`text-xs ${textMuted}`}>{t("vantagem2.mensagem")}</p>
+                      </div>
+                      <div className={`p-3 rounded-lg ${modoDark ? "bg-purple-500/10" : "bg-purple-50"} border ${modoDark ? "border-purple-500/20" : "border-purple-200"}`}>
+                        <h3 className={`font-bold text-sm ${textPrimary} mb-1`}>{t("vantagem3.titulo")}</h3>
+                        <p className={`text-xs ${textMuted}`}>{t("vantagem3.mensagem")}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className={`rounded-2xl border ${borderColor} ${bgCard} backdrop-blur-sm overflow-hidden`}>
+                  <div className="p-4 border-b" style={{ borderColor: temaAtual.borda }}>
+                    <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: temaAtual.texto }}>
+                      <FaShoppingCart className={modoDark ? "text-orange-400" : "text-orange-500"} />
+                      {t("suporteTitulo")}
+                    </h2>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <div className={`p-3 rounded-lg ${modoDark ? "bg-orange-500/10" : "bg-orange-50"} border ${modoDark ? "border-orange-500/20" : "border-orange-200"}`}>
+                        <h3 className={`font-bold text-sm ${textPrimary} mb-1`}>{t("suporte1.titulo")}</h3>
+                        <p className={`text-xs ${textMuted}`}>{t("suporte1.mensagem")}</p>
+                      </div>
+                      <div className={`p-3 rounded-lg ${modoDark ? "bg-cyan-500/10" : "bg-cyan-50"} border ${modoDark ? "border-cyan-500/20" : "border-cyan-200"}`}>
+                        <h3 className={`font-bold text-sm ${textPrimary} mb-1`}>{t("suporte2.titulo")}</h3>
+                        <p className={`text-xs ${textMuted}`}>{t("suporte2.mensagem")}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
