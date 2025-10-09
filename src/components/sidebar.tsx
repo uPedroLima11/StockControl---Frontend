@@ -44,7 +44,7 @@ export default function Sidebar() {
     dark: {
       fundo: "#0A1929",
       texto: "#FFFFFF",
-      card: "#132F4C",
+      card: "#0A2A4F",
       borda: "#1E4976",
       primario: "#1976D2",
       secundario: "#00B4D8",
@@ -56,7 +56,7 @@ export default function Sidebar() {
       active: "#3B82F6",
     },
     light: {
-      fundo: "#EDEDED",
+      fundo: "#f5f7fa",
       texto: "#0F172A",
       card: "#FFFFFF",
       borda: "#E2E8F0",
@@ -434,8 +434,8 @@ export default function Sidebar() {
             href="/"
             className="py-4 flex justify-center items-center gap-2 border-b no-underline"
             style={{
-              backgroundColor: modoDark ? temaAtual.card : "linear-gradient(135deg, #f0f0f0, #e8e8e8)",
-               borderColor: temaAtual.borda,
+              backgroundColor: modoDark ? temaAtual.card : "#e4ecf4",
+              borderColor: temaAtual.borda,
               textDecoration: 'none',
             }}
           >
