@@ -597,7 +597,20 @@ function LinkSidebar({
   href: string;
   icon: React.ReactNode;
   label: string;
-  temaAtual: any;
+  temaAtual: {
+    fundo: string;
+    texto: string;
+    card: string;
+    borda: string;
+    primario: string;
+    secundario: string;
+    placeholder: string;
+    hover: string;
+    sucesso: string;
+    erro: string;
+    alerta: string;
+    active: string;
+  };
   onLinkClick?: () => void;
   isActive?: boolean;
 }) {
@@ -640,7 +653,20 @@ function PainelNotificacoes({
   estaVisivel: boolean;
   aoFechar: () => void;
   nomeEmpresa: string | null;
-  temaAtual: any;
+  temaAtual: {
+    fundo: string;
+    texto: string;
+    card: string;
+    borda: string;
+    primario: string;
+    secundario: string;
+    placeholder: string;
+    hover: string;
+    sucesso: string;
+    erro: string;
+    alerta: string;
+    active: string;
+  };
   usuarioId: string;
   onNotificacoesAtualizadas: () => void;
   permissoesUsuario: Record<string, boolean>;
