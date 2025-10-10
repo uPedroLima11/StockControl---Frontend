@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook, FaClipboardList } from "react-icons/fa";
+import { FaBars, FaBell, FaFileExport, FaBoxOpen, FaFileAlt, FaUser, FaHeadset, FaWrench, FaSignOutAlt, FaTruck, FaCheck, FaCheckDouble, FaHistory, FaMoon, FaSun, FaBook, FaClipboardList, FaTimes } from "react-icons/fa";
 import { FaCartShopping, FaClipboardUser, FaUsers } from "react-icons/fa6";
 import { NotificacaoI } from "@/utils/types/notificacao";
 import { useUsuarioStore } from "@/context/usuario";
@@ -56,14 +56,14 @@ export default function Sidebar() {
       active: "#3B82F6",
     },
     light: {
-      fundo: "#f5f7fa",
+      fundo: "#f8fafc", 
       texto: "#0F172A",
-      card: "#FFFFFF",
-      borda: "#E2E8F0",
+      card: "#EDEBEB", 
+      borda: "#e2e8f0",
       primario: "#1976D2",
       secundario: "#0284C7",
       placeholder: "#6B7280",
-      hover: "#F1F5F9",
+      hover: "#f1f5f9", 
       sucesso: "#22C55E",
       erro: "#EF4444",
       alerta: "#F59E0B",
@@ -456,7 +456,7 @@ export default function Sidebar() {
           <nav className="flex flex-col items-start px-4 py-6 gap-2 text-sm">
             <button
               onClick={alternarNotificacoes}
-              className="relative flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+              className="relative cursor-pointer flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
               style={{
                 backgroundColor: temNotificacaoNaoLida ? temaAtual.primario + "20" : "transparent",
                 color: temaAtual.texto,
@@ -675,7 +675,16 @@ function PainelNotificacoes({
   const panelRef = useRef<HTMLDivElement>(null);
   const [notificacoes, setNotificacoes] = useState<NotificacaoI[]>([]);
   const [mostrarLidas, setMostrarLidas] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (estaVisivel) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [estaVisivel]);
 
   const traduzirNotificacao = (notificacao: NotificacaoI) => {
     const idioma = i18n.language;
@@ -858,12 +867,21 @@ function PainelNotificacoes({
 
   const formatarData = (dataString: string | Date) => {
     const data = new Date(dataString);
-    return data.toLocaleString("pt-BR", {
+    const agora = new Date();
+    const diffMs = agora.getTime() - data.getTime();
+    const diffMinutos = Math.floor(diffMs / (1000 * 60));
+    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutos < 1) return t("agora");
+    if (diffMinutos < 60) return `${diffMinutos}${t("min")}`;
+    if (diffHoras < 24) return `${diffHoras}${t("h")}`;
+    if (diffDias === 1) return t("ontem");
+    if (diffDias < 7) return `${diffDias}${t("d")}`;
+
+    return data.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -878,39 +896,56 @@ function PainelNotificacoes({
     return "ℹ️";
   };
 
-  const tabelaNotificacoes = notificacoes.map((notificacao) => {
+  const getCorPorTipo = (titulo: string) => {
+    if (titulo.includes("Crítico") || titulo.includes("CRÍTICO") || titulo.includes("Critical")) {
+      return temaAtual.erro;
+    } else if (titulo.includes("Alerta") || titulo.includes("ALERTA") || titulo.includes("Alert")) {
+      return temaAtual.alerta;
+    } else if (titulo.includes("Zerado") || titulo.includes("ZERADO") || titulo.includes("Out of Stock")) {
+      return "#6B7280";
+    }
+    return temaAtual.primario;
+  };
+
+  const NotificacaoItem = ({ notificacao, index }: { notificacao: NotificacaoI; index: number }) => {
     const notificacaoTraduzida = traduzirNotificacao(notificacao);
+
     if (notificacao.convite) {
       return (
         <div
-          key={notificacao.id}
-          className="flex flex-col gap-2 p-4 rounded-lg mb-2"
+          className={`p-4 rounded-xl mb-3 border-l-4 transform transition-all duration-300 hover:scale-[1.02] ${isAnimating ? 'animate-slide-in' : ''
+            }`}
           style={{
-            background: temaAtual.card,
-            border: `1px solid ${temaAtual.primario}`,
-            color: temaAtual.texto,
+            animationDelay: `${index * 100}ms`,
+            background: `linear-gradient(135deg, ${temaAtual.card} 0%, ${temaAtual.hover}20 100%)`,
+            borderLeftColor: temaAtual.sucesso,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold">{t("invite_title")}</h3>
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                <FaUser className="text-white text-sm" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm" style={{ color: temaAtual.texto }}>
+                  {t("invite_title")}
+                </h3>
+                <p className="text-xs opacity-80" style={{ color: temaAtual.texto }}>
+                  {t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <p>
-            {t("invite_description")} {notificacao.convite?.empresa?.nome || t("unknown_company")}.
-          </p>
-
-          <div className="flex justify-between items-center text-xs" style={{ color: temaAtual.primario }}>
-            <span>
-              {t("from")}: {notificacao.convite?.empresa?.nome || t("unknown_company")}
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-xs opacity-70" style={{ color: temaAtual.texto }}>
+              {formatarData(notificacao.createdAt)}
             </span>
-            <span>{formatarData(notificacao.createdAt)}</span>
-          </div>
-
-          <div className="flex gap-2 mt-2">
             <button
-              className="py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 flex-1"
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105"
               style={{
-                background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
+                background: "linear-gradient(135deg, #10B981, #059669)",
                 color: "white",
               }}
               onClick={() => notificacao.convite && responderConvite(notificacao.convite)}
@@ -924,77 +959,73 @@ function PainelNotificacoes({
 
     const descricao = notificacaoTraduzida.descricao;
     const isNotificacaoEstoque = descricao.includes("\n");
+
     if (isNotificacaoEstoque) {
       const titulo = notificacaoTraduzida.titulo;
       const linhas = descricao.split("\n");
       const emojiTipo = getEmojiPorTipo(titulo);
+      const corTipo = getCorPorTipo(titulo);
 
       return (
         <div
-          key={notificacao.id}
-          className="flex flex-col gap-3 p-4 rounded-lg mb-2"
+          className={`p-4 rounded-xl mb-3 border-l-4 transform transition-all duration-300 hover:scale-[1.02] ${isAnimating ? 'animate-slide-in' : ''
+            }`}
           style={{
-            background: temaAtual.card,
-            border: `1px solid ${temaAtual.primario}`,
-            color: temaAtual.texto,
+            animationDelay: `${index * 100}ms`,
+            background: `linear-gradient(135deg, ${temaAtual.card} 0%, ${corTipo}10 100%)`,
+            borderLeftColor: corTipo,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{emojiTipo}</span>
-              <h3 className="font-bold text-base">{titulo}</h3>
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg">
+                {emojiTipo}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-sm mb-2" style={{ color: temaAtual.texto }}>
+                  {titulo}
+                </h3>
+                <div className="space-y-2">
+                  {linhas.map((linha, linhaIndex) => (
+                    <div key={linhaIndex} className="flex items-center gap-2 text-xs">
+                      <div
+                        className="w-1 h-1 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: corTipo }}
+                      />
+                      <span style={{ color: temaAtual.texto }}>{linha}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             {!notificacao.empresaId && (
               <button
                 onClick={() => deletarNotificacao(notificacao.id)}
-                className="hover:text-cyan-500 transition-colors"
+                className="opacity-50 hover:opacity-100 transition-opacity duration-200 hover:text-red-500"
                 style={{ color: temaAtual.texto }}
               >
-                ✕
+                <FaTimes className="text-sm" />
               </button>
             )}
           </div>
-          <div className="space-y-2 text-sm">
-            {linhas.map((linha, index) => {
-              let emoji = "";
-              let texto = linha;
 
-              if (linha.includes("unidades restantes")) {
-                emoji = "📦";
-              } else if (linha.includes("QTD Min:")) {
-                emoji = "⚡";
-                texto = texto.replace("QTD Min:", "Mínimo:");
-              } else if (linha.includes("urgentemente") || linha.includes("IMEDIATA")) {
-                emoji = "🚨";
-              } else if (linha.includes("produto")) {
-                emoji = "📋";
-              }
-
-              return (
-                <div key={index} className="flex items-start gap-2">
-                  {emoji && <span className="flex-shrink-0">{emoji}</span>}
-                  <span className={linha.includes("🚨") || linha.includes("⚡") ? "font-semibold" : ""}>{texto}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: temaAtual.primario }}>
-            <span>
-              {t("Data")}: {formatarData(notificacao.createdAt)}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-xs flex items-center gap-1">
-              {notificacao.lida ? <FaCheck color={temaAtual.primario} /> : <FaCheckDouble color={temaAtual.secundario} />}
-              {notificacao.lida ? t("read") : t("unread")}
-            </span>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t" style={{ borderColor: temaAtual.borda }}>
+            <div className="flex items-center gap-4">
+              <span className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full ${notificacao.lida ? 'bg-green-500/20 text-green-600' : 'bg-blue-500/20 text-blue-600'
+                }`}>
+                {notificacao.lida ? <FaCheck className="text-xs" /> : <FaCheckDouble className="text-xs" />}
+                {notificacao.lida ? t("read") : t("unread")}
+              </span>
+              <span className="text-xs opacity-70" style={{ color: temaAtual.texto }}>
+                {formatarData(notificacao.createdAt)}
+              </span>
+            </div>
 
             {permissoesUsuario.pedidos_criar && (
               <button
                 onClick={() => handleFazerPedido(notificacao)}
-                className="px-3 py-1 text-xs rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-1 cursor-pointer"
+                className="px-3 cursor-pointer py-1 text-xs rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-1"
                 style={{
                   background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
                   color: "#FFFFFF"
@@ -1016,107 +1047,192 @@ function PainelNotificacoes({
 
     return (
       <div
-        key={notificacao.id}
-        className="flex flex-col gap-2 p-4 rounded-lg mb-2"
+        className={`p-4 rounded-xl mb-3 border-l-4 transform transition-all duration-300 hover:scale-[1.02] ${isAnimating ? 'animate-slide-in' : ''
+          }`}
         style={{
-          background: temaAtual.card,
-          border: `1px solid ${temaAtual.primario}`,
-          color: temaAtual.texto,
+          animationDelay: `${index * 100}ms`,
+          background: `linear-gradient(135deg, ${temaAtual.card} 0%, ${temaAtual.primario}10 100%)`,
+          borderLeftColor: temaAtual.primario,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold">{titulo}</h3>
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+              <FaBell className="text-white text-sm" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-sm mb-1" style={{ color: temaAtual.texto }}>
+                {titulo}
+              </h3>
+              <p className="text-xs opacity-90 mb-2" style={{ color: temaAtual.texto }}>
+                {mensagem}
+              </p>
+              <div className="flex items-center gap-2 text-xs opacity-70">
+                <FaUser className="text-xs" />
+                <span style={{ color: temaAtual.texto }}>{nomeRemetente}</span>
+              </div>
+            </div>
+          </div>
           {!notificacao.empresaId && (
             <button
               onClick={() => deletarNotificacao(notificacao.id)}
-              className="hover:text-cyan-500 transition-colors"
+              className="opacity-50 hover:opacity-100 transition-opacity duration-200 hover:text-red-500"
               style={{ color: temaAtual.texto }}
             >
-              ✕
+              <FaTimes className="text-sm" />
             </button>
           )}
         </div>
 
-        <p>{mensagem}</p>
-
-        <div className="flex flex-col text-xs mt-2 gap-1" style={{ color: temaAtual.primario }}>
-          <span>
-            {t("from")}: {nomeRemetente}
-          </span>
-          <span>
-            {t("Data")}: {formatarData(notificacao.createdAt)}
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-xs flex items-center gap-1">
-            {notificacao.lida ? <FaCheck color={temaAtual.primario} /> : <FaCheckDouble color={temaAtual.secundario} />}
+        <div className="flex items-center justify-between mt-2 pt-2 border-t" style={{ borderColor: temaAtual.borda }}>
+          <span className={`text-xs flex items-center gap-1 px-2 py-1 rounded-full ${notificacao.lida ? 'bg-green-500/20 text-green-600' : 'bg-blue-500/20 text-blue-600'
+            }`}>
+            {notificacao.lida ? <FaCheck className="text-xs" /> : <FaCheckDouble className="text-xs" />}
             {notificacao.lida ? t("read") : t("unread")}
+          </span>
+          <span className="text-xs opacity-70" style={{ color: temaAtual.texto }}>
+            {formatarData(notificacao.createdAt)}
           </span>
         </div>
       </div>
     );
-  });
-
+  };
   return (
     <div
       ref={panelRef}
-      className={`fixed w-80 p-4 shadow-lg rounded-b-xl transition-all duration-300 z-50 ${estaVisivel ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
+      className={`fixed top-4 left-4 w-96 max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col shadow-2xl rounded-2xl backdrop-blur-sm z-50 ${estaVisivel ? '' : 'hidden'
+        }`}
       style={{
-        backgroundColor: temaAtual.card,
-        borderTop: `2px solid ${temaAtual.primario}`,
-        boxShadow: "0 4px 25px rgba(0, 0, 0, 0.15)",
+        background: `linear-gradient(135deg, ${temaAtual.card} 0%, ${temaAtual.fundo} 100%)`,
+        border: `1px solid ${temaAtual.borda}`,
         color: temaAtual.texto,
+        animation: estaVisivel ? 'slideInFromLeft 0.5s ease-out forwards' : 'none',
       }}
     >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">{t("notifications")}</h2>
-        <div className="flex gap-2">
-          {!mostrarLidas && (
+      <style jsx>{`
+      @keyframes slideInFromLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      @media (max-width: 420px) {
+        .notificacao-mobile {
+          padding: 0.75rem;
+        }
+        .notificacao-mobile .texto-mobile {
+          font-size: 0.75rem;
+        }
+        .notificacao-mobile .titulo-mobile {
+          font-size: 0.875rem;
+        }
+      }
+    `}</style>
+      <div className="p-6 border-b notificacao-mobile" style={{ borderColor: temaAtual.borda }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+              <FaBell className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold titulo-mobile">{t("notifications")}</h2>
+              <p className="text-xs opacity-70 texto-mobile">
+                {notificacoes.length} {notificacoes.length === 1 ? t("notification") : t("notifications_count")}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={aoFechar}
+            className="w-8 h-8 rounded-lg cursor-pointer flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-red-500/10 hover:text-red-500"
+            style={{ color: temaAtual.texto }}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="flex gap-2 mt-4">
+          {!mostrarLidas && notificacoes.some(n => !n.lida) && (
             <button
               onClick={marcarTodasComoLidas}
-              className="text-xs px-2 py-1 rounded transition-all duration-300 hover:scale-105"
+              className="flex-1 cursor-pointer px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
               style={{
                 background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
                 color: "white",
               }}
             >
+              <FaCheckDouble className="text-xs" />
               {t("marcarLidas")}
             </button>
           )}
           <button
             onClick={alternarMostrarLidas}
-            className="text-xs px-2 py-1 rounded transition-all duration-300 hover:scale-105"
+            className="flex-1 px-3 cursor-pointer py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:scale-105 border flex items-center justify-center gap-2"
             style={{
-              background: "linear-gradient(135deg, #3B82F6, #0EA5E9)",
-              color: "white",
+              borderColor: temaAtual.primario,
+              color: temaAtual.primario,
+              background: `${temaAtual.primario}10`,
             }}
           >
+            <FaHistory className="text-xs" />
             {mostrarLidas ? t("mostrarTodas") : t("mostrarLidas")}
-          </button>
-          <button
-            onClick={aoFechar}
-            className="hover:text-cyan-500 transition-colors"
-            style={{ color: temaAtual.texto }}
-          >
-            ✕
           </button>
         </div>
       </div>
-      <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+      <div className="flex-1 overflow-y-auto p-4 notificacao-mobile">
         {mostrarLidas && (
-          <div className="text-center py-2 italic text-xs" style={{ color: temaAtual.primario }}>
+          <div className="text-center py-3 mb-3 rounded-lg text-xs italic" style={{ background: temaAtual.hover, color: temaAtual.primario }}>
             {t("empresa_nao_pode_ser_deletada", { nomeEmpresa })}
           </div>
         )}
+
         {notificacoes.length > 0 ? (
-          tabelaNotificacoes
+          <div className="space-y-2">
+            {notificacoes.map((notificacao, index) => (
+              <div key={notificacao.id} className="notificacao-mobile">
+                <NotificacaoItem notificacao={notificacao} index={index} />
+              </div>
+            ))}
+          </div>
         ) : (
-          <p className="text-center py-4" style={{ color: temaAtual.primario }}>
-            {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
-          </p>
+          <div className="text-center py-12 notificacao-mobile">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: temaAtual.hover }}>
+              <FaBell className="text-2xl opacity-50" style={{ color: temaAtual.texto }} />
+            </div>
+            <p className="text-sm opacity-70 mb-2 texto-mobile" style={{ color: temaAtual.texto }}>
+              {mostrarLidas ? t("semNotificacoesLidas") : t("NenhumaNotificacao")}
+            </p>
+            <p className="text-xs opacity-50 texto-mobile" style={{ color: temaAtual.texto }}>
+              {t("novas_notificacoes_aparecerao_aqui")}
+            </p>
+          </div>
         )}
       </div>
+      <div className="p-4 border-t text-center" style={{ borderColor: temaAtual.borda }}>
+        <p className="text-xs opacity-50" style={{ color: temaAtual.texto }}>
+          {t("gerenciar_notificacoes_configuracoes")}
+        </p>
+      </div>
+
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

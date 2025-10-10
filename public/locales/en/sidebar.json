@@ -35,5 +35,14 @@
   "semNotificacoesLidas": "You have no read notifications",
   "NenhumaNotificacao": "You have no unread notifications",
   "empresa_nao_pode_ser_deletada": "Messages from \"{{nomeEmpresa}}\" cannot be deleted",
-  "clients": "Clients"
+  "clients": "Clients",
+  "agora": "now",
+  "min": "m",
+  "h": "h",
+  "d": "d",
+  "ontem": "yesterday",
+  "notification": "notification",
+  "notifications_count": "notifications",
+  "novas_notificacoes_aparecerao_aqui": "New notifications will appear here",
+  "gerenciar_notificacoes_configuracoes": "Manage notifications in settings"
 }

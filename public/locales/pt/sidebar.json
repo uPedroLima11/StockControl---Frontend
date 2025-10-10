@@ -34,5 +34,14 @@
   "NenhumaNotificacao": "Você não possui nenhuma Notificação não lida",
   "empresa_nao_pode_ser_deletada": "As mensagens da \"{{nomeEmpresa}}\" não podem ser deletadas",
   "clients": "Clientes",
-  "help_center": "Central de Ajuda"
+  "help_center": "Central de Ajuda",
+  "agora": "agora",
+  "min": "min",
+  "h": "h",
+  "d": "d",
+  "ontem": "ontem",
+  "notification": "notificação",
+  "notifications_count": "notificações",
+  "novas_notificacoes_aparecerao_aqui": "Novas notificações aparecerão aqui",
+  "gerenciar_notificacoes_configuracoes": "Gerencie as notificações nas configurações"
 }
