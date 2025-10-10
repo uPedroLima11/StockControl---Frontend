@@ -1,0 +1,208 @@
+{
+    "hero": {
+      "titulo": "Control Your",
+      "destaque": "Inventory",
+      "subtitulo": "Like Never Before",
+      "descricao": "Complete business management system that transforms how you control inventory, sales, and business operations.",
+      "comecar_agora": "Get Started",
+      "ver_planos": "View Plans"
+    },
+    "estatisticas": {
+      "clientes_ativos": "Active Clients",
+      "produtos_gerenciados": "Managed Products",
+      "transacoes_mes": "Monthly Transactions",
+      "eficiencia": "Efficiency"
+    },
+    "secao_recursos": {
+      "titulo": "Everything you need in",
+      "destaque": "one place",
+      "descricao": "Powerful tools to transform your business management"
+    },
+    "recursos": {
+      "gestao": {
+        "titulo": "Smart Inventory Management",
+        "descricao": "Complete control of your inventory with automatic restocking alerts"
+      },
+      "analises": {
+        "titulo": "Real-time Analytics",
+        "descricao": "Interactive dashboards with your business's key indicators"
+      },
+      "permissoes": {
+        "titulo": "Permission Control",
+        "descricao": "Define access levels for different users on your team"
+      },
+      "relatorios": {
+        "titulo": "Detailed Reports",
+        "descricao": "Export data and generate customized reports for decision making"
+      },
+      "pedidos": {
+        "titulo": "Automated Stock Orders",
+        "descricao": "Make automatic orders to suppliers when stock is low"
+      },
+      "beneficios": [
+        "Real-time control",
+        "Automatic alerts",
+        "Detailed reports",
+        "Total integration"
+      ],
+      "dashboard": {
+        "titulo": "Interactive Dashboard",
+        "descricao": "View all your business data in real time"
+      }
+    },
+    "funcionalidades": {
+      "registro_completo": "Complete Record",
+      "registro_completo_desc": "Total control of all inventory movements",
+      "acesso_nuvem": "Cloud Access",
+      "acesso_nuvem_desc": "Access from anywhere, anytime",
+      "gestao_produtos": "Product Management",
+      "gestao_produtos_desc": "Complete product registration and organization",
+      "exportacao_dados": "Data Export",
+      "exportacao_dados_desc": "Customized reports in various formats",
+      "seguranca_maxima": "Maximum Security",
+      "seguranca_maxima_desc": "Your data protected with advanced encryption",
+      "controle_acesso": "Access Control",
+      "controle_acesso_desc": "Custom permissions for each user"
+    },
+    "comparacao": {
+      "titulo": "From",
+      "caos": "chaos",
+      "para": "to",
+      "controle": "total control",
+      "descricao": "Discover how StockControl completely transforms your management",
+      "antes": {
+        "titulo": "Before StockControl",
+        "itens": [
+          "Outdated and conflicting spreadsheets",
+          "Surprises with zero stock losing sales",
+          "Hours closing spreadsheets manually",
+          "Doubts about what and when to restock",
+          "Clients without organized registration",
+          "Orders made via WhatsApp without control",
+          "Difficulty exporting data for analysis",
+          "No history of inventory movements"
+        ]
+      },
+      "depois": {
+        "titulo": "With StockControl",
+        "itens": [
+          "Real-time dashboard always updated",
+          "Automatic low stock alerts",
+          "100% automated processes",
+          "Smart restocking reports",
+          "Complete client registration and history",
+          "Order system integrated with suppliers",
+          "Excel export with 1 click",
+          "Complete history of all movements"
+        ]
+      },
+      "mais_funcionalidades": {
+        "titulo": "And much more...",
+        "itens": [
+          "Complete product management",
+          "User and permission control",
+          "Sales and performance reports",
+          "Supplier registration",
+          "Automated inventory",
+          "24/7 cloud access"
+        ]
+      }
+    },
+    "criadores": {
+      "titulo": "Meet the",
+      "destaque": "creators",
+      "descricao": "Developed by experts passionate about transforming business management",
+      "pedro_lima": {
+        "nome": "Pedro Lima",
+        "cargo": "Full-Stack Developer & UI/UX Designer",
+        "descricao": "Specialist in developing complex systems and intuitive user experiences. Focuses on creating solutions that are both powerful and easy to use."
+      },
+      "pedro_siqueira": {
+        "nome": "Pedro Siqueira",
+        "cargo": "Backend Architect & System Designer",
+        "descricao": "Specialist in designing and implementing scalable backend architectures, efficient data modeling, and integration between complex systems."
+      },
+      "equipe": {
+        "titulo": "Pedros' TI",
+        "descricao": "A young and innovative team focused on creating technology solutions that really make a difference for small and medium businesses. We believe that good technology is technology that solves real problems.",
+        "estatisticas": [
+          "+2 years of experience",
+          "+50 projects delivered",
+          "Cutting-edge technology"
+        ]
+      }
+    },
+    "precos": {
+      "titulo": "Try and then decide",
+      "descricao": "Test all features for free before subscribing",
+      "teste_gratis": {
+        "emblema": "🚀 PERFECT FOR TESTING",
+        "titulo": "Free Trial",
+        "preco": "$0",
+        "periodo": "/7 days",
+        "descricao": "Complete system for you to test",
+        "funcionalidades": [
+          "Access to ALL features",
+          "100% complete system unlocked",
+          "Dashboard and complete reports",
+          "Product and inventory management",
+          "Sales and client control",
+          "User permissions",
+          "Data export",
+          "Support during trial period"
+        ],
+        "botao": "Request Free Trial",
+        "nota": "⚡ Contact us to create your test account"
+      },
+      "plano_completo": {
+        "emblema": "MOST CHOSEN",
+        "titulo": "Complete Plan",
+        "preco": "$15",
+        "periodo": "/month",
+        "descricao": "Continue with unlimited access",
+        "funcionalidades": [
+          "All trial features",
+          "Continuous and unlimited access",
+          "Data saved from trial period",
+          "Free updates forever",
+          "Priority 24/7 support",
+          "Daily automatic backup",
+          "Enterprise security",
+          "Unlimited multi-users"
+        ],
+        "botao": "Start Now",
+        "nota": "💎 Direct upgrade from trial • No recontracting"
+      },
+      "nota_rodape": "The 7-day trial offers the complete system exactly like in the paid version. If you decide to continue, your data will be maintained and you'll have continuous access."
+    },
+    "contato": {
+      "titulo": "Still have questions?",
+      "descricao": "Talk directly with our team of experts",
+      "botao": "Talk on WhatsApp"
+    },
+    "rodape": {
+      "descricao": "Complete business management system to optimize your business.",
+      "produto": "Product",
+      "recursos": "Features",
+      "planos": "Plans",
+      "demonstracao": "Demo",
+      "suporte": "Support",
+      "contato": "Contact",
+      "central_ajuda": "Help Center",
+      "documentacao": "Documentation",
+      "legal": "Legal",
+      "privacidade": "Privacy",
+      "termos": "Terms",
+      "cookies": "Cookies",
+      "copyright": "© 2025 StockControl. Developed with ❤️ by",
+      "pedro_lima": "Pedro Lima",
+      "e": "and",
+      "pedro_siqueira": "Pedro Siqueira"
+    },
+  "navbar": {
+    "recursos": "Features",
+    "assinatura": "Pricing",
+    "entrar": "Login",
+    "minha_conta": "My Account"
+  }
+}

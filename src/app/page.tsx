@@ -3,11 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Link as ScrollLink } from 'react-scroll';
 import { useEffect, useState, useRef } from "react";
-import { FaCloud, FaLock, FaUserShield, FaWhatsapp, FaArrowRight, FaCheck, FaPlay, FaPause, FaTimes, FaTruck } from "react-icons/fa";
+import { FaCloud, FaLock, FaUserShield, FaWhatsapp, FaArrowRight, FaCheck, FaPlay, FaPause, FaTimes, FaTruck, FaGlobe } from "react-icons/fa";
 import { MdOutlineLibraryBooks, MdInventory } from "react-icons/md";
 import { HiOutlineChartBar, HiOutlineTrendingUp } from "react-icons/hi";
 import { BiPackage, BiUserCheck } from "react-icons/bi";
 import { Poppins } from "next/font/google";
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -24,37 +26,39 @@ export default function Home() {
   });
   const [recursoAtivo, setRecursoAtivo] = useState(0);
   const [videoExecutando, setVideoExecutando] = useState(true);
+  const [mostrarIdiomas, setMostrarIdiomas] = useState(false);
   const referenciaVideo = useRef<HTMLVideoElement>(null);
+  const { t } = useTranslation("landing");
 
   const recursos = [
     {
       icone: <MdInventory className="text-3xl" />,
-      titulo: "Gestão Inteligente de Estoque",
-      descricao: "Controle completo do seu inventário com alertas automáticos de reposição",
+      titulo: t("recursos.gestao.titulo"),
+      descricao: t("recursos.gestao.descricao"),
       cor: "from-blue-500 to-cyan-500"
     },
     {
       icone: <HiOutlineTrendingUp className="text-3xl" />,
-      titulo: "Análises em Tempo Real",
-      descricao: "Dashboards interativos com os principais indicadores do seu negócio",
+      titulo: t("recursos.analises.titulo"),
+      descricao: t("recursos.analises.descricao"),
       cor: "from-purple-500 to-pink-500"
     },
     {
       icone: <BiUserCheck className="text-3xl" />,
-      titulo: "Controle de Permissões",
-      descricao: "Defina níveis de acesso para diferentes usuários da sua equipe",
+      titulo: t("recursos.permissoes.titulo"),
+      descricao: t("recursos.permissoes.descricao"),
       cor: "from-green-500 to-emerald-500"
     },
     {
       icone: <HiOutlineChartBar className="text-3xl" />,
-      titulo: "Relatórios Detalhados",
-      descricao: "Exporte dados e gere relatórios personalizados para tomada de decisão",
+      titulo: t("recursos.relatorios.titulo"),
+      descricao: t("recursos.relatorios.descricao"),
       cor: "from-orange-500 to-red-500"
     },
     {
       icone: <FaTruck className="text-3xl" />,
-      titulo: "Pedidos de Estoque Automatizados",
-      descricao: "Faça pedidos automáticos aos fornecedores quando o estoque estiver baixo",
+      titulo: t("recursos.pedidos.titulo"),
+      descricao: t("recursos.pedidos.descricao"),
       cor: "from-orange-500 to-red-500"
     }
   ];
@@ -62,35 +66,44 @@ export default function Home() {
   const funcionalidades = [
     {
       icone: <MdOutlineLibraryBooks />,
-      titulo: "Registro Completo",
-      descricao: "Controle total de todas as movimentações do estoque"
+      titulo: t("funcionalidades.registro_completo"),
+      descricao: t("funcionalidades.registro_completo_desc")
     },
     {
       icone: <FaCloud />,
-      titulo: "Acesso em Nuvem",
-      descricao: "Acesse de qualquer lugar, a qualquer momento"
+      titulo: t("funcionalidades.acesso_nuvem"),
+      descricao: t("funcionalidades.acesso_nuvem_desc")
     },
     {
       icone: <BiPackage />,
-      titulo: "Gestão de Produtos",
-      descricao: "Cadastro e organização completa dos seus produtos"
+      titulo: t("funcionalidades.gestao_produtos"),
+      descricao: t("funcionalidades.gestao_produtos_desc")
     },
     {
       icone: <HiOutlineChartBar />,
-      titulo: "Exportação de Dados",
-      descricao: "Relatórios personalizados em diversos formatos"
+      titulo: t("funcionalidades.exportacao_dados"),
+      descricao: t("funcionalidades.exportacao_dados_desc")
     },
     {
       icone: <FaLock />,
-      titulo: "Segurança Máxima",
-      descricao: "Seus dados protegidos com criptografia avançada"
+      titulo: t("funcionalidades.seguranca_maxima"),
+      descricao: t("funcionalidades.seguranca_maxima_desc")
     },
     {
       icone: <FaUserShield />,
-      titulo: "Controle de Acesso",
-      descricao: "Permissões personalizadas para cada usuário"
+      titulo: t("funcionalidades.controle_acesso"),
+      descricao: t("funcionalidades.controle_acesso_desc")
     }
   ];
+
+  const mudarIdioma = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setMostrarIdiomas(false);
+  };
+
+  const toggleIdiomas = () => {
+    setMostrarIdiomas(!mostrarIdiomas);
+  };
 
   useEffect(() => {
     const estilo = document.createElement("style");
@@ -210,15 +223,14 @@ export default function Home() {
         <div className="relative z-20 text-center px-4 max-w-6xl mx-auto mt-24 sm:mt-0">
           <div className={`transition-all duration-1000 transform ${visivel ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6">
-              Controle Seu
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> Estoque</span>
+              {t("hero.titulo")}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> {t("hero.destaque")}</span>
               <br />
-              Como Nunca
+              {t("hero.subtitulo")}
             </h1>
 
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto px-2 sm:px-0">
-              Sistema completo de gestão empresarial que transforma a maneira como você controla
-              estoque, vendas e operações do seu negócio.
+              {t("hero.descricao")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -227,7 +239,7 @@ export default function Home() {
                 className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-blue-500/25 flex items-center gap-3 relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
-                <span className="relative z-10">Comece Agora</span>
+                <span className="relative z-10">{t("hero.comecar_agora")}</span>
                 <FaArrowRight className="group-hover:translate-x-1 transition-transform relative z-10" />
               </Link>
 
@@ -236,7 +248,7 @@ export default function Home() {
                 {...propsScroll}
                 className="border-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10 font-semibold text-lg px-8 py-4 rounded-2xl transition-all duration-300 hover:border-blue-400 group relative overflow-hidden cursor-pointer"
               >
-                <span className="relative z-10">Ver Planos</span>
+                <span className="relative z-10">{t("hero.ver_planos")}</span>
                 <span className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-y-[-2px] transition-all duration-500 animate-bounce">
                   ↓
                 </span>
@@ -246,10 +258,10 @@ export default function Home() {
 
           <div className={`grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 transition-all duration-1000 delay-500 ${visivel ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             {[
-              { valor: estatisticas.clientes, label: 'Clientes Ativos', sufixo: '+' },
-              { valor: estatisticas.produtos, label: 'Produtos Gerenciados', sufixo: '+' },
-              { valor: estatisticas.transacoes, label: 'Transações/Mês', sufixo: '+' },
-              { valor: estatisticas.eficiencia, label: 'Eficiência', sufixo: '%' }
+              { valor: estatisticas.clientes, label: t("estatisticas.clientes_ativos"), sufixo: '+' },
+              { valor: estatisticas.produtos, label: t("estatisticas.produtos_gerenciados"), sufixo: '+' },
+              { valor: estatisticas.transacoes, label: t("estatisticas.transacoes_mes"), sufixo: '+' },
+              { valor: estatisticas.eficiencia, label: t("estatisticas.eficiencia"), sufixo: '%' }
             ].map((estatistica, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2">
@@ -272,11 +284,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Tudo que você precisa em
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> um só lugar</span>
+              {t("secao_recursos.titulo")}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> {t("secao_recursos.destaque")}</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Ferramentas poderosas para transformar a gestão do seu negócio
+              {t("secao_recursos.descricao")}
             </p>
           </div>
 
@@ -294,7 +306,10 @@ export default function Home() {
                     {recursos[recursoAtivo].descricao}
                   </p>
                   <ul className="space-y-3">
-                    {['Controle em tempo real', 'Alertas automáticos', 'Relatórios detalhados', 'Integração total'].map((item, index) => (
+                    {(Array.isArray(t("recursos.beneficios", { returnObjects: true }))
+                      ? (t("recursos.beneficios", { returnObjects: true }) as string[])
+                      : []
+                    ).map((item: string, index: number) => (
                       <li key={index} className="flex items-center text-gray-300">
                         <FaCheck className="text-green-400 mr-3 flex-shrink-0" />
                         {item}
@@ -344,9 +359,9 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="p-6">
-                  <h4 className="text-white font-semibold mb-2">Dashboard Interativo</h4>
+                  <h4 className="text-white font-semibold mb-2">{t("recursos.dashboard.titulo")}</h4>
                   <p className="text-gray-400 text-sm">
-                    Visualize todos os dados do seu negócio em tempo real
+                    {t("recursos.dashboard.descricao")}
                   </p>
                 </div>
               </div>
@@ -374,13 +389,13 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Do
-              <span className="text-red-400"> caos </span>
-              ao
-              <span className="text-green-400"> controle total</span>
+              {t("comparacao.titulo")}
+              <span className="text-red-400"> {t("comparacao.caos")} </span>
+              {t("comparacao.para")}
+              <span className="text-green-400"> {t("comparacao.controle")}</span>
             </h2>
             <p className="text-xl text-gray-300">
-              Descubra como o StockControl transforma completamente sua gestão
+              {t("comparacao.descricao")}
             </p>
           </div>
 
@@ -388,40 +403,17 @@ export default function Home() {
             <div className="text-center group">
               <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-2xl p-8 border border-red-500/20 h-full transition-all duration-500 group-hover:scale-105">
                 <div className="text-5xl mb-6">😵</div>
-                <h3 className="font-bold text-2xl mb-6 text-red-400">Antes do StockControl</h3>
+                <h3 className="font-bold text-2xl mb-6 text-red-400">{t("comparacao.antes.titulo")}</h3>
                 <ul className="space-y-4 text-gray-300 text-left">
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Planilhas desatualizadas e conflitantes
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Surpresas com estoque zerado perdendo vendas
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Horas fechando planilhas manualmente
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Dúvidas sobre o que e quando repor
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Clientes sem cadastro organizado
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Pedidos feitos por WhatsApp sem controle
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Dificuldade para exportar dados para análise
-                  </li>
-                  <li className="flex items-center">
-                    <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
-                    Sem histórico de movimentações do estoque
-                  </li>
+                  {(Array.isArray(t("comparacao.antes.itens", { returnObjects: true }))
+                    ? (t("comparacao.antes.itens", { returnObjects: true }) as string[])
+                    : []
+                  ).map((item: string, index: number) => (
+                    <li key={index} className="flex items-center">
+                      <FaTimes className="text-red-400 mr-4 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -429,40 +421,17 @@ export default function Home() {
             <div className="text-center group">
               <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-8 border border-green-500/20 h-full transition-all duration-500 group-hover:scale-105">
                 <div className="text-5xl mb-6">😎</div>
-                <h3 className="font-bold text-2xl mb-6 text-green-400">Com StockControl</h3>
+                <h3 className="font-bold text-2xl mb-6 text-green-400">{t("comparacao.depois.titulo")}</h3>
                 <ul className="space-y-4 text-gray-300 text-left">
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Dashboard em tempo real sempre atualizado
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Alertas automáticos de estoque baixo
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Processos 100% automatizados
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Relatórios inteligentes de reposição
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Cadastro completo de clientes e histórico
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Sistema de pedidos integrado com fornecedores
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Exportação em Excel com 1 clique
-                  </li>
-                  <li className="flex items-center">
-                    <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
-                    Histórico completo de todas as movimentações
-                  </li>
+                  {(Array.isArray(t("comparacao.depois.itens", { returnObjects: true }))
+                    ? (t("comparacao.depois.itens", { returnObjects: true }) as string[])
+                    : []
+                  ).map((item: string, index: number) => (
+                    <li key={index} className="flex items-center">
+                      <FaCheck className="text-green-400 mr-4 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -471,47 +440,33 @@ export default function Home() {
           <div className="mt-16 text-center">
             <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-2xl p-8 border border-blue-500/30">
               <h3 className="text-2xl font-bold text-white mb-6">
-                E muito mais...
+                {t("comparacao.mais_funcionalidades.titulo")}
               </h3>
               <div className="grid md:grid-cols-3 gap-6 text-gray-300">
-                <div className="flex items-center justify-center gap-3">
-                  <BiPackage className="text-blue-400 text-xl" />
-                  <span>Gestão completa de produtos</span>
-                </div>
-                <div className="flex items-center justify-center gap-3">
-                  <FaUserShield className="text-blue-400 text-xl" />
-                  <span>Controle de usuários e permissões</span>
-                </div>
-                <div className="flex items-center justify-center gap-3">
-                  <HiOutlineChartBar className="text-blue-400 text-xl" />
-                  <span>Relatórios de vendas e desempenho</span>
-                </div>
-                <div className="flex items-center justify-center gap-3">
-                  <FaTruck className="text-blue-400 text-xl" />
-                  <span>Cadastro de fornecedores</span>
-                </div>
-                <div className="flex items-center justify-center gap-3">
-                  <MdInventory className="text-blue-400 text-xl" />
-                  <span>Inventário automatizado</span>
-                </div>
-                <div className="flex items-center justify-center gap-3">
-                  <FaCloud className="text-blue-400 text-xl" />
-                  <span>Acesso em nuvem 24/7</span>
-                </div>
+                {(Array.isArray(t("comparacao.mais_funcionalidades.itens", { returnObjects: true }))
+                  ? (t("comparacao.mais_funcionalidades.itens", { returnObjects: true }) as string[])
+                  : []
+                ).map((item: string, index: number) => (
+                  <div key={index} className="flex items-center justify-center gap-3">
+                    <BiPackage className="text-blue-400 text-xl" />
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
+
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Conheça os
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> criadores</span>
+              {t("criadores.titulo")}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> {t("criadores.destaque")}</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Desenvolvido por especialistas apaixonados por transformar a gestão empresarial
+              {t("criadores.descricao")}
             </p>
           </div>
 
@@ -529,11 +484,10 @@ export default function Home() {
                     className="relative w-40 h-40 object-cover rounded-full mx-auto border-4 border-blue-500/50"
                   />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Pedro Lima</h3>
-                <p className="text-blue-400 mb-4">Full-Stack Developer & UI/UX Designer</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{t("criadores.pedro_lima.nome")}</h3>
+                <p className="text-blue-400 mb-4">{t("criadores.pedro_lima.cargo")}</p>
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Especialista em desenvolvimento de sistemas complexos e experiências de usuário intuitivas.
-                  Foca em criar soluções que são tanto poderosas quanto fáceis de usar.
+                  {t("criadores.pedro_lima.descricao")}
                 </p>
                 <div className="flex justify-center space-x-4">
                   <a
@@ -573,11 +527,10 @@ export default function Home() {
                     className="relative w-40 h-40 object-cover rounded-full mx-auto border-4 border-cyan-500/50"
                   />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Pedro Siqueira</h3>
-                <p className="text-cyan-400 mb-4">Backend Architect & System Designer</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{t("criadores.pedro_siqueira.nome")}</h3>
+                <p className="text-cyan-400 mb-4">{t("criadores.pedro_siqueira.cargo")}</p>
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Especialista em projetar e implementar arquiteturas backend escaláveis,
-                  modelagem de dados eficiente e integração entre sistemas complexos.
+                  {t("criadores.pedro_siqueira.descricao")}
                 </p>
                 <div className="flex justify-center space-x-4">
                   <a
@@ -607,37 +560,34 @@ export default function Home() {
 
           <div className="text-center mt-16">
             <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-2xl p-8 border border-blue-500/30">
-              <h3 className="text-2xl font-bold text-white mb-4">Pedros&apos; TI</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">{t("criadores.equipe.titulo")}</h3>
               <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-                Uma equipe jovem e inovadora focada em criar soluções de tecnologia que realmente fazem a diferença
-                para pequenas e médias empresas. Acreditamos que tecnologia boa é tecnologia que resolve problemas reais.
+                {t("criadores.equipe.descricao")}
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-gray-400">
-                <div className="flex items-center gap-2">
-                  <FaCheck className="text-green-400" />
-                  <span>+2 anos de experiência</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FaCheck className="text-green-400" />
-                  <span>+50 projetos entregues</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FaCheck className="text-green-400" />
-                  <span>Tecnologia de ponta</span>
-                </div>
+                {(Array.isArray(t("criadores.equipe.estatisticas", { returnObjects: true }))
+                  ? (t("criadores.equipe.estatisticas", { returnObjects: true }) as string[])
+                  : []
+                ).map((stat: string, index: number) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <FaCheck className="text-green-400" />
+                    <span>{stat}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
+
       <section id="pricing" className="py-20 px-4 bg-gradient-to-b from-[#0A1929] to-[#132F4C]">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Experimente e depois decida
+              {t("precos.titulo")}
             </h2>
             <p className="text-xl text-gray-300">
-              Teste todas as funcionalidades gratuitamente antes de assinar
+              {t("precos.descricao")}
             </p>
           </div>
 
@@ -646,31 +596,25 @@ export default function Home() {
               <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-3xl p-8 border border-blue-500/20 h-full flex flex-col">
                 <div className="text-center mb-8">
                   <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-sm font-bold mb-4">
-                    🚀 PERFEITO PARA EXPERIMENTAR
+                    {t("precos.teste_gratis.emblema")}
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    Teste Grátis
+                    {t("precos.teste_gratis.titulo")}
                   </h3>
                   <div className="text-4xl font-bold text-white mb-1">
-                    R$ 0
-                    <span className="text-lg"> /7 dias</span>
+                    {t("precos.teste_gratis.preco")}
+                    <span className="text-lg"> {t("precos.teste_gratis.periodo")}</span>
                   </div>
                   <p className="text-gray-400">
-                    Sistema completo para você testar
+                    {t("precos.teste_gratis.descricao")}
                   </p>
                 </div>
 
                 <ul className="space-y-4 mb-8 flex-grow">
-                  {[
-                    "Acesso a TODAS as funcionalidades",
-                    "Sistema 100% completo liberado",
-                    "Dashboard e relatórios completos",
-                    "Gestão de produtos e estoque",
-                    "Controle de vendas e clientes",
-                    "Permissões de usuários",
-                    "Exportação de dados",
-                    "Suporte durante o período de teste"
-                  ].map((funcionalidade, index) => (
+                  {(Array.isArray(t("precos.teste_gratis.funcionalidades", { returnObjects: true }))
+                    ? (t("precos.teste_gratis.funcionalidades", { returnObjects: true }) as string[])
+                    : []
+                  ).map((funcionalidade: string, index: number) => (
                     <li key={index} className="flex items-center">
                       <FaCheck className="text-green-400 mr-3 flex-shrink-0" />
                       <span className="text-gray-300">{funcionalidade}</span>
@@ -684,12 +628,12 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 text-center block"
                 >
-                  Solicitar Teste Grátis
+                  {t("precos.teste_gratis.botao")}
                 </a>
 
                 <div className="text-center mt-4">
                   <p className="text-blue-300 text-sm">
-                    ⚡ Entre em contato para criar sua conta teste
+                    {t("precos.teste_gratis.nota")}
                   </p>
                 </div>
               </div>
@@ -698,33 +642,27 @@ export default function Home() {
             <div className="relative">
               <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl p-8 border-2 border-blue-400 shadow-2xl shadow-blue-500/25 h-full flex flex-col">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-6 py-2 rounded-full text-sm font-bold">
-                  MAIS ESCOLHIDO
+                  {t("precos.plano_completo.emblema")}
                 </div>
 
                 <div className="text-center mb-8 mt-4">
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    Plano Completo
+                    {t("precos.plano_completo.titulo")}
                   </h3>
                   <div className="text-4xl font-bold text-white mb-1">
-                    R$ 79
-                    <span className="text-lg"> /mês</span>
+                    {t("precos.plano_completo.preco")}
+                    <span className="text-lg"> {t("precos.plano_completo.periodo")}</span>
                   </div>
                   <p className="text-blue-100">
-                    Continue com acesso ilimitado
+                    {t("precos.plano_completo.descricao")}
                   </p>
                 </div>
 
                 <ul className="space-y-4 mb-8 flex-grow">
-                  {[
-                    "Todas as funcionalidades do teste",
-                    "Acesso contínuo e ilimitado",
-                    "Dados salvos do período de teste",
-                    "Atualizações gratuitas forever",
-                    "Suporte prioritário 24/7",
-                    "Backup automático diário",
-                    "Segurança enterprise",
-                    "Multi-usuários ilimitados"
-                  ].map((funcionalidade, index) => (
+                  {(Array.isArray(t("precos.plano_completo.funcionalidades", { returnObjects: true }))
+                    ? (t("precos.plano_completo.funcionalidades", { returnObjects: true }) as string[])
+                    : []
+                  ).map((funcionalidade: string, index: number) => (
                     <li key={index} className="flex items-center">
                       <FaCheck className="text-white mr-3 flex-shrink-0" />
                       <span className="text-white">{funcionalidade}</span>
@@ -736,12 +674,12 @@ export default function Home() {
                   href="/registro"
                   className="w-full bg-white text-blue-600 hover:bg-gray-100 font-bold py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 text-center block"
                 >
-                  Começar Agora
+                  {t("precos.plano_completo.botao")}
                 </Link>
 
                 <div className="text-center mt-4">
                   <p className="text-blue-100 text-sm">
-                    💎 Upgrade direto do teste • Sem recontratação
+                    {t("precos.plano_completo.nota")}
                   </p>
                 </div>
               </div>
@@ -750,19 +688,19 @@ export default function Home() {
 
           <div className="text-center mt-12">
             <p className="text-gray-400 max-w-2xl mx-auto">
-              O teste de 7 dias oferece o sistema completo exatamente como na versão paga.
-              Se decidir continuar, seus dados serão mantidos e você terá acesso contínuo.
+              {t("precos.nota_rodape")}
             </p>
           </div>
         </div>
       </section>
+
       <section className="py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ainda com dúvidas?
+            {t("contato.titulo")}
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Fale diretamente com nossa equipe de especialistas
+            {t("contato.descricao")}
           </p>
 
           <a
@@ -772,10 +710,11 @@ export default function Home() {
             className="inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl shadow-green-500/25"
           >
             <FaWhatsapp size={24} />
-            Falar no WhatsApp
+            {t("contato.botao")}
           </a>
         </div>
       </section>
+
       <footer className="bg-[#0A1929] border-t border-blue-500/20 py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
@@ -785,12 +724,12 @@ export default function Home() {
                 <span className="text-white text-xl font-bold">StockControl</span>
               </div>
               <p className="text-gray-400">
-                Sistema completo de gestão empresarial para otimizar seu negócio.
+                {t("rodape.descricao")}
               </p>
             </div>
 
             <div>
-              <h4 className="text-white font-bold mb-4">Produto</h4>
+              <h4 className="text-white font-bold mb-4">{t("rodape.produto")}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <ScrollLink
@@ -798,7 +737,7 @@ export default function Home() {
                     {...propsScroll}
                     className="hover:text-blue-400 transition-colors text-left cursor-pointer"
                   >
-                    Recursos
+                    {t("rodape.recursos")}
                   </ScrollLink>
                 </li>
                 <li>
@@ -807,46 +746,75 @@ export default function Home() {
                     {...propsScroll}
                     className="hover:text-blue-400 transition-colors text-left cursor-pointer"
                   >
-                    Planos
+                    {t("rodape.planos")}
                   </ScrollLink>
                 </li>
-                <li><Link href="/demo" className="hover:text-blue-400 transition-colors">Demonstração</Link></li>
+                <li><Link href="/demo" className="hover:text-blue-400 transition-colors">{t("rodape.demonstracao")}</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-white font-bold mb-4">Suporte</h4>
+              <h4 className="text-white font-bold mb-4">{t("rodape.suporte")}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="https://wa.me/5553981185633" className="hover:text-blue-400 transition-colors">Contato</a></li>
-                <li><Link href="/ajuda" className="hover:text-blue-400 transition-colors">Central de Ajuda</Link></li>
-                <li><Link href="/documentacao" className="hover:text-blue-400 transition-colors">Documentação</Link></li>
+                <li><a href="https://wa.me/5553981185633" className="hover:text-blue-400 transition-colors">{t("rodape.contato")}</a></li>
+                <li><Link href="/ajuda" className="hover:text-blue-400 transition-colors">{t("rodape.central_ajuda")}</Link></li>
+                <li><Link href="/documentacao" className="hover:text-blue-400 transition-colors">{t("rodape.documentacao")}</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <h4 className="text-white font-bold mb-4">{t("rodape.legal")}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/politica-privacidade" className="hover:text-blue-400 transition-colors">Privacidade</Link></li>
-                <li><Link href="/termos-uso" className="hover:text-blue-400 transition-colors">Termos</Link></li>
-                <li><Link href="/cookies" className="hover:text-blue-400 transition-colors">Cookies</Link></li>
+                <li><Link href="/politica-privacidade" className="hover:text-blue-400 transition-colors">{t("rodape.privacidade")}</Link></li>
+                <li><Link href="/termos-uso" className="hover:text-blue-400 transition-colors">{t("rodape.termos")}</Link></li>
+                <li><Link href="/cookies" className="hover:text-blue-400 transition-colors">{t("rodape.cookies")}</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-blue-500/20 pt-8 text-center">
             <p className="text-gray-400">
-              © 2025 StockControl. Desenvolvido com ❤️ por{" "}
+              {t("rodape.copyright")}{" "}
               <a href="https://www.linkedin.com/in/upedrolima/" className="text-blue-400 hover:text-blue-300">
-                Pedro Lima
+                {t("rodape.pedro_lima")}
               </a>{" "}
-              e{" "}
+              {t("rodape.e")}{" "}
               <a href="https://www.linkedin.com/in/phasiqueira/" className="text-blue-400 hover:text-blue-300">
-                Pedro Siqueira
+                {t("rodape.pedro_siqueira")}
               </a>
             </p>
           </div>
         </div>
       </footer>
+      <div className="fixed bottom-4 right-4 z-50">
+        <div className="relative">
+          <button
+            onClick={toggleIdiomas}
+            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white p-3 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+          >
+            <FaGlobe className="text-lg" />
+          </button>
+          
+          {mostrarIdiomas && (
+            <div className="absolute bottom-14 right-0 bg-[#0A1929] border border-blue-500/20 rounded-2xl shadow-2xl p-2 min-w-[120px]">
+              <button
+                onClick={() => mudarIdioma("pt")}
+                className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+              >
+                <Image src="/brasil.png" alt="Português" width={24} height={18} className="rounded" />
+                <span className="text-sm font-medium">Português</span>
+              </button>
+              <button
+                onClick={() => mudarIdioma("en")}
+                className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+              >
+                <Image src="/ingles.png" alt="English" width={24} height={18} className="rounded" />
+                <span className="text-sm font-medium">English</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

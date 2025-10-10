@@ -521,7 +521,7 @@ export default function Sidebar() {
         <div className="flex flex-col items-start px-4 pb-6 gap-3 text-sm">
           <button
             onClick={alternarTema}
-            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            className="flex cursor-pointer items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
             style={{ color: temaAtual.texto }}
           >
             <span className="text-lg">
@@ -551,7 +551,7 @@ export default function Sidebar() {
               Cookies.remove("token");
               window.location.href = "/";
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            className="flex cursor-pointer items-center w-full gap-3 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
             style={{ color: temaAtual.erro }}
           >
             <span className="text-lg">

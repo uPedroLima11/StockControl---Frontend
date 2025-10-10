@@ -1,0 +1,202 @@
+{
+    "hero": {
+        "titulo": "Controle Seu",
+        "destaque": "Estoque",
+        "subtitulo": "Como Nunca",
+        "descricao": "Sistema completo de gestão empresarial que transforma a maneira como você controla estoque, vendas e operações do seu negócio.",
+        "comecar_agora": "Comece Agora",
+        "ver_planos": "Ver Planos"
+    },
+    "estatisticas": {
+        "clientes_ativos": "Clientes Ativos",
+        "produtos_gerenciados": "Produtos Gerenciados",
+        "transacoes_mes": "Transações/Mês",
+        "eficiencia": "Eficiência"
+    },
+    "secao_recursos": {
+        "titulo": "Tudo que você precisa em",
+        "destaque": "um só lugar",
+        "descricao": "Ferramentas poderosas para transformar a gestão do seu negócio"
+    },
+    "recursos": {
+        "gestao": {
+            "titulo": "Gestão Inteligente de Estoque",
+            "descricao": "Controle completo do seu inventário com alertas automáticos de reposição"
+        },
+        "analises": {
+            "titulo": "Análises em Tempo Real",
+            "descricao": "Dashboards interativos com os principais indicadores do seu negócio"
+        },
+        "permissoes": {
+            "titulo": "Controle de Permissões",
+            "descricao": "Defina níveis de acesso para diferentes usuários da sua equipe"
+        },
+        "relatorios": {
+            "titulo": "Relatórios Detalhados",
+            "descricao": "Exporte dados e gere relatórios personalizados para tomada de decisão"
+        },
+        "pedidos": {
+            "titulo": "Pedidos de Estoque Automatizados",
+            "descricao": "Faça pedidos automáticos aos fornecedores quando o estoque estiver baixo"
+        },
+        "beneficios": [
+            "Controle em tempo real",
+            "Alertas automáticos",
+            "Relatórios detalhados",
+            "Integração total"
+        ],
+        "dashboard": {
+            "titulo": "Dashboard Interativo",
+            "descricao": "Visualize todos os dados do seu negócio em tempo real"
+        }
+    },
+    "funcionalidades": {
+        "registro_completo": "Registro Completo",
+        "registro_completo_desc": "Controle total de todas as movimentações do estoque",
+        "acesso_nuvem": "Acesso em Nuvem",
+        "acesso_nuvem_desc": "Acesse de qualquer lugar, a qualquer momento",
+        "gestao_produtos": "Gestão de Produtos",
+        "gestao_produtos_desc": "Cadastro e organização completa dos seus produtos",
+        "exportacao_dados": "Exportação de Dados",
+        "exportacao_dados_desc": "Relatórios personalizados em diversos formatos",
+        "seguranca_maxima": "Segurança Máxima",
+        "seguranca_maxima_desc": "Seus dados protegidos com criptografia avançada",
+        "controle_acesso": "Controle de Acesso",
+        "controle_acesso_desc": "Permissões personalizadas para cada usuário"
+    },
+    "comparacao": {
+        "titulo": "Do",
+        "caos": "caos",
+        "para": "ao",
+        "controle": "controle total",
+        "descricao": "Descubra como o StockControl transforma completamente sua gestão",
+        "antes": {
+            "titulo": "Antes do StockControl",
+            "itens": [
+                "Planilhas desatualizadas e conflitantes",
+                "Surpresas com estoque zerado perdendo vendas",
+                "Horas fechando planilhas manualmente",
+                "Dúvidas sobre o que e quando repor",
+                "Clientes sem cadastro organizado",
+                "Pedidos feitos por WhatsApp sem controle",
+                "Dificuldade para exportar dados para análise",
+                "Sem histórico de movimentações do estoque"
+            ]
+        },
+        "depois": {
+            "titulo": "Com StockControl",
+            "itens": [
+                "Dashboard em tempo real sempre atualizado",
+                "Alertas automáticos de estoque baixo",
+                "Processos 100% automatizados",
+                "Relatórios inteligentes de reposição",
+                "Cadastro completo de clientes e histórico",
+                "Sistema de pedidos integrado com fornecedores",
+                "Exportação em Excel com 1 clique",
+                "Histórico completo de todas as movimentações"
+            ]
+        },
+        "mais_funcionalidades": {
+            "titulo": "E muito mais...",
+            "itens": [
+                "Gestão completa de produtos",
+                "Controle de usuários e permissões",
+                "Relatórios de vendas e desempenho",
+                "Cadastro de fornecedores",
+                "Inventário automatizado",
+                "Acesso em nuvem 24/7"
+            ]
+        }
+    },
+    "criadores": {
+        "titulo": "Conheça os",
+        "destaque": "criadores",
+        "descricao": "Desenvolvido por especialistas apaixonados por transformar a gestão empresarial",
+        "pedro_lima": {
+            "nome": "Pedro Lima",
+            "cargo": "Full-Stack Developer & UI/UX Designer",
+            "descricao": "Especialista em desenvolvimento de sistemas complexos e experiências de usuário intuitivas. Foca em criar soluções que são tanto poderosas quanto fáceis de usar."
+        },
+        "pedro_siqueira": {
+            "nome": "Pedro Siqueira",
+            "cargo": "Backend Architect & System Designer",
+            "descricao": "Especialista em projetar e implementar arquiteturas backend escaláveis, modelagem de dados eficiente e integração entre sistemas complexos."
+        },
+        "equipe": {
+            "titulo": "Pedros' TI",
+            "descricao": "Uma equipe jovem e inovadora focada em criar soluções de tecnologia que realmente fazem a diferença para pequenas e médias empresas. Acreditamos que tecnologia boa é tecnologia que resolve problemas reais.",
+            "estatisticas": [
+                "+2 anos de experiência",
+                "+50 projetos entregues",
+                "Tecnologia de ponta"
+            ]
+        }
+    },
+    "precos": {
+        "titulo": "Experimente e depois decida",
+        "descricao": "Teste todas as funcionalidades gratuitamente antes de assinar",
+        "teste_gratis": {
+            "emblema": "🚀 PERFEITO PARA EXPERIMENTAR",
+            "titulo": "Teste Grátis",
+            "preco": "R$ 0",
+            "periodo": "/7 dias",
+            "descricao": "Sistema completo para você testar",
+            "funcionalidades": [
+                "Acesso a TODAS as funcionalidades",
+                "Sistema 100% completo liberado",
+                "Dashboard e relatórios completos",
+                "Gestão de produtos e estoque",
+                "Controle de vendas e clientes",
+                "Permissões de usuários",
+                "Exportação de dados",
+                "Suporte durante o período de teste"
+            ],
+            "botao": "Solicitar Teste Grátis",
+            "nota": "⚡ Entre em contato para criar sua conta teste"
+        },
+        "plano_completo": {
+            "emblema": "MAIS ESCOLHIDO",
+            "titulo": "Plano Completo",
+            "preco": "R$ 79",
+            "periodo": "/mês",
+            "descricao": "Continue com acesso ilimitado",
+            "funcionalidades": [
+                "Todas as funcionalidades do teste",
+                "Acesso contínuo e ilimitado",
+                "Dados salvos do período de teste",
+                "Atualizações gratuitas forever",
+                "Suporte prioritário 24/7",
+                "Backup automático diário",
+                "Segurança enterprise",
+                "Multi-usuários ilimitados"
+            ],
+            "botao": "Começar Agora",
+            "nota": "💎 Upgrade direto do teste • Sem recontratação"
+        },
+        "nota_rodape": "O teste de 7 dias oferece o sistema completo exatamente como na versão paga. Se decidir continuar, seus dados serão mantidos e você terá acesso contínuo."
+    },
+    "contato": {
+        "titulo": "Ainda com dúvidas?",
+        "descricao": "Fale diretamente com nossa equipe de especialistas",
+        "botao": "Falar no WhatsApp"
+    },
+    "rodape": {
+        "descricao": "Sistema completo de gestão empresarial para otimizar seu negócio.",
+        "produto": "Produto",
+        "recursos": "Recursos",
+        "planos": "Planos",
+        "demonstracao": "Demonstração",
+        "suporte": "Suporte",
+        "contato": "Contato",
+        "central_ajuda": "Central de Ajuda",
+        "documentacao": "Documentação",
+        "legal": "Legal",
+        "privacidade": "Privacidade",
+        "termos": "Termos",
+        "cookies": "Cookies",
+        "copyright": "© 2025 StockControl. Desenvolvido com ❤️ por",
+        "pedro_lima": "Pedro Lima",
+        "e": "e",
+        "pedro_siqueira": "Pedro Siqueira"
+    }
+}

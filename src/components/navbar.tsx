@@ -2,17 +2,31 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaGlobe } from 'react-icons/fa';
 import { Link as ScrollLink } from 'react-scroll';
 import { useUsuarioStore } from '@/context/usuario';
 import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [fotoEmpresa, setFotoEmpresa] = useState<string | null>(null);
+  const [mostrarIdiomas, setMostrarIdiomas] = useState(false);
   const { logar } = useUsuarioStore();
+  const { t } = useTranslation("navbar");
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  const toggleIdiomas = () => {
+    setMostrarIdiomas(!mostrarIdiomas);
+  };
+
+  const mudarIdioma = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setMostrarIdiomas(false);
+  };
 
   const scrollProps = {
     spy: true,
@@ -69,19 +83,47 @@ export default function Navbar() {
           <span className="text-lg font-semibold text-white">StockControl</span>
         </Link>
 
-        <div className="lg:hidden">
+        <div className="lg:hidden flex items-center gap-4">
+          <div className="relative">
+            <button
+              onClick={toggleIdiomas}
+              className="text-white p-2 rounded-lg hover:bg-blue-500/10 transition-all duration-200"
+            >
+              <FaGlobe className="text-lg" />
+            </button>
+
+            {mostrarIdiomas && (
+              <div className="absolute top-12 right-0 bg-[#0A1929] border border-blue-500/20 rounded-2xl shadow-2xl p-2 min-w-[140px] z-50">
+                <button
+                  onClick={() => mudarIdioma("pt")}
+                  className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+                >
+                  <Image src="/brasil.png" alt="Português" width={24} height={18} className="rounded flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap">Português</span>
+                </button>
+                <button
+                  onClick={() => mudarIdioma("en")}
+                  className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+                >
+                  <Image src="/ingles.png" alt="English" width={24} height={18} className="rounded flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap">English</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <button onClick={toggleMenu} className="text-white text-2xl focus:outline-none z-50 relative">
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
 
-        <div className="hidden lg:flex items-center space-x-14">
+        <div className="hidden lg:flex items-center space-x-8">
           <ScrollLink
             to="features"
             {...scrollProps}
             className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer"
           >
-            Recursos
+            {t("recursos")}
           </ScrollLink>
 
           <ScrollLink
@@ -89,8 +131,36 @@ export default function Navbar() {
             {...scrollProps}
             className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer"
           >
-            Assinatura
+            {t("assinatura")}
           </ScrollLink>
+          <div className="relative">
+            <button
+              onClick={toggleIdiomas}
+              className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer flex items-center gap-2 p-2 rounded-lg hover:bg-blue-500/10"
+            >
+              <FaGlobe className="text-lg" />
+              <span>{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
+            </button>
+
+            {mostrarIdiomas && (
+              <div className="absolute top-12 right-0 bg-[#0A1929] border border-blue-500/20 rounded-2xl shadow-2xl p-2 min-w-[140px] z-50">
+                <button
+                  onClick={() => mudarIdioma("pt")}
+                  className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+                >
+                  <Image src="/brasil.png" alt="Português" width={24} height={18} className="rounded flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap">Português</span>
+                </button>
+                <button
+                  onClick={() => mudarIdioma("en")}
+                  className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-blue-500/10 transition-all duration-200 text-white"
+                >
+                  <Image src="/ingles.png" alt="English" width={24} height={18} className="rounded flex-shrink-0" />
+                  <span className="text-sm font-medium whitespace-nowrap">English</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {fotoEmpresa ? (
             <Link href="/dashboard">
@@ -103,9 +173,10 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-lg px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+              onClick={() => setMenuOpen(false)}
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl px-4 py-2 text-center font-semibold transition-all duration-300 transform hover:scale-105 inline-block w-full text-base"
             >
-              Entrar
+              {t("entrar")}
             </Link>
           )}
         </div>
@@ -117,23 +188,23 @@ export default function Navbar() {
             <ScrollLink
               to="features"
               {...scrollProps}
-              className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10 last:border-b-0"
+              className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10"
             >
-              Recursos
+              {t("recursos")}
             </ScrollLink>
 
             <ScrollLink
               to="pricing"
               {...scrollProps}
-              className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10 last:border-b-0"
+              className="hover:text-blue-300 transition-all duration-300 py-3 transform hover:scale-105 cursor-pointer w-full text-left border-b border-blue-500/10"
             >
-              Assinatura
+              {t("assinatura")}
             </ScrollLink>
 
-            <div className="w-full pt-2">
+            <div className="w-full pt-2 border-b border-blue-500/10 pb-4">
               {fotoEmpresa ? (
                 <Link
-                  href="/conta"
+                  href="/dashboard"
                   onClick={() => setMenuOpen(false)}
                   className="py-3 flex items-center gap-3 w-full"
                 >
@@ -142,15 +213,15 @@ export default function Navbar() {
                     alt="Empresa"
                     className="h-12 w-12 rounded-full object-cover border border-gray-300 transition-transform duration-300 hover:scale-110"
                   />
-                  <span className="text-white">Minha Conta</span>
+                  <span className="text-white">{t("minha_conta")}</span>
                 </Link>
               ) : (
                 <Link
                   href="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl px-6 py-3 text-center font-semibold transition-all duration-300 transform hover:scale-105 inline-block w-full text-lg"
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl px-4 py-2 text-center font-semibold transition-all duration-300 transform hover:scale-105 inline-block w-full text-base"
                 >
-                  Entrar
+                  {t("entrar")}
                 </Link>
               )}
             </div>
