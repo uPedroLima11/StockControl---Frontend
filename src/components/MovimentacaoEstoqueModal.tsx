@@ -15,7 +15,7 @@ interface MovimentacaoEstoqueModalProps {
     modoDark: boolean;
     empresaId: string;
     onMovimentacaoConcluida: () => void;
-    onFecharModal: () => void; 
+    onFecharModal: () => void;
 }
 
 export default function MovimentacaoEstoqueModal({
@@ -158,9 +158,9 @@ export default function MovimentacaoEstoqueModal({
 
     const realizarMovimentacao = async () => {
         if (!podeGerenciarEstoque) {
-            Swal.fire({ 
-                icon: "error", 
-                title: t("semPermissaoTitulo"), 
+            Swal.fire({
+                icon: "error",
+                title: t("semPermissaoTitulo"),
                 text: t("semPermissaoEstoque"),
                 background: temaAtual.card,
                 color: temaAtual.texto
@@ -171,9 +171,9 @@ export default function MovimentacaoEstoqueModal({
         try {
             const quantidadeNum = parseInt(quantidade) || 0;
             if (quantidadeNum <= 0) {
-                Swal.fire({ 
-                    icon: "error", 
-                    title: t("mensagens.erroTitulo"), 
+                Swal.fire({
+                    icon: "error",
+                    title: t("mensagens.erroTitulo"),
                     text: t("mensagens.quantidadeInvalida"),
                     background: temaAtual.card,
                     color: temaAtual.texto
@@ -188,13 +188,13 @@ export default function MovimentacaoEstoqueModal({
             const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/movimentacoes-estoque`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'user-id': usuarioValor },
-                body: JSON.stringify({ 
-                    produtoId: Number(produto.id), 
-                    tipo: tipoMovimentacao, 
-                    quantidade: quantidadeNum, 
-                    motivo, 
-                    observacao, 
-                    empresaId 
+                body: JSON.stringify({
+                    produtoId: Number(produto.id),
+                    tipo: tipoMovimentacao,
+                    quantidade: quantidadeNum,
+                    motivo,
+                    observacao,
+                    empresaId
                 })
             });
 
@@ -202,9 +202,9 @@ export default function MovimentacaoEstoqueModal({
                 Swal.fire({
                     icon: "success",
                     title: t("mensagens.sucessoTitulo"),
-                    text: t("mensagens.sucessoTexto", { 
-                        tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"), 
-                        quantidade: quantidadeNum 
+                    text: t("mensagens.sucessoTexto", {
+                        tipo: tipoMovimentacao === "ENTRADA" ? t("entrada") : t("saida"),
+                        quantidade: quantidadeNum
                     }),
                     background: temaAtual.card,
                     color: temaAtual.texto,
@@ -216,18 +216,18 @@ export default function MovimentacaoEstoqueModal({
                 onMovimentacaoConcluida();
             } else {
                 const erro = await response.json();
-                Swal.fire({ 
-                    icon: "error", 
-                    title: t("mensagens.erroTitulo"), 
+                Swal.fire({
+                    icon: "error",
+                    title: t("mensagens.erroTitulo"),
                     text: erro.mensagem || t("mensagens.erroGenerico"),
                     background: temaAtual.card,
                     color: temaAtual.texto
                 });
             }
         } catch {
-            Swal.fire({ 
-                icon: "error", 
-                title: t("mensagens.erroTitulo"), 
+            Swal.fire({
+                icon: "error",
+                title: t("mensagens.erroTitulo"),
                 text: t("mensagens.erroConexao"),
                 background: temaAtual.card,
                 color: temaAtual.texto
@@ -251,7 +251,7 @@ export default function MovimentacaoEstoqueModal({
         setMotivo('COMPRA');
         setObservacao('');
         setMostrarHistorico(false);
-        
+
         onFecharModal();
     };
     const handleFechar = () => {
@@ -263,11 +263,11 @@ export default function MovimentacaoEstoqueModal({
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-white flex items-center gap-3">
                     <FaBox className="text-blue-400" />
-                    {t("gerenciarEstoque")} 
+                    {t("gerenciarEstoque")}
                     <span className="text-blue-400">- {produto.nome}</span>
                 </h2>
                 <button
-                    onClick={handleFechar} 
+                    onClick={handleFechar}
                     className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-gray-400 hover:text-white"
                 >
                     <FaTimes className="text-lg" />
@@ -284,11 +284,10 @@ export default function MovimentacaoEstoqueModal({
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <button
                             onClick={() => setTipoMovimentacao('ENTRADA')}
-                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${
-                                tipoMovimentacao === 'ENTRADA'
+                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${tipoMovimentacao === 'ENTRADA'
                                     ? 'border-green-500 bg-green-500 text-white shadow-lg'
                                     : 'border-gray-500 bg-transparent opacity-70 hover:opacity-100'
-                            }`}
+                                }`}
                         >
                             <FaPlus />
                             {t("entrada")}
@@ -296,11 +295,10 @@ export default function MovimentacaoEstoqueModal({
 
                         <button
                             onClick={() => setTipoMovimentacao('SAIDA')}
-                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${
-                                tipoMovimentacao === 'SAIDA'
+                            className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center gap-3 font-semibold hover:scale-105 cursor-pointer ${tipoMovimentacao === 'SAIDA'
                                     ? 'border-red-500 bg-red-500 text-white shadow-lg'
                                     : 'border-gray-500 bg-transparent opacity-70 hover:opacity-100'
-                            }`}
+                                }`}
                         >
                             <FaMinus />
                             {t("saida")}
@@ -386,7 +384,7 @@ export default function MovimentacaoEstoqueModal({
                                 onClick={realizarMovimentacao}
                                 className="px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-105 cursor-pointer shadow-lg"
                                 style={{
-                                    background: tipoMovimentacao === 'ENTRADA' 
+                                    background: tipoMovimentacao === 'ENTRADA'
                                         ? "linear-gradient(135deg, #10B981, #059669)"
                                         : "linear-gradient(135deg, #EF4444, #DC2626)"
                                 }}
@@ -401,6 +399,7 @@ export default function MovimentacaoEstoqueModal({
                     <HistoricoEstoque
                         produtoId={Number(produto.id)}
                         modoDark={modoDark}
+                        mostrarFiltros={false}
                     />
 
                     <button

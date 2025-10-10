@@ -149,20 +149,20 @@ export default function Produtos() {
   );
 
   useEffect(() => {
-  const temaSalvo = localStorage.getItem("modoDark");
-  const ativado = temaSalvo === "true";
-  setModoDark(ativado);
+    const temaSalvo = localStorage.getItem("modoDark");
+    const ativado = temaSalvo === "true";
+    setModoDark(ativado);
 
-  const handleThemeChange = (e: CustomEvent) => {
-    setModoDark(e.detail.modoDark);
-  };
+    const handleThemeChange = (e: CustomEvent) => {
+      setModoDark(e.detail.modoDark);
+    };
 
-  window.addEventListener('themeChanged', handleThemeChange as EventListener);
-  
-  return () => {
-    window.removeEventListener('themeChanged', handleThemeChange as EventListener);
-  };
-}, []);
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -171,7 +171,7 @@ export default function Produtos() {
       return;
     }
 
-    
+
     const initialize = async () => {
       setLoading(true);
 
@@ -1254,14 +1254,18 @@ export default function Produtos() {
                 },
               ].map((stat, index) => (
                 <div key={index} className="gradient-border animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className={`p-4 rounded-[15px] ${bgStats} backdrop-blur-sm`}>
+                  <div className={`p-3 sm:p-4 rounded-[15px] ${bgStats} backdrop-blur-sm card-hover min-h-[90px] sm:min-h-[100px] flex flex-col justify-center`}>
                     <div className="flex items-center justify-between">
-                      <div>
-                        <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>{stat.value}</div>
-                        <div className={textMuted}>{stat.label}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-base sm:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1 overflow-hidden whitespace-nowrap`}>
+                          {stat.value}
+                        </div>
+                        <div className={`${textMuted} text-xs sm:text-sm truncate`}>
+                          {stat.label}
+                        </div>
                       </div>
-                      <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                        <stat.icon className={`text-xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
+                      <div className={`p-1 sm:p-2 rounded-lg ${stat.bgColor} flex-shrink-0 ml-2`}>
+                        <stat.icon className={`text-base sm:text-xl bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} />
                       </div>
                     </div>
                   </div>

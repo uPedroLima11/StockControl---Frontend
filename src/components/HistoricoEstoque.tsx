@@ -16,11 +16,12 @@ interface MovimentacaoEstoque {
 interface HistoricoEstoqueProps {
   produtoId: number;
   modoDark: boolean;
+  mostrarFiltros?: boolean;
 }
 
 type FiltroTipo = "TODOS" | "ENTRADA" | "SAIDA";
 
-export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoqueProps) {
+export default function HistoricoEstoque({ produtoId, modoDark, mostrarFiltros = true }: HistoricoEstoqueProps) {
   const { t: tEstoque } = useTranslation("estoque");
   const [movimentacoes, setMovimentacoes] = useState<MovimentacaoEstoque[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -204,6 +205,7 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
 
   return (
     <div className="space-y-4">
+       {mostrarFiltros && (
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <h3 className={`font-semibold ${textPrimary} text-lg`}>
           {tEstoque("historicoTitulo")} ({movimentacoesFiltradas.length})
@@ -225,100 +227,103 @@ export default function HistoricoEstoque({ produtoId, modoDark }: HistoricoEstoq
           </div>
         </div>
       </div>
-      <div className={`p-4 rounded-xl border ${borderColor} ${bgCard} backdrop-blur-sm`}>
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
-              <FaFilter className="inline mr-1" size={12} />
-              {tEstoque("filtros.tipo")}
-            </label>
-            <div className="flex gap-1">
-              {(["TODOS", "ENTRADA", "SAIDA"] as FiltroTipo[]).map((tipo) => (
-                <button
-                  key={tipo}
-                  onClick={() => {
-                    setFiltroTipo(tipo);
+       )}
+       {mostrarFiltros && (
+        <div className={`p-4 rounded-xl border ${borderColor} ${bgCard} backdrop-blur-sm`}>
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
+              <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
+                <FaFilter className="inline mr-1" size={12} />
+                {tEstoque("filtros.tipo")}
+              </label>
+              <div className="flex gap-1">
+                {(["TODOS", "ENTRADA", "SAIDA"] as FiltroTipo[]).map((tipo) => (
+                  <button
+                    key={tipo}
+                    onClick={() => {
+                      setFiltroTipo(tipo);
+                      setPaginaAtual(1);
+                    }}
+                    className={`flex-1 px-3 py-2 rounded-lg text-xs transition-all duration-300 ${filtroTipo === tipo
+                        ? tipo === "ENTRADA"
+                          ? "bg-green-500 text-white shadow-lg shadow-green-500/25"
+                          : tipo === "SAIDA"
+                            ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                            : "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                        : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor}`
+                      }`}
+                  >
+                    {tEstoque(`filtros.${tipo.toLowerCase()}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
+                <FaCalendar className="inline mr-1" size={12} />
+                {tEstoque("filtros.periodo")}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => {
+                    setDataInicio(e.target.value);
                     setPaginaAtual(1);
                   }}
-                  className={`flex-1 px-3 py-2 rounded-lg text-xs transition-all duration-300 ${filtroTipo === tipo
-                      ? tipo === "ENTRADA"
-                        ? "bg-green-500 text-white shadow-lg shadow-green-500/25"
-                        : tipo === "SAIDA"
-                          ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
-                          : "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                      : `${bgCard} ${bgHover} ${textPrimary} border ${borderColor}`
-                    }`}
-                >
-                  {tEstoque(`filtros.${tipo.toLowerCase()}`)}
-                </button>
-              ))}
+                  className={`flex-1 p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm`}
+                />
+                <input
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => {
+                    setDataFim(e.target.value);
+                    setPaginaAtual(1);
+                  }}
+                  className={`flex-1 p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm`}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex-1">
-            <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
-              <FaCalendar className="inline mr-1" size={12} />
-              {tEstoque("filtros.periodo")}
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={(e) => {
-                  setDataInicio(e.target.value);
-                  setPaginaAtual(1);
-                }}
-                className={`flex-1 p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm`}
-              />
-              <input
-                type="date"
-                value={dataFim}
-                onChange={(e) => {
-                  setDataFim(e.target.value);
-                  setPaginaAtual(1);
-                }}
-                className={`flex-1 p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm`}
-              />
-            </div>
-          </div>
 
-          <div className="flex-1">
-            <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
-              <FaSearch className="inline mr-1" size={12} />
-              {tEstoque("buscar")}
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder={tEstoque("buscarPlaceholder")}
-                value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setPaginaAtual(1);
-                }}
-                className={`w-full p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm pr-8`}
-              />
-              {busca && (
-                <button
-                  onClick={() => setBusca("")}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  ×
-                </button>
-              )}
+            <div className="flex-1">
+              <label className={`block text-sm font-medium ${textPrimary} mb-2`}>
+                <FaSearch className="inline mr-1" size={12} />
+                {tEstoque("buscar")}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={tEstoque("buscarPlaceholder")}
+                  value={busca}
+                  onChange={(e) => {
+                    setBusca(e.target.value);
+                    setPaginaAtual(1);
+                  }}
+                  className={`w-full p-2 rounded-lg border ${borderColor} ${bgCard} ${textPrimary} text-sm pr-8`}
+                />
+                {busca && (
+                  <button
+                    onClick={() => setBusca("")}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+          {(filtroTipo !== "TODOS" || dataInicio || dataFim || busca) && (
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={limparFiltros}
+                className={`px-3 py-1 text-xs rounded-lg border ${borderColor} ${bgHover} ${textPrimary} transition-all duration-300 hover:scale-105 cursor-pointer`}
+              >
+                {tEstoque("limparFiltros")}
+              </button>
+            </div>
+          )}
         </div>
-        {(filtroTipo !== "TODOS" || dataInicio || dataFim || busca) && (
-          <div className="mt-3 flex justify-end">
-            <button
-              onClick={limparFiltros}
-              className={`px-3 py-1 text-xs rounded-lg border ${borderColor} ${bgHover} ${textPrimary} transition-all duration-300 hover:scale-105 cursor-pointer`}
-            >
-              {tEstoque("limparFiltros")}
-            </button>
-          </div>
-        )}
-      </div>
+      )}
       <div className="space-y-3">
         {paginaItens.map((movimentacao) => (
           <div
