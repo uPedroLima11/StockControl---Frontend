@@ -43,16 +43,18 @@ const beneficios = [
 ];
 
 export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFormProps) {
-  const { register, handleSubmit } = useForm<Inputs>();
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
   const { logar } = useUsuarioStore();
   const [visivel, setVisivel] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
+  const [erroLogin, setErroLogin] = useState<string | null>(null);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { t: tLogin } = useTranslation("login");
   const { t: tNotificacoes } = useTranslation("notificacoes");
+  const { t: tErros } = useTranslation("erros");
 
   const temaAtual = cores.dark;
 
@@ -60,8 +62,16 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
     setAnimacaoAtiva(true);
   }, []);
 
+  useEffect(() => {
+    if (erroLogin) {
+      setErroLogin(null);
+    }
+  }, [register]);
+
   async function handleLogin(data: Inputs) {
     setIsLoading(true);
+    setErroLogin(null);
+    
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/login`, {
         method: "POST",
@@ -75,6 +85,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
       });
 
       const responseData = await response.json();
+      
       if (response.status === 200) {
         if (responseData.precisa2FA) {
           on2FANeeded(data.email);
@@ -91,14 +102,27 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
       } else if (response.status === 403 && responseData.precisaVerificacao) {
         onEmailNaoVerificado(data.email, data.senha);
       } else {
+        const codigoErro = responseData.codigo;
+        
+        switch (codigoErro) {
+          case "EMAIL_NAO_ENCONTRADO":
+            setErroLogin(tErros("email_nao_encontrado"));
+            break;
+          case "SENHA_INCORRETA":
+            setErroLogin(tErros("senha_incorreta"));
+            break;
+          case "EMAIL_NAO_VERIFICADO":
+            setErroLogin(tErros("email_nao_verificado"));
+            break;
+          default:
+            setErroLogin(responseData.message || tNotificacoes("login.erro_credenciais"));
+        }
+        
         console.error("❌ Erro no login:", responseData);
-        localStorage.setItem('login_success_message', responseData.message || tNotificacoes("login.erro_credenciais"));
-        localStorage.setItem('login_success_type', 'error');
       }
     } catch (err) {
       console.error("❌ Erro de conexão:", err);
-      localStorage.setItem('login_success_message', tNotificacoes("login.erro_conexao"));
-      localStorage.setItem('login_success_type', 'error');
+      setErroLogin(tNotificacoes("login.erro_conexao"));
     } finally {
       setIsLoading(false);
     }
@@ -186,6 +210,15 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
               </p>
             </div>
 
+            {erroLogin && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-200 text-sm backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                  {erroLogin}
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
@@ -197,7 +230,13 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   </div>
                   <input
                     type="email"
-                    {...register("email", { required: true })}
+                    {...register("email", { 
+                      required: true,
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: "Email inválido"
+                      }
+                    })}
                     required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
                     placeholder={tLogin("email_placeholder")}
@@ -218,7 +257,13 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   </div>
                   <input
                     type={visivel ? "text" : "password"}
-                    {...register("senha", { required: true })}
+                    {...register("senha", { 
+                      required: true,
+                      minLength: {
+                        value: 6,
+                        message: "A senha deve ter pelo menos 6 caracteres"
+                      }
+                    })}
                     required
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
                     placeholder={tLogin("senha_placeholder")}

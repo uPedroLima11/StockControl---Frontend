@@ -1,0 +1,6 @@
+{
+  "email_nao_encontrado": "Nenhuma conta encontrada com este email. Verifique o email ou crie uma nova conta.",
+  "senha_incorreta": "Senha incorreta. Tente novamente ou clique em 'Esqueceu a senha?' para redefinir.",
+  "email_nao_verificado": "Email não verificado. Verifique sua caixa de entrada para confirmar sua conta.",
+  "erro_interno": "Erro interno do servidor. Tente novamente em alguns instantes."
+}

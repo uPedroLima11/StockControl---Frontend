@@ -1,0 +1,6 @@
+{
+  "email_nao_encontrado": "No account found with this email. Check your email or create a new account.",
+  "senha_incorreta": "Incorrect password. Try again or click 'Forgot password?' to reset.",
+  "email_nao_verificado": "Email not verified. Check your inbox to confirm your account.",
+  "erro_interno": "Internal server error. Please try again in a few moments."
+}
