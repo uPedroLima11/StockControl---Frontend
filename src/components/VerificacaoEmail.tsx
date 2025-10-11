@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { cores } from "@/utils/cores";
 import { HiEnvelope, HiLockClosed, HiArrowLeft } from "react-icons/hi2";
