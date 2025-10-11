@@ -2,7 +2,7 @@
 
 import { HiEnvelope, HiLockClosed, HiMiniIdentification, HiCheckCircle, HiExclamationCircle, HiArrowLeft } from "react-icons/hi2";
 import { FaEye, FaEyeSlash, FaKey } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { useState, useEffect, useRef } from "react";
 import { cores } from "@/utils/cores";
@@ -25,13 +25,15 @@ type Inputs = {
 };
 
 export default function Alteracao() {
-  const { register, handleSubmit, control } = useForm<Inputs>();
+  const { register, handleSubmit, control, setValue } = useForm<Inputs>(); 
   const router = useRouter();
+  const searchParams = useSearchParams(); 
   const [passwordValid, setPasswordValid] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
+  const [emailPreenchido, setEmailPreenchido] = useState(false); 
   const senha = useWatch({ control, name: "senha" });
   const confirmaSenha = useWatch({ control, name: "confirmaSenha" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,14 @@ export default function Alteracao() {
 
   useEffect(() => {
     setAnimacaoAtiva(true);
-    
+
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      const emailDecodificado = decodeURIComponent(emailParam);
+      setValue("email", emailDecodificado);
+      setEmailPreenchido(true);
+    }
+
     const style = document.createElement('style');
     style.textContent = `
       @keyframes float {
@@ -93,7 +102,7 @@ export default function Alteracao() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [senha, confirmaSenha]);
+  }, [senha, confirmaSenha, searchParams, setValue]);
 
   function validarSenha(senha: string) {
     if (!senha) return false;
@@ -194,7 +203,7 @@ export default function Alteracao() {
   ];
 
   return (
-    <div 
+    <div
       className={`min-h-screen flex ${poppins.className}`}
       style={{ background: temaAtual.gradiente }}
     >
@@ -206,7 +215,7 @@ export default function Alteracao() {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
-          <Link 
+          <Link
             href="/"
             className="flex items-center gap-3 mb-12 group"
           >
@@ -223,14 +232,14 @@ export default function Alteracao() {
                 {t("senha")}
               </span>
             </h1>
-            
+
             <p className="text-xl text-gray-300 mb-12 max-w-md">
               {t("criar_senha_segura")}
             </p>
 
             <div className="space-y-6">
               {beneficios.map((beneficio, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-4 text-gray-300 group"
                   style={{ transitionDelay: `${index * 200}ms` }}
@@ -247,12 +256,12 @@ export default function Alteracao() {
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div 
+        <div
           ref={containerRef}
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex justify-center mb-8">
-            <Link 
+            <Link
               href="/"
               className="flex items-center gap-3 group"
             >
@@ -263,10 +272,10 @@ export default function Alteracao() {
             </Link>
           </div>
 
-          <div 
+          <div
             className={`bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm rounded-3xl p-8 border border-green-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
-            <Link 
+            <Link
               href="/esqueci"
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
             >
@@ -284,6 +293,11 @@ export default function Alteracao() {
               <p className="text-gray-400">
                 {t("digite_codigo_senha")}
               </p>
+              {emailPreenchido && (
+                <div className="mt-2 p-2 bg-green-900/20 border border-green-800 text-green-400 rounded-lg text-sm">
+                  ✅ {t("email_preenchido")}
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit(verificaAlteracao)} className="space-y-6">
@@ -295,20 +309,37 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiEnvelope className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input 
-                    type="email" 
-                    {...register("email")} 
-                    required 
-                    className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
+                  <input
+                    type="email"
+                    {...register("email", { required: true })}
+                    required
+                    disabled={emailPreenchido} 
+                    className={`w-full pl-12 pr-4 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50 ${emailPreenchido
+                        ? "border-green-500 bg-green-900/20 cursor-not-allowed"
+                        : "border-gray-600"
+                      }`}
                     placeholder={t("email_placeholder")}
                     style={{
-                      backgroundColor: temaAtual.fundo + '80',
-                      borderColor: temaAtual.borda
+                      backgroundColor: emailPreenchido
+                        ? temaAtual.primario + '20'
+                        : temaAtual.fundo + '80',
+                      borderColor: emailPreenchido
+                        ? temaAtual.primario
+                        : temaAtual.borda
                     }}
                   />
+                  {emailPreenchido && (
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                      <HiCheckCircle className="text-green-400" />
+                    </div>
+                  )}
                 </div>
+                {emailPreenchido && (
+                  <p className="mt-1 text-xs text-green-400">
+                    {t("email_automatico")}
+                  </p>
+                )}
               </div>
-
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
                   {t("codigo_verificacao")}
@@ -317,20 +348,20 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input 
-                    type="text" 
-                    {...register("codigoVerificacao")} 
-                    required 
+                  <input
+                    type="text"
+                    {...register("codigoVerificacao")}
+                    required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("codigo_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
                     }}
+                    autoFocus={emailPreenchido} 
                   />
                 </div>
               </div>
-
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
                   {t("nova_senha_field")}
@@ -339,10 +370,10 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiMiniIdentification className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    {...register("senha")} 
-                    required 
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    {...register("senha")}
+                    required
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("nova_senha_placeholder")}
                     style={{
@@ -359,8 +390,8 @@ export default function Alteracao() {
                   </button>
                   {senha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordValid ? 
-                        <HiCheckCircle className="text-green-400" /> : 
+                      {passwordValid ?
+                        <HiCheckCircle className="text-green-400" /> :
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -376,10 +407,10 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiMiniIdentification className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input 
-                    type={showConfirmPassword ? "text" : "password"} 
-                    {...register("confirmaSenha")} 
-                    required 
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...register("confirmaSenha")}
+                    required
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("confirmar_senha_placeholder")}
                     style={{
@@ -396,8 +427,8 @@ export default function Alteracao() {
                   </button>
                   {confirmaSenha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordsMatch ? 
-                        <HiCheckCircle className="text-green-400" /> : 
+                      {passwordsMatch ?
+                        <HiCheckCircle className="text-green-400" /> :
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -424,8 +455,8 @@ export default function Alteracao() {
                   ))}
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={!passwordValid || !passwordsMatch}
                 className="w-full cursor-pointer group relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -438,8 +469,8 @@ export default function Alteracao() {
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
                 {t("lembrou_senha")}{" "}
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="text-green-400 hover:text-green-300 font-semibold transition-colors"
                 >
                   {t("fazer_login")}

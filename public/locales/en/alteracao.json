@@ -1,42 +1,44 @@
 {
-  "nova": "New",
-  "senha": "password",
-  "criar_senha_segura": "Create a strong and secure password to protect your account.",
-  "voltar_recuperacao": "Back to recovery",
-  "nova_senha": "New password",
-  "digite_codigo_senha": "Enter the received code and create your new password",
-  "email_cadastrado": "Registered email",
-  "email_placeholder": "your@email.com",
-  "codigo_verificacao": "Verification code",
-  "codigo_placeholder": "Enter the received code",
-  "nova_senha_field": "New password",
-  "nova_senha_placeholder": "Create a secure password",
-  "confirmar_senha": "Confirm password",
-  "confirmar_senha_placeholder": "Enter password again",
-  "alterar_senha": "Change Password",
-  "lembrou_senha": "Remembered your password?",
-  "fazer_login": "Log in",
-  "copyright": "© 2025 StockControl. Complete management system.",
-  "requisitos_senha": "Password requirements:",
-  "minimo_caracteres": "Minimum 8 characters",
-  "letra_minuscula": "1 lowercase letter",
-  "letra_maiuscula": "1 uppercase letter",
-  "um_numero": "1 number",
-  "um_simbolo": "1 symbol",
-  "beneficios": {
-    "senha_segura": "New secure password",
-    "protecao": "Enhanced protection",
-    "acesso_imediato": "Immediate access"
-  },
-  "erros": {
-    "senha_invalida": "Invalid password",
-    "senha_requisitos": "Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.",
-    "senhas_nao_coincidem": "Passwords do not match.",
-    "erro_alteracao": "An error occurred while changing the password. Please try again.",
-    "titulo_erro": "Error"
-  },
-  "sucesso": {
-    "titulo": "Password changed successfully!",
-    "mensagem": "You can access your account with the new password."
-  }
+    "nova": "New",
+    "senha": "password",
+    "criar_senha_segura": "Create a strong and secure password to protect your account.",
+    "voltar_recuperacao": "Back to recovery",
+    "nova_senha": "New password",
+    "digite_codigo_senha": "Enter the received code and create your new password",
+    "email_cadastrado": "Registered email",
+    "email_placeholder": "your@email.com",
+    "codigo_verificacao": "Verification code",
+    "codigo_placeholder": "Enter the received code",
+    "nova_senha_field": "New password",
+    "email_preenchido": "Email filled automatically",
+    "email_automatico": "Email automatically filled from recovery",
+    "nova_senha_placeholder": "Create a secure password",
+    "confirmar_senha": "Confirm password",
+    "confirmar_senha_placeholder": "Enter password again",
+    "alterar_senha": "Change Password",
+    "lembrou_senha": "Remembered your password?",
+    "fazer_login": "Log in",
+    "copyright": "© 2025 StockControl. Complete management system.",
+    "requisitos_senha": "Password requirements:",
+    "minimo_caracteres": "Minimum 8 characters",
+    "letra_minuscula": "1 lowercase letter",
+    "letra_maiuscula": "1 uppercase letter",
+    "um_numero": "1 number",
+    "um_simbolo": "1 symbol",
+    "beneficios": {
+        "senha_segura": "New secure password",
+        "protecao": "Enhanced protection",
+        "acesso_imediato": "Immediate access"
+    },
+    "erros": {
+        "senha_invalida": "Invalid password",
+        "senha_requisitos": "Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.",
+        "senhas_nao_coincidem": "Passwords do not match.",
+        "erro_alteracao": "An error occurred while changing the password. Please try again.",
+        "titulo_erro": "Error"
+    },
+    "sucesso": {
+        "titulo": "Password changed successfully!",
+        "mensagem": "You can access your account with the new password."
+    }
 }

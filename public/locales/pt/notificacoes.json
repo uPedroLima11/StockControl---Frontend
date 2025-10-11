@@ -1,40 +1,42 @@
 {
-  "login": {
-    "sucesso": "Login realizado com sucesso!",
-    "email_verificado": "Email verificado e login realizado com sucesso!",
-    "email_verificado_sucesso": "Email verificado com sucesso!",
-    "erro_credenciais": "Algo deu errado, Verifique as credenciais",
-    "erro_conexao": "Não foi possível conectar ao servidor",
-    "erro_login_apos_verificacao": "Erro ao fazer login após verificação",
-    "erro_conexao_login_apos_verificacao": "Erro de conexão ao fazer login após verificação",
-    "erro_finalizar_login": "Erro ao finalizar login",
-    "erro_conexao_finalizar_login": "Erro de conexão ao finalizar login"
-  },
-  "registro": {
-    "sucesso": "Cadastro realizado! Agora verifique seu email para ativar sua conta.",
-    "email_ja_cadastrado": "Email já cadastrado",
-    "senha_invalida": "Senha inválida",
-    "senhas_nao_coincidem": "As senhas não coincidem",
-    "erro_conexao": "Não foi possível conectar ao servidor"
-  },
-  "esqueci_senha": {
-    "email_enviado": "Email enviado! Verifique sua caixa de entrada para o código de recuperação.",
-    "erro_envio": "Erro ao enviar email de recuperação"
-  },
-  "alteracao_senha": {
-    "sucesso": "Senha alterada com sucesso! Você pode acessar sua conta com a nova senha.",
-    "erro": "Ocorreu um erro ao alterar a senha. Tente novamente."
-  },
-  "verificacao": {
-    "codigo_enviado": "Código de Verificação Enviado! Verifique seu email.",
-    "codigo_reenviado": "Código reenviado com sucesso! Verifique seu email.",
-    "email_verificado": "Seu email foi verificado com sucesso!",
-    "verificacao_concluida": "Verificação em duas etapas concluída com sucesso!",
-    "erro_codigo": "Erro ao enviar código de verificação",
-    "erro_conexao": "Erro de conexão ao enviar código",
-    "codigo_invalido": "Código inválido. Verifique e tente novamente."
-  },
-  "geral": {
-    "erro_inesperado": "Ocorreu um erro inesperado. Tente novamente."
-  }
+    "login": {
+        "sucesso": "Login realizado com sucesso!",
+        "email_verificado": "Email verificado e login realizado com sucesso!",
+        "email_verificado_sucesso": "Email verificado com sucesso!",
+        "erro_credenciais": "Algo deu errado, Verifique as credenciais",
+        "erro_conexao": "Não foi possível conectar ao servidor",
+        "erro_login_apos_verificacao": "Erro ao fazer login após verificação",
+        "erro_conexao_login_apos_verificacao": "Erro de conexão ao fazer login após verificação",
+        "erro_finalizar_login": "Erro ao finalizar login",
+        "erro_conexao_finalizar_login": "Erro de conexão ao finalizar login"
+    },
+    "registro": {
+        "sucesso": "Registro realizado com sucesso! Agora verifique seu email para ativar sua conta.",
+        "codigo_enviado": "Código enviado!",
+        "sucesso_email_enviado": "Código de verificação enviado para seu email",
+        "email_ja_cadastrado": "Email já cadastrado",
+        "senha_invalida": "Senha inválida",
+        "senhas_nao_coincidem": "As senhas não coincidem",
+        "erro_conexao": "Erro de conexão"
+    },
+    "esqueci_senha": {
+        "email_enviado": "Email enviado! Verifique sua caixa de entrada para o código de recuperação.",
+        "erro_envio": "Erro ao enviar email de recuperação"
+    },
+    "alteracao_senha": {
+        "sucesso": "Senha alterada com sucesso! Você pode acessar sua conta com a nova senha.",
+        "erro": "Ocorreu um erro ao alterar a senha. Tente novamente."
+    },
+    "verificacao": {
+        "codigo_enviado": "Código de verificação enviado",
+        "codigo_reenviado": "Código reenviado com sucesso",
+        "email_verificado": "Email verificado com sucesso! Sua conta foi criada.",
+        "verificacao_concluida": "Verificação concluída com sucesso",
+        "codigo_invalido": "Código inválido",
+        "erro_codigo": "Erro ao enviar código",
+        "erro_conexao": "Erro de conexão"
+    },
+    "geral": {
+        "erro_inesperado": "Ocorreu um erro inesperado. Tente novamente."
+    }
 }

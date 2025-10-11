@@ -1,40 +1,42 @@
 {
-  "login": {
-    "sucesso": "Login successful!",
-    "email_verificado": "Email verified and login successful!",
-    "email_verificado_sucesso": "Email verified successfully!",
-    "erro_credenciais": "Something went wrong, Check your credentials",
-    "erro_conexao": "Could not connect to server",
-    "erro_login_apos_verificacao": "Error logging in after verification",
-    "erro_conexao_login_apos_verificacao": "Connection error when logging in after verification",
-    "erro_finalizar_login": "Error finalizing login",
-    "erro_conexao_finalizar_login": "Connection error when finalizing login"
-  },
-  "registro": {
-    "sucesso": "Registration successful! Now verify your email to activate your account.",
-    "email_ja_cadastrado": "Email already registered",
-    "senha_invalida": "Invalid password",
-    "senhas_nao_coincidem": "Passwords do not match",
-    "erro_conexao": "Could not connect to server"
-  },
-  "esqueci_senha": {
-    "email_enviado": "Email sent! Check your inbox for the recovery code.",
-    "erro_envio": "Error sending recovery email"
-  },
-  "alteracao_senha": {
-    "sucesso": "Password changed successfully! You can access your account with the new password.",
-    "erro": "An error occurred while changing the password. Please try again."
-  },
-  "verificacao": {
-    "codigo_enviado": "Verification Code Sent! Check your email.",
-    "codigo_reenviado": "Code resent successfully! Check your email.",
-    "email_verificado": "Your email has been verified successfully!",
-    "verificacao_concluida": "Two-factor authentication completed successfully!",
-    "erro_codigo": "Error sending verification code",
-    "erro_conexao": "Connection error when sending code",
-    "codigo_invalido": "Invalid code. Check and try again."
-  },
-  "geral": {
-    "erro_inesperado": "An unexpected error occurred. Please try again."
-  }
+    "login": {
+        "sucesso": "Login successful!",
+        "email_verificado": "Email verified and login successful!",
+        "email_verificado_sucesso": "Email verified successfully!",
+        "erro_credenciais": "Something went wrong, Check your credentials",
+        "erro_conexao": "Could not connect to server",
+        "erro_login_apos_verificacao": "Error logging in after verification",
+        "erro_conexao_login_apos_verificacao": "Connection error when logging in after verification",
+        "erro_finalizar_login": "Error finalizing login",
+        "erro_conexao_finalizar_login": "Connection error when finalizing login"
+    },
+    "registro": {
+        "sucesso_email_enviado": "Email sent! Check your inbox for the verification code.",
+        "codigo_enviado": "Code sent!",
+        "sucesso": "Registration successful! Now verify your email to activate your account.",
+        "email_ja_cadastrado": "Email already registered",
+        "senha_invalida": "Invalid password",
+        "senhas_nao_coincidem": "Passwords do not match",
+        "erro_conexao": "Could not connect to server"
+    },
+    "esqueci_senha": {
+        "email_enviado": "Email sent! Check your inbox for the recovery code.",
+        "erro_envio": "Error sending recovery email"
+    },
+    "alteracao_senha": {
+        "sucesso": "Password changed successfully! You can access your account with the new password.",
+        "erro": "An error occurred while changing the password. Please try again."
+    },
+    "verificacao": {
+        "codigo_enviado": "Verification Code Sent! Check your email.",
+        "codigo_reenviado": "Code resent successfully! Check your email.",
+        "email_verificado": "Your email has been verified successfully!",
+        "verificacao_concluida": "Two-factor authentication completed successfully!",
+        "erro_codigo": "Error sending verification code",
+        "erro_conexao": "Connection error when sending code",
+        "codigo_invalido": "Invalid code. Check and try again."
+    },
+    "geral": {
+        "erro_inesperado": "An unexpected error occurred. Please try again."
+    }
 }

@@ -9,7 +9,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { Poppins } from "next/font/google";
 import { useTranslation } from "react-i18next";
-
+import { useRouter } from "next/navigation";
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
@@ -26,7 +26,7 @@ export default function Esqueci() {
   const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation("esqueci");
-
+  const router = useRouter();
   const temaAtual = cores.dark;
 
   useEffect(() => {
@@ -85,21 +85,7 @@ export default function Esqueci() {
   async function enviaRecuperacao(data: Inputs) {
     setCarregando(true);
     try {
-      const token = Math.floor(100000 + Math.random() * 900000);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          recuperacao: token.toString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao atualizar código no banco');
-      }
+      const token = Math.floor(100000 + Math.random() * 900000).toString();
 
       const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/recuperacao-senha`, {
         method: "POST",
@@ -108,14 +94,28 @@ export default function Esqueci() {
         },
         body: JSON.stringify({
           email: data.email,
-          codigo: token.toString(),
+          codigo: token,
         }),
       });
 
       const emailData = await emailResponse.json();
 
-      if (!emailResponse.ok || !emailData.success) {
-        throw new Error(emailData.message || 'Erro ao enviar email');
+      if (!emailResponse.ok) {
+        throw new Error(emailData.message || 'Erro ao enviar email de recuperação');
+      }
+
+      const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuario/esqueceu/${data.email}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recuperacao: token,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        console.warn('⚠️ Email enviado, mas erro ao atualizar código no banco');
       }
 
       setEnviado(true);
@@ -124,18 +124,34 @@ export default function Esqueci() {
         title: t("sucesso.titulo"),
         text: t("sucesso.mensagem"),
         icon: "success",
-        confirmButtonText: "OK",
+        confirmButtonText: t("sucesso.continuar"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
-        color: temaAtual.texto
+        color: temaAtual.texto,
+        timer: 3000, 
+        timerProgressBar: true,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      }).then(() => {
+        router.push(`/alteracao?email=${encodeURIComponent(data.email)}`);
       });
 
+      setTimeout(() => {
+        router.push(`/alteracao?email=${encodeURIComponent(data.email)}`);
+      }, 3000);
+
     } catch (error: unknown) {
-      console.error('Erro:', error);
+      console.error('❌ Erro no processo de recuperação:', error);
 
       let errorMessage = t("erros.envio_email");
+
       if (error instanceof Error) {
         errorMessage = error.message;
+
+        if (error.message.includes('Nenhuma conta encontrada') || error.message.includes('EMAIL_NAO_ENCONTRADO')) {
+          errorMessage = t("erros.email_nao_encontrado");
+        }
       }
 
       Swal.fire({
@@ -151,7 +167,6 @@ export default function Esqueci() {
       setCarregando(false);
     }
   }
-
   const beneficios = [
     { icone: <FaShieldAlt className="text-xl" />, chave: "seguro" },
     { icone: <FaPaperPlane className="text-xl" />, chave: "instantaneo" },

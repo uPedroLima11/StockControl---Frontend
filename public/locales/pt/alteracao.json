@@ -1,42 +1,44 @@
 {
-  "nova": "Nova",
-  "senha": "senha",
-  "criar_senha_segura": "Crie uma senha forte e segura para proteger sua conta.",
-  "voltar_recuperacao": "Voltar para recuperação",
-  "nova_senha": "Nova senha",
-  "digite_codigo_senha": "Digite o código recebido e crie sua nova senha",
-  "email_cadastrado": "Email cadastrado",
-  "email_placeholder": "seu@email.com",
-  "codigo_verificacao": "Código de verificação",
-  "codigo_placeholder": "Digite o código recebido",
-  "nova_senha_field": "Nova senha",
-  "nova_senha_placeholder": "Crie uma senha segura",
-  "confirmar_senha": "Confirmar senha",
-  "confirmar_senha_placeholder": "Digite a senha novamente",
-  "alterar_senha": "Alterar Senha",
-  "lembrou_senha": "Lembrou sua senha?",
-  "fazer_login": "Fazer login",
-  "copyright": "© 2025 StockControl. Sistema de gestão completo.",
-  "requisitos_senha": "Requisitos da senha:",
-  "minimo_caracteres": "Mínimo 8 caracteres",
-  "letra_minuscula": "1 letra minúscula",
-  "letra_maiuscula": "1 letra maiúscula",
-  "um_numero": "1 número",
-  "um_simbolo": "1 símbolo",
-  "beneficios": {
-    "senha_segura": "Nova senha segura",
-    "protecao": "Proteção reforçada",
-    "acesso_imediato": "Acesso imediato"
-  },
-  "erros": {
-    "senha_invalida": "Senha inválida",
-    "senha_requisitos": "A senha deve conter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.",
-    "senhas_nao_coincidem": "As senhas não coincidem.",
-    "erro_alteracao": "Ocorreu um erro ao alterar a senha. Tente novamente.",
-    "titulo_erro": "Erro"
-  },
-  "sucesso": {
-    "titulo": "Senha alterada com sucesso!",
-    "mensagem": "Você pode acessar sua conta com a nova senha."
-  }
+    "nova": "Nova",
+    "senha": "senha",
+    "criar_senha_segura": "Crie uma senha forte e segura para proteger sua conta.",
+    "voltar_recuperacao": "Voltar para recuperação",
+    "nova_senha": "Nova senha",
+    "digite_codigo_senha": "Digite o código recebido e crie sua nova senha",
+    "email_cadastrado": "Email cadastrado",
+    "email_placeholder": "seu@email.com",
+    "codigo_verificacao": "Código de verificação",
+    "codigo_placeholder": "Digite o código recebido",
+    "nova_senha_field": "Nova senha",
+    "nova_senha_placeholder": "Crie uma senha segura",
+    "confirmar_senha": "Confirmar senha",
+    "confirmar_senha_placeholder": "Digite a senha novamente",
+    "alterar_senha": "Alterar Senha",
+    "lembrou_senha": "Lembrou sua senha?",
+    "fazer_login": "Fazer login",
+    "copyright": "© 2025 StockControl. Sistema de gestão completo.",
+    "requisitos_senha": "Requisitos da senha:",
+    "minimo_caracteres": "Mínimo 8 caracteres",
+    "letra_minuscula": "1 letra minúscula",
+    "letra_maiuscula": "1 letra maiúscula",
+    "email_preenchido": "Email preenchido automaticamente",
+    "email_automatico": "Email preenchido automaticamente da recuperação",
+    "um_numero": "1 número",
+    "um_simbolo": "1 símbolo",
+    "beneficios": {
+        "senha_segura": "Nova senha segura",
+        "protecao": "Proteção reforçada",
+        "acesso_imediato": "Acesso imediato"
+    },
+    "erros": {
+        "senha_invalida": "Senha inválida",
+        "senha_requisitos": "A senha deve conter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.",
+        "senhas_nao_coincidem": "As senhas não coincidem.",
+        "erro_alteracao": "Ocorreu um erro ao alterar a senha. Tente novamente.",
+        "titulo_erro": "Erro"
+    },
+    "sucesso": {
+        "titulo": "Senha alterada com sucesso!",
+        "mensagem": "Você pode acessar sua conta com a nova senha."
+    }
 }

@@ -28,13 +28,13 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<Inputs>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [tempoRestante, setTempoRestante] = useState(0); 
+  const [tempoRestante, setTempoRestante] = useState(0);
   const [, setCodigoEnviado] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
-  
+
   const { t: tVerificacao } = useTranslation("verificacao");
   const { t: tNotificacoes } = useTranslation("notificacoes");
-  
+
   const codigoInicialEnviado = useRef(false);
 
   const temaAtual = cores.dark;
@@ -47,13 +47,6 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
-
-  useEffect(() => {
-    if (!codigoInicialEnviado.current) {
-      enviarCodigoVerificacao(true); 
-      codigoInicialEnviado.current = true;
-    }
-  }, []);
 
   useEffect(() => {
     if (tempoRestante > 0) {
@@ -70,14 +63,14 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
 
   const enviarCodigoVerificacao = async (isInitial: boolean = false) => {
     if (isSending || (tempoRestante > 0 && !isInitial)) return;
-    
+
     setIsSending(true);
-    try {      
+    try {
       let endpoint;
       let bodyData;
-      
+
       if (tipo === "registro") {
-        endpoint = "/verificacao/enviar-codigo-registro";
+        endpoint = "/usuarios/reenviar-codigo";
         bodyData = { email };
       } else {
         endpoint = "/verificacao/enviar-codigo-2fa";
@@ -95,19 +88,19 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
       const responseData = await response.json();
       if (response.ok) {
         setCodigoEnviado(true);
-        
+
         if (isInitial) {
-          addNotification(tNotificacoes("verificacao.codigo_enviado"), "success");
+          addNotification(responseData.mensagem || tNotificacoes("verificacao.codigo_enviado"), "success");
         } else {
-          addNotification(tNotificacoes("verificacao.codigo_reenviado"), "success");
+          addNotification(responseData.mensagem || tNotificacoes("verificacao.codigo_reenviado"), "success");
         }
-        
+
         if (!isInitial) {
-          setTempoRestante(60); 
+          setTempoRestante(60);
         }
       } else {
         console.error("❌ Erro ao enviar código:", responseData);
-        addNotification(responseData.message || tNotificacoes("verificacao.erro_codigo"), "error");
+        addNotification(responseData.mensagem || responseData.message || tNotificacoes("verificacao.erro_codigo"), "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
@@ -119,12 +112,17 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
 
   const verificarCodigo = async (data: Inputs) => {
     setIsLoading(true);
-    try {      
+    try {
       let endpoint;
+      let bodyData;
+
       if (tipo === "registro") {
-        endpoint = "/verificacao/confirmar-email";
+
+        endpoint = "/usuarios/finalizar-registro";
+        bodyData = { email, codigo: data.codigo };
       } else {
         endpoint = "/verificacao/verificar-2fa";
+        bodyData = { email, codigo: data.codigo };
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}${endpoint}`, {
@@ -132,30 +130,27 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          codigo: data.codigo,
-        }),
+        body: JSON.stringify(bodyData),
       });
 
       const responseData = await response.json();
       if (response.ok) {
         let successMessage = "";
-        
+
         if (tipo === "registro") {
-          successMessage = tNotificacoes("verificacao.email_verificado");
+          successMessage = responseData.mensagem || tNotificacoes("verificacao.email_verificado");
         } else {
           successMessage = tNotificacoes("verificacao.verificacao_concluida");
         }
 
         addNotification(successMessage, "success");
-        
+
         setTimeout(() => {
           onVerificado();
         }, 1000);
       } else {
         console.error("❌ Erro na verificação:", responseData);
-        addNotification(responseData.message || tNotificacoes("verificacao.codigo_invalido"), "error");
+        addNotification(responseData.mensagem || responseData.message || tNotificacoes("verificacao.codigo_invalido"), "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
@@ -203,7 +198,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
           onClose={() => removeNotification(notification.id)}
         />
       ))}
-      
+
       <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm rounded-3xl p-8 border border-blue-500/20 shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
           {onVoltar && (
@@ -214,7 +209,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
               <HiArrowLeft className="text-xl" />
             </button>
           )}
-          
+
           <div className="w-16 h-16 bg-blue-500/20 rounded-2xl border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
             <HiEnvelope className="text-2xl text-blue-400" />
           </div>
@@ -225,7 +220,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
             {getDescricao()}
           </p>
           <p className="text-blue-400 font-medium break-all">{email}</p>
-          
+
           {isSending && (
             <div className="mt-4 p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
               <div className="text-blue-300 text-sm flex items-center justify-center gap-2">

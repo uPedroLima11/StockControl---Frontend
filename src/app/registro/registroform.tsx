@@ -107,7 +107,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${Cookies.get("token")}`,
-              "Accept-Language": i18n.language 
+              "Accept-Language": i18n.language
             },
           }
         );
@@ -183,7 +183,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/usuarios/iniciar-registro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -194,11 +194,13 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         }),
       });
 
+      const responseData = await response.json();
+
       if (response.status === 201) {
         Swal.fire({
           icon: "success",
-          title: "Cadastro realizado!",
-          text: tNotificacoes("registro.sucesso"),
+          title: tNotificacoes("registro.codigo_enviado"),
+          text: tNotificacoes("registro.sucesso_email_enviado"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto,
@@ -206,11 +208,10 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
           onRegistroSuccess(data.email);
         });
       } else {
-        const errorData = await response.json();
         Swal.fire({
           icon: "error",
           title: "Algo deu errado.",
-          text: errorData.mensagem || "Verifique se o email já está cadastrado ou se a senha atende todos os requisitos.",
+          text: responseData.mensagem || "Erro ao iniciar registro.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto,

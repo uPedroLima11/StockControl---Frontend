@@ -23,7 +23,8 @@
     "titulo_erro": "Error sending"
   },
   "sucesso": {
-    "titulo": "Email sent!",
-    "mensagem": "Check your inbox for the recovery code."
+    "titulo": "Code sent!",
+    "mensagem": "We sent a recovery code to your email. You will be redirected automatically...",
+    "continuar": "Continue"
   }
 }
