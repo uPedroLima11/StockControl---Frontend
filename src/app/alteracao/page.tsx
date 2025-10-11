@@ -24,7 +24,7 @@ type Inputs = {
   confirmaSenha: string;
 };
 
-export default function Alteracao() {
+export default function AlteracaoForm() {
   const { register, handleSubmit, control, setValue } = useForm<Inputs>(); 
   const router = useRouter();
   const searchParams = useSearchParams(); 
@@ -74,24 +74,6 @@ export default function Alteracao() {
       .animate-float-delayed {
         animation: float 10s ease-in-out infinite;
         animation-delay: 2s;
-      }
-      
-      html::-webkit-scrollbar {
-        width: 10px;
-      }
-      
-      html::-webkit-scrollbar-track {
-        background: #132F4C;
-      }
-      
-      html::-webkit-scrollbar-thumb {
-        background: #132F4C; 
-        border-radius: 5px;
-        border: 2px solid #132F4C;
-      }
-      
-      html::-webkit-scrollbar-thumb:hover {
-        background: #132F4C; 
       }
     `;
     document.head.appendChild(style);
@@ -203,7 +185,7 @@ export default function Alteracao() {
   ];
 
   return (
-    <div
+    <div 
       className={`min-h-screen flex ${poppins.className}`}
       style={{ background: temaAtual.gradiente }}
     >
@@ -215,7 +197,7 @@ export default function Alteracao() {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
-          <Link
+          <Link 
             href="/"
             className="flex items-center gap-3 mb-12 group"
           >
@@ -232,14 +214,14 @@ export default function Alteracao() {
                 {t("senha")}
               </span>
             </h1>
-
+            
             <p className="text-xl text-gray-300 mb-12 max-w-md">
               {t("criar_senha_segura")}
             </p>
 
             <div className="space-y-6">
               {beneficios.map((beneficio, index) => (
-                <div
+                <div 
                   key={index}
                   className="flex items-center gap-4 text-gray-300 group"
                   style={{ transitionDelay: `${index * 200}ms` }}
@@ -256,12 +238,12 @@ export default function Alteracao() {
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div
+        <div 
           ref={containerRef}
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex justify-center mb-8">
-            <Link
+            <Link 
               href="/"
               className="flex items-center gap-3 group"
             >
@@ -272,10 +254,10 @@ export default function Alteracao() {
             </Link>
           </div>
 
-          <div
+          <div 
             className={`bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm rounded-3xl p-8 border border-green-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
-            <Link
+            <Link 
               href="/esqueci"
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
             >
@@ -309,22 +291,23 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiEnvelope className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input
-                    type="email"
-                    {...register("email", { required: true })}
-                    required
+                  <input 
+                    type="email" 
+                    {...register("email", { required: true })} 
+                    required 
                     disabled={emailPreenchido} 
-                    className={`w-full pl-12 pr-4 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50 ${emailPreenchido
-                        ? "border-green-500 bg-green-900/20 cursor-not-allowed"
+                    className={`w-full pl-12 pr-4 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50 ${
+                      emailPreenchido 
+                        ? "border-green-500 bg-green-900/20 cursor-not-allowed" 
                         : "border-gray-600"
-                      }`}
+                    }`}
                     placeholder={t("email_placeholder")}
                     style={{
-                      backgroundColor: emailPreenchido
-                        ? temaAtual.primario + '20'
+                      backgroundColor: emailPreenchido 
+                        ? temaAtual.primario + '20' 
                         : temaAtual.fundo + '80',
-                      borderColor: emailPreenchido
-                        ? temaAtual.primario
+                      borderColor: emailPreenchido 
+                        ? temaAtual.primario 
                         : temaAtual.borda
                     }}
                   />
@@ -340,6 +323,7 @@ export default function Alteracao() {
                   </p>
                 )}
               </div>
+
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
                   {t("codigo_verificacao")}
@@ -348,10 +332,10 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input
-                    type="text"
-                    {...register("codigoVerificacao")}
-                    required
+                  <input 
+                    type="text" 
+                    {...register("codigoVerificacao")} 
+                    required 
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("codigo_placeholder")}
                     style={{
@@ -362,6 +346,7 @@ export default function Alteracao() {
                   />
                 </div>
               </div>
+
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
                   {t("nova_senha_field")}
@@ -370,10 +355,10 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiMiniIdentification className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    {...register("senha")}
-                    required
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    {...register("senha")} 
+                    required 
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("nova_senha_placeholder")}
                     style={{
@@ -390,8 +375,8 @@ export default function Alteracao() {
                   </button>
                   {senha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordValid ?
-                        <HiCheckCircle className="text-green-400" /> :
+                      {passwordValid ? 
+                        <HiCheckCircle className="text-green-400" /> : 
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -407,10 +392,10 @@ export default function Alteracao() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiMiniIdentification className="text-gray-400 group-hover:text-green-400 transition-colors" />
                   </div>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    {...register("confirmaSenha")}
-                    required
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    {...register("confirmaSenha")} 
+                    required 
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
                     placeholder={t("confirmar_senha_placeholder")}
                     style={{
@@ -427,8 +412,8 @@ export default function Alteracao() {
                   </button>
                   {confirmaSenha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordsMatch ?
-                        <HiCheckCircle className="text-green-400" /> :
+                      {passwordsMatch ? 
+                        <HiCheckCircle className="text-green-400" /> : 
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -455,8 +440,8 @@ export default function Alteracao() {
                   ))}
                 </div>
               </div>
-              <button
-                type="submit"
+              <button 
+                type="submit" 
                 disabled={!passwordValid || !passwordsMatch}
                 className="w-full cursor-pointer group relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -469,8 +454,8 @@ export default function Alteracao() {
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
                 {t("lembrou_senha")}{" "}
-                <Link
-                  href="/login"
+                <Link 
+                  href="/login" 
                   className="text-green-400 hover:text-green-300 font-semibold transition-colors"
                 >
                   {t("fazer_login")}
