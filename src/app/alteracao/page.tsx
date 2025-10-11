@@ -4,7 +4,7 @@ import { HiEnvelope, HiLockClosed, HiMiniIdentification, HiCheckCircle, HiExclam
 import { FaEye, FaEyeSlash, FaKey } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Link from "next/link";
@@ -24,7 +24,7 @@ type Inputs = {
   confirmaSenha: string;
 };
 
-export default function AlteracaoForm() {
+function AlteracaoFormContent() {
   const { register, handleSubmit, control, setValue } = useForm<Inputs>(); 
   const router = useRouter();
   const searchParams = useSearchParams(); 
@@ -472,5 +472,20 @@ export default function AlteracaoForm() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AlteracaoForm() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500/10 to-emerald-500/10">
+        <div className="text-white text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    }>
+      <AlteracaoFormContent />
+    </Suspense>
   );
 }
