@@ -43,7 +43,7 @@ const beneficios = [
 ];
 
 export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
+  const { register, handleSubmit } = useForm<Inputs>();
   const { logar } = useUsuarioStore();
   const [visivel, setVisivel] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
