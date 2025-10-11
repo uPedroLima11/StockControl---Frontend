@@ -1,0 +1,27 @@
+{
+  "bem_vindo_de_volta": "Bem-vindo de",
+  "volta": "volta",
+  "continue_jornada": "Continue sua jornada rumo ao controle total do seu estoque e vendas.",
+  "acesse_sua_conta": "Acesse sua conta",
+  "entre_sistema": "Entre no sistema e continue gerenciando",
+  "email": "Email",
+  "email_placeholder": "seu@email.com",
+  "senha": "Senha",
+  "senha_placeholder": "Sua senha",
+  "esqueceu_senha": "Esqueceu a senha?",
+  "acessar_sistema": "Acessar Sistema",
+  "entrando": "Entrando...",
+  "nao_tem_conta": "Não tem uma conta?",
+  "criar_conta": "Criar conta",
+  "beneficios": {
+    "seguranca": "Segurança de dados avançada",
+    "relatorios": "Relatórios inteligentes de vendas",
+    "estoque": "Gestão de estoque simplificada"
+  },
+  "carregando": "Carregando...",
+  "copyright": "© 2025 StockControl. Sistema de gestão completo.",
+  "erros": {
+    "conexao": "Não foi possível conectar ao servidor",
+    "credenciais": "Algo deu errado, Verifique as credenciais"
+  }
+}

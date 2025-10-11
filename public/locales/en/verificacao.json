@@ -1,0 +1,21 @@
+{
+  "verifique_seu_email": "Verify your Email",
+  "verificacao_duas_etapas": "Two-Factor Authentication",
+  "enviamos_codigo_registro": "We sent a 6-digit code to verify your email",
+  "enviamos_codigo_seguranca": "We sent a 6-digit code for your security verification",
+  "codigo_verificacao": "Verification Code",
+  "digite_codigo": "Enter the 6-digit code received by email",
+  "verificar_codigo": "Verify Code",
+  "verificando": "Verifying...",
+  "reenviar_codigo": "Didn't receive the code? Resend",
+  "reenviar_em": "Resend in",
+  "enviando": "Sending...",
+  "apos_verificar": "After verification, you will be redirected to login",
+  "codigo_enviado": "Verification Code Sent! Check your email.",
+  "codigo_reenviado": "Code resent successfully! Check your email.",
+  "email_verificado": "Your email has been verified successfully!",
+  "verificacao_concluida": "Two-factor authentication completed successfully!",
+  "erro_codigo": "Error sending verification code",
+  "erro_conexao": "Connection error when sending code",
+  "codigo_invalido": "Invalid code. Check and try again."
+}

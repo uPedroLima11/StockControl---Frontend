@@ -8,6 +8,7 @@ import { cores } from "@/utils/cores";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { Poppins } from "next/font/google";
+import { useTranslation } from "react-i18next";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -24,6 +25,7 @@ export default function Esqueci() {
   const [carregando, setCarregando] = useState(false);
   const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation("esqueci");
 
   const temaAtual = cores.dark;
 
@@ -119,8 +121,8 @@ export default function Esqueci() {
       setEnviado(true);
 
       Swal.fire({
-        title: "Email enviado!",
-        text: "Verifique sua caixa de entrada para o código de recuperação.",
+        title: t("sucesso.titulo"),
+        text: t("sucesso.mensagem"),
         icon: "success",
         confirmButtonText: "OK",
         confirmButtonColor: temaAtual.primario,
@@ -131,13 +133,13 @@ export default function Esqueci() {
     } catch (error: unknown) {
       console.error('Erro:', error);
 
-      let errorMessage = "Ocorreu um erro ao tentar enviar o e-mail de recuperação. Tente novamente.";
+      let errorMessage = t("erros.envio_email");
       if (error instanceof Error) {
         errorMessage = error.message;
       }
 
       Swal.fire({
-        title: "Erro ao enviar",
+        title: t("erros.titulo_erro"),
         text: errorMessage,
         icon: "error",
         confirmButtonText: "OK",
@@ -151,9 +153,9 @@ export default function Esqueci() {
   }
 
   const beneficios = [
-    { icone: <FaShieldAlt className="text-xl" />, texto: "Processo 100% seguro" },
-    { icone: <FaPaperPlane className="text-xl" />, texto: "Código enviado instantaneamente" },
-    { icone: <FaCheckCircle className="text-xl" />, texto: "Recuperação garantida" }
+    { icone: <FaShieldAlt className="text-xl" />, chave: "seguro" },
+    { icone: <FaPaperPlane className="text-xl" />, chave: "instantaneo" },
+    { icone: <FaCheckCircle className="text-xl" />, chave: "garantido" }
   ];
 
   return (
@@ -181,12 +183,14 @@ export default function Esqueci() {
 
           <div className={`transition-all duration-1000 transform ${animacaoAtiva ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
             <h1 className="text-5xl font-bold text-white mb-6">
-              Recupere seu
-              <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent"> acesso</span>
+              {t("recupere_seu")}{" "}
+              <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                {t("acesso")}
+              </span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-12 max-w-md">
-              Vamos te ajudar a recuperar o acesso à sua conta de forma rápida e segura.
+              {t("ajuda_recuperacao")}
             </p>
 
             <div className="space-y-6">
@@ -199,7 +203,7 @@ export default function Esqueci() {
                   <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/30 group-hover:bg-red-500/30 transition-all duration-300">
                     {beneficio.icone}
                   </div>
-                  <span className="text-lg">{beneficio.texto}</span>
+                  <span className="text-lg">{t(`beneficios.${beneficio.chave}`)}</span>
                 </div>
               ))}
             </div>
@@ -232,7 +236,7 @@ export default function Esqueci() {
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
             >
               <HiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Voltar para o login
+              {t("voltar_login")}
             </Link>
 
             <div className="text-center mb-8">
@@ -240,17 +244,17 @@ export default function Esqueci() {
                 <HiEnvelope className="text-white text-2xl" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-2">
-                Recuperar senha
+                {t("recuperar_senha")}
               </h2>
               <p className="text-gray-400">
-                Digite seu email para receber o código de recuperação
+                {t("digite_email_codigo")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit(enviaRecuperacao)} className="space-y-6">
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Email cadastrado
+                  {t("email_cadastrado")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -264,7 +268,7 @@ export default function Esqueci() {
                     })}
                     required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 group-hover:border-red-400/50"
-                    placeholder="seu@email.com"
+                    placeholder={t("email_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -277,7 +281,7 @@ export default function Esqueci() {
                 <div className="bg-green-900/20 border border-green-800 text-green-400 p-4 rounded-2xl text-center">
                   <p className="flex items-center justify-center gap-2">
                     <FaCheckCircle />
-                    Código enviado! Verifique seu email.
+                    {t("codigo_enviado")}
                   </p>
                 </div>
               )}
@@ -291,11 +295,11 @@ export default function Esqueci() {
                   {carregando ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Enviando código...
+                      {t("enviando_codigo")}
                     </>
                   ) : (
                     <>
-                      Enviar Código de Recuperação
+                      {t("enviar_codigo_recuperacao")}
                       <FaPaperPlane className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -305,12 +309,12 @@ export default function Esqueci() {
 
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
-                Lembrou sua senha?{" "}
+                {t("lembrou_senha")}{" "}
                 <Link
                   href="/login"
                   className="text-red-400 hover:text-red-300 font-semibold transition-colors"
                 >
-                  Fazer login
+                  {t("fazer_login")}
                 </Link>
               </p>
             </div>
@@ -318,7 +322,7 @@ export default function Esqueci() {
 
           <div className="lg:hidden mt-8 text-center">
             <p className="text-gray-500 text-sm">
-              © 2025 StockControl. Sistema de gestão completo.
+              {t("copyright")}
             </p>
           </div>
         </div>

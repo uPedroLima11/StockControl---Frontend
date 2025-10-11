@@ -9,7 +9,8 @@ import { cores } from "@/utils/cores";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 import { Poppins } from "next/font/google";
-
+import { useTranslation } from "react-i18next";
+import i18n from "../../../lib/i18n";
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
@@ -43,6 +44,9 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
   const verificarSenha = useWatch({ control, name: "verificarSenha" });
   const email = useWatch({ control, name: "email" });
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { t: tRegistro } = useTranslation("registro");
+  const { t: tNotificacoes } = useTranslation("notificacoes");
 
   const [emailStatus, setEmailStatus] = useState<EmailStatus>({
     existe: false,
@@ -96,10 +100,17 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
       setEmailStatus((prev) => ({ ...prev, carregando: true }));
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(email)}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${Cookies.get("token")}` },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/empresa/verificar-email/${encodeURIComponent(email)}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+              "Accept-Language": i18n.language 
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -139,7 +150,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
       if (emailStatus.existe) {
         Swal.fire({
           icon: "error",
-          title: "Email já cadastrado",
+          title: tNotificacoes("registro.email_ja_cadastrado"),
           text: emailStatus.mensagem,
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
@@ -151,7 +162,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
       if (!passwordValid) {
         Swal.fire({
           icon: "error",
-          title: "Senha inválida",
+          title: tNotificacoes("registro.senha_invalida"),
           text: "A senha deve ter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.",
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
@@ -164,7 +175,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "As senhas não coincidem.",
+          text: tNotificacoes("registro.senhas_nao_coincidem"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto,
@@ -187,7 +198,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         Swal.fire({
           icon: "success",
           title: "Cadastro realizado!",
-          text: "Agora verifique seu email para ativar sua conta.",
+          text: tNotificacoes("registro.sucesso"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto,
@@ -210,7 +221,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
       Swal.fire({
         icon: "error",
         title: "Erro de conexão",
-        text: "Não foi possível conectar ao servidor. Tente novamente.",
+        text: tNotificacoes("registro.erro_conexao"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
         color: temaAtual.texto,
@@ -221,21 +232,21 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
   }
 
   const beneficios = [
-    { icone: <FaRocket className="text-xl" />, texto: "Setup rápido e intuitivo" },
-    { icone: <FaChartBar className="text-xl" />, texto: "Dashboard completo" },
-    { icone: <FaShieldAlt className="text-xl" />, texto: "Dados protegidos" }
+    { icone: <FaRocket className="text-xl" />, chave: "setup" },
+    { icone: <FaChartBar className="text-xl" />, chave: "dashboard" },
+    { icone: <FaShieldAlt className="text-xl" />, chave: "dados" }
   ];
 
   const requisitosSenha = [
-    { condicao: senha?.length >= 8, texto: "Mínimo 8 caracteres" },
-    { condicao: senha && /[a-z]/.test(senha), texto: "1 letra minúscula" },
-    { condicao: senha && /[A-Z]/.test(senha), texto: "1 letra maiúscula" },
-    { condicao: senha && /[0-9]/.test(senha), texto: "1 número" },
-    { condicao: senha && /[^a-zA-Z0-9]/.test(senha), texto: "1 símbolo" }
+    { condicao: senha?.length >= 8, chave: "minimo_caracteres" },
+    { condicao: senha && /[a-z]/.test(senha), chave: "letra_minuscula" },
+    { condicao: senha && /[A-Z]/.test(senha), chave: "letra_maiuscula" },
+    { condicao: senha && /[0-9]/.test(senha), chave: "um_numero" },
+    { condicao: senha && /[^a-zA-Z0-9]/.test(senha), chave: "um_simbolo" }
   ];
 
   return (
-     <div 
+    <div
       className={`min-h-screen flex ${poppins.className}`}
       style={{ background: temaAtual.gradiente }}
     >
@@ -247,7 +258,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center items-start px-16 w-full">
-          <Link 
+          <Link
             href="/"
             className="flex items-center gap-3 mb-12 group"
           >
@@ -259,17 +270,19 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
 
           <div className={`transition-all duration-1000 transform ${animacaoAtiva ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
             <h1 className="text-5xl font-bold text-white mb-6">
-              Comece sua
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"> jornada</span>
+              {tRegistro("comece_sua")}{" "}
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                {tRegistro("jornada")}
+              </span>
             </h1>
-            
+
             <p className="text-xl text-gray-300 mb-12 max-w-md">
-              Junte-se a milhares de empresas que transformaram sua gestão com o StockControl.
+              {tRegistro("junte_se")}
             </p>
 
             <div className="space-y-6">
               {beneficios.map((beneficio, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-center gap-4 text-gray-300 group"
                   style={{ transitionDelay: `${index * 200}ms` }}
@@ -277,7 +290,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                   <div className="p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
                     {beneficio.icone}
                   </div>
-                  <span className="text-lg">{beneficio.texto}</span>
+                  <span className="text-lg">{tRegistro(`beneficios.${beneficio.chave}`)}</span>
                 </div>
               ))}
             </div>
@@ -285,12 +298,12 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div 
+        <div
           ref={containerRef}
           className="w-full max-w-md"
         >
           <div className="lg:hidden flex justify-center mb-8">
-            <Link 
+            <Link
               href="/"
               className="flex items-center gap-3 group"
             >
@@ -301,22 +314,22 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
             </Link>
           </div>
 
-          <div 
+          <div
             className={`bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-sm rounded-3xl p-8 border border-cyan-500/20 shadow-2xl transition-all duration-1000 ${animacaoAtiva ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">
-                Criar conta
+                {tRegistro("criar_conta")}
               </h2>
               <p className="text-gray-400">
-                Primeiro passo rumo ao controle total
+                {tRegistro("primeiro_passo")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit(verificaCadastro)} className="space-y-6">
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Nome completo
+                  {tRegistro("nome_completo")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -328,7 +341,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                     {...register("nome")}
                     required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50"
-                    placeholder="Seu nome completo"
+                    placeholder={tRegistro("nome_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -338,7 +351,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
               </div>
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Email
+                  {tRegistro("email")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -348,12 +361,11 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                     type="email"
                     {...register("email")}
                     required
-                    className={`w-full pl-12 pr-12 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50 ${
-                      emailStatus.existe ? "border-red-500" : 
-                      email && !emailStatus.existe && !emailStatus.carregando ? "border-green-500" : 
-                      "border-gray-600"
-                    }`}
-                    placeholder="seu@email.com"
+                    className={`w-full pl-12 pr-12 py-4 bg-gray-900/50 border rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 group-hover:border-cyan-400/50 ${emailStatus.existe ? "border-red-500" :
+                      email && !emailStatus.existe && !emailStatus.carregando ? "border-green-500" :
+                        "border-gray-600"
+                      }`}
+                    placeholder={tRegistro("email_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80'
                     }}
@@ -371,25 +383,24 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                   )}
                 </div>
                 {emailStatus.mensagem && (
-                  <div className={`mt-2 text-sm p-2 rounded-lg border ${
-                    emailStatus.existe ? 
-                    "bg-red-900/20 text-red-400 border-red-800" : 
+                  <div className={`mt-2 text-sm p-2 rounded-lg border ${emailStatus.existe ?
+                    "bg-red-900/20 text-red-400 border-red-800" :
                     "bg-green-900/20 text-green-400 border-green-800"
-                  }`}>
+                    }`}>
                     {emailStatus.mensagem}
                   </div>
                 )}
               </div>
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Senha
+                  {tRegistro("senha")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
                   </div>
                   <input
-                    placeholder="Crie uma senha segura"
+                    placeholder={tRegistro("senha_placeholder")}
                     type={visivel ? "text" : "password"}
                     {...register("senha")}
                     required
@@ -408,8 +419,8 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                   </button>
                   {senha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordValid ? 
-                        <HiCheckCircle className="text-green-400" /> : 
+                      {passwordValid ?
+                        <HiCheckCircle className="text-green-400" /> :
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -418,14 +429,14 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
               </div>
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Confirmar senha
+                  {tRegistro("confirmar_senha")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="text-gray-400 group-hover:text-cyan-400 transition-colors" />
                   </div>
                   <input
-                    placeholder="Digite a senha novamente"
+                    placeholder={tRegistro("confirmar_senha_placeholder")}
                     type={visivel ? "text" : "password"}
                     {...register("verificarSenha")}
                     required
@@ -444,8 +455,8 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                   </button>
                   {verificarSenha && (
                     <div className="absolute inset-y-0 right-10 pr-4 flex items-center">
-                      {passwordsMatch ? 
-                        <HiCheckCircle className="text-green-400" /> : 
+                      {passwordsMatch ?
+                        <HiCheckCircle className="text-green-400" /> :
                         <HiExclamationCircle className="text-red-400" />
                       }
                     </div>
@@ -454,7 +465,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
               </div>
               <div className="bg-gray-900/30 rounded-2xl p-4 border border-gray-600">
                 <p className="text-sm font-medium text-gray-300 mb-3">
-                  Requisitos da senha:
+                  {tRegistro("requisitos_senha")}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {requisitosSenha.map((req, index) => (
@@ -465,7 +476,7 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                         <HiExclamationCircle className="text-red-400 text-sm flex-shrink-0" />
                       )}
                       <span className={`text-xs ${req.condicao ? 'text-green-400' : 'text-red-400'}`}>
-                        {req.texto}
+                        {tRegistro(req.chave)}
                       </span>
                     </div>
                   ))}
@@ -480,11 +491,11 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Criando conta...
+                      {tRegistro("criando_conta")}
                     </>
                   ) : (
                     <>
-                      Criar Minha Conta
+                      {tRegistro("criar_minha_conta")}
                       <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -494,19 +505,19 @@ export default function RegistroForm({ onRegistroSuccess }: RegistroFormProps) {
 
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
-                Já tem uma conta?{" "}
-                <Link 
-                  href="/login" 
+                {tRegistro("ja_tem_conta")}{" "}
+                <Link
+                  href="/login"
                   className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
                 >
-                  Fazer login
+                  {tRegistro("fazer_login")}
                 </Link>
               </p>
             </div>
           </div>
           <div className="lg:hidden mt-8 text-center">
             <p className="text-gray-500 text-sm">
-              © 2025 StockControl. Sistema de gestão completo.
+              {tRegistro("copyright")}
             </p>
           </div>
         </div>

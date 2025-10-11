@@ -1,0 +1,38 @@
+{
+  "comece_sua": "Comece sua",
+  "jornada": "jornada",
+  "junte_se": "Junte-se a milhares de empresas que transformaram sua gestão com o StockControl.",
+  "criar_conta": "Criar conta",
+  "primeiro_passo": "Primeiro passo rumo ao controle total",
+  "nome_completo": "Nome completo",
+  "nome_placeholder": "Seu nome completo",
+  "email": "Email",
+  "email_placeholder": "seu@email.com",
+  "senha": "Senha",
+  "senha_placeholder": "Crie uma senha segura",
+  "confirmar_senha": "Confirmar senha",
+  "confirmar_senha_placeholder": "Digite a senha novamente",
+  "criar_minha_conta": "Criar Minha Conta",
+  "criando_conta": "Criando conta...",
+  "ja_tem_conta": "Já tem uma conta?",
+  "fazer_login": "Fazer login",
+  "beneficios": {
+    "setup": "Setup rápido e intuitivo",
+    "dashboard": "Dashboard completo",
+    "dados": "Dados protegidos"
+  },
+  "requisitos_senha": "Requisitos da senha:",
+  "minimo_caracteres": "Mínimo 8 caracteres",
+  "letra_minuscula": "1 letra minúscula",
+  "letra_maiuscula": "1 letra maiúscula",
+  "um_numero": "1 número",
+  "um_simbolo": "1 símbolo",
+  "carregando": "Carregando...",
+  "copyright": "© 2025 StockControl. Sistema de gestão completo.",
+  "erros": {
+    "email_cadastrado": "Email já cadastrado",
+    "senha_invalida": "Senha inválida",
+    "senhas_nao_coincidem": "As senhas não coincidem",
+    "conexao": "Não foi possível conectar ao servidor"
+  }
+}

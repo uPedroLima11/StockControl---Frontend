@@ -1,0 +1,38 @@
+{
+  "comece_sua": "Start your",
+  "jornada": "journey",
+  "junte_se": "Join thousands of companies that have transformed their management with StockControl.",
+  "criar_conta": "Create account",
+  "primeiro_passo": "First step towards total control",
+  "nome_completo": "Full name",
+  "nome_placeholder": "Your full name",
+  "email": "Email",
+  "email_placeholder": "your@email.com",
+  "senha": "Password",
+  "senha_placeholder": "Create a secure password",
+  "confirmar_senha": "Confirm password",
+  "confirmar_senha_placeholder": "Enter password again",
+  "criar_minha_conta": "Create My Account",
+  "criando_conta": "Creating account...",
+  "ja_tem_conta": "Already have an account?",
+  "fazer_login": "Log in",
+  "beneficios": {
+    "setup": "Quick and intuitive setup",
+    "dashboard": "Complete dashboard",
+    "dados": "Protected data"
+  },
+  "requisitos_senha": "Password requirements:",
+  "minimo_caracteres": "Minimum 8 characters",
+  "letra_minuscula": "1 lowercase letter",
+  "letra_maiuscula": "1 uppercase letter",
+  "um_numero": "1 number",
+  "um_simbolo": "1 symbol",
+  "carregando": "Loading...",
+  "copyright": "© 2025 StockControl. Complete management system.",
+  "erros": {
+    "email_cadastrado": "Email already registered",
+    "senha_invalida": "Invalid password",
+    "senhas_nao_coincidem": "Passwords do not match",
+    "conexao": "Could not connect to server"
+  }
+}

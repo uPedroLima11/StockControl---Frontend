@@ -46,6 +46,14 @@ import landingpt from '../public/locales/pt/landing.json';
 import landingen from '../public/locales/en/landing.json';
 import navbarpt from '../public/locales/pt/navbar.json';
 import navbaren from '../public/locales/en/navbar.json';
+import loginpt from '../public/locales/pt/login.json';
+import loginen from '../public/locales/en/login.json';
+import registroen from '../public/locales/en/registro.json';
+import registropt from '../public/locales/pt/registro.json';
+import verificacao from '../public/locales/pt/verificacao.json';
+import verificacaoen from '../public/locales/en/verificacao.json';
+import notificacoesen from '../public/locales/en/notificacoes.json';
+import notificacoespt from '../public/locales/pt/notificacoes.json';
 
 
 
@@ -56,7 +64,7 @@ if (!i18n.isInitialized) {
     .init({
       fallbackLng: 'pt',
       supportedLngs: ['pt', 'en'],
-      ns: ['settings', 'sidebar', 'dashboard', 'navbar', 'landing', 'ajuda', 'pedidos', 'produtos', 'usuarios', 'conta', 'empresa', 'criarempresa', 'vendas', 'ativacao', 'fornecedores', 'suporte', 'logs', 'esqueci', 'alteracao', 'clientes', 'exportacoes', 'estoque'],
+      ns: ['settings', 'sidebar', 'dashboard', 'notificacoes', 'verificacao', 'login', 'registro', 'navbar', 'landing', 'ajuda', 'pedidos', 'produtos', 'usuarios', 'conta', 'empresa', 'criarempresa', 'vendas', 'ativacao', 'fornecedores', 'suporte', 'logs', 'esqueci', 'alteracao', 'clientes', 'exportacoes', 'estoque'],
       defaultNS: 'settings',
       resources: {
         en: {
@@ -81,7 +89,12 @@ if (!i18n.isInitialized) {
           pedidos: pedidosEn,
           ajuda: ajudaEn,
           landing: landingen,
-          navbar: navbaren
+          navbar: navbaren,
+          login: loginen,
+          registro: registroen,
+          verificacao: verificacaoen,
+          notificacoes: notificacoesen
+
         },
         pt: {
           settings: settingsPt,
@@ -105,7 +118,11 @@ if (!i18n.isInitialized) {
           pedidos: pedidosPt,
           ajuda: ajudaPt,
           landing: landingpt,
-          navbar: navbarpt
+          navbar: navbarpt,
+          login: loginpt,
+          registro: registropt,
+          verificacao: verificacao,
+          notificacoes: notificacoespt
         },
       },
       detection: {

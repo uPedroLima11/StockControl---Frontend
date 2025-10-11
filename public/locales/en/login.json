@@ -1,0 +1,27 @@
+{
+  "bem_vindo_de_volta": "Welcome back",
+  "volta": "back",
+  "continue_jornada": "Continue your journey towards total control of your inventory and sales.",
+  "acesse_sua_conta": "Access your account",
+  "entre_sistema": "Enter the system and continue managing",
+  "email": "Email",
+  "email_placeholder": "your@email.com",
+  "senha": "Password",
+  "senha_placeholder": "Your password",
+  "esqueceu_senha": "Forgot password?",
+  "acessar_sistema": "Access System",
+  "entrando": "Logging in...",
+  "nao_tem_conta": "Don't have an account?",
+  "criar_conta": "Create account",
+  "beneficios": {
+    "seguranca": "Advanced data security",
+    "relatorios": "Smart sales reports",
+    "estoque": "Simplified inventory management"
+  },
+  "carregando": "Loading...",
+  "copyright": "© 2025 StockControl. Complete management system.",
+  "erros": {
+    "conexao": "Could not connect to server",
+    "credenciais": "Something went wrong, Check your credentials"
+  }
+}

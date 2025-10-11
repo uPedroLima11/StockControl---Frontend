@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { FaShield } from "react-icons/fa6";
+import { useTranslation } from "react-i18next";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -34,6 +35,7 @@ export default function Alteracao() {
   const senha = useWatch({ control, name: "senha" });
   const confirmaSenha = useWatch({ control, name: "confirmaSenha" });
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation("alteracao");
 
   const temaAtual = cores.dark;
 
@@ -111,8 +113,8 @@ export default function Alteracao() {
       if (!passwordValid) {
         Swal.fire({
           icon: "error",
-          title: "Senha inválida",
-          text: "A senha deve conter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.",
+          title: t("erros.senha_invalida"),
+          text: t("erros.senha_requisitos"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto
@@ -122,8 +124,8 @@ export default function Alteracao() {
       if (data.senha !== data.confirmaSenha) {
         Swal.fire({
           icon: "error",
-          title: "Erro",
-          text: "As senhas não coincidem.",
+          title: t("erros.titulo_erro"),
+          text: t("erros.senhas_nao_coincidem"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto
@@ -146,8 +148,8 @@ export default function Alteracao() {
       if (response.status === 200) {
         Swal.fire({
           icon: "success",
-          title: "Senha alterada com sucesso!",
-          text: "Você pode acessar sua conta com a nova senha.",
+          title: t("sucesso.titulo"),
+          text: t("sucesso.mensagem"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto
@@ -157,8 +159,8 @@ export default function Alteracao() {
       } else {
         Swal.fire({
           icon: "error",
-          title: "Erro",
-          text: "Ocorreu um erro ao alterar a senha. Tente novamente.",
+          title: t("erros.titulo_erro"),
+          text: t("erros.erro_alteracao"),
           confirmButtonColor: temaAtual.primario,
           background: temaAtual.card,
           color: temaAtual.texto
@@ -168,8 +170,8 @@ export default function Alteracao() {
       console.error("Erro na requisição:", err);
       Swal.fire({
         icon: "error",
-        title: "Erro",
-        text: "Ocorreu um erro ao alterar a senha. Tente novamente.",
+        title: t("erros.titulo_erro"),
+        text: t("erros.erro_alteracao"),
         confirmButtonColor: temaAtual.primario,
         background: temaAtual.card,
         color: temaAtual.texto
@@ -178,17 +180,17 @@ export default function Alteracao() {
   }
 
   const requisitosSenha = [
-    { condicao: senha?.length >= 8, texto: "Mínimo 8 caracteres" },
-    { condicao: senha && /[a-z]/.test(senha), texto: "1 letra minúscula" },
-    { condicao: senha && /[A-Z]/.test(senha), texto: "1 letra maiúscula" },
-    { condicao: senha && /[0-9]/.test(senha), texto: "1 número" },
-    { condicao: senha && /[^a-zA-Z0-9]/.test(senha), texto: "1 símbolo" }
+    { condicao: senha?.length >= 8, chave: "minimo_caracteres" },
+    { condicao: senha && /[a-z]/.test(senha), chave: "letra_minuscula" },
+    { condicao: senha && /[A-Z]/.test(senha), chave: "letra_maiuscula" },
+    { condicao: senha && /[0-9]/.test(senha), chave: "um_numero" },
+    { condicao: senha && /[^a-zA-Z0-9]/.test(senha), chave: "um_simbolo" }
   ];
 
   const beneficios = [
-    { icone: <FaKey className="text-xl" />, texto: "Nova senha segura" },
-    { icone: <FaShield className="text-xl" />, texto: "Proteção reforçada" },
-    { icone: <HiCheckCircle className="text-xl" />, texto: "Acesso imediato" }
+    { icone: <FaKey className="text-xl" />, chave: "senha_segura" },
+    { icone: <FaShield className="text-xl" />, chave: "protecao" },
+    { icone: <HiCheckCircle className="text-xl" />, chave: "acesso_imediato" }
   ];
 
   return (
@@ -216,12 +218,14 @@ export default function Alteracao() {
 
           <div className={`transition-all duration-1000 transform ${animacaoAtiva ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
             <h1 className="text-5xl font-bold text-white mb-6">
-              Nova
-              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent"> senha</span>
+              {t("nova")}{" "}
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                {t("senha")}
+              </span>
             </h1>
             
             <p className="text-xl text-gray-300 mb-12 max-w-md">
-              Crie uma senha forte e segura para proteger sua conta.
+              {t("criar_senha_segura")}
             </p>
 
             <div className="space-y-6">
@@ -234,7 +238,7 @@ export default function Alteracao() {
                   <div className="p-3 rounded-xl bg-green-500/20 border border-green-500/30 group-hover:bg-green-500/30 transition-all duration-300">
                     {beneficio.icone}
                   </div>
-                  <span className="text-lg">{beneficio.texto}</span>
+                  <span className="text-lg">{t(`beneficios.${beneficio.chave}`)}</span>
                 </div>
               ))}
             </div>
@@ -267,7 +271,7 @@ export default function Alteracao() {
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
             >
               <HiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-              Voltar para recuperação
+              {t("voltar_recuperacao")}
             </Link>
 
             <div className="text-center mb-8">
@@ -275,17 +279,17 @@ export default function Alteracao() {
                 <FaKey className="text-white text-2xl" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-2">
-                Nova senha
+                {t("nova_senha")}
               </h2>
               <p className="text-gray-400">
-                Digite o código recebido e crie sua nova senha
+                {t("digite_codigo_senha")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit(verificaAlteracao)} className="space-y-6">
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Email cadastrado
+                  {t("email_cadastrado")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -296,7 +300,7 @@ export default function Alteracao() {
                     {...register("email")} 
                     required 
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
-                    placeholder="seu@email.com"
+                    placeholder={t("email_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -307,7 +311,7 @@ export default function Alteracao() {
 
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Código de verificação
+                  {t("codigo_verificacao")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -318,7 +322,7 @@ export default function Alteracao() {
                     {...register("codigoVerificacao")} 
                     required 
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
-                    placeholder="Digite o código recebido"
+                    placeholder={t("codigo_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -329,7 +333,7 @@ export default function Alteracao() {
 
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Nova senha
+                  {t("nova_senha_field")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -340,7 +344,7 @@ export default function Alteracao() {
                     {...register("senha")} 
                     required 
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
-                    placeholder="Crie uma senha segura"
+                    placeholder={t("nova_senha_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -366,7 +370,7 @@ export default function Alteracao() {
 
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Confirmar senha
+                  {t("confirmar_senha")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -377,7 +381,7 @@ export default function Alteracao() {
                     {...register("confirmaSenha")} 
                     required 
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 group-hover:border-green-400/50"
-                    placeholder="Digite a senha novamente"
+                    placeholder={t("confirmar_senha_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -403,7 +407,7 @@ export default function Alteracao() {
 
               <div className="bg-gray-900/30 rounded-2xl p-4 border border-gray-600">
                 <p className="text-sm font-medium text-gray-300 mb-3">
-                  Requisitos da senha:
+                  {t("requisitos_senha")}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {requisitosSenha.map((req, index) => (
@@ -414,7 +418,7 @@ export default function Alteracao() {
                         <HiExclamationCircle className="text-red-400 text-sm flex-shrink-0" />
                       )}
                       <span className={`text-xs ${req.condicao ? 'text-green-400' : 'text-red-400'}`}>
-                        {req.texto}
+                        {t(req.chave)}
                       </span>
                     </div>
                   ))}
@@ -426,19 +430,19 @@ export default function Alteracao() {
                 className="w-full cursor-pointer group relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
-                  Alterar Senha
+                  {t("alterar_senha")}
                   <FaShield className="group-hover:scale-110 transition-transform" />
                 </span>
               </button>
             </form>
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
-                Lembrou sua senha?{" "}
+                {t("lembrou_senha")}{" "}
                 <Link 
                   href="/login" 
                   className="text-green-400 hover:text-green-300 font-semibold transition-colors"
                 >
-                  Fazer login
+                  {t("fazer_login")}
                 </Link>
               </p>
             </div>
@@ -446,7 +450,7 @@ export default function Alteracao() {
 
           <div className="lg:hidden mt-8 text-center">
             <p className="text-gray-500 text-sm">
-              © 2025 StockControl. Sistema de gestão completo.
+              {t("copyright")}
             </p>
           </div>
         </div>

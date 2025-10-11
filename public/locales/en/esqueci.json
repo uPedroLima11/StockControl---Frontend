@@ -1,9 +1,29 @@
 {
-    "processando": "Processing...",
-    "mensagemEnviada": "Recovery email sent successfully! Please check your inbox.",
-    "emailRegistrado": "Registered email:",
-    "digiteEmail": "Enter your email here",
-    "enviarEmail": "Send Email",
-    "erroTitulo": "Error",
-    "erroTexto": "User not found or invalid email."
+  "recupere_seu": "Recover your",
+  "acesso": "access",
+  "ajuda_recuperacao": "We'll help you recover access to your account quickly and securely.",
+  "voltar_login": "Back to login",
+  "recuperar_senha": "Recover password",
+  "digite_email_codigo": "Enter your email to receive the recovery code",
+  "email_cadastrado": "Registered email",
+  "email_placeholder": "your@email.com",
+  "enviar_codigo_recuperacao": "Send Recovery Code",
+  "enviando_codigo": "Sending code...",
+  "codigo_enviado": "Code sent! Check your email.",
+  "lembrou_senha": "Remembered your password?",
+  "fazer_login": "Log in",
+  "copyright": "© 2025 StockControl. Complete management system.",
+  "beneficios": {
+    "seguro": "100% secure process",
+    "instantaneo": "Code sent instantly",
+    "garantido": "Guaranteed recovery"
+  },
+  "erros": {
+    "envio_email": "An error occurred while trying to send the recovery email. Please try again.",
+    "titulo_erro": "Error sending"
+  },
+  "sucesso": {
+    "titulo": "Email sent!",
+    "mensagem": "Check your inbox for the recovery code."
+  }
 }

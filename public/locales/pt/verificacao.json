@@ -1,0 +1,21 @@
+{
+  "verifique_seu_email": "Verifique seu Email",
+  "verificacao_duas_etapas": "Verificação em Duas Etapas",
+  "enviamos_codigo_registro": "Enviamos um código de 6 dígitos para verificar seu email",
+  "enviamos_codigo_seguranca": "Enviamos um código de 6 dígitos para sua verificação de segurança",
+  "codigo_verificacao": "Código de Verificação",
+  "digite_codigo": "Digite o código de 6 dígitos recebido por email",
+  "verificar_codigo": "Verificar Código",
+  "verificando": "Verificando...",
+  "reenviar_codigo": "Não recebeu o código? Reenviar",
+  "reenviar_em": "Reenviar em",
+  "enviando": "Enviando...",
+  "apos_verificar": "Após verificar, você será redirecionado para o login",
+  "codigo_enviado": "Código de Verificação Enviado! Verifique seu email.",
+  "codigo_reenviado": "Código reenviado com sucesso! Verifique seu email.",
+  "email_verificado": "Seu email foi verificado com sucesso!",
+  "verificacao_concluida": "Verificação em duas etapas concluída com sucesso!",
+  "erro_codigo": "Erro ao enviar código de verificação",
+  "erro_conexao": "Erro de conexão ao enviar código",
+  "codigo_invalido": "Código inválido. Verifique e tente novamente."
+}

@@ -10,6 +10,7 @@ import { useUsuarioStore } from "@/context/usuario";
 import { cores } from "@/utils/cores";
 import Cookies from "js-cookie";
 import { Poppins } from "next/font/google";
+import { useTranslation } from "react-i18next";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -29,15 +30,15 @@ interface LoginFormProps {
 const beneficios = [
   {
     icone: <FaUserShield className="text-blue-400 text-xl" />,
-    texto: "Segurança de dados avançada",
+    chave: "seguranca"
   },
   {
     icone: <FaChartLine className="text-cyan-400 text-xl" />,
-    texto: "Relatórios inteligentes de vendas",
+    chave: "relatorios"
   },
   {
     icone: <FaClipboard className="text-purple-400 text-xl" />,
-    texto: "Gestão de estoque simplificada",
+    chave: "estoque"
   },
 ];
 
@@ -49,6 +50,9 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
   const [animacaoAtiva, setAnimacaoAtiva] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { t: tLogin } = useTranslation("login");
+  const { t: tNotificacoes } = useTranslation("notificacoes");
 
   const temaAtual = cores.dark;
 
@@ -75,7 +79,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
         if (responseData.precisa2FA) {
           on2FANeeded(data.email);
         } else {
-          localStorage.setItem('login_success_message', 'Login realizado com sucesso!');
+          localStorage.setItem('login_success_message', tNotificacoes("login.sucesso"));
           localStorage.setItem('login_success_type', 'success');
           localStorage.setItem("modoDark", "true");
 
@@ -88,12 +92,12 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
         onEmailNaoVerificado(data.email, data.senha);
       } else {
         console.error("❌ Erro no login:", responseData);
-        localStorage.setItem('login_success_message', responseData.message || 'Algo deu errado, Verifique as credenciais');
+        localStorage.setItem('login_success_message', responseData.message || tNotificacoes("login.erro_credenciais"));
         localStorage.setItem('login_success_type', 'error');
       }
     } catch (err) {
       console.error("❌ Erro de conexão:", err);
-      localStorage.setItem('login_success_message', 'Não foi possível conectar ao servidor');
+      localStorage.setItem('login_success_message', tNotificacoes("login.erro_conexao"));
       localStorage.setItem('login_success_type', 'error');
     } finally {
       setIsLoading(false);
@@ -125,12 +129,14 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
 
           <div className={`transition-all duration-1000 transform ${animacaoAtiva ? 'translate-x-20 opacity-100' : '-translate-x-0 opacity-0'}`}>
             <h1 className="text-5xl font-bold text-white mb-6">
-              Bem-vindo de
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> volta</span>
+              {tLogin("bem_vindo_de_volta")}{" "}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                {tLogin("volta")}
+              </span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-12 max-w-md">
-              Continue sua jornada rumo ao controle total do seu estoque e vendas.
+              {tLogin("continue_jornada")}
             </p>
 
             <div className="space-y-6">
@@ -143,7 +149,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 group-hover:bg-blue-500/30 transition-all duration-300">
                     {beneficio.icone}
                   </div>
-                  <span className="text-lg">{beneficio.texto}</span>
+                  <span className="text-lg">{tLogin(`beneficios.${beneficio.chave}`)}</span>
                 </div>
               ))}
             </div>
@@ -173,17 +179,17 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
           >
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">
-                Acesse sua conta
+                {tLogin("acesse_sua_conta")}
               </h2>
               <p className="text-gray-400">
-                Entre no sistema e continue gerenciando
+                {tLogin("entre_sistema")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Email
+                  {tLogin("email")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -194,7 +200,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                     {...register("email", { required: true })}
                     required
                     className="w-full pl-12 pr-4 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
-                    placeholder="seu@email.com"
+                    placeholder={tLogin("email_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -204,7 +210,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
               </div>
               <div className="group">
                 <label className="block mb-3 text-sm font-medium text-gray-300">
-                  Senha
+                  {tLogin("senha")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -215,7 +221,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                     {...register("senha", { required: true })}
                     required
                     className="w-full pl-12 pr-12 py-4 bg-gray-900/50 border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400/50"
-                    placeholder="Sua senha"
+                    placeholder={tLogin("senha_placeholder")}
                     style={{
                       backgroundColor: temaAtual.fundo + '80',
                       borderColor: temaAtual.borda
@@ -235,7 +241,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   href="/esqueci"
                   className="text-blue-400 hover:text-blue-300 transition-colors"
                 >
-                  Esqueceu a senha?
+                  {tLogin("esqueceu_senha")}
                 </Link>
               </div>
 
@@ -248,11 +254,11 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Entrando...
+                      {tLogin("entrando")}
                     </>
                   ) : (
                     <>
-                      Acessar Sistema
+                      {tLogin("acessar_sistema")}
                       <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -262,12 +268,12 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
 
             <div className="mt-8 pt-6 border-t border-gray-700">
               <p className="text-center text-gray-400">
-                Não tem uma conta?{" "}
+                {tLogin("nao_tem_conta")}{" "}
                 <Link
                   href="/registro"
                   className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                 >
-                  Criar conta
+                  {tLogin("criar_conta")}
                 </Link>
               </p>
             </div>
@@ -275,7 +281,7 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
 
           <div className="lg:hidden mt-8 text-center">
             <p className="text-gray-500 text-sm">
-              © 2025 StockControl. Sistema de gestão completo.
+              {tLogin("copyright")}
             </p>
           </div>
         </div>

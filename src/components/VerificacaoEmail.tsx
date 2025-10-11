@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { cores } from "@/utils/cores";
 import { HiEnvelope, HiLockClosed, HiArrowLeft } from "react-icons/hi2";
 import CustomNotification from "./NotificacaoCustom";
+import { useTranslation } from "react-i18next";
 
 interface VerificacaoEmailProps {
   email: string;
@@ -30,6 +31,9 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
   const [tempoRestante, setTempoRestante] = useState(0); 
   const [, setCodigoEnviado] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  
+  const { t: tVerificacao } = useTranslation("verificacao");
+  const { t: tNotificacoes } = useTranslation("notificacoes");
   
   const codigoInicialEnviado = useRef(false);
 
@@ -93,9 +97,9 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         setCodigoEnviado(true);
         
         if (isInitial) {
-          addNotification("Código de Verificação Enviado! Verifique seu email.", "success");
+          addNotification(tNotificacoes("verificacao.codigo_enviado"), "success");
         } else {
-          addNotification("Código reenviado com sucesso! Verifique seu email.", "success");
+          addNotification(tNotificacoes("verificacao.codigo_reenviado"), "success");
         }
         
         if (!isInitial) {
@@ -103,11 +107,11 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         }
       } else {
         console.error("❌ Erro ao enviar código:", responseData);
-        addNotification(responseData.message || "Erro ao enviar código de verificação", "error");
+        addNotification(responseData.message || tNotificacoes("verificacao.erro_codigo"), "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
-      addNotification("Erro de conexão ao enviar código", "error");
+      addNotification(tNotificacoes("verificacao.erro_conexao"), "error");
     } finally {
       setIsSending(false);
     }
@@ -139,9 +143,9 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         let successMessage = "";
         
         if (tipo === "registro") {
-          successMessage = "Seu email foi verificado com sucesso!";
+          successMessage = tNotificacoes("verificacao.email_verificado");
         } else {
-          successMessage = "Verificação em duas etapas concluída com sucesso!";
+          successMessage = tNotificacoes("verificacao.verificacao_concluida");
         }
 
         addNotification(successMessage, "success");
@@ -151,11 +155,11 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         }, 1000);
       } else {
         console.error("❌ Erro na verificação:", responseData);
-        addNotification(responseData.message || "Código inválido. Verifique e tente novamente.", "error");
+        addNotification(responseData.message || tNotificacoes("verificacao.codigo_invalido"), "error");
       }
     } catch (error) {
       console.error("❌ Erro de conexão:", error);
-      addNotification("Erro de conexão ao verificar código", "error");
+      addNotification(tNotificacoes("verificacao.erro_conexao"), "error");
     } finally {
       setIsLoading(false);
     }
@@ -175,17 +179,17 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
 
   const getTitulo = () => {
     if (tipo === "registro") {
-      return "Verifique seu Email";
+      return tVerificacao("verifique_seu_email");
     } else {
-      return "Verificação em Duas Etapas";
+      return tVerificacao("verificacao_duas_etapas");
     }
   };
 
   const getDescricao = () => {
     if (tipo === "registro") {
-      return "Enviamos um código de 6 dígitos para verificar seu email";
+      return tVerificacao("enviamos_codigo_registro");
     } else {
-      return "Enviamos um código de 6 dígitos para sua verificação de segurança";
+      return tVerificacao("enviamos_codigo_seguranca");
     }
   };
 
@@ -226,7 +230,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
             <div className="mt-4 p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
               <div className="text-blue-300 text-sm flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                Enviando código...
+                {tVerificacao("enviando")}
               </div>
             </div>
           )}
@@ -235,7 +239,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
         <form onSubmit={handleSubmit(verificarCodigo)} className="space-y-6">
           <div>
             <label className="block mb-3 text-sm font-medium text-gray-300">
-              Código de Verificação
+              {tVerificacao("codigo_verificacao")}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -268,14 +272,14 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
               <p className="text-red-400 text-sm mt-2 text-center">{errors.codigo.message}</p>
             )}
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Digite o código de 6 dígitos recebido por email
+              {tVerificacao("digite_codigo")}
             </p>
           </div>
 
           {tempoRestante > 0 && (
             <div className="text-center">
               <p className="text-sm text-gray-400">
-                Pode reenviar em: <span className="font-mono text-orange-400">{formatarTempo(tempoRestante)}</span>
+                {tVerificacao("reenviar_em")} <span className="font-mono text-orange-400">{formatarTempo(tempoRestante)}</span>
               </p>
             </div>
           )}
@@ -288,10 +292,10 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Verificando...
+                {tVerificacao("verificando")}
               </div>
             ) : (
-              "Verificar Código"
+              tVerificacao("verificar_codigo")
             )}
           </button>
 
@@ -305,12 +309,12 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
               {isSending ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                  Enviando...
+                  {tVerificacao("enviando")}
                 </div>
               ) : tempoRestante > 0 ? (
-                `Reenviar em ${formatarTempo(tempoRestante)}`
+                `${tVerificacao("reenviar_em")} ${formatarTempo(tempoRestante)}`
               ) : (
-                "Não recebeu o código? Reenviar"
+                tVerificacao("reenviar_codigo")
               )}
             </button>
           </div>
@@ -318,7 +322,7 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
           {tipo === "registro" && (
             <div className="text-center pt-4 border-t border-gray-700">
               <p className="text-sm text-gray-400">
-                Após verificar, você será redirecionado para o login
+                {tVerificacao("apos_verificar")}
               </p>
             </div>
           )}
