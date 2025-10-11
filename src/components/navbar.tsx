@@ -139,7 +139,7 @@ export default function Navbar() {
               className="text-white hover:text-blue-300 text-lg font-bold transition-colors duration-300 hover:scale-105 cursor-pointer flex items-center gap-2 p-2 rounded-lg hover:bg-blue-500/10"
             >
               <FaGlobe className="text-lg" />
-              <span>{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
+              <span>{i18n.language === 'pt' ? 'BR' : 'EN'}</span>
             </button>
 
             {mostrarIdiomas && (

@@ -35,8 +35,6 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
   const { t: tVerificacao } = useTranslation("verificacao");
   const { t: tNotificacoes } = useTranslation("notificacoes");
 
-  const codigoInicialEnviado = useRef(false);
-
   const temaAtual = cores.dark;
 
   const addNotification = (message: string, type: "success" | "error" | "info" = "info") => {
