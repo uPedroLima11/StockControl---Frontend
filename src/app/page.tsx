@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Link as ScrollLink } from 'react-scroll';
 import { useEffect, useState, useRef } from "react";
-import { FaCloud, FaLock, FaUserShield, FaWhatsapp, FaArrowRight, FaCheck, FaPlay, FaPause, FaTimes, FaTruck, FaGlobe } from "react-icons/fa";
+import { FaCloud, FaLock, FaUserShield, FaWhatsapp, FaArrowRight, FaCheck, FaPlay, FaPause, FaTimes, FaTruck } from "react-icons/fa";
 import { MdOutlineLibraryBooks, MdInventory } from "react-icons/md";
 import { HiOutlineChartBar, HiOutlineTrendingUp } from "react-icons/hi";
 import { BiPackage, BiUserCheck } from "react-icons/bi";
@@ -101,9 +101,7 @@ export default function Home() {
     setMostrarIdiomas(false);
   };
 
-  const toggleIdiomas = () => {
-    setMostrarIdiomas(!mostrarIdiomas);
-  };
+ 
 
   useEffect(() => {
     const estilo = document.createElement("style");
