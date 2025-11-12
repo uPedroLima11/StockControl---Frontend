@@ -137,6 +137,7 @@ function LoginContent() {
           tipo="login"
           onVerificado={handleVerificacaoComplete}
           onVoltar={handleVoltar}
+          enviarCodigoAutomaticamente={true}
         />
       )}
 

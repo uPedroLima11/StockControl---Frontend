@@ -788,13 +788,6 @@ export default function Home() {
       </footer>
       <div className="fixed bottom-4 right-4 z-50">
         <div className="relative">
-          <button
-            onClick={toggleIdiomas}
-            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white p-3 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
-          >
-            <FaGlobe className="text-lg" />
-          </button>
-          
           {mostrarIdiomas && (
             <div className="absolute bottom-14 right-0 bg-[#0A1929] border border-blue-500/20 rounded-2xl shadow-2xl p-2 min-w-[120px]">
               <button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { cores } from "@/utils/cores";
 import { HiEnvelope, HiLockClosed, HiArrowLeft } from "react-icons/hi2";
@@ -12,6 +12,7 @@ interface VerificacaoEmailProps {
   tipo: "registro" | "login";
   onVerificado: () => void;
   onVoltar?: () => void;
+  enviarCodigoAutomaticamente?: boolean;
 }
 
 type Inputs = {
@@ -24,13 +25,21 @@ type NotificationType = {
   type: "success" | "error" | "info";
 };
 
-export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }: VerificacaoEmailProps) {
+export default function VerificacaoEmail({ 
+  email, 
+  tipo, 
+  onVerificado, 
+  onVoltar, 
+  enviarCodigoAutomaticamente = false 
+}: VerificacaoEmailProps) {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<Inputs>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [tempoRestante, setTempoRestante] = useState(0);
-  const [, setCodigoEnviado] = useState(false);
+  const [codigoEnviado, setCodigoEnviado] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
+  
+  const envioAutomaticoExecutado = useRef(false);
 
   const { t: tVerificacao } = useTranslation("verificacao");
   const { t: tNotificacoes } = useTranslation("notificacoes");
@@ -52,6 +61,15 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
       return () => clearTimeout(timer);
     }
   }, [tempoRestante]);
+
+  useEffect(() => {
+    if (envioAutomaticoExecutado.current) return;
+    
+    if (enviarCodigoAutomaticamente && !codigoEnviado && tipo === "login") {
+      envioAutomaticoExecutado.current = true;
+      enviarCodigoVerificacao(true);
+    }
+  }, [enviarCodigoAutomaticamente, codigoEnviado, tipo]);
 
   const formatarTempo = (segundos: number) => {
     const minutos = Math.floor(segundos / 60);
@@ -115,7 +133,6 @@ export default function VerificacaoEmail({ email, tipo, onVerificado, onVoltar }
       let bodyData;
 
       if (tipo === "registro") {
-
         endpoint = "/usuarios/finalizar-registro";
         bodyData = { email, codigo: data.codigo };
       } else {
