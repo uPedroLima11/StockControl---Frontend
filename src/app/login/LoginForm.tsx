@@ -68,6 +68,19 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
     }
   }, [register]);
 
+  const verificarESetarTemaPadrao = () => {
+    if (typeof window !== "undefined") {
+      const temaSalvo = localStorage.getItem("modoDark");
+      
+      if (temaSalvo === null) {
+        localStorage.setItem("modoDark", "true");
+        console.log("🎨 Tema padrão setado como dark (modoDark: true) - primeira vez");
+      } else {
+        console.log("🎨 Tema já existe, mantendo valor:", temaSalvo);
+      }
+    }
+  };
+
   async function handleLogin(data: Inputs) {
     setIsLoading(true);
     setErroLogin(null);
@@ -90,9 +103,10 @@ export default function LoginForm({ on2FANeeded, onEmailNaoVerificado }: LoginFo
         if (responseData.precisa2FA) {
           on2FANeeded(data.email);
         } else {
+          verificarESetarTemaPadrao();
+          
           localStorage.setItem('login_success_message', tNotificacoes("login.sucesso"));
           localStorage.setItem('login_success_type', 'success');
-          localStorage.setItem("modoDark", "true");
 
           Cookies.set("token", responseData.token, { expires: 7 });
           logar(responseData);

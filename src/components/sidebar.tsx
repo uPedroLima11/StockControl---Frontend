@@ -547,7 +547,6 @@ export default function Sidebar() {
             onClick={() => {
               permissoesCache.clear();
               localStorage.removeItem("client_key");
-              localStorage.removeItem("modoDark");
               Cookies.remove("token");
               window.location.href = "/";
             }}

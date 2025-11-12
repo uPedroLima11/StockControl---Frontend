@@ -10,6 +10,17 @@ declare global {
 
 export function ThemeManager() {
   useEffect(() => {
+    const verificarESetarTemaPadrao = () => {
+      const temaSalvo = localStorage.getItem("modoDark");
+      
+      if (temaSalvo === null) {
+        localStorage.setItem("modoDark", "true");
+        console.log("🎨 Tema padrão setado como dark (modoDark: true)");
+      }
+    };
+
+    verificarESetarTemaPadrao();
+
     const temaSalvo = localStorage.getItem("modoDark");
     const ativado = temaSalvo === "true";
     aplicarTema(ativado);
